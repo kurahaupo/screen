@@ -411,7 +411,7 @@ void WriteString(Window *win, char *buf, size_t len)
 				case '7':
 				case '8':
 				case '9':
-					if (win->w_NumArgs >= 0 && win->w_NumArgs < MAXARGS) {
+					if (win->w_NumArgs < MAXARGS) {
 						if (win->w_args[win->w_NumArgs] < 100000000)
 							win->w_args[win->w_NumArgs] =
 							    10 * win->w_args[win->w_NumArgs] + (c - '0');
@@ -1074,8 +1074,8 @@ static void DoControlSequence(Window *win, int c, int intermediate)
 		}
 		break;
 	case '?':
-		for (a2 = 0; a2 < win->w_NumArgs; a2++) {
-			a1 = win->w_args[a2];
+		for (size_t j = 0; j < win->w_NumArgs; j++) {
+			a1 = win->w_args[j];
 			if (c != 'h' && c != 'l')
 				break;
 			i = (c == 'h');
@@ -1684,7 +1684,7 @@ static void CursorLeft(Window *win, int n)
 
 static void ASetMode(Window *win, bool on)
 {
-	for (int i = 0; i < win->w_NumArgs; ++i) {
+	for (size_t i = 0; i < win->w_NumArgs; ++i) {
 		switch (win->w_args[i]) {
 			/* case 2:            KAM: Lock keyboard */
 		case 4:	/* IRM: Insert mode */
@@ -1713,13 +1713,14 @@ static char rendlist[] = {
 
 static void SelectRendition(Window *win)
 {
-	int j, i = 0;
+	size_t i = 0;
 	int attr = win->w_rend.attr;
 	int colorbg = win->w_rend.colorbg;
 	int colorfg = win->w_rend.colorfg;
 
 	do {
-		j = win->w_args[i];
+		int j = win->w_args[i];
+
 		/* indexed colour space aka 256 colours; example escape \e[48;2;12m */
 		if ((j == 38 || j == 48) && i + 2 < win->w_NumArgs && win->w_args[i + 1] == 5) {
 			int jj;
