@@ -1092,7 +1092,7 @@ static void DoControlSequence(Window *win, int c, int intermediate)
 			a1 = win->w_args[j];
 			if (c != 'h' && c != 'l')
 				break;
-			int i = (c == 'h');
+			bool i = c == 'h';
 			switch (a1) {
 			case 1:	/* CKM:  cursor key mode */
 				LCursorkeysMode(&win->w_layer, win->w_cursorkeys = i);
@@ -1113,11 +1113,10 @@ static void DoControlSequence(Window *win, int c, int intermediate)
 				}
 				break;
 			case 3:	/* COLM: column mode */
-				i = (i ? Z0width : Z1width);
 				ClearScreen(win);
 				win->w_x = 0;
 				win->w_y = 0;
-				WChangeSize(win, i, win->w_height);
+				WChangeSize(win, i ? Z0width : Z1width, win->w_height);
 				break;
 				/* case 4:        SCLM: scrolling mode */
 			case 5:	/* SCNM: screen mode */
