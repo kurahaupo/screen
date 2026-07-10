@@ -354,8 +354,10 @@ void WriteString(Window *win, char *buf, size_t len)
 				switch (c) {
 				case '[':
 					win->w_NumArgs = 0;
+					win->w_has_subargs = false;
 					win->w_intermediate = 0;
 					memset(win->w_args, 0, sizeof win->w_args);
+					memset(win->w_seps, 0, sizeof win->w_seps);
 					win->w_state = CSI;
 					break;
 				case ']':
@@ -417,10 +419,14 @@ void WriteString(Window *win, char *buf, size_t len)
 							    10 * win->w_args[win->w_NumArgs] + (c - '0');
 					}
 					break;
-				case ';':
 				case ':':
-					if (win->w_NumArgs < MAXARGS)
+					win->w_has_subargs = true;
+					/*FALLTHRU*/
+				case ';':
+					if (win->w_NumArgs < MAXARGS) {
+						win->w_seps[win->w_NumArgs] = c;
 						win->w_NumArgs++;
+					}
 					break;
 				default:
 					if (Special(win, c))
@@ -469,8 +475,10 @@ void WriteString(Window *win, char *buf, size_t len)
 							if (win->w_autoaka < 0)
 								win->w_autoaka = 0;
 							win->w_NumArgs = 0;
+							win->w_has_subargs = false;
 							win->w_intermediate = 0;
 							memset(win->w_args, 0, sizeof win->w_args);
+							memset(win->w_seps, 0, sizeof win->w_seps);
 							win->w_state = CSI;
 							break;
 						case 0xc0 ^ 'P':
@@ -843,6 +851,12 @@ static void DoESC(Window *win, int c, int intermediate)
 static void DoControlSequence(Window *win, int c, int intermediate)
 {
 	int a1 = win->w_args[0], a2 = win->w_args[1];
+
+#ifndef ALLOW_INVALID_COLON_DELIMITER
+	/* sub-args only valid for SelectRendition */
+	if (win->w_has_subargs && !( c == 'm' && !intermediate ))
+		return;
+#endif
 
 	if (win->w_NumArgs > MAXARGS)
 		win->w_NumArgs = MAXARGS;
@@ -1713,21 +1727,23 @@ static char rendlist[] = {
 
 static void SelectRendition(Window *win)
 {
-	size_t i = 0;
 	int attr = win->w_rend.attr;
 	int colorbg = win->w_rend.colorbg;
 	int colorfg = win->w_rend.colorfg;
 
-	do {
+	for (size_t i = 0, k; i < win->w_NumArgs; i = k) {
 		int j = win->w_args[i];
+
+		for (k = i + 1; k < win->w_NumArgs && win->w_seps[k - 1] == ':' ; ++k) {}
 
 		/* indexed colour space aka 256 colours; example escape \e[48;2;12m */
 		if ((j == 38 || j == 48) && i + 2 < win->w_NumArgs && win->w_args[i + 1] == 5) {
-			int jj;
 
-			i += 2;
-			jj = win->w_args[i];
-			if (jj < 0 || jj > 255)
+			if (k == i + 1)
+				k = i + 3;
+
+			int jj = win->w_args[i + 2];
+			if (k != i + 3 || jj & ~255)
 				continue;
 			if (j == 38) {
 				colorfg = jj | 0x02000000;
@@ -1736,23 +1752,34 @@ static void SelectRendition(Window *win)
 			}
 			continue;
 		}
-		/* truecolor (24bit) colour space; example escape \e[48;5;12;13;14m 
-		 * where 12;13;14 are rgb values */
+		/* Truecolor (24bit) colour space; examples:
+		 *   \e[48:5:0:12:13:14m	Standard
+		 *   \e[48;5;12;13;14m		Customary
+		 *   \e[48:5:12:13:14m		Fix for botched clients
+		 * which set red=12, green=13, blue=14, color-space=application (0/empty) */
 		if ((j == 38 || j == 48) && i + 4 < win->w_NumArgs && win->w_args[i + 1] == 2) {
 			uint8_t r, g, b;
+			if (k > i + 5)
+				++i;	/* wasn't botched (see above) */
+			else if (k == i + 1)
+				k = i + 5;
 
 			r = win->w_args[i + 2];
 			g = win->w_args[i + 3];
 			b = win->w_args[i + 4];
+
+			if (k < i+5 || (r | g | b) & ~255)
+				continue;
 
 			if (j == 38) {
 				colorfg = 0x04000000 | (r << 16) | (g << 8) | b;
 			} else {
 				colorbg = 0x04000000 | (r << 16) | (g << 8) | b;
 			}
-			i += 4;
 			continue;
 		}
+		if (k != i + 1)
+			continue;
 		if (j >= 90 && j <= 97)
 			colorfg = (j - 90 + 8) | 0x01000000;
 		if (j >= 100 && j <= 107)
@@ -1779,8 +1806,8 @@ static void SelectRendition(Window *win)
 			attr &= j;
 		else
 			attr |= j;
-	} while (++i < win->w_NumArgs);
-	
+	}
+
 	win->w_rend.attr = attr;
 
 	win->w_rend.colorbg = colorbg;
