@@ -842,7 +842,7 @@ static void DoESC(Window *win, int c, int intermediate)
 
 static void DoControlSequence(Window *win, int c, int intermediate)
 {
-	int i, a1 = win->w_args[0], a2 = win->w_args[1];
+	int a1 = win->w_args[0], a2 = win->w_args[1];
 
 	if (win->w_NumArgs > MAXARGS)
 		win->w_NumArgs = MAXARGS;
@@ -1078,7 +1078,7 @@ static void DoControlSequence(Window *win, int c, int intermediate)
 			a1 = win->w_args[j];
 			if (c != 'h' && c != 'l')
 				break;
-			i = (c == 'h');
+			int i = (c == 'h');
 			switch (a1) {
 			case 1:	/* CKM:  cursor key mode */
 				LCursorkeysMode(&win->w_layer, win->w_cursorkeys = i);
