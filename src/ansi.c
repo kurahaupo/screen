@@ -414,9 +414,9 @@ void WriteString(Window *win, char *buf, size_t len)
 				case '8':
 				case '9':
 					if (win->w_NumArgs < MAXARGS) {
-						if (win->w_args[win->w_NumArgs] < 100000000)
-							win->w_args[win->w_NumArgs] =
-							    10 * win->w_args[win->w_NumArgs] + (c - '0');
+						int *const a = &win->w_args[win->w_NumArgs];
+						if (*a < INT_MAX/10-1)
+							*a = *a * 10 + (c - '0');
 					}
 					break;
 				case ':':
