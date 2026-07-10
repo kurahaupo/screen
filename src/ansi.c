@@ -1068,7 +1068,7 @@ static void DoControlSequence(Window *win, int c, int intermediate)
 			a1 = cs->params[j];
 			if (c != 'h' && c != 'l')
 				break;
-			int i = (c == 'h');
+			bool i = c == 'h';
 			switch (a1) {
 			case 1:	/* CKM:  cursor key mode */
 				LCursorkeysMode(&win->w_layer, win->w_cursorkeys = i);
@@ -1092,11 +1092,10 @@ static void DoControlSequence(Window *win, int c, int intermediate)
 				}
 				break;
 			case 3:	/* COLM: column mode */
-				i = (i ? Z0width : Z1width);
 				ClearScreen(win);
 				win->w_x = 0;
 				win->w_y = 0;
-				WChangeSize(win, i, win->w_height);
+				WChangeSize(win, i ? Z0width : Z1width, win->w_height);
 				break;
 				/* case 4:        SCLM: scrolling mode */
 			case 5:	/* SCNM: screen mode */
@@ -1105,11 +1104,9 @@ static void DoControlSequence(Window *win, int c, int intermediate)
 				win->w_revvid = i;
 				break;
 			case 6:	/* OM:   origin mode */
-				if ((win->w_origin = i) != 0) {
-					win->w_y = win->w_top;
-					win->w_x = 0;
-				} else
-					win->w_y = win->w_x = 0;
+				win->w_origin = i;
+				win->w_x = 0;
+				win->w_y = i ? win->w_top : 0;
 				LGotoPos(&win->w_layer, win->w_x, win->w_y);
 				break;
 			case 7:	/* AWM:  auto wrap mode */
@@ -1130,7 +1127,7 @@ static void DoControlSequence(Window *win, int c, int intermediate)
 				/* case 19:       PEX:  Printer extend screen / scroll. reg */
 			case 25:	/* TCEM: text cursor enable mode */
 				win->w_curinv = !i;
-				LCursorVisibility(&win->w_layer, win->w_curinv ? -1 : win->w_curvvis);
+				LCursorVisibility(&win->w_layer, i ? win->w_curvvis : -1);
 				break;
 				/* case 34:       RLM:  Right to left mode */
 				/* case 35:       HEBM: hebrew keyboard map */
@@ -1182,7 +1179,7 @@ static void DoControlSequence(Window *win, int c, int intermediate)
 				break;
 			/* case 1015:     UXRVT mouse mode rejected */
 			case 2004:	/* bracketed paste mode */
-				win->w_bracketed = i ? true : false;
+				win->w_bracketed = i;
 				LBracketedPasteMode(&win->w_layer, win->w_bracketed);
 				break;
 			}
