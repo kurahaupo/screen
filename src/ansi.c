@@ -355,7 +355,7 @@ void WriteString(Window *win, char *buf, size_t len)
 				case '[':
 					win->w_NumArgs = 0;
 					win->w_intermediate = 0;
-					memset((char *)win->w_args, 0, MAXARGS * sizeof(int));
+					memset(win->w_args, 0, sizeof win->w_args);
 					win->w_state = CSI;
 					break;
 				case ']':
@@ -470,7 +470,7 @@ void WriteString(Window *win, char *buf, size_t len)
 								win->w_autoaka = 0;
 							win->w_NumArgs = 0;
 							win->w_intermediate = 0;
-							memset((char *)win->w_args, 0, MAXARGS * sizeof(int));
+							memset(win->w_args, 0, sizeof win->w_args);
 							win->w_state = CSI;
 							break;
 						case 0xc0 ^ 'P':
