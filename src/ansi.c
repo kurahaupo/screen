@@ -1713,13 +1713,14 @@ static char rendlist[] = {
 
 static void SelectRendition(Window *win)
 {
-	size_t j, i = 0;
+	size_t i = 0;
 	int attr = win->w_rend.attr;
 	int colorbg = win->w_rend.colorbg;
 	int colorfg = win->w_rend.colorfg;
 
 	do {
-		j = win->w_args[i];
+		unsigned j = win->w_args[i];
+
 		/* indexed colour space aka 256 colours; example escape \e[48;2;12m */
 		if ((j == 38 || j == 48) && i + 2 < win->w_NumArgs && win->w_args[i + 1] == 5) {
 			int jj;
