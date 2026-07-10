@@ -2028,8 +2028,8 @@ static void DoCommandWritelock(struct action *act)
 				return;
 			fore->w_wlock = b ? WLOCK_ON : WLOCK_OFF;
 		}
-		/* 
-		 * user may have permission to change the writelock setting, 
+		/*
+		 * user may have permission to change the writelock setting,
 		 * but he may never aquire the lock himself without write permission
 		 */
 		if (!AclCheckPermWin(D_user, ACL_WRITE, fore))
@@ -7426,7 +7426,7 @@ void ApplyAttrColor(uint64_t i, struct mchar *mc)
 	if (h & 0x04) f |= 0x04000000;
 	if (h & 0x02) f |= 0x02000000;
 	if (h & 0x01) f |= 0x01000000;
-	
+
 	mc->attr	= a;
 	mc->colorbg	= b;
 	mc->colorfg	= f;
