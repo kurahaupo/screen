@@ -347,10 +347,11 @@ void WriteFile(struct acluser *user, char *fn, int dump)
 	case DUMP_TERMCAP:
 		if (fn == NULL) {
 			i = SocketName - SocketPath;
-			if (i > (int)ARRAY_SIZE(fnbuf) - 9)
+			if (i + sizeof ".termcap" > sizeof fnbuf)
 				i = 0;
-			strncpy(fnbuf, SocketPath, i);
-			strncpy(fnbuf + i, ".termcap", 9);
+			//snprintf(fnbuf, sizeof fnbuf, "%.*s.termcap", i, SocketPath);
+			memcpy(fnbuf, SocketPath, i);
+			strcpy(fnbuf + i, ".termcap");
 			fn = fnbuf;
 		}
 		break;
