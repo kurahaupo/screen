@@ -1781,7 +1781,7 @@ static void SelectRendition(Window *win)
 	} while (++i < win->w_NumArgs);
 	
 	win->w_rend.attr = attr;
-	
+
 	win->w_rend.colorbg = colorbg;
 	win->w_rend.colorfg = colorfg;
 	LSetRendition(&win->w_layer, &win->w_rend);
