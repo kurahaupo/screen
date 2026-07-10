@@ -168,8 +168,8 @@ struct Window {
 	int	 w_autoaka;		/* autoaka hack */
 	Window  *w_group;		/* window group we belong to */
 	int	 w_intermediate;	/* char used while parsing ESC-seq */
+	size_t	 w_NumArgs;
 	int	 w_args[MAXARGS];	/* emulator args */
-	int	 w_NumArgs;
 
 	int    w_wlock;		/* WLOCK_AUTO, WLOCK_OFF, WLOCK_ON */
 	struct acluser *w_wlockuser;	/* NULL when unlocked or user who writes */
