@@ -127,7 +127,7 @@ static int gl_License_rebuild(ListData *ldata)
 	char *lastspace = NULL;
 
 	if (flayer->l_width < 40 || flayer->l_height < 5)
-		return -1; 
+		return -1;
 
 	for (char *c = license; *c != 0; c++) {
 		if (linelen == 0)

@@ -1657,7 +1657,7 @@ static void win_silenceev_fn(Event *event, void *data)
 {
 	Window *p = (Window *)data;
 	Canvas *cv;
-	
+
 	(void)event; /* unused */
 
 	for (display = displays; display; display = display->d_next) {
