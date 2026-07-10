@@ -833,8 +833,6 @@ static void DoControlSequence(Window *win, int c, int intermediate)
 		return;
 #endif
 
-	if (cs->num_params > MAX_CS_PARAMS)
-		cs->num_params = MAX_CS_PARAMS;
 	switch (intermediate) {
 	case 0:
 		switch (c) {
