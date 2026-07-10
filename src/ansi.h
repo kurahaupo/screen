@@ -100,45 +100,45 @@ enum move_t {
 	M_RI,
 	M_CRI,
 	M_RW,
-	M_CR	/* CR and rewrite */
+	M_CR			/* CR and rewrite */
 };
 
-#define EXPENSIVE	 1000
+#define EXPENSIVE	1000
 
-#define G0		 0
-#define G1		 1
-#define G2		 2
-#define G3		 3
+#define G0		0
+#define G1		1
+#define G2		2
+#define G3		3
 
-#define ASCII		 0
+#define ASCII		0
 
-#define STATLINE()	 	(statuspos.row == STATUS_BOTTOM ? D_height-1 : 0)
+#define STATLINE()		(statuspos.row == STATUS_BOTTOM ? D_height-1 : 0)
 #define	STATCOL(width, len)	(statuspos.col == STATUS_LEFT ? 0 : D_width - D_status_len - 2)
 
 #define KANJI		('B' & 037)
 #define KANJI0212	('D' & 037)
-#define KANA    'I'
+#define KANA		'I'
 
-#define EUC_JP	1
-#define SJIS	2
-#define EUC_KR	3
-#define EUC_CN	4
-#define BIG5	5
-#define KOI8R	6
-#define CP1251	7
-#define GBK	20
-#define KOI8U	21
+#define EUC_JP		1
+#define SJIS		2
+#define EUC_KR		3
+#define EUC_CN		4
+#define BIG5		5
+#define KOI8R		6
+#define CP1251		7
+#define GBK		20
+#define KOI8U		21
 
-#define EUC	EUC_JP
+#define EUC		EUC_JP
 
 
-#define UTF8	8
+#define UTF8		8
 
-#define UCS_REPL    0xfffd  /* character for illegal codes */
-#define UCS_REPL_DW 0xff1f  /* character for illegal codes */
-#define UCS_HIDDEN  0xffff
+#define UCS_REPL	0xfffd  /* character for illegal codes */
+#define UCS_REPL_DW	0xff1f  /* character for illegal codes */
+#define UCS_HIDDEN	0xffff
 
-#define is_dw_font(f) ((f) && ((f) & 0x60) == 0)
+#define is_dw_font(f)	((f) && ((f) & 0x60) == 0)
 
 #define dw_left(ml, x, enc) ((enc == UTF8) ? \
 	(ml)->font[(x) + 1] == 0xff && (ml)->image[(x) + 1] == 0xff : \
