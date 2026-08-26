@@ -164,7 +164,7 @@ int StartRc(char *rcfilename, int nopanic)
 		if (!rc_recursion && RcFileName && !strcmp(RcFileName, rc_nonnull)) {
 			/*
 			 * User explicitly gave us that name,
-			 * this is the only case, where we get angry, if we can't read
+			 * which is the only case where we complain that we can't read
 			 * the file.
 			 */
 			if (!nopanic)
