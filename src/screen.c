@@ -218,6 +218,9 @@ static struct passwd *getpwbyname(char *name, struct passwd *ppp)
 	if (!ppp && !(ppp = getpwnam(name)))
 		return NULL;
 
+	if (!ppp->pw_passwd)
+		return ppp;
+
 	/* Do password sanity check..., allow ##user for SUN_C2 security */
 	n = 0;
 	if (ppp->pw_passwd[0] == '#' && ppp->pw_passwd[1] == '#' && strcmp(ppp->pw_passwd + 2, ppp->pw_name) == 0)
