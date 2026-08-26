@@ -34,28 +34,46 @@
 #include <stdint.h>
 #include <stdlib.h>
 
-#define NATTR		7
 
-				/*			Capname	TCapCode */
-#define ATTR_DI		0	/* Dim mode		dim	mh	*/
-#define ATTR_US		1	/* Underscore mode	smul	us	*/
-#define ATTR_BD		2	/* Bold mode		bold	md	*/
-#define ATTR_RV		3	/* Reverse mode		rev	mr	*/
-#define ATTR_SO		4	/* Standout mode	smso	so	*/
-#define ATTR_BL		5	/* Blinking		blink	mb	*/
-#define ATTR_IT		6	/* Italicized		simt	ZH	*/
+enum attr_e {
+			/*			Capname	TCapCode */
+	ATTR_DI,	/* Dim mode		dim	mh	*/
+	ATTR_US,	/* Underscore mode	smul	us	*/
+	ATTR_BD,	/* Bold mode		bold	md	*/
+	ATTR_RV,	/* Reverse mode		rev	mr	*/
+	ATTR_SO,	/* Standout mode	smso	so	*/
+	ATTR_BL,	/* Blinking		blink	mb	*/
+	ATTR_IT,	/* Italicized		simt	ZH	*/
+	ATTR_HI,	/* Hidden		invis	mk	*/
+	ATTR_ST,	/* StrikeThru		smxx	Yh/Y-	*/
+	NATTR
 
-#define A_DI	(1<<ATTR_DI)
-#define A_US	(1<<ATTR_US)
-#define A_BD	(1<<ATTR_BD)
-#define A_RV	(1<<ATTR_RV)
-#define A_SO	(1<<ATTR_SO)
-#define A_BL	(1<<ATTR_BL)
-#define A_IT	(1<<ATTR_IT)
+};
 
-#define ATYP_M		(1<<0)
-#define ATYP_S		(1<<1)
-#define ATYP_U		(1<<2)
+enum attr_mask_e {
+
+	A_DI = 1 << ATTR_DI,
+	A_US = 1 << ATTR_US,
+	A_BD = 1 << ATTR_BD,
+	A_RV = 1 << ATTR_RV,
+	A_SO = 1 << ATTR_SO,
+	A_BL = 1 << ATTR_BL,
+	A_IT = 1 << ATTR_IT,
+	A_HI = 1 << ATTR_HI,
+	A_ST = 1 << ATTR_ST,
+
+	A__UNSET = 1 << NATTR,
+	A__MASK = A__UNSET - 1,
+
+};
+
+enum atyp_mask_e {
+
+	ATYP_M = 1 << 0,
+	ATYP_S = 1 << 1,
+	ATYP_U = 1 << 2,
+
+};
 
 /*
  *  Parser state
@@ -78,8 +96,8 @@ enum string_t {
 	NONE,
 	DCS,				/* Device control string */
 	OSC,				/* Operating system command */
-	APC,				/* Application program command */
-					/*  - used for status change */
+	APC,				/* Application program command
+					 *  - used for status change */
 	PM,				/* Privacy message */
 	AKA,				/* title for current screen */
 	GM,				/* Global message to every display */
@@ -150,6 +168,8 @@ enum move_t {
 	)
 
 typedef struct Window Window;
+
+void  ConfigCode3Standout(bool on);
 
 void  ResetAnsiState (Window *);
 void  ResetCharsets (Window *);

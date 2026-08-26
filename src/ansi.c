@@ -1718,11 +1718,33 @@ static void ASetMode(Window *win, bool on)
 	}
 }
 
-static char rendlist[] = {
-	~((1 << NATTR) - 1), A_BD, A_DI, A_IT, A_US, A_BL, 0, A_RV, 0, 0,
-	0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-	0, 0, ~(A_BD | A_DI), ~A_IT, ~A_US, ~A_BL, 0, ~A_RV
+static enum attr_mask_e rendlist[] = {
+	[0]  = ~A__MASK,
+	[1]  = A_BD,
+	[2]  = A_DI,
+	[3]  = A_IT,
+	[4]  = A_US,
+	[5]  = A_BL,
+	[7]  = A_RV,
+	[8]  = A_HI,
+	[9]  = A_ST,
+	[22] = ~(A_BD | A_DI),
+	[23] = ~A_IT,
+	[24] = ~A_US,
+	[25] = ~A_BL,
+	[27] = ~A_RV,
+	[28] = ~A_HI,
+	[29] = ~A_ST,
 };
+
+void ConfigCode3Standout(bool on) {
+	if (on)
+		rendlist[3] = A_SO,
+		rendlist[23] = ~A_SO;
+	else
+		rendlist[3] = A_IT,
+		rendlist[23] = ~A_IT;
+}
 
 static void SelectRendition(Window *win)
 {
@@ -1801,7 +1823,7 @@ static void SelectRendition(Window *win)
 		if (j < 0 || j >= (int)(ARRAY_SIZE(rendlist)))
 			continue;
 		j = rendlist[j];
-		if (j & (1 << NATTR))
+		if (j & A__UNSET)
 			attr &= j;
 		else
 			attr |= j;
