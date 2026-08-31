@@ -16,7 +16,7 @@ export LC_ALL
 rm -f comm.h
 cat << EOF > comm.h
 /*
- * This file is automagically created from comm.c -- DO NOT EDIT
+ * This file is automagically created from comm.sh -- DO NOT EDIT
  */
 
 #ifndef SCREEN_COMM_H
@@ -33,35 +33,18 @@ struct comm
 
 extern struct comm comms[];
 
-#define ARGS_MASK	(3)
+#define ARGS_ANY		5		/* interpreted as "more than 4" */
 
-#define ARGS_0	(0)
-#define ARGS_1	(1)
-#define ARGS_2	(2)
-#define ARGS_3	(3)
+#define ARGS(n)			(1U << (n))
+#define NEED_FORE		(1<<ARGS_ANY+1)	/* this command needs a fore window */
+#define NEED_DISPLAY		(1<<ARGS_ANY+2)	/* this command needs a display */
+#define NEED_LAYER		(1<<ARGS_ANY+3)	/* this command needs a layer */
+#define CAN_QUERY		(1<<ARGS_ANY+4)	/* this command can be queried using
+						   ‘-Q’ to print a result to stdout */
 
-#define ARGS_PLUS1	(1<<2)
-#define ARGS_PLUS2	(1<<3)
-#define ARGS_PLUS3	(1<<4)
-#define ARGS_ORMORE	(1<<5)
-
-#define NEED_FORE	(1<<6)	/* this command needs a fore window */
-#define NEED_DISPLAY	(1<<7)	/* this command needs a display */
-#define NEED_LAYER	(1<<8)	/* this command needs a layer */
-#define CAN_QUERY	(1<<9)  /* this command can be queried, i.e. used with -Q to
-				   get back a result to stdout */
-
-#define ARGS_01		(ARGS_0 | ARGS_PLUS1)
-#define ARGS_02		(ARGS_0 | ARGS_PLUS2)
-#define ARGS_12		(ARGS_1 | ARGS_PLUS1)
-#define ARGS_23		(ARGS_2 | ARGS_PLUS1)
-#define ARGS_24		(ARGS_2 | ARGS_PLUS2)
-#define ARGS_34		(ARGS_3 | ARGS_PLUS1)
-#define ARGS_012	(ARGS_0 | ARGS_PLUS1 | ARGS_PLUS2)
-#define ARGS_0123	(ARGS_0 | ARGS_PLUS1 | ARGS_PLUS2 | ARGS_PLUS3)
-#define ARGS_123	(ARGS_1 | ARGS_PLUS1 | ARGS_PLUS2)
-#define ARGS_124	(ARGS_1 | ARGS_PLUS1 | ARGS_PLUS3)
-#define ARGS_1234	(ARGS_1 | ARGS_PLUS1 | ARGS_PLUS2 | ARGS_PLUS3)
+#define ARGS_RANGE(lo,hi)	(ARGS(hi+1)-ARGS(lo))
+#define ARGS_ATLEAST(lo)	ARGS_RANGE(lo,ARGS_ANY)
+#define ARGS_MASK		ARGS_ATLEAST(0)
 
 struct action
 {
