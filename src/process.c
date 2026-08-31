@@ -68,7 +68,7 @@
 #include "viewport.h"
 #include "winmsg.h"
 
-
+static bool CheckArgCount(struct comm *, int);
 static int CheckArgNum(int, char **);
 static void ClearAction(struct action *);
 static void SaveAction(struct action *, int, char **, int *);
@@ -834,72 +834,36 @@ int FindCommnr(const char *str)
 	return RC_ILLEGAL;
 }
 
+static size_t CountArgs(char **args)
+{
+	size_t argc = 0;
+	if (args)
+		for (; args[argc]; argc++) {}
+	return argc;
+}
+
+static bool CheckArgCount(struct comm *c, int argc)
+{
+	int allowed_counts_mask = c->flags & ARGS_MASK;
+	if (allowed_counts_mask == 0
+	 || allowed_counts_mask & 1U << (argc <= ARGS_ANY ?
+					 argc  : ARGS_ANY))
+		return true;
+
+	Msg(0, "%s: %s: wrong number of arguments", rc_name, c->name);
+
+	return false;
+}
+
 static int CheckArgNum(int nr, char **args)
 {
-	int i, n;
-	static char *argss[] = { "no", "one", "two", "three", "four", "OOPS" };
-	static char *orformat[] = {
-		"%s: %s: %s argument%s required",
-		"%s: %s: %s or %s argument%s required",
-		"%s: %s: %s, %s or %s argument%s required",
-		"%s: %s: %s, %s, %s or %s argument%s required"
-	};
-
-	n = comms[nr].flags & ARGS_MASK;
-	for (i = 0; args[i]; i++) ;
-	if (comms[nr].flags & ARGS_ORMORE) {
-		if (i < n) {
-			Msg(0, "%s: %s: at least %s argument%s required",
-			    rc_name, comms[nr].name, argss[n], n != 1 ? "s" : "");
-			return -1;
-		}
-	} else if ((comms[nr].flags & ARGS_PLUS1) && (comms[nr].flags & ARGS_PLUS2) && (comms[nr].flags & ARGS_PLUS3)) {
-		if (i != n && i != n + 1 && i != n + 2 && i != n + 3) {
-			Msg(0, orformat[3], rc_name, comms[nr].name, argss[n],
-			    argss[n + 1], argss[n + 2], argss[n + 3], "");
-			return -1;
-		}
-	} else if ((comms[nr].flags & ARGS_PLUS1) && (comms[nr].flags & ARGS_PLUS2)) {
-		if (i != n && i != n + 1 && i != n + 2) {
-			Msg(0, orformat[2], rc_name, comms[nr].name, argss[n], argss[n + 1], argss[n + 2], "");
-			return -1;
-		}
-	} else if ((comms[nr].flags & ARGS_PLUS1) && (comms[nr].flags & ARGS_PLUS3)) {
-		if (i != n && i != n + 1 && i != n + 3) {
-			Msg(0, orformat[2], rc_name, comms[nr].name, argss[n], argss[n + 1], argss[n + 3], "");
-			return -1;
-		}
-	} else if ((comms[nr].flags & ARGS_PLUS2) && (comms[nr].flags & ARGS_PLUS3)) {
-		if (i != n && i != n + 2 && i != n + 3) {
-			Msg(0, orformat[2], rc_name, comms[nr].name, argss[n], argss[n + 2], argss[n + 3], "");
-			return -1;
-		}
-	} else if (comms[nr].flags & ARGS_PLUS1) {
-		if (i != n && i != n + 1) {
-			Msg(0, orformat[1], rc_name, comms[nr].name, argss[n], argss[n + 1], n != 0 ? "s" : "");
-			return -1;
-		}
-	} else if (comms[nr].flags & ARGS_PLUS2) {
-		if (i != n && i != n + 2) {
-			Msg(0, orformat[1], rc_name, comms[nr].name, argss[n], argss[n + 2], "s");
-			return -1;
-		}
-	} else if (comms[nr].flags & ARGS_PLUS3) {
-		if (i != n && i != n + 3) {
-			Msg(0, orformat[1], rc_name, comms[nr].name, argss[n], argss[n + 3], "");
-			return -1;
-		}
-	} else if (i != n) {
-		Msg(0, orformat[0], rc_name, comms[nr].name, argss[n], n != 1 ? "s" : "");
-		return -1;
-	}
-	return i;
+	int argc = CountArgs(args);
+	return CheckArgCount(&comms[nr], argc) ? argc : -1;
 }
 
 static void StuffFin(char *buf, size_t len, void *data)
 {
 	(void)data; /* unused */
-
 	if (!flayer)
 		return;
 	while (len)
@@ -5326,13 +5290,10 @@ void DoCommand(char **argv, int *argl)
 
 static void SaveAction(struct action *act, int nr, char **args, int *argl)
 {
-	int argc = 0;
+	int argc = CountArgs(args);
 	char **pp;
 	int *lp;
 
-	if (args)
-		while (args[argc])
-			argc++;
 	if (argc == 0) {
 		act->nr = nr;
 		act->args = noargs;
