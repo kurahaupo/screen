@@ -836,64 +836,19 @@ int FindCommnr(const char *str)
 
 static int CheckArgNum(int nr, char **args)
 {
-	int i, n;
-	static char *argss[] = { "no", "one", "two", "three", "four", "OOPS" };
-	static char *orformat[] = {
-		"%s: %s: %s argument%s required",
-		"%s: %s: %s or %s argument%s required",
-		"%s: %s: %s, %s or %s argument%s required",
-		"%s: %s: %s, %s, %s or %s argument%s required"
-	};
+	int allowed_counts_mask = comms[nr].flags & ARGS_MASK;
+	int actual_count;
+	for (actual_count = 0; args[actual_count]; actual_count++) ;
 
-	n = comms[nr].flags & ARGS_MASK;
-	for (i = 0; args[i]; i++) ;
-	if (comms[nr].flags & ARGS_ORMORE) {
-		if (i < n) {
-			Msg(0, "%s: %s: at least %s argument%s required",
-			    rc_name, comms[nr].name, argss[n], n != 1 ? "s" : "");
-			return -1;
-		}
-	} else if ((comms[nr].flags & ARGS_PLUS1) && (comms[nr].flags & ARGS_PLUS2) && (comms[nr].flags & ARGS_PLUS3)) {
-		if (i != n && i != n + 1 && i != n + 2 && i != n + 3) {
-			Msg(0, orformat[3], rc_name, comms[nr].name, argss[n],
-			    argss[n + 1], argss[n + 2], argss[n + 3], "");
-			return -1;
-		}
-	} else if ((comms[nr].flags & ARGS_PLUS1) && (comms[nr].flags & ARGS_PLUS2)) {
-		if (i != n && i != n + 1 && i != n + 2) {
-			Msg(0, orformat[2], rc_name, comms[nr].name, argss[n], argss[n + 1], argss[n + 2], "");
-			return -1;
-		}
-	} else if ((comms[nr].flags & ARGS_PLUS1) && (comms[nr].flags & ARGS_PLUS3)) {
-		if (i != n && i != n + 1 && i != n + 3) {
-			Msg(0, orformat[2], rc_name, comms[nr].name, argss[n], argss[n + 1], argss[n + 3], "");
-			return -1;
-		}
-	} else if ((comms[nr].flags & ARGS_PLUS2) && (comms[nr].flags & ARGS_PLUS3)) {
-		if (i != n && i != n + 2 && i != n + 3) {
-			Msg(0, orformat[2], rc_name, comms[nr].name, argss[n], argss[n + 2], argss[n + 3], "");
-			return -1;
-		}
-	} else if (comms[nr].flags & ARGS_PLUS1) {
-		if (i != n && i != n + 1) {
-			Msg(0, orformat[1], rc_name, comms[nr].name, argss[n], argss[n + 1], n != 0 ? "s" : "");
-			return -1;
-		}
-	} else if (comms[nr].flags & ARGS_PLUS2) {
-		if (i != n && i != n + 2) {
-			Msg(0, orformat[1], rc_name, comms[nr].name, argss[n], argss[n + 2], "s");
-			return -1;
-		}
-	} else if (comms[nr].flags & ARGS_PLUS3) {
-		if (i != n && i != n + 3) {
-			Msg(0, orformat[1], rc_name, comms[nr].name, argss[n], argss[n + 3], "");
-			return -1;
-		}
-	} else if (i != n) {
-		Msg(0, orformat[0], rc_name, comms[nr].name, argss[n], n != 1 ? "s" : "");
-		return -1;
-	}
-	return i;
+	if (allowed_counts_mask == 0
+	 || allowed_counts_mask & 1U << (actual_count <= ARGS_ANY ?
+					 actual_count  : ARGS_ANY))
+		return actual_count;
+
+	char const *name = comms[nr].name;
+	Msg(0, "%s: %s: wrong number of arguments", rc_name, name);
+
+	return -1;
 }
 
 static void StuffFin(char *buf, size_t len, void *data)
