@@ -76,28 +76,28 @@ uint64_t renditions[NUM_RENDS] = {
 
 /* keep string_t and string_t_string in sync! */
 static char *string_t_string[] = {
-	"NONE",
-	"DCS",			/* Device control string */
-	"OSC",			/* Operating system command */
-	"APC",			/* Application program command */
-	/*  - used for status change */
-	"PM",			/* Privacy message */
-	"AKA",			/* title for current screen */
-	"GM",			/* Global message to every display */
-	"STATUS"		/* User hardstatus line */
+	[NONE]  	= "NONE",
+	[DCS]		= "DCS",	/* Device Control String */
+	[OSC]		= "OSC",	/* Operating System Command */
+	[APC]		= "APC",	/* Application Program Command
+					 *  - used for status change */
+	[PM]    	= "PM",		/* Privacy Message */
+	[AKA]   	= "AKA",	/* Title for current screen */
+	[GM]    	= "GM",		/* Global Message (to every display) */
+	[STATUS]	= "STATUS"	/* User hardstatus line */
 };
 
 /* keep state_t and state_t_string in sync! */
 static char *state_t_string[] = {
-	"LIT",			/* Literal input */
-	"ESC",			/* Start of escape sequence */
-	"ASTR",			/* Start of control string */
-	"STRESC",		/* ESC seen in control string */
-	"CSI",			/* Reading arguments in "CSI Pn ;... */
-	"PRIN",			/* Printer mode */
-	"PRINESC",		/* ESC seen in printer mode */
-	"PRINCSI",		/* CSI seen in printer mode */
-	"PRIN4"			/* CSI 4 seen in printer mode */
+	[LIT]		= "LIT",	/* Literal input */
+	[ESC]		= "ESC",	/* Start of escape sequence */
+	[ASTR]		= "ASTR",	/* Start of control string */
+	[STRESC]	= "STRESC",	/* ESC seen in control string */
+	[CSI]		= "CSI",	/* Reading arguments in "CSI Pn ;... */
+	[PRIN]		= "PRIN",	/* Printer mode */
+	[PRINESC]	= "PRINESC",	/* ESC seen in printer mode */
+	[PRINCSI]	= "PRINCSI",	/* CSI seen in printer mode */
+	[PRIN4]		= "PRIN4"	/* CSI 4 seen in printer mode */
 };
 
 static int Special(Window *,int);
