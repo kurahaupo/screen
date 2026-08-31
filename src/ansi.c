@@ -100,7 +100,6 @@ static char *state_t_string[] = {
 	[PRIN4]		= "PRIN4"	/* CSI 4 seen in printer mode */
 };
 
-static int Special(Window *,int);
 static void DoESC(Window *, int, int);
 static void DoControlSequence(Window *, int, int);
 static void StringStart(Window *, enum string_t);
@@ -152,6 +151,16 @@ static void MPutChar(Window *, struct mchar *, int, int);
 static void MWrapChar(Window *, struct mchar *, int, int, int, bool);
 static void MBceLine(Window *, int, int, int, int);
 static void WChangeSize(Window *, int, int);
+
+#define C0ControlCases(win,Action) \
+	case '\a':    WBell(win, visual_bell); Action break; \
+	case '\b':    BackSpace(win);          Action break; \
+	case '\t':    ForwardTab(win);         Action break; \
+	case '\n':    if (win->w_autoaka) FindAKA(win); /*FALLTHROUGH*/ \
+	case '\v':    LineFeed(win, 0);        Action break; \
+	case '\r':    Return(win);             Action break; \
+	case '\016':  MapCharset(win, G1);     Action break; \
+	case '\017':  MapCharset(win, G0);     Action break
 
 void ResetAnsiState(Window *win)
 {
@@ -379,11 +388,10 @@ void WriteString(Window *win, char *buf, size_t len)
 				case 'k':
 					StringStart(win, AKA);
 					break;
+				C0ControlCases(win,
+					win->w_state = LIT;
+				);
 				default:
-					if (Special(win, c)) {
-						win->w_state = LIT;
-						break;
-					}
 					if (c >= ' ' && c <= '/') {
 						if (win->w_intermediate) {
 							if (win->w_intermediate == '$')
@@ -428,16 +436,15 @@ void WriteString(Window *win, char *buf, size_t len)
 						win->w_NumArgs++;
 					}
 					break;
+				C0ControlCases(win,);
 				default:
-					if (Special(win, c))
-						break;
-					if (c >= '@' && c <= '~') {
+					if (c >= '@' && c <= '~') {		// (c & 0xc0) == 0x40 && c != 0x7f
 						if (win->w_NumArgs < MAXARGS)
 							win->w_NumArgs++;
 						DoControlSequence(win, c, win->w_intermediate);
 						if (win->w_state != PRIN)
 							win->w_state = LIT;
-					} else if ((c >= ' ' && c <= '/') || (c >= '<' && c <= '?'))
+					} else if (c >= ' ' && c <= '?')	// (c & 0xe0) == 0x20
 						win->w_intermediate = win->w_intermediate ? -1 : c;
 					else {
 						win->w_state = LIT;
@@ -447,17 +454,17 @@ void WriteString(Window *win, char *buf, size_t len)
 				break;
 			case LIT:
 			default:
-				if (win->w_mbcs)
-					if (c <= ' ' || c == 0x7f || (c >= 0x80 && c < 0xa0 && win->w_c1))
-						win->w_mbcs = 0;
+				if (c <= ' ' || c == 0x7f || (c >= 0x80 && c < 0xa0 && win->w_c1))
+					win->w_mbcs = 0;
 				if (c < ' ') {
-					if (c == '\033') {
+					switch (c) {
+					C0ControlCases(win,);
+					case '\033':
 						win->w_intermediate = 0;
 						win->w_state = ESC;
 						if (win->w_autoaka < 0)
 							win->w_autoaka = 0;
-					} else
-						Special(win, c);
+					}
 					break;
 				}
 				if (c >= 0x80 && c < 0xa0 && win->w_c1)
@@ -684,38 +691,6 @@ static void WLogString(Window *win, char *buf, size_t len)
 	}
 	if (!log_flush)
 		logfflush(win->w_log);
-}
-
-static int Special(Window *win, int c)
-{
-	switch (c) {
-	case '\b':
-		BackSpace(win);
-		return 1;
-	case '\r':
-		Return(win);
-		return 1;
-	case '\n':
-		if (win->w_autoaka)
-			FindAKA(win);
-		/* fall through */
-	case '\013':		/* Vertical tab is the same as Line Feed */
-		LineFeed(win, 0);
-		return 1;
-	case '\007':
-		WBell(win, visual_bell);
-		return 1;
-	case '\t':
-		ForwardTab(win);
-		return 1;
-	case '\017':		/* SI */
-		MapCharset(win, G0);
-		return 1;
-	case '\016':		/* SO */
-		MapCharset(win, G1);
-		return 1;
-	}
-	return 0;
 }
 
 static void DoESC(Window *win, int c, int intermediate)
