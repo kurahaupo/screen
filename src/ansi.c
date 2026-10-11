@@ -515,7 +515,7 @@ void WriteString(Window *win, char *buf, size_t len)
 						mcp = recode_mchar(&mc, 0, UTF8);
 						c = mcp->image | mcp->font << 8;
 					}
-					win->w_rend.font = 0;
+					win->w_rend.font = FONT_LATIN1;
 				}
 				if (win->w_encoding == UTF8 && c >= 0x0300 && utf8_iscomb(c) &&
 				    (!display || D_encoding != UTF8)) {
@@ -550,17 +550,17 @@ void WriteString(Window *win, char *buf, size_t len)
 				if (win->w_encoding == UTF8 && utf8_isdouble(c))
 					win->w_mbcs = 0xff;
 				font = win->w_rend.font;
-				if (font == KANA && win->w_encoding == SJIS && win->w_mbcs == 0) {
+				if (font == FONT_KANA && win->w_encoding == SJIS && win->w_mbcs == 0) {
 					/* Lets see if it is the first byte of a kanji */
 					if ((0x81 <= c && c <= 0x9f) || (0xe0 <= c && c <= 0xef)) {
 						win->w_mbcs = c;
 						break;
 					}
 				}
-				if (font == 031 && c == 0x80 && !win->w_mbcs)
-					font = win->w_rend.font = 0;
+				if (font == FONT_GBK && c == 0x80 && !win->w_mbcs)
+					font = win->w_rend.font = FONT_LATIN1;
 				if (is_dw_font(font) && c == ' ')
-					font = win->w_rend.font = 0;
+					font = win->w_rend.font = FONT_LATIN1;
 				if (is_dw_font(font) || win->w_mbcs) {
 					int t = c;
 					if (win->w_mbcs == 0) {
@@ -572,7 +572,7 @@ void WriteString(Window *win, char *buf, size_t len)
 					}
 					if (win->w_encoding != UTF8) {
 						c = win->w_mbcs;
-						if (font == KANA && win->w_encoding == SJIS) {
+						if (font == FONT_KANA && win->w_encoding == SJIS) {
 							/*
 							 * SJIS -> EUC mapping:
 							 *   First byte:
@@ -594,14 +594,14 @@ void WriteString(Window *win, char *buf, size_t len)
 									t -= 0x20;
 								else
 									t -= 0x7e, c++;
-								win->w_rend.font = KANJI;
+								win->w_rend.font = FONT_KANJI;
 							} else {
 								/* Incomplete shift-jis - skip first byte */
 								c = t;
 								t = 0;
 							}
 						}
-						if (t && win->w_gr && font != 030 && font != 031) {
+						if (t && win->w_gr && font != FONT_BIG5 && font != FONT_GBK) {
 							t &= 0x7f;
 							if (t < ' ')
 								goto tryagain;
@@ -612,14 +612,14 @@ void WriteString(Window *win, char *buf, size_t len)
 					}
 				}
 				if (font == '<' && c >= ' ') {
-					win->w_rend.font = 0;
+					win->w_rend.font = FONT_LATIN1;
 					c |= 0x80;
 				} else if (win->w_gr && win->w_encoding != UTF8) {
-					if (c == 0x80 && font == 0 && win->w_encoding == GBK)
+					if (c == 0x80 && font == FONT_LATIN1 && win->w_encoding == GBK)
 						c = 0xa4;
 					else
 						c &= 0x7f;
-					if (c < ' ' && font != 031)
+					if (c < ' ' && font != FONT_GBK)
 						goto tryagain;
 				}
 				if (c == '\177')
@@ -1401,7 +1401,7 @@ static void DesignateCharset(Window *win, int c, int n)
 {
 	win->w_ss = 0;
 	if (c == ('@' & 037))	/* map JIS 6226 to 0208 */
-		c = KANJI;
+		c = FONT_KANJI;
 	if (c == 'B')
 		c = ASCII;
 	if (win->w_charsets[n] != c) {
@@ -1950,7 +1950,7 @@ static void MFixLine(Window *win, int y, struct mchar *mc)
 			ml->font = null;
 			win->w_FontL = win->w_charsets[win->w_ss ? win->w_ss : win->w_Charset] = 0;
 			win->w_FontR = win->w_charsets[win->w_ss ? win->w_ss : win->w_CharsetR] = 0;
-			mc->font = win->w_rend.font = 0;
+			mc->font = win->w_rend.font = FONT_LATIN1;
 			WMsg(win, 0, "Warning: no space for font - turned off");
 		}
 	}

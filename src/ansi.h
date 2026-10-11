@@ -133,9 +133,14 @@ enum move_t {
 #define STATLINE()	 	(statuspos.row == STATUS_BOTTOM ? D_height-1 : 0)
 #define	STATCOL(width, len)	(statuspos.col == STATUS_LEFT ? 0 : D_width - D_status_len - 2)
 
-#define KANJI		('B' & 037)
-#define KANJI0212	('D' & 037)
-#define KANA    'I'
+#define FONT_KANJI	('B' & 037)
+#define FONT_KANJI0212	('D' & 037)
+#define FONT_KANA    'I'
+#define FONT_LATIN1	0
+#define FONT_CN		1
+#define FONT_HANGUL	3
+#define FONT_BIG5	030
+#define FONT_GBK	031
 
 #define EUC_JP	1
 #define SJIS	2

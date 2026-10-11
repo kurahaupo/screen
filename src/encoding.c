@@ -387,7 +387,7 @@ static int recode_char_dw(int c, int *c2p, int to_utf, int font)
 		return UCS_REPL_DW;
 	}
 	if (font == -1) {
-		for (font = 0; font < 030; font++) {
+		for (font = FONT_LATIN1; font < FONT_BIG5; font++) {
 			p = recodetabs[font].tab;
 			if (p)
 				for (; (*p)[1]; p++)
@@ -457,9 +457,9 @@ struct mchar *recode_mchar(struct mchar *mc, int from, int to)
 	if (from == to || (from != UTF8 && to != UTF8))
 		return mc;
 	rmc = *mc;
-	if (rmc.font == 0 && from != UTF8)
+	if (rmc.font == FONT_LATIN1 && from != UTF8)
 		rmc.font = encodings[from].deffont;
-	if (rmc.font == 0)	/* latin1 is the same in unicode */
+	if (rmc.font == FONT_LATIN1)	/* latin1 is the same in unicode */
 		return mc;
 	c = rmc.image | (rmc.font << 8);
 	if (rmc.mbcs) {
@@ -482,7 +482,7 @@ struct mline *recode_mline(struct mline *ml, int w, int from, int to)
 
 	if (from == to || (from != UTF8 && to != UTF8) || w == 0)
 		return ml;
-	if (ml->font == null && encodings[from].deffont == 0)
+	if (ml->font == null && encodings[from].deffont == FONT_LATIN1)
 		return ml;
 	if (w > maxlen) {
 		for (i = 0; i < 2; i++) {
@@ -678,7 +678,7 @@ void WinSwitchEncoding(Window *p, int encoding)
 	flayer = oldflayer;
 	for (j = 0; j < p->w_height + p->w_histheight; j++) {
 		ml = j < p->w_height ? &p->w_mlines[j] : &p->w_hlines[j - p->w_height];
-		if (ml->font == null && encodings[p->w_encoding].deffont == 0)
+		if (ml->font == null && encodings[p->w_encoding].deffont == FONT_LATIN1)
 			continue;
 		for (i = 0; i < p->w_width; i++) {
 			c = ml->image[i] | (ml->font[i] << 8);
@@ -1053,7 +1053,7 @@ void utf8_handle_comb(unsigned int c, struct mchar *mc)
 		if (i == 0x800 || i == 0x801 || c1 == i + 0xd800) {
 			/* completely full, can't recycle */
 			mc->image = '?';
-			mc->font = 0;
+			mc->font = FONT_LATIN1;
 			return;
 		}
 		/* FIXME: delete old char from all buffers */
@@ -1172,7 +1172,7 @@ int DecodeChar(int c, int encoding, int *statep)
 			}
 			if (c < 0x80)
 				return c;
-			return c | (KANA << 16);
+			return c | (FONT_KANA << 16);
 		}
 		t = c;
 		c = *statep;
@@ -1188,7 +1188,7 @@ int DecodeChar(int c, int encoding, int *statep)
 				t -= 0x20;
 			else
 				t -= 0x7e, c++;
-			return (c << 8) | t | (KANJI << 16);
+			return (c << 8) | t | (FONT_KANJI << 16);
 		}
 		return t;
 	}
@@ -1205,9 +1205,9 @@ int DecodeChar(int c, int encoding, int *statep)
 		*statep = 0;
 		if (encoding == EUC_JP) {
 			if (c == 0x8e)
-				return t | (KANA << 16);
+				return t | (FONT_KANA << 16);
 			if (c == 0x8f) {
-				*statep = t | (KANJI0212 << 8);
+				*statep = t | (FONT_KANJI0212 << 8);
 				return -1;
 			}
 		}
@@ -1218,10 +1218,10 @@ int DecodeChar(int c, int encoding, int *statep)
 			return c | (3 << 16);
 		if (encoding == EUC_CN)
 			return c | (1 << 16);
-		if (c & (KANJI0212 << 16))
+		if (c & (FONT_KANJI0212 << 16))
 			return c;
 		else
-			return c | (KANJI << 16);
+			return c | (FONT_KANJI << 16);
 	}
 	if (encoding == BIG5 || encoding == GBK) {
 		if (!*statep) {
@@ -1237,7 +1237,7 @@ int DecodeChar(int c, int encoding, int *statep)
 		c = *statep;
 		*statep = 0;
 		c &= 0x7f;
-		return c << 8 | t | (encoding == BIG5 ? 030 << 16 : 031 << 16);
+		return c << 8 | t | (encoding == BIG5 ? FONT_BIG5 << 16 : FONT_GBK << 16);
 	}
 	return c | (encodings[encoding].deffont << 16);
 }
@@ -1247,7 +1247,7 @@ int EncodeChar(char *bp, int c, int encoding, int *fontp)
 	int t, f, l;
 
 	if (c == -1 && fontp) {
-		if (*fontp == 0)
+		if (*fontp == FONT_LATIN1)
 			return 0;
 		if (bp) {
 			*bp++ = 033;
@@ -1271,7 +1271,7 @@ int EncodeChar(char *bp, int c, int encoding, int *fontp)
 		}
 		return ToUtf8(bp, c);
 	}
-	if (f == 0 && (c & 0x7f00ff00) != 0) {	/* is_utf8? */
+	if (f == FONT_LATIN1 && (c & 0x7f00ff00) != 0) {	/* is_utf8? */
 		if (c >= 0x10000)
 			c = (c & 0x7f0000) >> 8 | (c & 0xffff);
 		if (utf8_isdouble(c)) {
@@ -1285,39 +1285,40 @@ int EncodeChar(char *bp, int c, int encoding, int *fontp)
 		f = c >> 16;
 	}
 	if (f & 0x80)		/* map special 96-fonts to latin1 */
-		f = 0;
+		f = FONT_LATIN1;
 
 	if (encoding == SJIS) {
-		if (f == KANA)
+		if (f == FONT_KANA)
 			c = (c & 0xff) | 0x80;
-		else if (f == KANJI) {
+		else if (f == FONT_KANJI) {
 			if (!bp)
 				return 2;
 			t = c & 0xff;
 			c = (c >> 8) & 0xff;
 			t += (c & 1) ? ((t <= 0x5f) ? 0x1f : 0x20) : 0x7e;
-			c = (c - 0x21) / 2 + ((c < 0x5f) ? 0x81 : 0xc1);
+			c = (c - 0x21 >> 1)
+			  + (c < 0x5f ? 0x81 : 0xc1);
 			*bp++ = c;
 			*bp++ = t;
 			return 2;
 		}
 	}
 	if (encoding == EUC) {
-		if (f == KANA) {
+		if (f == FONT_KANA) {
 			if (bp) {
 				*bp++ = '\x8e';
 				*bp++ = c | 0x80;
 			}
 			return 2;
 		}
-		if (f == KANJI) {
+		if (f == FONT_KANJI) {
 			if (bp) {
 				*bp++ = (c >> 8) | 0x80;
 				*bp++ = c | 0x80;
 			}
 			return 2;
 		}
-		if (f == KANJI0212) {
+		if (f == FONT_KANJI0212) {
 			if (bp) {
 				*bp++ = '\x8f';
 				*bp++ = c >> 8;
@@ -1326,21 +1327,21 @@ int EncodeChar(char *bp, int c, int encoding, int *fontp)
 			return 3;
 		}
 	}
-	if ((encoding == EUC_KR && f == 3) || (encoding == EUC_CN && f == 1)) {
+	if ((encoding == EUC_KR && f == FONT_HANGUL) || (encoding == EUC_CN && f == FONT_CN)) {
 		if (bp) {
 			*bp++ = (c >> 8) | 0x80;
 			*bp++ = c | 0x80;
 		}
 		return 2;
 	}
-	if ((encoding == BIG5 && f == 030) || (encoding == GBK && f == 031)) {
+	if ((encoding == BIG5 && f == FONT_BIG5) || (encoding == GBK && f == FONT_GBK)) {
 		if (bp) {
 			*bp++ = (c >> 8) | 0x80;
 			*bp++ = c;
 		}
 		return 2;
 	}
-	if (encoding == GBK && f == 0 && c == 0xa4)
+	if (encoding == GBK && f == FONT_LATIN1 && c == 0xa4)
 		c = 0x80;
 
 	l = 0;
@@ -1356,7 +1357,7 @@ int EncodeChar(char *bp, int c, int encoding, int *fontp)
 			}
 			l += f > 2 ? 4 : 3;
 		} else if (f < 128) {
-			if (f == 0)
+			if (f == FONT_LATIN1)
 				f = 'B';
 			if (bp) {
 				*bp++ = 033;
@@ -1382,17 +1383,17 @@ int CanEncodeFont(int encoding, int f)
 	case UTF8:
 		return 1;
 	case SJIS:
-		return f == KANJI || f == KANA;
+		return f == FONT_KANJI || f == FONT_KANA;
 	case EUC:
-		return f == KANJI || f == KANA || f == KANJI0212;
+		return f == FONT_KANJI || f == FONT_KANA || f == FONT_KANJI0212;
 	case EUC_KR:
-		return f == 3;
+		return f == FONT_HANGUL;
 	case EUC_CN:
-		return f == 1;
+		return f == FONT_CN;
 	case BIG5:
-		return f == 030;
+		return f == FONT_BIG5;
 	case GBK:
-		return f == 031;
+		return f == FONT_GBK;
 	default:
 		break;
 	}
@@ -1409,35 +1410,38 @@ int PrepareEncodedChar(int c)
 	f = D_rend.font;
 	t = D_mbcs;
 	if (encoding == SJIS) {
-		if (f == KANA)
+		if (f == FONT_KANA)
 			return c | 0x80;
-		else if (f == KANJI) {
-			t += (c & 1) ? ((t <= 0x5f) ? 0x1f : 0x20) : 0x7e;
-			c = (c - 0x21) / 2 + ((c < 0x5f) ? 0x81 : 0xc1);
+		else if (f == FONT_KANJI) {
+			t += (c & 1) == 0 ? 0x7e :
+			     t <= 0x5f    ? 0x1f :
+					    0x20;
+			c = (c - 0x21 >> 1)
+			  + (c < 0x5f ? 0x81 : 0xc1);
 			D_mbcs = t;
 		}
 		return c;
 	}
 	if (encoding == EUC) {
-		if (f == KANA) {
+		if (f == FONT_KANA) {
 			AddChar('\x8e');
 			return c | 0x80;
 		}
-		if (f == KANJI) {
+		if (f == FONT_KANJI) {
 			D_mbcs = t | 0x80;
 			return c | 0x80;
 		}
-		if (f == KANJI0212) {
+		if (f == FONT_KANJI0212) {
 			AddChar('\x8f');
 			D_mbcs = t | 0x80;
 			return c | 0x80;
 		}
 	}
-	if ((encoding == EUC_KR && f == 3) || (encoding == EUC_CN && f == 1)) {
+	if ((encoding == EUC_KR && f == FONT_HANGUL) || (encoding == EUC_CN && f == FONT_CN)) {
 		D_mbcs = t | 0x80;
 		return c | 0x80;
 	}
-	if ((encoding == BIG5 && f == 030) || (encoding == GBK && f == 031))
+	if ((encoding == BIG5 && f == FONT_BIG5) || (encoding == GBK && f == FONT_GBK))
 		return c | 0x80;
 	return c;
 }
@@ -1445,7 +1449,7 @@ int PrepareEncodedChar(int c)
 int RecodeBuf(unsigned char *fbuf, int flen, int fenc, int tenc, unsigned char *tbuf)
 {
 	int c, i, j;
-	int decstate = 0, font = 0;
+	int decstate = 0, font = FONT_LATIN1;
 
 	for (i = j = 0; i < flen; i++) {
 		c = fbuf[i];
@@ -1465,7 +1469,7 @@ int ContainsSpecialDeffont(struct mline *ml, int xs, int xe, int encoding)
 	uint32_t *f, *i;
 	int c, x, dx;
 
-	if (encoding == UTF8 || encodings[encoding].deffont == 0)
+	if (encoding == UTF8 || encodings[encoding].deffont == FONT_LATIN1)
 		return 0;
 	i = ml->image + xs;
 	f = ml->font + xs;
@@ -1493,7 +1497,7 @@ int LoadFontTranslation(int font, char *file)
 
 	myfile = file;
 	if (myfile == NULL) {
-		if (font == 0 || screenencodings == NULL)
+		if (font == FONT_LATIN1 || screenencodings == NULL)
 			return -1;
 		if (strlen(screenencodings) > ARRAY_SIZE(buf) - 10)
 			return -1;
