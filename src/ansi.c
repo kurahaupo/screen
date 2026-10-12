@@ -1777,6 +1777,32 @@ static void SelectRendition(Window *win)
 			}
 			continue;
 		}
+		if (k == i + 2 && cs->params[i + 1] == 0) {
+			/*
+			 * exact 'italic'; example control sequences:
+			 *  \e[3:m	⎱ enables italic
+			 *  \e[3:0m	⎰
+			 *  \e[23:m	⎱ disables italic
+			 *  \e[23:0m	⎰
+			 */
+			if (j == 3)
+				attr |= A_IT;
+			else if (j == 23)
+				attr &= ~A_IT;
+			continue;
+		}
+		if (k == i + 2 && cs->params[i + 1] == 1) {
+			/*
+			 * exact 'standout'; example control sequences:
+			 *  \e[3:1m	enables standout
+			 *  \e[23:1m	disables standout
+			 */
+			if (j == 3)
+				attr |= A_SO;
+			else if (j == 23)
+				attr &= ~A_SO;
+			continue;
+		}
 		if (k != i + 1)
 			continue;
 		if (j >= 90 && j <= 97)
