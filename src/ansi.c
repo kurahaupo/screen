@@ -102,7 +102,7 @@ static char *state_t_string[] = {
 
 static int Special(Window *,int);
 static void DoESC(Window *, int, int);
-static void DoCSI(Window *, int, int);
+static void DoControlSequence(Window *, int, int);
 static void StringStart(Window *, enum string_t);
 static void StringChar(Window *, int);
 static int StringEnd(Window *);
@@ -428,7 +428,7 @@ void WriteString(Window *win, char *buf, size_t len)
 					if (c >= '@' && c <= '~') {
 						if (win->w_NumArgs < MAXARGS)
 							win->w_NumArgs++;
-						DoCSI(win, c, win->w_intermediate);
+						DoControlSequence(win, c, win->w_intermediate);
 						if (win->w_state != PRIN)
 							win->w_state = LIT;
 					} else if ((c >= ' ' && c <= '/') || (c >= '<' && c <= '?'))
@@ -840,7 +840,7 @@ static void DoESC(Window *win, int c, int intermediate)
 	}
 }
 
-static void DoCSI(Window *win, int c, int intermediate)
+static void DoControlSequence(Window *win, int c, int intermediate)
 {
 	int i, a1 = win->w_args[0], a2 = win->w_args[1];
 
