@@ -1732,7 +1732,10 @@ static void SelectRendition(Window *win)
 
 		for (k = i + 1; k < win->w_NumArgs && win->w_seps[k - 1] == ':' ; ++k) {}
 
-		/* indexed colour space aka 256 colours; example escape \e[48;2;12m */
+		/* indexed colour space aka 256 colours; example control sequences:
+		 *  \e[48:2:12m			Standard
+		 *  \e[48;2;12m			Customary
+		 */
 		if ((j == 38 || j == 48) && i + 2 < win->w_NumArgs && win->w_args[i + 1] == 5) {
 
 			if (k == i + 1)
@@ -1748,7 +1751,7 @@ static void SelectRendition(Window *win)
 			}
 			continue;
 		}
-		/* Truecolor (24bit) colour space; examples:
+		/* Truecolor (24bit) colour space; example control sequences:
 		 *   \e[48:5:0:12:13:14m	Standard
 		 *   \e[48;5;12;13;14m		Customary
 		 *   \e[48:5:12:13:14m		Fix for botched clients
