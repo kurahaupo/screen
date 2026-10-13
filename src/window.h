@@ -135,6 +135,9 @@ struct paster {
 	Event	 pa_slowev;		/* slowpaste event */
 };
 
+typedef uint16_t cs_param_t;
+#define CS_PARAM_MAX UINT16_MAX
+
 typedef struct Window Window;
 struct Window {
 	Window *w_prev;			/* previous window */
@@ -168,10 +171,17 @@ struct Window {
 	int	 w_autoaka;		/* autoaka hack */
 	Window  *w_group;		/* window group we belong to */
 	int	 w_intermediate;	/* char used while parsing ESC-seq */
-	size_t	 w_NumArgs;
-	bool	 w_has_subargs;
-	int	 w_args[MAXARGS];	/* emulator args */
-	char	 w_seps[MAXARGS];	/* emulator arg separators */
+	struct cs_parser {
+	  size_t num_params;
+	  cs_param_t
+		 params[MAX_CS_PARAMS];	/* emulator args */
+	  char	 seps[MAX_CS_PARAMS];	/* emulator arg separators;
+					 * (sep[n] terminates params[n]);
+					 * params overrun signalled by
+					 * (seps[MAX_CS_PARAMS-1] != 0) */
+	  bool	 has_colons;		/* are any of the separators colons? */
+	}	 w_cs;			/* track state while parsing a Control Sequence */
+	bool	 w_strict_standout;
 
 	int    w_wlock;		/* WLOCK_AUTO, WLOCK_OFF, WLOCK_ON */
 	struct acluser *w_wlockuser;	/* NULL when unlocked or user who writes */
