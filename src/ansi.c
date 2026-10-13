@@ -230,6 +230,7 @@ void WriteString(Window *win, char *buf, size_t len)
 	int c;
 	int font;
 	Canvas *cv;
+	struct cs_parser * const cs = &win->w_cs;
 
 	if (len == 0)
 		return;
@@ -362,12 +363,9 @@ void WriteString(Window *win, char *buf, size_t len)
 			case ESC:
 				switch (c) {
 				case '[':
-					win->w_NumArgs = 0;
-					win->w_has_subargs = false;
 					win->w_intermediate = 0;
-					memset(win->w_args, 0, sizeof win->w_args);
-					memset(win->w_seps, 0, sizeof win->w_seps);
 					win->w_state = CSI;
+					*cs = (struct cs_parser){};
 					break;
 				case ']':
 					StringStart(win, OSC);
@@ -421,26 +419,26 @@ void WriteString(Window *win, char *buf, size_t len)
 				case '7':
 				case '8':
 				case '9':
-					if (win->w_NumArgs < MAXARGS) {
-						int *const a = &win->w_args[win->w_NumArgs];
-						if (*a < INT_MAX/10-1)
+					if (cs->num_params < MAX_CS_PARAMS) {
+						cs_param_t *const a = &cs->params[cs->num_params];
+						if (*a < CS_PARAM_MAX / 10 - 1)
 							*a = *a * 10 + (c - '0');
 					}
 					break;
 				case ':':
-					win->w_has_subargs = true;
+					cs->has_colons = true;
 					/*FALLTHRU*/
 				case ';':
-					if (win->w_NumArgs < MAXARGS) {
-						win->w_seps[win->w_NumArgs] = c;
-						win->w_NumArgs++;
+					if (cs->num_params < MAX_CS_PARAMS) {
+						cs->seps[cs->num_params] = c;
+						cs->num_params++;
 					}
 					break;
 				C0ControlCases(win,);
 				default:
 					if (c >= '@' && c <= '~') {		// (c & 0xc0) == 0x40 && c != 0x7f
-						if (win->w_NumArgs < MAXARGS)
-							win->w_NumArgs++;
+						if (cs->num_params < MAX_CS_PARAMS)
+							cs->num_params++;
 						DoControlSequence(win, c, win->w_intermediate);
 						if (win->w_state != PRIN)
 							win->w_state = LIT;
@@ -481,12 +479,9 @@ void WriteString(Window *win, char *buf, size_t len)
 						case 0xc0 ^ '[':
 							if (win->w_autoaka < 0)
 								win->w_autoaka = 0;
-							win->w_NumArgs = 0;
-							win->w_has_subargs = false;
 							win->w_intermediate = 0;
-							memset(win->w_args, 0, sizeof win->w_args);
-							memset(win->w_seps, 0, sizeof win->w_seps);
 							win->w_state = CSI;
+							*cs = (struct cs_parser){};
 							break;
 						case 0xc0 ^ 'P':
 							StringStart(win, DCS);
@@ -825,16 +820,17 @@ static void DoESC(Window *win, int c, int intermediate)
 
 static void DoControlSequence(Window *win, int c, int intermediate)
 {
-	int a1 = win->w_args[0], a2 = win->w_args[1];
+	struct cs_parser * const cs = &win->w_cs;
+	int a1 = cs->params[0], a2 = cs->params[1];
 
 #ifndef ALLOW_INVALID_COLON_DELIMITER
 	/* sub-args only valid for SelectRendition */
-	if (win->w_has_subargs && !( c == 'm' && !intermediate ))
+	if (cs->has_colons && !( c == 'm' && !intermediate ))
 		return;
 #endif
 
-	if (win->w_NumArgs > MAXARGS)
-		win->w_NumArgs = MAXARGS;
+	if (cs->num_params > MAX_CS_PARAMS)
+		cs->num_params = MAX_CS_PARAMS;
 	switch (intermediate) {
 	case 0:
 		switch (c) {
@@ -959,7 +955,7 @@ static void DoControlSequence(Window *win, int c, int intermediate)
 				LRefreshAll(&win->w_layer, 0);
 				break;
 			case 8:
-				a1 = win->w_args[2];
+				a1 = cs->params[2];
 				if (a1 < 1)
 					a1 = win->w_width;
 				if (a2 < 1)
@@ -1063,8 +1059,8 @@ static void DoControlSequence(Window *win, int c, int intermediate)
 		}
 		break;
 	case '?':
-		for (size_t j = 0; j < win->w_NumArgs; j++) {
-			a1 = win->w_args[j];
+		for (size_t j = 0; j < cs->num_params; j++) {
+			a1 = cs->params[j];
 			if (c != 'h' && c != 'l')
 				break;
 			bool i = c == 'h';
@@ -1672,8 +1668,10 @@ static void CursorLeft(Window *win, int n)
 
 static void ASetMode(Window *win, bool on)
 {
-	for (size_t i = 0; i < win->w_NumArgs; ++i) {
-		switch (win->w_args[i]) {
+	struct cs_parser * const cs = &win->w_cs;
+
+	for (size_t i = 0; i < cs->num_params; ++i) {
+		switch (cs->params[i]) {
 			/* case 2:            KAM: Lock keyboard */
 		case 4:	/* IRM: Insert mode */
 			win->w_insert = on;
@@ -1726,22 +1724,23 @@ static void SelectRendition(Window *win)
 	int attr = win->w_rend.attr;
 	int colorbg = win->w_rend.colorbg;
 	int colorfg = win->w_rend.colorfg;
+	struct cs_parser * const cs = &win->w_cs;
 
-	for (size_t i = 0, k; i < win->w_NumArgs; i = k) {
-		int j = win->w_args[i];
+	for (size_t i = 0, k; i < cs->num_params; i = k) {
+		int j = cs->params[i];
 
-		for (k = i + 1; k < win->w_NumArgs && win->w_seps[k - 1] == ':' ; ++k) {}
+		for (k = i + 1; k < cs->num_params && cs->seps[k - 1] == ':' ; ++k) {}
 
 		/* indexed colour space aka 256 colours; example control sequences:
 		 *  \e[48:2:12m			Standard
 		 *  \e[48;2;12m			Customary
 		 */
-		if ((j == 38 || j == 48) && i + 2 < win->w_NumArgs && win->w_args[i + 1] == 5) {
+		if ((j == 38 || j == 48) && i + 2 < cs->num_params && cs->params[i + 1] == 5) {
 
 			if (k == i + 1)
 				k = i + 3;
 
-			int jj = win->w_args[i + 2];
+			int jj = cs->params[i + 2];
 			if (k != i + 3 || jj & ~255)
 				continue;
 			if (j == 38) {
@@ -1756,16 +1755,16 @@ static void SelectRendition(Window *win)
 		 *   \e[48;5;12;13;14m		Customary
 		 *   \e[48:5:12:13:14m		Fix for botched clients
 		 * which set red=12, green=13, blue=14, color-space=application (0/empty) */
-		if ((j == 38 || j == 48) && i + 4 < win->w_NumArgs && win->w_args[i + 1] == 2) {
+		if ((j == 38 || j == 48) && i + 4 < cs->num_params && cs->params[i + 1] == 2) {
 			uint8_t r, g, b;
 			if (k > i + 5)
 				++i;	/* wasn't botched (see above) */
-			else if (k == i + 1)
+			else if (k == i + 1 && !cs->has_colons)
 				k = i + 5;
 
-			r = win->w_args[i + 2];
-			g = win->w_args[i + 3];
-			b = win->w_args[i + 4];
+			r = cs->params[i + 2];
+			g = cs->params[i + 3];
+			b = cs->params[i + 4];
 
 			if (k < i+5 || (r | g | b) & ~255)
 				continue;
@@ -1777,7 +1776,7 @@ static void SelectRendition(Window *win)
 			}
 			continue;
 		}
-		if (k == i + 2 && win->w_args[i + 1] == 0) {
+		if (k == i + 2 && cs->params[i + 1] == 0) {
 			/*
 			 * exact 'italic'; example control sequences:
 			 *  \e[3:m	⎱ enables italic
@@ -1791,7 +1790,7 @@ static void SelectRendition(Window *win)
 				attr &= ~A_IT;
 			continue;
 		}
-		if (k == i + 2 && win->w_args[i + 1] == 1) {
+		if (k == i + 2 && cs->params[i + 1] == 1) {
 			/*
 			 * exact 'standout'; example control sequences:
 			 *  \e[3:1m	enables standout
