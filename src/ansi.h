@@ -91,6 +91,13 @@ enum state_t {
 	PRIN4				/* CSI 4 seen in printer mode */
 };
 
+#define MAX_CS_PARAMS	64		/* ISO-6429 specifies 16, and recommends
+					 * silently ignoring any more, but we
+					 * need more to correctly support
+					 * colon-separated sub-parameters;
+					 * furthermore the ISO limit is out of
+					 * step with common usage. */
+
 /* keep string_t and string_t_string in sync! */
 enum string_t {
 	NONE,
