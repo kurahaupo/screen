@@ -136,6 +136,7 @@ struct paster {
 };
 
 typedef uint16_t cs_param_t;
+#define CS_PARAM_MAX UINT16_MAX
 
 typedef struct Window Window;
 struct Window {
