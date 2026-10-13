@@ -421,8 +421,12 @@ void WriteString(Window *win, char *buf, size_t len)
 				case '9':
 					if (cs->num_params < MAX_CS_PARAMS) {
 						cs_param_t *const a = &cs->params[cs->num_params];
-						if (*a < CS_PARAM_MAX / 10 - 1)
-							*a = *a * 10 + (c - '0');
+						cs_param_t v = *a;
+						int d = c - '0';
+						if (v <= (CS_PARAM_MAX - d) / 10)
+							*a = v * 10 + d;
+						else
+							*a = CS_PARAM_MAX;
 					}
 					break;
 				case ':':
