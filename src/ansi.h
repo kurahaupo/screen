@@ -36,18 +36,18 @@
 
 
 enum attr_e {
-			/*			Capname	TCapCode */
-	ATTR_DI,	/* Dim mode		dim	mh	*/
-	ATTR_US,	/* Underscore mode	smul	us	*/
-	ATTR_BD,	/* Bold mode		bold	md	*/
-	ATTR_RV,	/* Reverse mode		rev	mr	*/
-	ATTR_SO,	/* Standout mode	smso	so	*/
-	ATTR_BL,	/* Blinking		blink	mb	*/
-	ATTR_IT,	/* Italicized		simt	ZH	*/
-	ATTR_HI,	/* Hidden		invis	mk	*/
-	ATTR_ST,	/* StrikeThru		smxx	Yh/Y-	*/
-	NATTR
+			/*			Terminfo name	TermCap code	*/
+	ATTR_BD,	/* Bold mode		bold		md		*/
+	ATTR_DI,	/* Dim mode		dim		mh		*/
+	ATTR_IT,	/* Italicized		simt		ZH		*/
+	ATTR_US,	/* Underscore mode	smul		us		*/
 
+	ATTR_BL,	/* Blinking		blink		mb		*/
+	ATTR_RV,	/* Reverse mode		rev		mr		*/
+	ATTR_HI,	/* Hidden		invis		mk		*/
+	ATTR_ST,	/* StrikeThru		smxx		Yh/Y-		*/
+	ATTR_SO,	/* Standout mode	smso		so		*/
+	NATTR
 };
 
 enum attr_mask_e {
