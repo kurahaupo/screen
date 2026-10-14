@@ -1737,7 +1737,7 @@ static void SelectRendition(Window *win)
 		 */
 		if ((j == 38 || j == 48) && i + 2 < cs->num_params && cs->params[i + 1] == 5) {
 
-			if (k == i + 1)
+			if (k == i + 1 && !cs->has_colons)
 				k = i + 3;
 
 			int jj = cs->params[i + 2];
