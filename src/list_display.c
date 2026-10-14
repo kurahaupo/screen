@@ -46,23 +46,24 @@ static char ListID[] = "display";
 
 /*
  * layout of the displays page is as follows:
-
-xterm 80x42      jnweiger@/dev/ttyp4    0(m11)    &rWx
-facit 80x24 nb   mlschroe@/dev/ttyhf   11(tcsh)    rwx
-xterm 80x42      jnhollma@/dev/ttyp5    0(m11)    &R.x
-
-  |     |    |      |         |         |   |     | ¦___ window permissions
-  |     |    |      |         |         |   |     |      (R. is locked r-only,
-  |     |    |      |         |         |   |     |       W has wlock)
-  |     |    |      |         |         |   |     |___ Window is shared
-  |     |    |      |         |         |   |___ Name/Title of window
-  |     |    |      |         |         |___ Number of window
-  |     |    |      |         |___ Name of the display (the attached device)
-  |     |    |      |___ Username who is logged in at the display
-  |     |    |___ Display is in nonblocking mode. Shows 'NB' if obuf is full.
-  |     |___ Displays geometry as width x height.
-  |___ the terminal type known by screen for this display.
-
+ *
+ *  xterm  80x42       jnweiger@/dev/ttyp4    0(m11)    &rWx
+ *  facit  80x24  nb   mlschroe@/dev/ttyhf   11(tcsh)    rwx
+ *  xterm  80x42       jnhollma@/dev/ttyp5    0(m11)    &R.x
+ *  ──┬──  ──┬──  ─┬   ───┬──── ────┬─────   ─┬  ─┬     ┬ ┬─
+ *    │      │     │      │         │         │   │     │ │
+ *    │      │     │      │         │         │   │     │ ⎪   ⎧ window permissions:
+ *    │      │     │      │         │         │   │     │ ╰───⎨ (R. is locked r-only,
+ *    │      │     │      │         │         │   │     │     ⎩  W has wlock)
+ *    │      │     │      │         │         │   │     ╰────── Window is shared
+ *    │      │     │      │         │         │   ╰─────────── Name/Title of window
+ *    │      │     │      │         │         ╰────────────── Number of window
+ *    │      │     │      │         ╰─────────────────────── Name of the display (the attached device)
+ *    │      │     │      ╰──────────────────────────────── Username who is logged in at the display
+ *    │      │     ╰────────────────────────────────────── Display is in nonblocking mode. Shows 'NB' if obuf is full.
+ *    │      ╰─────────────────────────────────────────── Displays geometry as width × height.
+ *    ╰───────────────────────────────────────────────── the terminal type known by screen for this display.
+ *
  */
 
 static int gl_Display_header(ListData *ldata)
