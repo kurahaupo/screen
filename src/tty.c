@@ -49,7 +49,7 @@
 #include "screen.h"
 #include "fileio.h"
 #include "misc.h"
-#include "pty.h"
+#include "our-pty.h"
 #include "telnet.h"
 #include "tty.h"
 

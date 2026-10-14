@@ -28,7 +28,7 @@
 
 #include "config.h"
 
-#include "pty.h"
+#include "our-pty.h"
 
 #include <sys/ioctl.h>
 

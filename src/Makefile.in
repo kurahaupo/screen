@@ -205,12 +205,12 @@ search.o: search.c config.h screen.h os.h ansi.h sched.h acls.h comm.h \
  logfile.h mark.h input.h
 tty.o: tty.c config.h screen.h os.h ansi.h sched.h acls.h comm.h layer.h \
  term.h image.h canvas.h display.h layout.h viewport.h window.h logfile.h \
- fileio.h misc.h pty.h telnet.h tty.h
+ fileio.h misc.h our-pty.h telnet.h tty.h
 term.o: term.c term.h
 window.o: window.c config.h screen.h os.h ansi.h sched.h acls.h comm.h \
  layer.h term.h image.h canvas.h display.h layout.h viewport.h window.h \
  logfile.h winmsg.h winmsgbuf.h winmsgcond.h backtick.h fileio.h help.h \
- input.h mark.h misc.h process.h pty.h resize.h telnet.h termcap.h tty.h \
+ input.h mark.h misc.h process.h our-pty.h resize.h telnet.h termcap.h tty.h \
  utmp.h
 utmp.o: utmp.c config.h screen.h os.h ansi.h sched.h acls.h comm.h \
  layer.h term.h image.h canvas.h display.h layout.h viewport.h window.h \
@@ -237,7 +237,7 @@ process.o: process.c config.h screen.h os.h ansi.h sched.h acls.h comm.h \
 display.o: display.c config.h screen.h os.h ansi.h sched.h acls.h comm.h \
  layer.h term.h image.h canvas.h display.h layout.h viewport.h window.h \
  logfile.h winmsg.h winmsgbuf.h winmsgcond.h backtick.h encoding.h mark.h \
- misc.h process.h pty.h resize.h termcap.h tty.h
+ misc.h process.h our-pty.h resize.h termcap.h tty.h
 comm.o: comm.c config.h os.h screen.h ansi.h sched.h acls.h comm.h \
  layer.h term.h image.h canvas.h display.h layout.h viewport.h window.h \
  logfile.h
