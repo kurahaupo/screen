@@ -1777,7 +1777,7 @@ static void SelectRendition(Window *win)
 			}
 			continue;
 		}
-		if (k == i + 2 && cs->params[i + 1] == 0) {
+		if (k == i + 2 && win->w_args[i + 1] == 0) {
 			/*
 			 * exact 'italic'; example control sequences:
 			 *  \e[3:m	⎱ enables italic
@@ -1791,7 +1791,7 @@ static void SelectRendition(Window *win)
 				attr &= ~A_IT;
 			continue;
 		}
-		if (k == i + 2 && cs->params[i + 1] == 1) {
+		if (k == i + 2 && win->w_args[i + 1] == 1) {
 			/*
 			 * exact 'standout'; example control sequences:
 			 *  \e[3:1m	enables standout
