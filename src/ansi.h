@@ -83,7 +83,7 @@ enum state_t {
 	LIT,				/* Literal input */
 	ESC,				/* Start of escape sequence */
 	ASTR,				/* Start of control string */
-	STRESC,			/* ESC seen in control string */
+	STRESC,				/* ESC seen in control string */
 	CSI,				/* Reading arguments in "CSI Pn ;...*/
 	PRIN,				/* Printer mode */
 	PRINESC,			/* ESC seen in printer mode */
@@ -94,13 +94,13 @@ enum state_t {
 /* keep string_t and string_t_string in sync! */
 enum string_t {
 	NONE,
-	DCS,				/* Device control string */
-	OSC,				/* Operating system command */
-	APC,				/* Application program command
+	DCS,				/* Device Control String */
+	OSC,				/* Operating System Command */
+	APC,				/* Application Program Command
 					 *  - used for status change */
-	PM,				/* Privacy message */
-	AKA,				/* title for current screen */
-	GM,				/* Global message to every display */
+	PM,				/* Privacy Message */
+	AKA,				/* Title for current screen */
+	GM,				/* Global Message (to every display) */
 	STATUS				/* User hardstatus line */
 };
 
