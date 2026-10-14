@@ -1732,48 +1732,92 @@ static void SelectRendition(Window *win)
 
 		for (k = i + 1; k < cs->num_params && cs->seps[k - 1] == ':' ; ++k) {}
 
-		/* indexed colour space aka 256 colours; example control sequences:
-		 *  \e[48:2:12m			Standard
-		 *  \e[48;2;12m			Customary
-		 */
-		if ((j == 38 || j == 48) && i + 2 < cs->num_params && cs->params[i + 1] == 5) {
-
-			if (k == i + 1)
-				k = i + 3;
-
-			int jj = cs->params[i + 2];
-			if (k != i + 3 || jj & ~255)
-				continue;
-			if (j == 38) {
-				colorfg = jj | 0x02000000;
-			} else {
-				colorbg = jj | 0x02000000;
-			}
-			continue;
+		int *target_color = NULL;
+		bool bright = 0;
+		switch (j/10) {
+			case 9:  bright = 1; /*FALLTHRU*/ case 3: target_color = &colorfg; break;
+			case 10: bright = 1; /*FALLTHRU*/ case 4: target_color = &colorbg; break;
 		}
-		/* Truecolor (24bit) colour space; example control sequences:
-		 *   \e[48:5:0:12:13:14m	Standard
-		 *   \e[48;5;12;13;14m		Customary
-		 *   \e[48:5:12:13:14m		Fix for botched clients
-		 * which set red=12, green=13, blue=14, color-space=application (0/empty) */
-		if ((j == 38 || j == 48) && i + 4 < cs->num_params && cs->params[i + 1] == 2) {
-			uint8_t r, g, b;
-			if (k > i + 5)
-				++i;	/* wasn't botched (see above) */
-			else if (k == i + 1 && !cs->has_colons)
-				k = i + 5;
+		if (target_color) {
+			int cm = j % 10;
 
-			r = cs->params[i + 2];
-			g = cs->params[i + 3];
-			b = cs->params[i + 4];
+			if (cm < 8) {
+				/* direct colour codes: 30⋯37, 40⋯47, 90⋯97, & 100⋯107 */
+				*target_color = cm | bright << 3 | 0x01000000;
+				continue;
+			}
 
-			if (k < i+5 || (r | g | b) & ~255)
+			/* codes 98, 99, 108, 109 not valid */
+			if (bright)
 				continue;
 
-			if (j == 38) {
-				colorfg = 0x04000000 | (r << 16) | (g << 8) | b;
-			} else {
-				colorbg = 0x04000000 | (r << 16) | (g << 8) | b;
+			if (cm == 9) {
+				/* reset to default colour */
+				*target_color = 0;
+				continue;
+			}
+
+			/* cm == 8 && !bright */
+
+			if (i + 1 >= cs->num_params)
+				/* not enough params left */
+				break;
+
+			cs_param_t
+				cm2 = cs->params[i + 1];
+
+			/* Indexed colour space aka 256 colours; example control sequences:
+			 *  \e[48:2:12m			Standard
+			 *  \e[48;2;12m			Customary
+			 */
+			if (cm2 == 5) {
+
+				if (k == i + 1 && !cs->has_colons)
+					k = i + 3;
+				else if (k < i + 3)
+					continue;
+
+				if (k > cs->num_params)
+					/* not enough params left */
+					break;
+
+				cs_param_t jj = cs->params[i + 2];
+				if (jj & ~255)
+					/* Value out of range */
+					continue;
+				*target_color = 0x02000000 | jj;
+				continue;
+			}
+
+			/* Truecolor (24bit) colour space; example control sequences:
+			 *   \e[48:5:0:12:13:14m	Standard
+			 *   \e[48;5;12;13;14m		Customary
+			 *   \e[48:5:12:13:14m		Fix for botched clients
+			 * which sets red=12, green=13, blue=14, color-space=0/empty (application)
+			 * giving very dark gun-metal gray)
+			 */
+			if (cm2 == 2) {
+
+				if (k == i + 1 && !cs->has_colons)
+					k = i + 5;
+				else if (k > i + 5)
+					++i;	/* wasn't botched (see above) */
+				else if (k < i + 5)
+					continue;
+
+				if (k > cs->num_params)
+					/* not enough params left */
+					break;
+
+				cs_param_t
+					r = cs->params[i + 2],
+					g = cs->params[i + 3],
+					b = cs->params[i + 4];
+
+				if ( (r | g | b) & ~255U )
+					continue;
+				*target_color = 0x04000000 | r << 16 | g << 8 | b;
+				continue;
 			}
 			continue;
 		}
@@ -1805,18 +1849,8 @@ static void SelectRendition(Window *win)
 		}
 		if (k != i + 1)
 			continue;
-		if (j >= 90 && j <= 97)
-			colorfg = (j - 90 + 8) | 0x01000000;
-		if (j >= 100 && j <= 107)
-			colorbg = (j - 100 + 8) | 0x01000000;
-		if (j >= 30 && j < 38)
-			colorfg = (j - 30) | 0x01000000;
-		if (j >= 40 && j < 48)
-			colorbg = (j - 40) | 0x01000000;
-		if (j == 39)
-			colorfg = 0;
-		if (j == 49)
-			colorbg = 0;
+
+		/* 0 = reset all attributes, including colors */
 		if (j == 0) {
 			attr = 0;
 			/* will be xored to 0 */
