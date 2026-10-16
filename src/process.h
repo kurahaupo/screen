@@ -35,7 +35,6 @@ int   StuffKey (int);
 extern bool hardcopy_append;
 
 extern char *noargs[];
-extern char NullStr[];
 extern char *zmodem_recvcmd;
 extern char *zmodem_sendcmd;
 
