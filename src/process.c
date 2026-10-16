@@ -922,6 +922,16 @@ static void StuffFin(char *buf, size_t len, void *data)
 		LayProcess(&buf, &len);
 }
 
+/* {{{{{{ */
+
+#if defined(__GNUC__) || defined(__clang__)
+# pragma GCC diagnostic push
+# pragma GCC diagnostic ignored "-Wunused-parameter"
+#elif defined(_MSC_VER)
+# __pragma(warning(push))
+# __pragma(warning(disable: 4100)) /* unreferenced formal parameter */
+#endif
+
 /* If the command is not 'quieted', then use Msg to output the message. If it's a remote
  * query, then Msg takes care of also outputting the message to the querying client.
  *
@@ -1024,8 +1034,6 @@ static void DoCommandObuflimit(struct action *act)
 
 static void DoCommandDumptermcap(struct action *act)
 {
-	(void)act; /* unused */
-
 	struct acluser *user = display ? D_user : users;
 
 	WriteFile(user, NULL, DUMP_TERMCAP);
@@ -1072,31 +1080,23 @@ static void DoCommandLog(struct action *act)
 
 static void DoCommandSuspend(struct action *act)
 {
-	(void)act; /* unused */
-
 	Detach(D_STOP);
 }
 
 static void DoCommandNext(struct action *act)
 {
-	(void)act; /* unused */
-
 	if (MoreWindows())
 		SwitchWindow(NextWindow());
 }
 
 static void DoCommandPrev(struct action *act)
 {
-	(void)act; /* unused */
-
 	if (MoreWindows())
 		SwitchWindow(PreviousWindow());
 }
 
 static void DoCommandParent(struct action *act)
 {
-	(void)act; /* unused */
-
 	if (MoreWindows()) {
 		Window *w = ParentWindow();
 		if (w == NULL && fore != NULL)
@@ -1221,8 +1221,6 @@ static void DoCommandZmodem(struct action *act)
 
 static void DoCommandUnbindall(struct action *act)
 {
-	(void)act; /* unused */
-
 	for (size_t i = 0; i < ARRAY_SIZE(ktab); i++)
 		ClearAction(&ktab[i]);
 	OutputMsg(0, "Unbound all keys.");
@@ -1574,8 +1572,6 @@ static void DoCommandStuff(struct action *act)
 
 static void DoCommandRedisplay(struct action *act)
 {
-	(void)act; /* unused */
-
 	Activate(-1);
 }
 
@@ -1591,22 +1587,16 @@ static void DoCommandWindows(struct action *act)
 
 static void DoCommandVersion(struct action *act)
 {
-	(void)act; /* unused */
-
 	OutputMsg(0, "screen %s", version);
 }
 
 static void DoCommandInfo(struct action *act)
 {
-	(void)act; /* unused */
-
 	ShowInfo();
 }
 
 static void DoCommandDinfo(struct action *act)
 {
-	(void)act; /* unused */
-
 	ShowDInfo();
 }
 
@@ -1639,8 +1629,6 @@ static void DoCommandCommand(struct action *act)
 
 static void DoCommandOther(struct action *act)
 {
-	(void)act; /* unused */
-
 	if (MoreWindows())
 		SwitchWindow(display && D_other ? D_other : NextWindow());
 }
@@ -1653,8 +1641,6 @@ static void DoCommandMeta(struct action *act)
 	char *s = &ch;
 	size_t len = 1;
 
-	(void)act; /* unused */
-
 	if (ch != -1)
 		LayProcess(&s, &len);
 }
@@ -1665,8 +1651,6 @@ static void DoCommandXon(struct action *act)
 	char *s = &ch;
 	size_t len = 1;
 
-	(void)act; /* unused */
-
 	LayProcess(&s, &len);
 }
 
@@ -1675,8 +1659,6 @@ static void DoCommandXoff(struct action *act)
 	char ch = Ctrl('s');
 	char *s = &ch;
 	size_t len = 1;
-
-	(void)act; /* unused */
 
 	LayProcess(&s, &len);
 }
@@ -1735,8 +1717,6 @@ static void DoCommandBreak(struct action *act)
 
 static void DoCommandLockscreen(struct action *act)
 {
-	(void)act; /* unused */
-
 	Detach(D_LOCK);
 }
 
@@ -1929,15 +1909,11 @@ static void DoCommandHeight(struct action *act)
 
 static void DoCommandDefdynamictitle(struct action *act)
 {
-	(void)act; /* unused */
-
 	(void)ParseOnOff(act, &nwin_default.dynamicaka);
 }
 
 static void DoCommandDynamictitle(struct action *act)
 {
-	(void)act; /* unused */
-
 	(void)ParseOnOff(act, &fore->w_dynamicaka);
 }
 
@@ -1972,8 +1948,6 @@ static void DoCommandColon(struct action *act)
 
 static void DoCommandLastmsg(struct action *act)
 {
-	(void)act; /* unused */
-
 	if (D_status_lastmsg)
 		OutputMsg(0, "%s", D_status_lastmsg);
 }
@@ -2057,16 +2031,12 @@ static void DoCommandWritelock(struct action *act)
 
 static void DoCommandClear(struct action *act)
 {
-	(void)act; /* unused */
-
 	ResetAnsiState(fore);
 	WriteString(fore, "\033[H\033[J", 6);
 }
 
 static void DoCommandReset(struct action *act)
 {
-	(void)act; /* unused */
-
 	ResetAnsiState(fore);
 	if (fore->w_zdisplay)
 		zmodem_abort(fore, fore->w_zdisplay);
@@ -2111,8 +2081,6 @@ static void DoCommandMonitor(struct action *act)
 
 static void DoCommandDisplays(struct action *act)
 {
-	(void)act; /* unused */
-
 	display_displays();
 }
 
@@ -2181,16 +2149,12 @@ static void DoCommandHelp(struct action *act)
 
 static void DoCommandLicense(struct action *act)
 {
-	(void)act; /* unused */
-
 	display_license();
 }
 
 
 static void DoCommandCopy(struct action *act)
 {
-	(void)act; /* unused */
-
 	if (flayer->l_layfn != &WinLf) {
 		OutputMsg(0, "Must be on a window layer");
 		return;
@@ -2527,14 +2491,12 @@ static void DoCommandReadbuf(struct action *act)
 		user->u_plop.buf = s;
 		user->u_plop.enc = i;
 		OutputMsg(0, "Read contents of %s into copybuffer",
-                          args[0] ? args[0] : BufferFile);
+			  args[0] ? args[0] : BufferFile);
 	}
 }
 
 static void DoCommandRemovebuf(struct action *act)
 {
-	(void)act; /* unused */
-
 	KillBuffers();
 }
 
@@ -2674,15 +2636,12 @@ static void DoCommandShelltitle(struct action *act)
 
 static void DoCommandTerminfo(struct action *act)
 {
-	(void)act; /* unused */
-
 	if (!rc_name || !*rc_name)
 		OutputMsg(0, "Sorry, too late now. Place that in your .screenrc file.");
 }
 
 static void DoCommandSleep(struct action *act)
 {
-	(void)act; /* unused */
 }
 
 static void DoCommandTerm(struct action *act)
@@ -3142,8 +3101,6 @@ static void DoCommandBumpright(struct action *act)
 {
 	Window *win = NextWindow();
 
-	(void)act; /* unused */
-
 	if (fore->w_number < win->w_number)
 		SwapWindows(fore->w_number, win->w_number);
 }
@@ -3152,16 +3109,12 @@ static void DoCommandBumpleft(struct action *act)
 {
 	Window *win = PreviousWindow();
 
-	(void)act; /* unused */
-
 	if (fore->w_number > win->w_number)
 		SwapWindows(fore->w_number, win->w_number);
 }
 
 static void DoCommandCollapse(struct action *act)
 {
-	(void)act; /* unused */
-
 	CollapseWindowlist();
 }
 
@@ -3216,8 +3169,6 @@ static void DoCommandZombie_timeout(struct action *act)
 
 static void DoCommandSort(struct action *act)
 {
-	(void)act; /* unused */
-
 	if (first_window == last_window) {
 		Msg(0, "Less than two windows, sorting makes no sense.\n");
 		return;
@@ -3661,15 +3612,11 @@ static void DoCommandMaptimeout(struct action *act)
 
 static void DoCommandMapnotnext(struct action *act)
 {
-	(void)act; /* unused */
-
 	D_dontmap = 1;
 }
 
 static void DoCommandMapdefault(struct action *act)
 {
-	(void)act; /* unused */
-
 	D_mapdefault = 1;
 }
 
@@ -4196,24 +4143,18 @@ static void DoCommandSplit(struct action *act)
 
 static void DoCommandRemove(struct action *act)
 {
-	(void)act; /* unused */
-
 	RemCanvas();
 	Activate(-1);
 }
 
 static void DoCommandOnly(struct action *act)
 {
-	(void)act; /* unused */
-
 	OneCanvas();
 	Activate(-1);
 }
 
 static void DoCommandFit(struct action *act)
 {
-	(void)act; /* unused */
-
 	D_forecv->c_xoff = D_forecv->c_xs;
 	D_forecv->c_yoff = D_forecv->c_ys;
 	RethinkViewportOffsets(D_forecv);
@@ -4356,8 +4297,6 @@ static void DoCommandBacktick(struct action *act)
 
 static void DoCommandBlanker(struct action *act)
 {
-	(void)act; /* unused */
-
 	if (blankerprg) {
 		RunBlanker(blankerprg);
 		return;
@@ -4697,6 +4636,14 @@ static void DoCommandTruecolor(struct action *act)
 	if (ParseOnOff(act, &hastruecolor) == 0)
 		Activate(-1);
 }
+
+#if defined(__GNUC__) || defined(__clang__)
+# pragma GCC diagnostic pop
+#elif defined(_MSC_VER)
+# __pragma(warning(pop))
+#endif
+
+/* }}}}}} */
 
 void DoAction(struct action *act)
 {
