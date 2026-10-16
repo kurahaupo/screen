@@ -91,6 +91,7 @@ struct NewWindow nwin_undef = {
 	.args                = NULL,
 	.dir                 = NULL,
 	.term                = NULL,
+	.hastruecolor	     = false,
 	.aflag               = false,
 	.dynamicaka          = false,
 	.flowflag            = -1,
@@ -119,10 +120,11 @@ struct NewWindow nwin_default = {
 	.args       = ShellArgs,
 	.dir        = NULL,
 	.term       = screenterm,
+	.hastruecolor = false,	/**/
 	.aflag      = false,
 	.dynamicaka = true,
 	.flowflag   = FLOW_ON,
-	.list_order   = false,
+	.list_order  = false,
 	.list_nested = false,
 	.lflag      = 1,
 	.histheight = DEFAULTHISTHEIGHT,
@@ -173,6 +175,7 @@ void nwin_compose(struct NewWindow *def, struct NewWindow *new, struct NewWindow
 	COMPOSE(hstatus);
 	COMPOSE(charset);
 	COMPOSE(poll_zombie_timeout);
+	COMPOSE(hastruecolor);
 #undef COMPOSE
 }
 
@@ -533,6 +536,7 @@ int MakeWindow(struct NewWindow *newwin)
 		p->w_dir = SaveStr(nwin.dir);
 	if (nwin.term)
 		p->w_term = SaveStr(nwin.term);
+	p->w_truecolor = nwin.hastruecolor;
 
 	p->w_number = startat;
 	p->w_group = NULL;
