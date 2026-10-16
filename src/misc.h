@@ -28,6 +28,30 @@ void  xsetegid  (int);
 int   AddXChar (char *, int);
 int   AddXChars (char *, int, char *);
 
-#define ARRAY_SIZE(x) (sizeof(x) / sizeof((x)[0]))
+# define UNSAFE_ARRAY_SIZE(x) (sizeof(x) / sizeof((x)[0]))
+
+#if __STDC_VERSION__ >= 202000
+
+# define ARRAY_SIZE(x)	_Generic(&(x), \
+				typeof(*(x)) (*)[]: UNSAFE_ARRAY_SIZE(x), \
+				default: sizeof(char[-1]) /* error: expression is not an array */ \
+			)
+
+#else
+
+# if defined __GNUC__ || defined __clang__
+
+#  define IS_ARRAY(x)	!__builtin_types_compatible_p(__typeof__(x), __typeof__(*(x))*)
+
+# else
+
+#  define IS_ARRAY(x)	((void const*)(x) == (void const*)*(x))
+
+# endif
+
+# define MUST_BE_ARRAY(x) sizeof(char [IS_ARRAY(x)*2-1])
+# define ARRAY_SIZE(x)	(MUST_BE_ARRAY(x) * UNSAFE_ARRAY_SIZE(x))
+
+#endif
 
 #endif /* SCREEN_MISC_H */
