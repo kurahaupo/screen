@@ -39,6 +39,7 @@
 #include "encoding.h"
 #include "fileio.h"
 #include "help.h"
+#include "inline.h" /* must follow ansi.h and image.h */
 #include "logfile.h"
 #include "mark.h"
 #include "misc.h"

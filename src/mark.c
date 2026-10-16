@@ -28,19 +28,19 @@
 
 #include "config.h"
 
-#include "mark.h"
-
 #include <sys/types.h>
 #include <ctype.h>
 #include <stdbool.h>
 #include <stdint.h>
 #include <stdbool.h>
 
-#include "screen.h"
+#include "mark.h"
 
 #include "encoding.h"
 #include "fileio.h"
+#include "inline.h" /* must follow ansi.h and image.h */
 #include "process.h"
+#include "screen.h"
 #include "search.h"
 #include "winmsg.h"
 

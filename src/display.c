@@ -45,6 +45,7 @@
 #include "canvas.h"
 #include "encoding.h"
 #include "mark.h"
+#include "inline.h" /* must follow ansi.h and image.h */
 #include "misc.h"
 #include "process.h"
 #include "pty.h"
