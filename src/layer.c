@@ -30,10 +30,11 @@
 
 #include "layer.h"
 
-#include "screen.h"
 #include "encoding.h"
+#include "inline.h" /* must follow ansi.h and image.h */
 #include "mark.h"
 #include "misc.h"
+#include "screen.h"
 #include "tty.h"
 
 /*
