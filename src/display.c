@@ -1180,8 +1180,8 @@ void SetAttr(int new)
 				D_rend.colorbg = D_rend.colorfg = 0;
 			if (!D_CG0) {
 				/* D_ME may also reset the alternate charset */
-				D_rend.font = 0;
-				D_realfont = 0;
+				D_rend.font = FONT_LATIN1;
+				D_realfont = FONT_LATIN1;
 			}
 		}
 		old = 0;
@@ -1278,7 +1278,7 @@ int color256to88(int color)
 /*
  * SetColor - Sets foreground and background color
  * 0x00000000 <- default color ("transparent")
- * 	one note here that "null" variable is pointer to array of 0 and that's one of reasons to use it this way 
+ * 	one note here that "null" variable is pointer to array of 0 and that's one of reasons to use it this way
  * 0x0100000x <- 16 base color
  * 0x020000xx <- 256 color
  * 0x04xxxxxx <- truecolor
@@ -1307,8 +1307,8 @@ void SetColor(uint32_t foreground, uint32_t background)
 			AddCStr(D_ME ? D_ME : "\033[m");
 			if (D_ME && !D_CG0) {
 				/* D_ME may also reset the alternate charset */
-				D_rend.font = 0;
-				D_realfont = 0;
+				D_rend.font = FONT_LATIN1;
+				D_realfont = FONT_LATIN1;
 			}
 			D_atyp = 0;
 			D_rend.attr = 0;
@@ -1344,7 +1344,7 @@ void SetColor(uint32_t foreground, uint32_t background)
 			//AddCStr2(D_CAF, f); //FIXME
 			tputs(tparm("\033[38;5;%dm", f), 1, DoAddChar);
 		}
-		
+
 	}
 	if (f != of && (f & 0x04000000) && hastruecolor) {
 		uint8_t _r, _g, _b;
@@ -1998,7 +1998,7 @@ void PutChar(struct mchar *c, int x, int y)
 	PUTCHARLP(c->image);
 	if (c->mbcs) {
 		if (D_encoding == UTF8)
-			D_rend.font = 0;
+			D_rend.font = FONT_LATIN1;
 		PUTCHARLP(c->mbcs);
 	}
 }
@@ -2040,7 +2040,7 @@ void InsChar(struct mchar *c, int x, int xe, int y, struct mline *oml)
 	RAW_PUTCHAR(c->image);
 	if (c->mbcs) {
 		if (D_encoding == UTF8)
-			D_rend.font = 0;
+			D_rend.font = FONT_LATIN1;
 		if (D_x == D_width - 1)
 			PUTCHARLP(c->mbcs);
 		else
@@ -2095,7 +2095,7 @@ void WrapChar(struct mchar *c, int x, int y, int xs, int ys, int xe, int ye, boo
 	RAW_PUTCHAR(c->image);
 	if (c->mbcs) {
 		if (D_encoding == UTF8)
-			D_rend.font = 0;
+			D_rend.font = FONT_LATIN1;
 		RAW_PUTCHAR(c->mbcs);
 	}
 }
@@ -2785,7 +2785,7 @@ static void disp_processinput(Display * display, unsigned char *buf, size_t size
 			if (c < 0)
 				continue;
 			if (pastefont) {
-				int font = 0;
+				int font = FONT_LATIN1;
 				j += EncodeChar(buf2 + j, c, enc, &font);
 				j += EncodeChar(buf2 + j, -1, enc, &font);
 			} else
