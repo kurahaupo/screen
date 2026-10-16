@@ -170,15 +170,6 @@ enum move_t {
 
 #define is_dw_font(f)	((f) && ((f) & 0x60) == 0)
 
-#define dw_left(ml, x, enc) ((enc == UTF8) ? \
-	(ml)->font[(x) + 1] == 0xff && (ml)->image[(x) + 1] == 0xff : \
-	((ml)->font[x] & 0x1f) != 0 && ((ml)->font[x] & 0xe0) == 0 \
-	)
-#define dw_right(ml, x, enc) ((enc == UTF8) ? \
-	(ml)->font[x] == 0xff && (ml)->image[x] == 0xff : \
-	((ml)->font[x] & 0xe0) == 0x80 \
-	)
-
 typedef struct Window Window;
 
 void  ConfigCode3Standout(bool on);
