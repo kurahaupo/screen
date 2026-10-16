@@ -1189,7 +1189,7 @@ static void DoControlSequence(Window *win, int c, int intermediate)
 		switch (c) {
 		case 'c':	/* secondary DA */
 			if (a1 == 0)
-				Report(win, "\033[>%d;%d;0c", 83, nversion);	/* 83 == 'S' */
+				Report(win, "\033[>%d;%d;0c", 'S', nversion);
 			break;
 		}
 		break;
