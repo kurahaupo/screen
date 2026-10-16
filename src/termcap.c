@@ -699,8 +699,7 @@ char *MakeTermcap(bool aflag)
 		if (e_tgetent(buf, p) == 1)
 			break;
 		strcpy(p, "vt100");
-	}
-	while (0);		/* Goto free programming... */
+	} while (0);		/* Goto free programming... */
 
 	tcLineLen = 100;	/* Force NL */
 	if (strlen(Term) > TERMCAP_BUFSIZE - 40)
