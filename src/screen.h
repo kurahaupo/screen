@@ -135,6 +135,7 @@ struct Message {
 			int esc;			/* his new escape character unless -1 */
 			int meta_esc;			/* his new meta esc character unless -1 */
 			char envterm[MAXTERMLEN + 1];	/* terminal type */
+			bool envtruecolor;
 			int encoding;			/* encoding of display */
 			int detachfirst;		/* whether to detach remote sessions first */
 		} attach;
@@ -240,6 +241,7 @@ extern char HostName[];
 extern char SocketPath[MAXPATHLEN + 2];
 extern char *attach_tty;
 extern char *attach_term;
+extern bool attach_truecolor;
 extern char *captionstring;
 extern char *hardcopydir;
 extern char *home;
