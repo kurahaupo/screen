@@ -6273,10 +6273,8 @@ static void ShowDInfo(void)
 	Msg(0, "%s", buf);
 }
 
-static void AKAFin(char *buf, size_t len, void *data)
+static void AKAFin(char *buf, size_t len, void *data UNUSED)
 {
-	(void)data; /* unused */
-
 	if (len && fore)
 		ChangeAKA(fore, buf, strlen(buf));
 
@@ -6306,11 +6304,9 @@ static void InputAKA(void)
 	}
 }
 
-static void ColonFin(char *buf, size_t len, void *data)
+static void ColonFin(char *buf, size_t len, void *data UNUSED)
 {
 	char mbuf[256];
-
-	(void)data; /* unused */
 
 	RemoveStatus();
 	if (buf[len] == '\t') {
@@ -6371,11 +6367,9 @@ static void ColonFin(char *buf, size_t len, void *data)
 	}
 }
 
-static void SelectFin(char *buf, size_t len, void *data)
+static void SelectFin(char *buf, size_t len, void *data UNUSED)
 {
 	int n;
-
-	(void)data; /* unused */
 
 	if (!len || !display)
 		return;
@@ -6389,11 +6383,9 @@ static void SelectFin(char *buf, size_t len, void *data)
 	SwitchWindow(GetWindowByNumber(n));
 }
 
-static void SelectLayoutFin(char *buf, size_t len, void *data)
+static void SelectLayoutFin(char *buf, size_t len, void *data UNUSED)
 {
 	Layout *lay;
-
-	(void)data; /* unused */
 
 	if (!len || !display)
 		return;
@@ -6420,19 +6412,15 @@ static void InputSelect(void)
 
 static char setenv_var[31];
 
-static void SetenvFin1(char *buf, size_t len, void *data)
+static void SetenvFin1(char *buf, size_t len, void *data UNUSED)
 {
-	(void)data; /* unused */
-
 	if (!len || !display)
 		return;
 	InputSetenv(buf);
 }
 
-static void SetenvFin2(char *buf, size_t len, void *data)
+static void SetenvFin2(char *buf, size_t len, void *data UNUSED)
 {
-	(void)data; /* unused */
-
 	if (!len || !display)
 		return;
 	setenv(setenv_var, buf, 1);
@@ -6611,10 +6599,8 @@ int CompileKeys(char *s, int sl, unsigned char *array)
  *  Asynchronous input functions
  */
 
-static void copy_reg_fn(char *buf, size_t len, void *data)
+static void copy_reg_fn(char *buf, size_t len, void *data UNUSED)
 {
-	(void)data; /* unused */
-
 	struct plop *pp = plop_tab + (int)(unsigned char)*buf;
 
 	if (len) {
@@ -6637,10 +6623,8 @@ static void copy_reg_fn(char *buf, size_t len, void *data)
 	Msg(0, "Copied %zu characters into register %c", D_user->u_plop.len, *buf);
 }
 
-static void ins_reg_fn(char *buf, size_t len, void *data)
+static void ins_reg_fn(char *buf, size_t len, void *data UNUSED)
 {
-	(void)data; /* unused */
-
 	struct plop *pp = plop_tab + (int)(unsigned char)*buf;
 
 	if (len) {
@@ -6658,11 +6642,9 @@ static void ins_reg_fn(char *buf, size_t len, void *data)
 	Msg(0, "Empty register.");
 }
 
-static void process_fn(char *buf, size_t len, void *data)
+static void process_fn(char *buf, size_t len, void *data UNUSED)
 {
 	struct plop *pp = plop_tab + (int)(unsigned char)*buf;
-
-	(void)data; /* unused */
 
 	if (len) {
 		memset(buf, 0, len);
@@ -6752,12 +6734,10 @@ static int digraph_find(const char *buf)
 	return i;
 }
 
-static void digraph_fn(char *buf, size_t len, void *data)
+static void digraph_fn(char *buf, size_t len, void *data UNUSED)
 {
 	int ch, i, x;
 	size_t l;
-
-	(void)data; /* unused */
 
 	ch = buf[len];
 	if (ch) {
