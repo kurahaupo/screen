@@ -95,6 +95,7 @@ struct        passwd *ppp;
 char         *attach_tty;
 int           attach_fd = -1;
 char         *attach_term;
+bool          attach_truecolor;
 char         *LoginName;
 struct mode   attach_Mode;
 
@@ -790,6 +791,8 @@ int main(int argc, char **argv)
 			Panic(0, "Please set a terminal type.");
 		if (strlen(attach_term) > MAXTERMLEN)
 			Panic(0, "$TERM too long - sorry.");
+		char *ts = getenv("TRUECOLOR");
+		attach_truecolor = ts && (! strcmp(ts, "truecolor") || ! strcmp(ts, "24bit"));
 		GetTTY(0, &attach_Mode);
 	}
 
@@ -1042,7 +1045,7 @@ int main(int argc, char **argv)
 	if (UserAdd(LoginName, NULL) < 0)
 		Panic(0, "Could not create user info");
 	if (!detached) {
-		if (MakeDisplay(LoginName, attach_tty, attach_term, n, getppid(), &attach_Mode) == NULL)
+		if (MakeDisplay(LoginName, attach_tty, attach_term, attach_truecolor, n, getppid(), &attach_Mode) == NULL)
 			Panic(0, "Could not alloc display");
 		PanicPid = 0;
 		D_encoding = nwin_options.encoding > 0 ? nwin_options.encoding : 0;
@@ -1499,21 +1502,22 @@ void MakeNewEnv(void)
 	for (op = environ; *op; ++op) ;
 	if (NewEnv)
 		free((char *)NewEnv);
-	NewEnv = np = malloc((unsigned)(op - environ + 7 + 1) * sizeof(char *));
+	NewEnv = np = malloc((unsigned)(op - environ + 8 + 1) * sizeof(char *));
 	if (!NewEnv)
 		Panic(0, "%s", strnomem);
 	sprintf(stybuf, "STY=%s", strlen(SocketName) <= MAXSTR - 5 ? SocketName : "?");
 	*np++ = stybuf;		/* NewEnv[0] */
 	*np++ = Term;		/* NewEnv[1] */
-	np++;			/* room for SHELL */
-	np += 2;		/* room for TERMCAP and WINDOW */
+	np += 3;		/* room for SHELL, TERMCAP, and WINDOW */
+	if (hastruecolor)
+		*np++ = "TRUECOLOR=truecolor";
 
 	for (op = environ; *op; ++op) {
 		if (!IsSymbol(*op, "TERM") && !IsSymbol(*op, "TERMCAP")
 		    && !IsSymbol(*op, "STY") && !IsSymbol(*op, "WINDOW")
 		    && !IsSymbol(*op, "SCREENCAP") && !IsSymbol(*op, "SHELL")
 		    && !IsSymbol(*op, "LINES") && !IsSymbol(*op, "COLUMNS")
-		    )
+		    && !IsSymbol(*op, "TRUECOLOR")  )
 			*np++ = *op;
 	}
 	*np = NULL;
