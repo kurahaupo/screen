@@ -7383,20 +7383,11 @@ uint64_t ParseAttrColor(char *str, int msgok)
  */
 void ApplyAttrColor(uint64_t i, struct mchar *mc)
 {
-	uint32_t a, b, f;
-	unsigned char h;
-	a = (0xFF00000000000000 & i) >> 56;
-	b = (0x0000FFFFFF000000 & i) >> 24;
-	f = (0x0000000000FFFFFF & i);
+	uint8_t  a = i >> 56;
+	uint8_t  h = i >> 48;
 
-	h = (0x00FF000000000000 & i) >> 48;
-
-	if (h & 0x40) b |= 0x04000000;
-	if (h & 0x20) b |= 0x02000000;
-	if (h & 0x10) b |= 0x01000000;
-	if (h & 0x04) f |= 0x04000000;
-	if (h & 0x02) f |= 0x02000000;
-	if (h & 0x01) f |= 0x01000000;
+	uint32_t b = i >> 24 & 0xFFFFFF | h << 20 & 0x07000000;
+	uint32_t f = i       & 0xFFFFFF | h << 24 & 0x07000000;
 
 	mc->attr	= a;
 	mc->colorbg	= b;
