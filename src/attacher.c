@@ -241,6 +241,7 @@ int Attach(int how)
 	}
 	strncpy(m.m.attach.envterm, attach_term, MAXTERMLEN);
 	m.m.attach.envterm[MAXTERMLEN] = 0;
+	m.m.attach.envtruecolor = attach_truecolor;
 
 	strncpy(m.m.attach.auser, LoginName, ARRAY_SIZE(m.m.attach.auser) - 1);
 	m.m.attach.auser[ARRAY_SIZE(m.m.attach.auser) - 1] = 0;
