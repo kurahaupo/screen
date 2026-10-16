@@ -32,6 +32,7 @@
 #include "screen.h"
 #include "fileio.h"
 #include "misc.h"
+#include "inline.h"
 
 static int encmatch(char *, char *);
 static int recode_char(int, int, int);
