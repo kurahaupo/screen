@@ -112,8 +112,6 @@ static void SelectFin(char *, size_t, void *);
 static void SelectLayoutFin(char *, size_t, void *);
 static void ShowWindowsX(char *);
 
-char NullStr[] = "";
-
 struct plop plop_tab[MAX_PLOP_DEFS];
 
 #ifndef PTY_MODE
