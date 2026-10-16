@@ -54,6 +54,8 @@
 #include "tty.h"
 #include "winmsg.h"
 
+#include "inline.h" /* must follow ansi.h and image.h */
+
 /* CSI parsing status */
 enum {
 	CSI_PB=0, CSI_PX=1, CSI_PY=2, CSI_DONE=3,
@@ -170,7 +172,7 @@ static int BlankResize(int wi, int he)
  *  The new display is placed in the displays list.
  */
 
-Display *MakeDisplay(char *uname, char *utty, char *term, int fd, pid_t pid, struct mode *Mode)
+Display *MakeDisplay(char *uname, char *utty, char *term, bool truecolor, int fd, pid_t pid, struct mode *Mode)
 {
 	struct acluser **u;
 
@@ -231,6 +233,7 @@ Display *MakeDisplay(char *uname, char *utty, char *term, int fd, pid_t pid, str
 	D_usertty[ARRAY_SIZE(D_usertty) - 1] = 0;
 	strncpy(D_termname, term, MAXTERMLEN);
 	D_termname[MAXTERMLEN] = 0;
+	D_hastruecolor = truecolor;
 	D_user = *u;
 	D_processinput = ProcessInput;
 	D_mousetrack = defmousetrack;
@@ -2988,7 +2991,7 @@ void RunBlanker(char **cmdv)
 	char **np;
 
 	strncpy(termname, "TERM=", 6);
-	strncpy(termname + 5, D_termname, MAXTERMLEN - 6);
+	strncpy(termname + 5, D_termname, MAXTERMLEN);
 	termname[ARRAY_SIZE(termname) - 1] = 0;
 	KillBlanker();
 	D_blankerpid = -1;
