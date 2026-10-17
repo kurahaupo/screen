@@ -69,6 +69,8 @@
 #include "winmsg.h"
 
 
+static size_t CountArgs(char **);
+static bool CheckArgCount(struct comm *, int);
 static int CheckArgNum(int, char **);
 static void ClearAction(struct action *);
 static void SaveAction(struct action *, int, char **, int *);
@@ -790,6 +792,13 @@ int FindCommnr(const char *str)
 	return RC_ILLEGAL;
 }
 
+static size_t CountArgs(char **args) {
+	size_t argc = 0;
+	if (args)
+		for (; args[argc]; argc++) ;
+	return argc;
+}
+
 #ifdef FANCY_ERROR_REPORTING
 /* Make sure the following are kept in sync with ARGS_ANY */
 /* lookup for base-2 logarithm */
@@ -813,10 +822,8 @@ static inline bool is_bit_pair(int i)   { return is_single_bit(hi_bits(i)); }
 static inline bool is_bit_range(int i)  { return is_single_bit(range_end_bit(i)); }
 #endif
 
-static int CheckArgNum(int nr, char **args)
+static bool CheckArgCount(struct comm *c, int argc)
 {
-	struct comm *c = comms[nr];
-	int argc = CountArgs(args);
 	int allowed_counts_mask = c->flags & ARGS_MASK;
 
 	if (allowed_counts_mask == 0
@@ -865,13 +872,17 @@ static int CheckArgNum(int nr, char **args)
 #endif
 		Msg(0, "%s: %s: wrong number of arguments", rc_name, name);
 
-	return -1;
+	return false;
 }
 
-static void StuffFin(char *buf, size_t len, void *data)
+static int CheckArgNum(int nr, char **args)
 {
-	(void)data; /* unused */
+    int argc = CountArgs(args);
+    return CheckArgCount(&comms[nr], argc) ? argc : -1;
+}
 
+static void StuffFin(char *buf, size_t len, void *data UNUSED)
+{
 	if (!flayer)
 		return;
 	while (len)
@@ -1069,14 +1080,13 @@ static void DoCommandKill(struct action *act)
 	int n;
 
 	if (*args) {
-		if (!strcmp(*args, "--confirm")) {
-			Input(fore->w_pwin ? "Really kill this filter [y/n]" : "Really kill this window [y/n]",
+		if (!strcmp(*args, "--confirm"))
+			Input(fore->w_pwin ? "Really kill this filter [y/n]"
+					   : "Really kill this window [y/n]",
 			      1, INP_RAW, confirm_fn, NULL, RC_KILL);
-			return;
-		} else {
+		else
 			OutputMsg(0, "usage: kill [--confirm]");
-			return;
-		}
+		return;
 	}
 	n = fore->w_number;
 	if (fore->w_pwin) {
@@ -1096,13 +1106,12 @@ static void DoCommandQuit(struct action *act)
 	char **args = act->args;
 
 	if (*args) {
-		if (!strcmp(*args, "--confirm")) {
-			Input("Really quit and kill all your windows [y/n]", 1, INP_RAW, confirm_fn, NULL, RC_QUIT);
-			return;
-		} else {
+		if (!strcmp(*args, "--confirm"))
+			Input("Really quit and kill all your windows [y/n]",
+			      1, INP_RAW, confirm_fn, NULL, RC_QUIT);
+		else
 			OutputMsg(0, "usage: quit [--confirm]");
-			return;
-		}
+		return;
 	}
 	Finit(0);
 	/* does not return */
@@ -1123,13 +1132,12 @@ static void DoCommandPow_detach(struct action *act)
 	char **args = act->args;
 
 	if (*args) {
-		if (!strcmp(*args, "--confirm")) {
-			Input("Really detach and send HANGUP to parent process [y/n]", 1, INP_RAW, confirm_fn, NULL, RC_POW_DETACH);
-			return;
-		} else {
+		if (!strcmp(*args, "--confirm"))
+			Input("Really detach and send HANGUP to parent process [y/n]",
+			      1, INP_RAW, confirm_fn, NULL, RC_POW_DETACH);
+		else
 			OutputMsg(0, "usage: pow_detach [--confirm]");
-			return;
-		}
+		return;
 	}
 
 	Detach(D_POWER);	/* detach and kill Attacher's parent */
@@ -1138,7 +1146,7 @@ static void DoCommandPow_detach(struct action *act)
 static void DoCommandZmodem(struct action *act)
 {
 	char **args = act->args;
-	int msgok = display && !*rc_name;
+	bool const msgok = display && !*rc_name;
 
 	static char *zmodes[] = { "off", "auto", "catch", "pass", "on" };
 
@@ -5245,13 +5253,10 @@ void DoCommand(char **argv, int *argl)
 
 static void SaveAction(struct action *act, int nr, char **args, int *argl)
 {
-	int argc = 0;
+	int argc = CountArgs(args);
 	char **pp;
 	int *lp;
 
-	if (args)
-		while (args[argc])
-			argc++;
 	if (argc == 0) {
 		act->nr = nr;
 		act->args = noargs;
