@@ -132,18 +132,23 @@ void Input(char *istr, size_t len, int mode, InputCallback *finfunc, void *priv,
 	flayer->l_mode = 1;
 	inpdata = flayer->l_data;
 
-	inpdata->inpmaxlen = len;
-	inpdata->inpfinfunc = finfunc;
-	inpdata->inp.pos = inpdata->inp.len = 0;
-	inpdata->inp.prev = inphist.prev;
-	inpdata->inpmode = mode;
-	inpdata->privdata = data;
-	if (!priv)
-		priv = &inpdata->privdata;
-	inpdata->priv = priv;
-	inpdata->inpstringlen = 0;
-	inpdata->inpstring = NULL;
-	inpdata->search = NULL;
+	*inpdata = (struct inpdata) {
+		.inp = {
+			.len = 0,
+			.pos = 0,
+			.next = inpdata->inp.next,	// NOT OVERWRITTEN = keep old value?
+			.prev = inphist.prev,
+		},
+		.inpmaxlen = len,
+		.inpstring = NULL,
+		.inpstringlen = 0,
+		.inpmode = mode,
+		.inpfinfunc = finfunc,
+		.priv =  priv ? priv
+			      : &inpdata->privdata,	// self-referential
+		.privdata = data,
+		.search = NULL,
+	};
 	if (istr)
 		inp_setprompt(istr, (char *)NULL);
 }
