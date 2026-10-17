@@ -762,11 +762,11 @@ char *MakeTermcap(bool aflag)
 			AddCap("us=\\E[4m:"
 			       "ue=\\E[24m:");
 		if (D_CZH)
-			AddCap("ZH=\\E[3m:"
-			       "ZR=\\E[23m:");
+			AddCap("ZH=\\E[3\\0720m:"
+			       "ZR=\\E[23\\0720m:");
 		if (D_SO)
-			AddCap("so=\\E[7m:"
-			       "se=\\E[27m:");
+			AddCap("so=\\E[3\\0721m:"
+			       "se=\\E[23\\0721m:");
 		if (D_MB)
 			AddCap("mb=\\E[5m:");
 		if (D_MD)
