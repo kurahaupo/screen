@@ -644,10 +644,10 @@ static int remmapseq(char *seq, int k)
  */
 static void AddCap(char *s)
 {
-	int n;
+	size_t n;
 
 	n = strlen(s);
-	if (Termcaplen + n < TERMCAP_BUFSIZE - 1) {
+	if (Termcaplen + n + 1 < TERMCAP_BUFSIZE) {
 		strcpy(Termcap + Termcaplen, s);
 		Termcaplen += n;
 		tcLineLen += n;
