@@ -205,12 +205,12 @@ static void InpProcess(char **ppbuf, size_t *plen)
 			inpdata->inp.buf[inpdata->inp.len] = ch;
 			if (ch) {
 				display = inpdisplay;
-				(*inpdata->inpfinfunc) (inpdata->inp.buf, inpdata->inp.len, inpdata->priv);
+				inpdata->inpfinfunc (inpdata->inp.buf, inpdata->inp.len, inpdata->priv);
 				ch = inpdata->inp.buf[inpdata->inp.len];
 			}
 		} else if (inpdata->inpmode & INP_RAW) {
 			display = inpdisplay;
-			(*inpdata->inpfinfunc) (&ch, 1, inpdata->priv);	/* raw */
+			inpdata->inpfinfunc(&ch, 1, inpdata->priv);	/* raw */
 			if (ch)
 				continue;
 		}
@@ -371,9 +371,9 @@ static void InpProcess(char **ppbuf, size_t *plen)
 			*plen = len;
 			display = inpdisplay;
 			if ((inpdata->inpmode & INP_RAW) == 0)
-				(*inpdata->inpfinfunc) (inpdata->inp.buf, inpdata->inp.len, inpdata->priv);
+				inpdata->inpfinfunc(inpdata->inp.buf, inpdata->inp.len, inpdata->priv);
 			else
-				(*inpdata->inpfinfunc) (pbuf - 1, 0, inpdata->priv);
+				inpdata->inpfinfunc(pbuf - 1, 0, inpdata->priv);
 			if (inpdata->search)
 				free(inpdata->search);
 			free(inpdata);
