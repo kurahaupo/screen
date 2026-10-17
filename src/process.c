@@ -791,64 +791,66 @@ int FindCommnr(const char *str)
 }
 
 #ifdef FANCY_ERROR_REPORTING
+/* Make sure the following are kept in sync with ARGS_ANY */
+/* lookup for base-2 logarithm */
+static const int blog[2 << ARGS_ANY] = {
+    [1 << 0] = 1,
+    [1 << 1] = 2,
+    [1 << 2] = 3,
+    [1 << 3] = 4,
+    [1 << 4] = 5,
+    [1 << 5] = 6,
+    /* The last entry here should be equivalent to:
+    [1 << ARGS_ANY-1] = ARGS_ANY, */
+};
+static char *nums[] = { "no", "one", "two", "three", "four", "five" };
+
 static inline int lo_bit(int i) { return i & -i; }
-static inline int hi_bits(int i) { return i - lo_bit(i); }
+static inline int hi_bits(int i) { return i ^ lo_bit(i); }
 static inline int range_end_bit(int i)  { return (i + lo_bit(i)) >> 1; }	// top of a consecutive range
-static inline bool single_bit(int i) { return ! hi_bits(i); }
-static inline bool bit_pair(int i)   { return single_bit(hi_bits(i)); }
-static inline bool bit_range(int i)  { return single_bit(range_end_bit(i)); }
+static inline bool is_single_bit(int i) { return ! hi_bits(i); }
+static inline bool is_bit_pair(int i)   { return is_single_bit(hi_bits(i)); }
+static inline bool is_bit_range(int i)  { return is_single_bit(range_end_bit(i)); }
 #endif
 
 static int CheckArgNum(int nr, char **args)
 {
-	int allowed_counts_mask = comms[nr].flags & ARGS_MASK;
-	int actual_count;
-	for (actual_count = 0; args[actual_count]; actual_count++) ;
+	struct comm *c = comms[nr];
+	int argc = CountArgs(args);
+	int allowed_counts_mask = c->flags & ARGS_MASK;
 
 	if (allowed_counts_mask == 0
-	 || allowed_counts_mask & 1U << (actual_count <= ARGS_ANY ?
-					 actual_count  : ARGS_ANY))
-		return actual_count;
+	 || allowed_counts_mask & 1U << (argc <= ARGS_ANY ?
+					 argc  : ARGS_ANY))
+		return true;
 
 	/* From here to the end of this function is just trying to be
 	 * very specific about the phrasing of the error message. */
-	char const *name = comms[nr].name;
+	char const *name = c->name;
 #ifdef FANCY_ERROR_REPORTING
-	static char *nums[] = { "no", "one", "two", "three", "four", "five" };
-	/* lookup for base-2 logarithm */
-	static int blog[2 << ARGS_ANY] = {
-	    #ifdef __GNUC__
-	    [0 ... ARGS_MASK] =
-	    #endif
-		-1
-	};
-	if (blog[0] < 0)
-		for (int i=0;i<=ARGS_ANY; ++i)
-			blog[1U<<i] = i;
-
-	switch (allowed_counts_or_more_mask) {
+	switch (allowed_counts_mask) {
 	  case ARGS_0: Msg(0, "%s: %s: no arguments allowed", rc_name, name); return -1;
 	  case ARGS_1: Msg(0, "%s: %s: exactly one argument required", rc_name, name); return -1;
 	  case ARGS_1M: Msg(0, "%s: %s: at least one argument required", rc_name, name); return -1;
 	  case ARGS_124: Msg(0, "%s: %s: one, two, or four arguments required", rc_name, name); return -1;
 	}
 
-	int allowed_counts_mask = allowed_counts_or_more_mask & ~ARGS_M;
-	bool or_more = allowed_counts_or_more_mask & ARGS_M;
-	const int first = blog[lo_bit(allowed_counts_or_more_mask)];
-	if (!or_more && single_bit(allowed_counts_mask))
+	int allowed_counts_mask = allowed_counts_mask & ~ARGS_M;
+	bool or_more = allowed_counts_mask & ARGS_M;
+	const int first = blog[lo_bit(allowed_counts_mask)]-1;
+	if (!or_more && is_single_bit(allowed_counts_mask))
 		Msg(0, "%s: %s: exactly %s arguments required", rc_name, name, nums[first]);
-	else if (!or_more && bit_pair(allowed_counts_mask)) {
+	else if (!or_more && is_bit_pair(allowed_counts_mask)) {
 		Msg(0, "%s: %s: %s or %s arguments required", rc_name, name,
-		    nums[first], nums[blog[hi_bits(allowed_counts_mask)]]);
+		    nums[first], nums[blog[hi_bits(allowed_counts_mask)]-1]);
 	}
-	else if (bit_range(allowed_counts_or_more_mask)) {
+	else if (is_bit_range(allowed_counts_mask)) {
 		/* Use bitwise carry propagation to find the top of the range.
-		 * Since we've already checked single_bit(allowed_counts_mask),
+		 * Since we've already checked is_single_bit(allowed_counts_mask),
 		 * we know that first ≠ range_top (except for first = hi =
 		 * ARGS_M, but we will still correctly render that as "five or
 		 * more") */
-		const int range_top = blog[range_end_bit(allowed_counts_or_more_mask)];
+		const int range_top = blog[range_end_bit(allowed_counts_mask)]-1;
 		if (first == 0)
 			Msg(0, "%s: %s: no more than %s arguments allowed",
 			    rc_name, name, nums[range_top]);
