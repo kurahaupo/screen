@@ -1080,9 +1080,12 @@ static void DoControlSequence(Window *win, int c, int intermediate)
 				if (i) {
 					if (win->w_encoding)
 						break;
-					win->w_charsets[0] = win->w_charsets[1] =
-					    win->w_charsets[2] = win->w_charsets[3] =
-					    win->w_FontL = win->w_FontR = ASCII;
+					win->w_charsets[0] =
+					win->w_charsets[1] =
+					win->w_charsets[2] =
+					win->w_charsets[3] =
+					win->w_FontL =
+					win->w_FontR = ASCII;
 					win->w_Charset = 0;
 					win->w_CharsetR = 2;
 					win->w_ss = 0;
@@ -1704,13 +1707,15 @@ static enum attr_mask_e rendlist[] = {
 	[3]  = A_IT,
 	[4]  = A_US,
 	[5]  = A_BL,
+	[6]  = A_FB,
 	[7]  = A_RV,
 	[8]  = A_HI,
 	[9]  = A_ST,
 	[22] = ~(A_BD | A_DI),
 	[23] = ~A_IT,
 	[24] = ~A_US,
-	[25] = ~A_BL,
+	[25] = ~(A_BL | A_FB),
+	[26] = ~(A_BL | A_FB),
 	[27] = ~A_RV,
 	[28] = ~A_HI,
 	[29] = ~A_ST,
