@@ -68,10 +68,33 @@ char screenterm[MAXTERMLEN + 1];	/* new $TERM, usually "screen" */
 
 char *extra_incap, *extra_outcap;
 
-static const char TermcapConst[] = "DO=\\E[%dB:LE=\\E[%dD:RI=\\E[%dC:\
-UP=\\E[%dA:bs:bt=\\E[Z:cd=\\E[J:ce=\\E[K:cl=\\E[H\\E[J:cm=\\E[%i%d;%dH:\
-ct=\\E[3g:do=^J:nd=\\E[C:pt:rc=\\E8:rs=\\Ec:sc=\\E7:st=\\EH:up=\\EM:\
-le=^H:bl=^G:cr=^M:it#8:ho=\\E[H:nw=\\EE:ta=^I:is=\\E)0:";
+static const char TermcapConst[] = "DO=\\E[%dB:"
+				   "LE=\\E[%dD:"
+				   "RI=\\E[%dC:"
+				   "UP=\\E[%dA:"
+				   "bs:"
+				   "bt=\\E[Z:"
+				   "cd=\\E[J:"
+				   "ce=\\E[K:"
+				   "cl=\\E[H\\E[J:"
+				   "cm=\\E[%i%d;%dH:"
+				   "ct=\\E[3g:"
+				   "do=^J:"
+				   "nd=\\E[C:"
+				   "pt:"
+				   "rc=\\E8:"
+				   "rs=\\Ec:"
+				   "sc=\\E7:"
+				   "st=\\EH:"
+				   "up=\\EM:"
+				   "le=^H:"
+				   "bl=^G:"
+				   "cr=^M:"
+				   "it#8:"
+				   "ho=\\E[H:"
+				   "nw=\\EE:"
+				   "ta=^I:"
+				   "is=\\E)0:";
 
 char *gettermcapstring(char *s)
 {
