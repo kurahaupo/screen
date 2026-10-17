@@ -381,14 +381,13 @@ void InitKeytab(void)
 	unsigned int i;
 	char *argarr[2];
 
-	for (i = 0; i < ARRAY_SIZE(ktab); i++) {
+	for (i = 0; i < ARRAY_SIZE(ktab); i++)
 		ktab[i] = (struct action){
 			       .nr = RC_ILLEGAL,
 			       .args = noargs,
 			       .argl = NULL,
 			};
-	}
-	for (i = 0; i < KMAP_KEYS + KMAP_AKEYS; i++) {
+	for (i = 0; i < KMAP_KEYS + KMAP_AKEYS; i++)
 		umtab[i] =
 		dmtab[i] =
 		mmtab[i] = (struct action){
@@ -396,7 +395,6 @@ void InitKeytab(void)
 				.args = noargs,
 				.argl = NULL,
 			};
-	}
 	argarr[1] = NULL;
 	for (i = 0; i < NKMAPDEF; i++) {
 		if (i + KMAPDEFSTART < T_CAPS)
