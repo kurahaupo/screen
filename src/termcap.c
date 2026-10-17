@@ -719,56 +719,53 @@ char *MakeTermcap(bool aflag)
 		strcpy(Termcap + Termcaplen, TermcapConst);
 		Termcaplen += strlen(TermcapConst);
 	}
-	sprintf(buf, "li#%d:co#%d:", height, width);
+	sprintf(buf, "li#%d:"
+		     "co#%d:", height, width);
 	AddCap(buf);
 	AddCap("am:");
 	if (aflag || (force_vt && !D_COP) || D_CLP || !D_AM) {
-		AddCap("xn:");
-		AddCap("xv:");
-		AddCap("LP:");
+		AddCap("xn:"
+		       "xv:"
+		       "LP:");
 	}
 	if (aflag || (D_CS && D_SR) || D_AL || D_CAL) {
-		AddCap("sr=\\EM:");
-		AddCap("al=\\E[L:");
-		AddCap("AL=\\E[%dL:");
+		AddCap("sr=\\EM:"
+		       "al=\\E[L:"
+		       "AL=\\E[%dL:");
 	} else if (D_SR)
 		AddCap("sr=\\EM:");
 	if (aflag || D_CS)
 		AddCap("cs=\\E[%i%d;%dr:");
 	if (aflag || D_CS || D_DL || D_CDL) {
-		AddCap("dl=\\E[M:");
-		AddCap("DL=\\E[%dM:");
+		AddCap("dl=\\E[M:"
+		       "DL=\\E[%dM:");
 	}
 	if (aflag || D_DC || D_CDC) {
-		AddCap("dc=\\E[P:");
-		AddCap("DC=\\E[%dP:");
+		AddCap("dc=\\E[P:"
+		       "DC=\\E[%dP:");
 	}
-	if (aflag || D_CIC || D_IC || D_IM) {
-		AddCap("im=\\E[4h:");
-		AddCap("ei=\\E[4l:");
-		AddCap("mi:");
-		AddCap("IC=\\E[%d@:");
-	}
-	AddCap("ks=\\E[?1h\\E=:");
-	AddCap("ke=\\E[?1l\\E>:");
-	AddCap("vi=\\E[?25l:");
-	AddCap("ve=\\E[34h\\E[?25h:");
-	AddCap("vs=\\E[34l:");
-	AddCap("ti=\\E[?1049h:");
-	AddCap("te=\\E[?1049l:");
+	if (aflag || D_CIC || D_IC || D_IM)
+		AddCap("im=\\E[4h:"
+		       "ei=\\E[4l:"
+		       "mi:"
+		       "IC=\\E[%d@:");
+	AddCap("ks=\\E[?1h\\E=:"
+	       "ke=\\E[?1l\\E>:"
+	       "vi=\\E[?25l:"
+	       "ve=\\E[34h\\E[?25h:"
+	       "vs=\\E[34l:"
+	       "ti=\\E[?1049h:"
+	       "te=\\E[?1049l:");
 	if (display) {
-		if (D_US) {
-			AddCap("us=\\E[4m:");
-			AddCap("ue=\\E[24m:");
-		}
-		if (D_CZH) {
-			AddCap("so=\\E[3m:");
-			AddCap("se=\\E[23m:");
-		}
-		if (D_SO) {
-			AddCap("so=\\E[7m:");
-			AddCap("se=\\E[27m:");
-		}
+		if (D_US)
+			AddCap("us=\\E[4m:"
+			       "ue=\\E[24m:");
+		if (D_CZH)
+			AddCap("ZH=\\E[3m:"
+			       "ZR=\\E[23m:");
+		if (D_SO)
+			AddCap("so=\\E[7m:"
+			       "se=\\E[27m:");
 		if (D_MB)
 			AddCap("mb=\\E[5m:");
 		if (D_MD)
@@ -778,9 +775,15 @@ char *MakeTermcap(bool aflag)
 		if (D_MR)
 			AddCap("mr=\\E[7m:");
 		if (D_MB || D_MD || D_MH || D_MR)
-			AddCap("me=\\E[m:ms:");
+			AddCap("me=\\E[m:"
+			       "ms:");
 		if (D_hascolor)
-			AddCap("Co#8:pa#64:AF=\\E[3%dm:AB=\\E[4%dm:op=\\E[39;49m:AX:");
+			AddCap("Co#8:"
+			       "pa#64:"
+			       "AF=\\E[3%dm:"
+			       "AB=\\E[4%dm:"
+			       "op=\\E[39;49m:"
+			       "AX:");
 		if (D_VB)
 			AddCap("vb=\\Eg:");
 		if (D_CG0)

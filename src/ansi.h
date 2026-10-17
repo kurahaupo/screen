@@ -34,19 +34,18 @@
 #include <stdint.h>
 #include <stdlib.h>
 
-
 enum attr_e {
-			/*			Terminfo name	TermCap code	*/
-	ATTR_BD,	/* Bold mode		bold		md		*/
-	ATTR_DI,	/* Dim mode		dim		mh		*/
-	ATTR_IT,	/* Italicized		simt		ZH		*/
-	ATTR_US,	/* Underscore mode	smul		us		*/
-	ATTR_BL,	/* Blinking		blink		mb		*/
-	ATTR_FB,	/* Fast Blinking	-		-		*/
-	ATTR_RV,	/* Reverse mode		rev		mr		*/
-	ATTR_HI,	/* Hidden		invis		mk		*/
-	ATTR_ST,	/* StrikeThru		smxx		Yh/Y-		*/
-	ATTR_SO,	/* Standout mode	smso		so		*/
+			/*			Terminfo name	TermCap code	ECMA48 SGR code	Screen custom	*/
+	ATTR_BD,	/* Bold mode		bold		md		1				*/
+	ATTR_DI,	/* Dim mode		dim		mh		2				*/
+	ATTR_IT,	/* Italicized		simt		ZH / ZR		3		3:0		*/
+	ATTR_US,	/* Underscore mode	smul		us / ue		4				*/
+	ATTR_BL,	/* Blinking		blink		mb		5				*/
+	ATTR_FB,	/* Fast Blinking	-		-		6				*/
+	ATTR_RV,	/* Reverse mode		rev		mr		7				*/
+	ATTR_HI,	/* Hidden		invis		mk		8				*/
+	ATTR_ST,	/* StrikeThru		smxx		Yh/Y-		9				*/
+	ATTR_SO,	/* Standout mode	smso		so		-				*/
 	NATTR
 };
 
