@@ -378,15 +378,13 @@ int enter_window_name_mode = 0;
 
 void InitKeytab(void)
 {
-	unsigned int i;
-
-	for (i = 0; i < ARRAY_SIZE(ktab); i++)
+	for (size_t i = 0; i < ARRAY_SIZE(ktab); i++)
 		ktab[i] = (struct action){
 			       .nr = RC_ILLEGAL,
 			       .args = noargs,
 			       .argl = NULL,
 			};
-	for (i = 0; i < KMAP_KEYS + KMAP_AKEYS; i++)
+	for (size_t i = 0; i < KMAP_KEYS + KMAP_AKEYS; i++)
 		umtab[i] =
 		dmtab[i] =
 		mmtab[i] = (struct action){
@@ -394,7 +392,7 @@ void InitKeytab(void)
 				.args = noargs,
 				.argl = NULL,
 			};
-	for (i = 0; i < NKMAPDEF; i++) {
+	for (size_t i = 0; i < NKMAPDEF; i++) {
 		if (i + KMAPDEFSTART < T_CAPS)
 			continue;
 		if (i + KMAPDEFSTART >= T_CAPS + KMAP_KEYS)
@@ -404,7 +402,7 @@ void InitKeytab(void)
 		SaveAction(dmtab + i + (KMAPDEFSTART - T_CAPS), RC_STUFF,
 			   (char *[2]){ kmapdef[i] }, NULL);
 	}
-	for (i = 0; i < NKMAPADEF; i++) {
+	for (size_t i = 0; i < NKMAPADEF; i++) {
 		if (i + KMAPADEFSTART < T_CURSOR)
 			continue;
 		if (i + KMAPADEFSTART >= T_CURSOR + KMAP_AKEYS)
@@ -414,7 +412,7 @@ void InitKeytab(void)
 		SaveAction(dmtab + i + (KMAPADEFSTART - T_CURSOR + KMAP_KEYS), RC_STUFF,
 			   (char *[2]){ kmapadef[i] }, NULL);
 	}
-	for (i = 0; i < NKMAPMDEF; i++) {
+	for (size_t i = 0; i < NKMAPMDEF; i++) {
 		if (i + KMAPMDEFSTART < T_CAPS)
 			continue;
 		if (i + KMAPMDEFSTART >= T_CAPS + KMAP_KEYS)
@@ -463,7 +461,7 @@ void InitKeytab(void)
 	ktab['*'].nr = RC_DISPLAYS;
 	SaveAction(ktab + '-', RC_SELECT,
 		   (char *[2]){ "-" }, NULL);
-	for (i = 0; i < 10; i++) {
+	for (int i = 0; i < 10; i++) {
 		char arg1[10];
 		snprintf(arg1, sizeof arg1, "%d", i);
 		SaveAction(ktab + '0' + i, RC_SELECT,
