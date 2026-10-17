@@ -4126,6 +4126,16 @@ static void DoCommandSplit(struct action *act)
 	Activate(-1);
 }
 
+static void DoCommandStandout(struct action *act)
+{
+	int msgok = display && !*rc_name;
+	bool x;
+
+	if (ParseOnOff(act, &x) == 0 && msgok)
+		OutputMsg(0, "\\e[3m will select %s", x ? "standout" : "italic");
+	ConfigCode3Standout(x);
+}
+
 static void DoCommandRemove(struct action *act)
 {
 	RemCanvas();
@@ -4841,6 +4851,7 @@ void DoAction(struct action *act)
 		[RC_SORT]		= DoCommandSort,
 		[RC_SOURCE]		= DoCommandSource,
 		[RC_SPLIT]		= DoCommandSplit,
+		[RC_STANDOUT]		= DoCommandStandout,
 		[RC_STARTUP_MESSAGE]	= DoCommandStartup_message,
 		[RC_STATUS]		= DoCommandStatus,
 		[RC_STUFF]		= DoCommandStuff,
