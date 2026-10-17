@@ -497,13 +497,13 @@ void CheckEscape(void)
 		display = odisplay;
 		return;
 	}
-	SetEscape(NULL, Ctrl('a'), 'a');
+	SetEscape(NULL, Ctrl(ESCAPE_KEY), ESCAPE_KEY);
 	if (odisplay->d_user->u_Esc == -1)
 		odisplay->d_user->u_Esc = DefaultEsc;
 	if (odisplay->d_user->u_MetaEsc == -1)
 		odisplay->d_user->u_MetaEsc = DefaultMetaEsc;
 	display = NULL;
-	Msg(0, "Warning: escape char set back to ^A");
+	Msg(0, "Warning: escape char set back to ^%c", ESCAPE_KEY);
 	display = odisplay;
 }
 
