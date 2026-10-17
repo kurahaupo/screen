@@ -4043,7 +4043,7 @@ static void DoCommandDefcharset(struct action *act)
 		return;
 	}
 	if (len > 4 && (((args[0][4] < '0' || args[0][4] > '3') && args[0][4] != '.') ||
-		        ((args[0][5] < '0' || args[0][5] > '3') && args[0][5] && args[0][5] != '.'))) {
+			((args[0][5] < '0' || args[0][5] > '3') && args[0][5] && args[0][5] != '.'))) {
 		OutputMsg(0, "%s: defcharset: illegal mapping number.", rc_name);
 		return;
 	}
@@ -4070,7 +4070,7 @@ static void DoCommandCharset(struct action *act)
 		return;
 	}
 	if (len > 4 && (((args[0][4] < '0' || args[0][4] > '3') && args[0][4] != '.') ||
-		        ((args[0][5] < '0' || args[0][5] > '3') && args[0][5] && args[0][5] != '.'))) {
+			((args[0][5] < '0' || args[0][5] > '3') && args[0][5] && args[0][5] != '.'))) {
 		OutputMsg(0, "%s: charset: illegal mapping number.", rc_name);
 		return;
 	}
