@@ -41,8 +41,8 @@ enum attr_e {
 	ATTR_DI,	/* Dim mode		dim		mh		*/
 	ATTR_IT,	/* Italicized		simt		ZH		*/
 	ATTR_US,	/* Underscore mode	smul		us		*/
-
 	ATTR_BL,	/* Blinking		blink		mb		*/
+	ATTR_FB,	/* Fast Blinking	-		-		*/
 	ATTR_RV,	/* Reverse mode		rev		mr		*/
 	ATTR_HI,	/* Hidden		invis		mk		*/
 	ATTR_ST,	/* StrikeThru		smxx		Yh/Y-		*/
@@ -52,15 +52,16 @@ enum attr_e {
 
 enum attr_mask_e {
 
-	A_DI = 1 << ATTR_DI,
-	A_US = 1 << ATTR_US,
 	A_BD = 1 << ATTR_BD,
-	A_RV = 1 << ATTR_RV,
-	A_SO = 1 << ATTR_SO,
-	A_BL = 1 << ATTR_BL,
+	A_DI = 1 << ATTR_DI,
 	A_IT = 1 << ATTR_IT,
+	A_US = 1 << ATTR_US,
+	A_BL = 1 << ATTR_BL,
+	A_FB = 1 << ATTR_FB,
+	A_RV = 1 << ATTR_RV,
 	A_HI = 1 << ATTR_HI,
 	A_ST = 1 << ATTR_ST,
+	A_SO = 1 << ATTR_SO,
 
 	A__UNSET = 1 << NATTR,
 	A__MASK = A__UNSET - 1,
