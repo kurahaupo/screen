@@ -124,7 +124,6 @@ bool all_norefresh = 0;
 int zmodem_mode = 0;
 char *zmodem_sendcmd;
 char *zmodem_recvcmd;
-static char *zmodes[4] = { "off", "auto", "catch", "pass" };
 
 int idletimo;
 struct action idleaction;
@@ -1182,35 +1181,35 @@ static void DoCommandZmodem(struct action *act)
 	char **args = act->args;
 	int msgok = display && !*rc_name;
 
-	if (*args && !strcmp(*args, "sendcmd")) {
-		if (args[1]) {
-			free(zmodem_sendcmd);
-			zmodem_sendcmd = SaveStr(args[1]);
-		}
-		if (msgok)
-			OutputMsg(0, "zmodem sendcmd: %s", zmodem_sendcmd);
-		return;
-	}
-	if (*args && !strcmp(*args, "recvcmd")) {
-		if (args[1]) {
-			free(zmodem_recvcmd);
-			zmodem_recvcmd = SaveStr(args[1]);
-		}
-		if (msgok)
-			OutputMsg(0, "zmodem recvcmd: %s", zmodem_recvcmd);
-		return;
-	}
+	static char *zmodes[] = { "off", "auto", "catch", "pass", "on" };
+
 	if (*args) {
-		int i;
-		for (i = 0; i < 4; i++)
-			if (!strcmp(zmodes[i], *args))
-				break;
-		if (i == 4 && !strcmp(*args, "on"))
-			i = 1;
-		if (i == 4) {
-			OutputMsg(0, "usage: zmodem off|auto|catch|pass");
+		if (!strcmp(*args, "sendcmd")) {
+			if (args[1]) {
+				free(zmodem_sendcmd);
+				zmodem_sendcmd = SaveStr(args[1]);
+			}
+			if (msgok)
+				OutputMsg(0, "zmodem sendcmd: %s", zmodem_sendcmd);
 			return;
 		}
+		if (!strcmp(*args, "recvcmd")) {
+			if (args[1]) {
+				free(zmodem_recvcmd);
+				zmodem_recvcmd = SaveStr(args[1]);
+			}
+			if (msgok)
+				OutputMsg(0, "zmodem recvcmd: %s", zmodem_recvcmd);
+			return;
+		}
+		size_t i = 0;
+		for (; i < ARRAY_SIZE(zmodes) && strcmp(zmodes[i], *args) ; ++i) {}
+		if (i == ARRAY_SIZE(zmodes)) {
+			OutputMsg(0, "usage: zmodem [ on | off | auto | catch | pass | sendcmd CMD | recvcmd CMD ]");
+			return;
+		}
+		if (i == 4)
+			i = 1;	/* treat "on" as a synonym for "auto" */
 		zmodem_mode = i;
 	}
 	if (msgok)
