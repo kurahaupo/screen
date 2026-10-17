@@ -4679,554 +4679,205 @@ void DoAction(struct action *act)
 		}
 	}
 
-	switch (nr) {
-	case RC_SELECT:
-		DoCommandSelect(act);
-		break;
-	case RC_MULTIINPUT:
-		DoCommandMultiinput(act);
-		break;
-	case RC_DEFAUTONUKE:
-		DoCommandDefautonuke(act);
-		break;
-	case RC_AUTONUKE:
-		DoCommandAutonuke(act);
-		break;
-	case RC_DEFOBUFLIMIT:
-		DoCommandDefobuflimit(act);
-		break;
-	case RC_OBUFLIMIT:
-		DoCommandObuflimit(act);
-		break;
-	case RC_DUMPTERMCAP:
-		DoCommandDumptermcap(act);
-		break;
-	case RC_HARDCOPY:
-		DoCommandHardcopy(act);
-		break;
-	case RC_DEFLOG:
-		DoCommandDeflog(act);
-		break;
-	case RC_LOG:
-		DoCommandLog(act);
-		break;
-	case RC_SUSPEND:
-		DoCommandSuspend(act);
-		break;
-	case RC_NEXT:
-		DoCommandNext(act);
-		break;
-	case RC_PREV:
-		DoCommandPrev(act);
-		break;
-	case RC_PARENT:
-		DoCommandParent(act);
-		break;
-	case RC_KILL:
-		DoCommandKill(act);
-		break;
-	case RC_QUIT:
-		DoCommandQuit(act);
-		break;
-	case RC_DETACH:
-		DoCommandDetach(act);
-		break;
-	case RC_POW_DETACH:
-		DoCommandPow_detach(act);
-		break;
-	case RC_ZMODEM:
-		DoCommandZmodem(act);
-		break;
-	case RC_UNBINDALL:
-		DoCommandUnbindall(act);
-		break;
-	case RC_ZOMBIE:
-		DoCommandZombie(act);
-		break;
-	case RC_WALL:
-		DoCommandWall(act);
-		break;
-	case RC_AT:
-		DoCommandAt(act);
-		break;
-	case RC_READREG:
-		DoCommandReadreg(act);
-		break;
-	case RC_REGISTER:
-		DoCommandRegister(act);
-		break;
-	case RC_PROCESS:
-		DoCommandProcess(act);
-		break;
-	case RC_STUFF:
-		DoCommandStuff(act);
-		break;
-	case RC_REDISPLAY:
-		DoCommandRedisplay(act);
-		break;
-	case RC_WINDOWS:
-		DoCommandWindows(act);
-		break;
-	case RC_VERSION:
-		DoCommandVersion(act);
-		break;
-	case RC_INFO:
-		DoCommandInfo(act);
-		break;
-	case RC_DINFO:
-		DoCommandDinfo(act);
-		break;
-	case RC_COMMAND:
-		DoCommandCommand(act);
-		break;
-	case RC_OTHER:
-		DoCommandOther(act);
-		break;
-	case RC_META:
-		DoCommandMeta(act);
-		break;
-	case RC_XON:
-		DoCommandXon(act);
-		break;
-	case RC_XOFF:
-		DoCommandXoff(act);
-		break;
-	case RC_DEFBREAKTYPE:
-	case RC_BREAKTYPE:
-		DoCommandBreaktype(act);
-		break;
-	case RC_POW_BREAK:
-		DoCommandPow_break(act);
-		break;
-	case RC_BREAK:
-		DoCommandBreak(act);
-		break;
-	case RC_LOCKSCREEN:
-		DoCommandLockscreen(act);
-		break;
-	case RC_WIDTH:
-		DoCommandWidth(act);
-		break;
-	case RC_HEIGHT:
-		DoCommandHeight(act);
-		break;
-	case RC_DEFDYNAMICTITLE:
-		DoCommandDefdynamictitle(act);
-		break;
-	case RC_DYNAMICTITLE:
-		DoCommandDynamictitle(act);
-		break;
-	case RC_TITLE:
-		DoCommandTitle(act);
-		break;
-	case RC_COLON:
-		DoCommandColon(act);
-		break;
-	case RC_LASTMSG:
-		DoCommandLastmsg(act);
-		break;
-	case RC_SCREEN:
-		DoCommandScreen(act);
-		break;
-	case RC_WRAP:
-		DoCommandWrap(act);
-		break;
-	case RC_FLOW:
-		DoCommandFlow(act);
-		break;
-	case RC_DEFWRITELOCK:
-		DoCommandDefwritelock(act);
-		break;
-	case RC_WRITELOCK:
-		DoCommandWritelock(act);
-		break;
-	case RC_CLEAR:
-		DoCommandClear(act);
-		break;
-	case RC_RESET:
-		DoCommandReset(act);
-		break;
-	case RC_MONITOR:
-		DoCommandMonitor(act);
-		break;
-	case RC_DISPLAYS:
-		DoCommandDisplays(act);
-		break;
-	case RC_WINDOWLIST:
-		DoCommandWindowlist(act);
-		break;
-	case RC_HELP:
-		DoCommandHelp(act);
-		break;
-	case RC_LICENSE:
-		DoCommandLicense(act);
-		break;
-	case RC_COPY:
-		DoCommandCopy(act);
-		break;
-	case RC_HISTORY:
-		DoCommandHistory(act);
-		break;
-	case RC_PASTE:
-		DoCommandPaste(act);
-		break;
-	case RC_WRITEBUF:
-		DoCommandWritebuf(act);
-		break;
-	case RC_READBUF:
-		DoCommandReadbuf(act);
-		break;
-	case RC_REMOVEBUF:
-		DoCommandRemovebuf(act);
-		break;
-	case RC_IGNORECASE:
-		DoCommandIgnorecase(act);
-		break;
-	case RC_ESCAPE:
-		DoCommandEscape(act);
-		break;
-	case RC_DEFESCAPE:
-		DoCommandDefescape(act);
-		break;
-	case RC_CHDIR:
-		DoCommandChdir(act);
-		break;
-	case RC_SHELL:
-	case RC_DEFSHELL:
-		DoCommandShell(act);
-		break;
-	case RC_HARDCOPYDIR:
-		DoCommandHardcopydir(act);
-		break;
-	case RC_LOGFILE:
-		DoCommandLogfile(act);
-		break;
-	case RC_LOGTSTAMP:
-		DoCommandLogtstamp(act);
-		break;
-	case RC_SHELLTITLE:
-		DoCommandShelltitle(act);
-		break;
-	case RC_TERMCAP:
-	case RC_TERMCAPINFO:
-	case RC_TERMINFO:
-		DoCommandTerminfo(act);
-		break;
-	case RC_SLEEP:
-		DoCommandSleep(act);
-		break;
-	case RC_TERM:
-		DoCommandTerm(act);
-		break;
-	case RC_ECHO:
-		DoCommandEcho(act);
-		break;
-	case RC_BELL:
-	case RC_BELL_MSG:
-		DoCommandBell(act);
-		break;
-	case RC_BUFFERFILE:
-		DoCommandBufferfile(act);
-		break;
-	case RC_ACTIVITY:
-		DoCommandActivity(act);
-		break;
-	case RC_POW_DETACH_MSG:
-		DoCommandPow_detach_msg(act);
-		break;
-#if defined(ENABLE_UTMP) && defined(LOGOUTOK)
-	case RC_LOGIN:
-		DoCommandLogin(act);
-		break;
-	case RC_DEFLOGIN:
-		DoCommandDeflogin(act);
-		break;
-#endif
-	case RC_DEFFLOW:
-		DoCommandDefflow(act);
-		break;
-	case RC_DEFWRAP:
-		DoCommandDefwrap(act);
-		break;
-	case RC_DEFC1:
-		DoCommandDefc1(act);
-		break;
-	case RC_DEFBCE:
-		DoCommandDefbce(act);
-		break;
-	case RC_DEFGR:
-		DoCommandDefgr(act);
-		break;
-	case RC_DEFMONITOR:
-		DoCommandDefmonitor(act);
-		break;
-	case RC_DEFMOUSETRACK:
-		DoCommandDefmousetrack(act);
-		break;
-	case RC_MOUSETRACK:
-		DoCommandMousetrack(act);
-		break;
-	case RC_DEFSILENCE:
-		DoCommandDefsilence(act);
-		break;
-	case RC_VERBOSE:
-		DoCommandVerbose(act);
-		break;
-	case RC_HARDSTATUS:
-		DoCommandHardstatus(act);
-		break;
-	case RC_STATUS:
-		DoCommandStatus(act);
-		break;
-	case RC_CAPTION:
-		DoCommandCaption(act);
-		break;
-	case RC_CONSOLE:
-		DoCommandConsole(act);
-		break;
-	case RC_ALLPARTIAL:
-		DoCommandAllpartial(act);
-		break;
-	case RC_PARTIAL:
-		DoCommandPartial(act);
-		break;
-	case RC_VBELL:
-		DoCommandVbell(act);
-		break;
-	case RC_VBELLWAIT:
-		DoCommandVbellwait(act);
-		break;
-	case RC_MSGWAIT:
-		DoCommandMsgwait(act);
-		break;
-	case RC_MSGMINWAIT:
-		DoCommandMsgminwait(act);
-		break;
-	case RC_SILENCEWAIT:
-		DoCommandSilencewait(act);
-		break;
-	case RC_BUMPRIGHT:
-		DoCommandBumpright(act);
-		break;
-	case RC_BUMPLEFT:
-		DoCommandBumpleft(act);
-		break;
-	case RC_COLLAPSE:
-		DoCommandCollapse(act);
-		break;
-	case RC_NUMBER:
-		DoCommandNumber(act);
-		break;
-	case RC_ZOMBIE_TIMEOUT:
-		DoCommandZombie_timeout(act);
-		break;
-	case RC_SORT:
-		DoCommandSort(act);
-		break;
-	case RC_SILENCE:
-		DoCommandSilence(act);
-		break;
-	case RC_DEFSCROLLBACK:
-		DoCommandDefscrollback(act);
-		break;
-	case RC_SCROLLBACK:
-		DoCommandScrollback(act);
-		break;
-	case RC_SESSIONNAME:
-		DoCommandSessionname(act);
-		break;
-	case RC_SETENV:
-		DoCommandSetenv(act);
-		break;
-	case RC_UNSETENV:
-		DoCommandUnsetenv(act);
-		break;
-	case RC_DEFSLOWPASTE:
-		DoCommandDefslowpaste(act);
-		break;
-	case RC_SLOWPASTE:
-		DoCommandSlowpaste(act);
-		break;
-	case RC_MARKKEYS:
-		DoCommandMarkkeys(act);
-		break;
-	case RC_PASTEFONT:
-		DoCommandPastefont(act);
-		break;
-	case RC_CRLF:
-		DoCommandCrlf(act);
-		break;
-	case RC_COMPACTHIST:
-		DoCommandCompacthist(act);
-		break;
-	case RC_HARDCOPY_APPEND:
-		DoCommandHardcopy_append(act);
-		break;
-	case RC_VBELL_MSG:
-		DoCommandVbell_msg(act);
-		break;
-	case RC_DEFMODE:
-		DoCommandDefmode(act);
-		break;
-	case RC_AUTODETACH:
-		DoCommandAutodetach(act);
-		break;
-	case RC_STARTUP_MESSAGE:
-		DoCommandStartup_message(act);
-		break;
-	case RC_BIND:
-		DoCommandBind(act);
-		break;
-	case RC_BINDKEY:
-		DoCommandBindkey(act);
-		break;
-	case RC_MAPTIMEOUT:
-		DoCommandMaptimeout(act);
-		break;
-	case RC_MAPNOTNEXT:
-		DoCommandMapnotnext(act);
-		break;
-	case RC_MAPDEFAULT:
-		DoCommandMapdefault(act);
-		break;
-	case RC_ACLCHG:
-	case RC_ACLADD:
-	case RC_ADDACL:
-	case RC_CHACL:
-		DoCommandAclchg(act);
-		break;
-	case RC_ACLDEL:
-		DoCommandAcldel(act);
-		break;
-	case RC_ACLGRP:
-		DoCommandAclgrp(act);
-		break;
-	case RC_ACLUMASK:
-	case RC_UMASK:
-		DoCommandAclumask(act);
-		break;
-	case RC_MULTIUSER:
-		DoCommandMultiuser(act);
-		break;
-	case RC_EXEC:
-		DoCommandExec(act);
-		break;
-	case RC_NONBLOCK:
-		DoCommandNonblock(act);
-		break;
-	case RC_DEFNONBLOCK:
-		DoCommandDefnonblock(act);
-		break;
-	case RC_GR:
-		DoCommandGr(act);
-		break;
-	case RC_C1:
-		DoCommandC1(act);
-		break;
-	case RC_KANJI:
-	case RC_ENCODING:
-		DoCommandEncoding(act);
-		break;
-	case RC_DEFKANJI:
-	case RC_DEFENCODING:
-		DoCommandDefencoding(act);
-		break;
-	case RC_DEFUTF8:
-		DoCommandDefutf8(act);
-		break;
-	case RC_UTF8:
-		DoCommandUtf8(act);
-		break;
-	case RC_PRINTCMD:
-		DoCommandPrintcmd(act);
-		break;
-	case RC_DIGRAPH:
-		DoCommandDigraph(act);
-		break;
-	case RC_DEFHSTATUS:
-		DoCommandDefhstatus(act);
-		break;
-	case RC_HSTATUS:
-		DoCommandHstatus(act);
-		break;
-	case RC_DEFCHARSET:
-		DoCommandDefcharset(act);
-		break;
-	case RC_CHARSET:
-		DoCommandCharset(act);
-		break;
-	case RC_RENDITION:
-		DoCommandRendition(act);
-		break;
-	case RC_SORENDITION:
-		DoCommandSorendition(act);
-		break;
-	case RC_SOURCE:
-		DoCommandSource(act);
-		break;
-	case RC_SU:
-		DoCommandSu(act);
-		break;
-	case RC_SPLIT:
-		DoCommandSplit(act);
-		break;
-	case RC_REMOVE:
-		DoCommandRemove(act);
-		break;
-	case RC_ONLY:
-		DoCommandOnly(act);
-		break;
-	case RC_FIT:
-		DoCommandFit(act);
-		break;
-	case RC_FOCUS:
-		DoCommandFocus(act);
-		break;
-	case RC_RESIZE:
-		DoCommandResize(act);
-		break;
-	case RC_SETSID:
-		DoCommandSetsid(act);
-		break;
-	case RC_EVAL:
-		DoCommandEval(act);
-		break;
-	case RC_ALTSCREEN:
-		DoCommandAltscreen(act);
-		break;
-	case RC_AUTH:
-		DoCommandAuth(act);
-		break;
-	case RC_BACKTICK:
-		DoCommandBacktick(act);
-		break;
-	case RC_BLANKER:
-		DoCommandBlanker(act);
-		break;
-	case RC_BLANKERPRG:
-		DoCommandBlankerprg(act);
-		break;
-	case RC_IDLE:
-		DoCommandIdle(act);
-		break;
-	case RC_FOCUSMINSIZE:
-		DoCommandFocusminsize(act);
-		break;
-	case RC_GROUP:
-		DoCommandGroup(act);
-		break;
-	case RC_LAYOUT:
-		DoCommandLayout(act);
-		break;
-	case RC_CJKWIDTH:
-		DoCommandCjkwidth(act);
-		break;
-	case RC_TRUECOLOR:
-		DoCommandTruecolor(act);
-		break;
-	default:
-		break;
-	}
+	static void (*despatch_action[RC_LAST+1])(struct action *act) = {
+
+		[RC_ACLADD]		= DoCommandAclchg,
+		[RC_ACLCHG]		= DoCommandAclchg,
+		[RC_ACLDEL]		= DoCommandAcldel,
+		[RC_ACLGRP]		= DoCommandAclgrp,
+		[RC_ACLUMASK]		= DoCommandAclumask,
+		[RC_ACTIVITY]		= DoCommandActivity,
+		[RC_ADDACL]		= DoCommandAclchg,
+		[RC_ALLPARTIAL]		= DoCommandAllpartial,
+		[RC_ALTSCREEN]		= DoCommandAltscreen,
+		[RC_AT]			= DoCommandAt,
+		[RC_AUTH]		= DoCommandAuth,
+		[RC_AUTODETACH]		= DoCommandAutodetach,
+		[RC_AUTONUKE]		= DoCommandAutonuke,
+		[RC_BACKTICK]		= DoCommandBacktick,
+		[RC_BELL]		= DoCommandBell,
+		[RC_BELL_MSG]		= DoCommandBell,
+		[RC_BINDKEY]		= DoCommandBindkey,
+		[RC_BIND]		= DoCommandBind,
+		[RC_BLANKERPRG]		= DoCommandBlankerprg,
+		[RC_BLANKER]		= DoCommandBlanker,
+		[RC_BREAKTYPE]		= DoCommandBreaktype,
+		[RC_BREAK]		= DoCommandBreak,
+		[RC_BUFFERFILE]		= DoCommandBufferfile,
+		[RC_BUMPLEFT]		= DoCommandBumpleft,
+		[RC_BUMPRIGHT]		= DoCommandBumpright,
+		[RC_C1]			= DoCommandC1,
+		[RC_CAPTION]		= DoCommandCaption,
+		[RC_CHACL]		= DoCommandAclchg,
+		[RC_CHARSET]		= DoCommandCharset,
+		[RC_CHDIR]		= DoCommandChdir,
+		[RC_CJKWIDTH]		= DoCommandCjkwidth,
+		[RC_CLEAR]		= DoCommandClear,
+		[RC_COLLAPSE]		= DoCommandCollapse,
+		[RC_COLON]		= DoCommandColon,
+		[RC_COMMAND]		= DoCommandCommand,
+		[RC_COMPACTHIST]	= DoCommandCompacthist,
+		[RC_CONSOLE]		= DoCommandConsole,
+		[RC_COPY]		= DoCommandCopy,
+		[RC_CRLF]		= DoCommandCrlf,
+		[RC_DEFAUTONUKE]	= DoCommandDefautonuke,
+		[RC_DEFBCE]		= DoCommandDefbce,
+		[RC_DEFBREAKTYPE]	= DoCommandBreaktype,
+		[RC_DEFC1]		= DoCommandDefc1,
+		[RC_DEFCHARSET]		= DoCommandDefcharset,
+		[RC_DEFDYNAMICTITLE]	= DoCommandDefdynamictitle,
+		[RC_DEFENCODING]	= DoCommandDefencoding,
+		[RC_DEFESCAPE]		= DoCommandDefescape,
+		[RC_DEFFLOW]		= DoCommandDefflow,
+		[RC_DEFGR]		= DoCommandDefgr,
+		[RC_DEFHSTATUS]		= DoCommandDefhstatus,
+		[RC_DEFKANJI]		= DoCommandDefencoding,
+		[RC_DEFLOG]		= DoCommandDeflog,
+	      # if defined(ENABLE_UTMP) && defined(LOGOUTOK)
+		[RC_DEFLOGIN]		= DoCommandDeflogin,
+	      # endif
+		[RC_DEFMODE]		= DoCommandDefmode,
+		[RC_DEFMONITOR]		= DoCommandDefmonitor,
+		[RC_DEFMOUSETRACK]	= DoCommandDefmousetrack,
+		[RC_DEFNONBLOCK]	= DoCommandDefnonblock,
+		[RC_DEFOBUFLIMIT]	= DoCommandDefobuflimit,
+		[RC_DEFSCROLLBACK]	= DoCommandDefscrollback,
+		[RC_DEFSHELL]		= DoCommandShell,
+		[RC_DEFSILENCE]		= DoCommandDefsilence,
+		[RC_DEFSLOWPASTE]	= DoCommandDefslowpaste,
+		[RC_DEFUTF8]		= DoCommandDefutf8,
+		[RC_DEFWRAP]		= DoCommandDefwrap,
+		[RC_DEFWRITELOCK]	= DoCommandDefwritelock,
+		[RC_DETACH]		= DoCommandDetach,
+		[RC_DIGRAPH]		= DoCommandDigraph,
+		[RC_DINFO]		= DoCommandDinfo,
+		[RC_DISPLAYS]		= DoCommandDisplays,
+		[RC_DUMPTERMCAP]	= DoCommandDumptermcap,
+		[RC_DYNAMICTITLE]	= DoCommandDynamictitle,
+		[RC_ECHO]		= DoCommandEcho,
+		[RC_ENCODING]		= DoCommandEncoding,
+		[RC_ESCAPE]		= DoCommandEscape,
+		[RC_EVAL]		= DoCommandEval,
+		[RC_EXEC]		= DoCommandExec,
+		[RC_FIT]		= DoCommandFit,
+		[RC_FLOW]		= DoCommandFlow,
+		[RC_FOCUSMINSIZE]	= DoCommandFocusminsize,
+		[RC_FOCUS]		= DoCommandFocus,
+		[RC_GROUP]		= DoCommandGroup,
+		[RC_GR]			= DoCommandGr,
+		[RC_HARDCOPYDIR]	= DoCommandHardcopydir,
+		[RC_HARDCOPY]		= DoCommandHardcopy,
+		[RC_HARDCOPY_APPEND]	= DoCommandHardcopy_append,
+		[RC_HARDSTATUS]		= DoCommandHardstatus,
+		[RC_HEIGHT]		= DoCommandHeight,
+		[RC_HELP]		= DoCommandHelp,
+		[RC_HISTORY]		= DoCommandHistory,
+		[RC_HSTATUS]		= DoCommandHstatus,
+		[RC_IDLE]		= DoCommandIdle,
+		[RC_IGNORECASE]		= DoCommandIgnorecase,
+		[RC_INFO]		= DoCommandInfo,
+		[RC_KANJI]		= DoCommandEncoding,
+		[RC_KILL]		= DoCommandKill,
+		[RC_LASTMSG]		= DoCommandLastmsg,
+		[RC_LAYOUT]		= DoCommandLayout,
+		[RC_LICENSE]		= DoCommandLicense,
+		[RC_LOCKSCREEN]		= DoCommandLockscreen,
+		[RC_LOGFILE]		= DoCommandLogfile,
+	      # if defined(ENABLE_UTMP) && defined(LOGOUTOK)
+		[RC_LOGIN]		= DoCommandLogin,
+	      # endif
+		[RC_LOGTSTAMP]		= DoCommandLogtstamp,
+		[RC_LOG]		= DoCommandLog,
+		[RC_MAPDEFAULT]		= DoCommandMapdefault,
+		[RC_MAPNOTNEXT]		= DoCommandMapnotnext,
+		[RC_MAPTIMEOUT]		= DoCommandMaptimeout,
+		[RC_MARKKEYS]		= DoCommandMarkkeys,
+		[RC_META]		= DoCommandMeta,
+		[RC_MONITOR]		= DoCommandMonitor,
+		[RC_MOUSETRACK]		= DoCommandMousetrack,
+		[RC_MSGMINWAIT]		= DoCommandMsgminwait,
+		[RC_MSGWAIT]		= DoCommandMsgwait,
+		[RC_MULTIINPUT]		= DoCommandMultiinput,
+		[RC_MULTIUSER]		= DoCommandMultiuser,
+		[RC_NEXT]		= DoCommandNext,
+		[RC_NONBLOCK]		= DoCommandNonblock,
+		[RC_NUMBER]		= DoCommandNumber,
+		[RC_OBUFLIMIT]		= DoCommandObuflimit,
+		[RC_ONLY]		= DoCommandOnly,
+		[RC_OTHER]		= DoCommandOther,
+		[RC_PARENT]		= DoCommandParent,
+		[RC_PARTIAL]		= DoCommandPartial,
+		[RC_PASTEFONT]		= DoCommandPastefont,
+		[RC_PASTE]		= DoCommandPaste,
+		[RC_POW_BREAK]		= DoCommandPow_break,
+		[RC_POW_DETACH]		= DoCommandPow_detach,
+		[RC_POW_DETACH_MSG]	= DoCommandPow_detach_msg,
+		[RC_PREV]		= DoCommandPrev,
+		[RC_PRINTCMD]		= DoCommandPrintcmd,
+		[RC_PROCESS]		= DoCommandProcess,
+		[RC_QUIT]		= DoCommandQuit,
+		[RC_READBUF]		= DoCommandReadbuf,
+		[RC_READREG]		= DoCommandReadreg,
+		[RC_REDISPLAY]		= DoCommandRedisplay,
+		[RC_REGISTER]		= DoCommandRegister,
+		[RC_REMOVEBUF]		= DoCommandRemovebuf,
+		[RC_REMOVE]		= DoCommandRemove,
+		[RC_RENDITION]		= DoCommandRendition,
+		[RC_RESET]		= DoCommandReset,
+		[RC_RESIZE]		= DoCommandResize,
+		[RC_SCREEN]		= DoCommandScreen,
+		[RC_SCROLLBACK]		= DoCommandScrollback,
+		[RC_SELECT]		= DoCommandSelect,
+		[RC_SESSIONNAME]	= DoCommandSessionname,
+		[RC_SETENV]		= DoCommandSetenv,
+		[RC_SETSID]		= DoCommandSetsid,
+		[RC_SHELLTITLE]		= DoCommandShelltitle,
+		[RC_SHELL]		= DoCommandShell,
+		[RC_SILENCEWAIT]	= DoCommandSilencewait,
+		[RC_SILENCE]		= DoCommandSilence,
+		[RC_SLEEP]		= DoCommandSleep,
+		[RC_SLOWPASTE]		= DoCommandSlowpaste,
+		[RC_SORENDITION]	= DoCommandSorendition,
+		[RC_SORT]		= DoCommandSort,
+		[RC_SOURCE]		= DoCommandSource,
+		[RC_SPLIT]		= DoCommandSplit,
+		[RC_STARTUP_MESSAGE]	= DoCommandStartup_message,
+		[RC_STATUS]		= DoCommandStatus,
+		[RC_STUFF]		= DoCommandStuff,
+		[RC_SUSPEND]		= DoCommandSuspend,
+		[RC_SU]			= DoCommandSu,
+		[RC_TERMCAPINFO]	= DoCommandTerminfo,
+		[RC_TERMCAP]		= DoCommandTerminfo,
+		[RC_TERMINFO]		= DoCommandTerminfo,
+		[RC_TERM]		= DoCommandTerm,
+		[RC_TITLE]		= DoCommandTitle,
+		[RC_TRUECOLOR]		= DoCommandTruecolor,
+		[RC_UMASK]		= DoCommandAclumask,
+		[RC_UNBINDALL]		= DoCommandUnbindall,
+		[RC_UNSETENV]		= DoCommandUnsetenv,
+		[RC_UTF8]		= DoCommandUtf8,
+		[RC_VBELLWAIT]		= DoCommandVbellwait,
+		[RC_VBELL]		= DoCommandVbell,
+		[RC_VBELL_MSG]		= DoCommandVbell_msg,
+		[RC_VERBOSE]		= DoCommandVerbose,
+		[RC_VERSION]		= DoCommandVersion,
+		[RC_WALL]		= DoCommandWall,
+		[RC_WIDTH]		= DoCommandWidth,
+		[RC_WINDOWLIST]		= DoCommandWindowlist,
+		[RC_WINDOWS]		= DoCommandWindows,
+		[RC_WRAP]		= DoCommandWrap,
+		[RC_WRITEBUF]		= DoCommandWritebuf,
+		[RC_WRITELOCK]		= DoCommandWritelock,
+		[RC_XOFF]		= DoCommandXoff,
+		[RC_XON]		= DoCommandXon,
+		[RC_ZMODEM]		= DoCommandZmodem,
+		[RC_ZOMBIE]		= DoCommandZombie,
+		[RC_ZOMBIE_TIMEOUT]	= DoCommandZombie_timeout,
+	};
+
+	void (*desp)(struct action *act) = nr >= 0 && nr < RC_LAST ? despatch_action[nr] : NULL;
+	if (desp)
+		desp(act);
 	if (display != odisplay) {
 		for (display = displays; display; display = display->d_next)
 			if (display == odisplay)
