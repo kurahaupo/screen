@@ -39,6 +39,10 @@
 /* here comes my own Free: jw. */
 #define Free(a) {if ((a) == NULL) abort(); else free((void *)(a)); (a)=NULL;}
 
+#ifndef ESCAPE_KEY
+#define ESCAPE_KEY 'a'
+#endif
+
 #define Ctrl(c) ((c)&037)
 
 #define MAXSTR		768
