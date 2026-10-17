@@ -177,8 +177,7 @@ int GetAnsiStatus(Window *win, char *buf)
 	if (win->w_state == LIT)
 		return 0;
 
-	strcpy(p, state_t_string[win->w_state]);
-	p += strlen(p);
+	p = stpcpy(p, state_t_string[win->w_state]);
 	if (win->w_intermediate) {
 		*p++ = '-';
 		if (win->w_intermediate > 0xff)
@@ -187,8 +186,7 @@ int GetAnsiStatus(Window *win, char *buf)
 		*p = 0;
 	}
 	if (win->w_state == ASTR || win->w_state == STRESC)
-		sprintf(p, "-%s", string_t_string[win->w_StringType]);
-	p += strlen(p);
+		p += sprintf(p, "-%s", string_t_string[win->w_StringType]);
 	return p - buf;
 }
 
@@ -228,9 +226,6 @@ void SetCharsets(Window *win, char *s)
  */
 void WriteString(Window *win, char *buf, size_t len)
 {
-	int c;
-	int font;
-	Canvas *cv;
 	struct cs_parser * const cs = &win->w_cs;
 
 	if (len == 0)
@@ -247,7 +242,7 @@ void WriteString(Window *win, char *buf, size_t len)
 
 	if (win->w_width > 0 && win->w_height > 0) {
 		do {
-			c = (unsigned char)*buf++;
+			int c = (unsigned char)*buf++;
 			if (!win->w_mbcs)
 				win->w_rend.font = win->w_FontL;	/* Default: GL */
 
@@ -338,17 +333,15 @@ void WriteString(Window *win, char *buf, size_t len)
 					if (StringEnd(win) == 0 || len <= 1)
 						break;
 					/* check if somewhere a status is displayed */
-					for (cv = win->w_layer.l_cvlist; cv; cv = cv->c_lnext) {
+					for (Canvas *cv = win->w_layer.l_cvlist; cv; cv = cv->c_lnext) {
 						display = cv->c_display;
-						if (D_status == STATUS_ON_WIN)
-							break;
-					}
-					if (cv) {
-						if (len > IOSIZE + 1)
-							len = IOSIZE + 1;
-						win->w_outlen = len - 1;
-						memmove(win->w_outbuf, buf, len - 1);
-						return;	/* wait till status is gone */
+						if (D_status == STATUS_ON_WIN) {
+							if (len > IOSIZE + 1)
+								len = IOSIZE + 1;
+							win->w_outlen = len - 1;
+							memmove(win->w_outbuf, buf, len - 1);
+							return;	/* wait till status is gone */
+						}
 					}
 					break;
 				case '\033':
@@ -549,7 +542,7 @@ void WriteString(Window *win, char *buf, size_t len)
 				}
 				if (win->w_encoding == UTF8 && utf8_isdouble(c))
 					win->w_mbcs = 0xff;
-				font = win->w_rend.font;
+				int font = win->w_rend.font;
 				if (font == FONT_KANA && win->w_encoding == SJIS && win->w_mbcs == 0) {
 					/* Lets see if it is the first byte of a kanji */
 					if ((0x81 <= c && c <= 0x9f) || (0xe0 <= c && c <= 0xef)) {
