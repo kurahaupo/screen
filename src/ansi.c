@@ -66,7 +66,7 @@ struct mline mline_null;
 
 struct mchar mchar_null;
 struct mchar mchar_blank = { ' ', 0, 0, 0, 0, 0 };
-struct mchar mchar_so = { ' ', A_RV, 0, 0, 0, 0};
+struct mchar mchar_so = { ' ', A_RV, 0, 0, 0, 0 };
 
 /* Default bell/monitor/silence renditions in ParseAttrColor() encoding. */
 uint64_t renditions[NUM_RENDS] = {
@@ -1112,30 +1112,30 @@ static void DoControlSequence(Window *win, int c, int intermediate)
 			case 7:	/* AWM:  auto wrap mode */
 				win->w_wrap = i;
 				break;
-				/* case 8:        ARM:  auto repeat mode */
-				/* case 9:        INLM: interlace mode */
+		     /*	case 8:        ARM:  auto repeat mode */
+		     /*	case 9:        INLM: interlace mode */
 			case 9:	/* X10 mouse tracking */
 				win->w_mouse = i ? 9 : 0;
 				LMouseMode(&win->w_layer, win->w_mouse);
 				break;
-				/* case 10:       EDM:  edit mode */
-				/* case 11:       LTM:  line transmit mode */
-				/* case 13:       SCFDM: space compression / field delimiting */
-				/* case 14:       TEM:  transmit execution mode */
-				/* case 16:       EKEM: edit key execution mode */
-				/* case 18:       PFF:  Printer term form feed */
-				/* case 19:       PEX:  Printer extend screen / scroll. reg */
+		     /*	case 10:       EDM:  edit mode */
+		     /*	case 11:       LTM:  line transmit mode */
+		     /*	case 13:       SCFDM: space compression / field delimiting */
+		     /*	case 14:       TEM:  transmit execution mode */
+		     /*	case 16:       EKEM: edit key execution mode */
+		     /*	case 18:       PFF:  Printer term form feed */
+		     /*	case 19:       PEX:  Printer extend screen / scroll. reg */
 			case 25:	/* TCEM: text cursor enable mode */
 				win->w_curinv = !i;
 				LCursorVisibility(&win->w_layer, i ? win->w_curvvis : -1);
 				break;
-				/* case 34:       RLM:  Right to left mode */
-				/* case 35:       HEBM: hebrew keyboard map */
-				/* case 36:       HEM:  hebrew encoding */
-				/* case 38:             TeK Mode */
-				/* case 40:             132 col enable */
-				/* case 42:       NRCM: 7bit NRC character mode */
-				/* case 44:             margin bell enable */
+		     /*	case 34:       RLM:  Right to left mode */
+		     /*	case 35:       HEBM: hebrew keyboard map */
+		     /*	case 36:       HEM:  hebrew encoding */
+		     /*	case 38:             TeK Mode */
+		     /*	case 40:             132 col enable */
+		     /*	case 42:       NRCM: 7bit NRC character mode */
+		     /*	case 44:             margin bell enable */
 			case 47:	/*       xterm-like alternate screen */
 			case 1047:	/*       xterm-like alternate screen */
 			case 1049:	/*       xterm-like alternate screen */
@@ -1163,8 +1163,8 @@ static void DoControlSequence(Window *win, int c, int intermediate)
 				else
 					RestoreCursor(win, &win->w_saved);
 				break;
-				/* case 66:       NKM:  Numeric keypad appl mode */
-				/* case 68:       KBUM: Keyboard usage mode (data process) */
+		     /*	case 66:       NKM:  Numeric keypad appl mode */
+		     /*	case 68:       KBUM: Keyboard usage mode (data process) */
 			case 1000:	/* VT200 mouse tracking */
 			case 1001:	/* VT200 highlight mouse */
 			case 1002:	/* button event mouse */
@@ -1172,12 +1172,12 @@ static void DoControlSequence(Window *win, int c, int intermediate)
 				win->w_mouse = i ? a1 : 0;
 				LMouseMode(&win->w_layer, win->w_mouse);
 				break;
-			/* case 1005:     UTF-8 mouse mode rejected */
+		     /*	case 1005:     UTF-8 mouse mode rejected */
 			case 1006:	/* SGR mouse mode */
 				win->w_extmouse = i ? a1 : 0;
 				LExtMouseMode(&win->w_layer, win->w_extmouse);
 				break;
-			/* case 1015:     UXRVT mouse mode rejected */
+		     /*	case 1015:     UXRVT mouse mode rejected */
 			case 2004:	/* bracketed paste mode */
 				win->w_bracketed = i;
 				LBracketedPasteMode(&win->w_layer, win->w_bracketed);
