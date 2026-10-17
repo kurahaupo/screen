@@ -382,20 +382,20 @@ void InitKeytab(void)
 	char *argarr[2];
 
 	for (i = 0; i < ARRAY_SIZE(ktab); i++) {
-		ktab[i].nr = RC_ILLEGAL;
-		ktab[i].args = noargs;
-		ktab[i].argl = NULL;
+		ktab[i] = (struct action){
+			       .nr = RC_ILLEGAL,
+			       .args = noargs,
+			       .argl = NULL,
+			};
 	}
 	for (i = 0; i < KMAP_KEYS + KMAP_AKEYS; i++) {
-		umtab[i].nr = RC_ILLEGAL;
-		umtab[i].args = noargs;
-		umtab[i].argl = NULL;
-		dmtab[i].nr = RC_ILLEGAL;
-		dmtab[i].args = noargs;
-		dmtab[i].argl = NULL;
-		mmtab[i].nr = RC_ILLEGAL;
-		mmtab[i].args = noargs;
-		mmtab[i].argl = NULL;
+		umtab[i] =
+		dmtab[i] =
+		mmtab[i] = (struct action){
+				.nr = RC_ILLEGAL,
+				.args = noargs,
+				.argl = NULL,
+			};
 	}
 	argarr[1] = NULL;
 	for (i = 0; i < NKMAPDEF; i++) {
