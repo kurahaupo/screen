@@ -102,13 +102,13 @@ struct term term[T_N] =
 /* attributes */
 /* define T_ATTR */
 /* order is important for how we set up attributes */
-  { "mh", T_STR  },
-  { "us", T_STR  },
-  { "md", T_STR  },
-  { "mr", T_STR  },
-  { "so", T_STR  },
-  { "mb", T_STR  },
-  { "ZH", T_STR  },
+  { "mh", T_STR  }, // mh	dim	Dim mode
+  { "us", T_STR  }, // us	smul	Underscore mode
+  { "md", T_STR  }, // md	bold	Bold mode
+  { "mr", T_STR  }, // mr	rev	Reverse mode
+  { "so", T_STR  }, // so	smso	Standout mode
+  { "mb", T_STR  }, // mb	blink	Blinking
+  { "ZH", T_STR  }, // ZH	simt	Italicized
   { "ue", T_STR  },
   { "se", T_STR  },
   { "me", T_STR  },
