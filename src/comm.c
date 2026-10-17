@@ -208,6 +208,7 @@ struct comm comms[RC_LAST + 1] =
   { "sort",		ARGS(0) },
   { "source",		ARGS(1) },
   { "split",		ARGS_RANGE(0,1)	| NEED_DISPLAY },
+  { "standout",		ARGS_RANGE(0,1) },
   { "startup_message",	ARGS(1) },
   { "status",		ARGS_RANGE(1,2) },
   { "stuff",		ARGS_RANGE(0,2)	| NEED_LAYER },
