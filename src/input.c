@@ -86,7 +86,7 @@ void inp_setprompt(char *p, char *s)
 {
 	struct inpdata *inpdata;
 
-	inpdata = (struct inpdata *)flayer->l_data;
+	inpdata = flayer->l_data;
 	if (p) {
 		inpdata->inpstringlen = strlen(p);
 		inpdata->inpstring = p;
@@ -130,7 +130,8 @@ void Input(char *istr, size_t len, int mode, InputCallback *finfunc, void *priv,
 	if (InitOverlayPage(sizeof(struct inpdata), &InpLf, 1))
 		return;
 	flayer->l_mode = 1;
-	inpdata = (struct inpdata *)flayer->l_data;
+	inpdata = flayer->l_data;
+
 	inpdata->inpmaxlen = len;
 	inpdata->inpfinfunc = finfunc;
 	inpdata->inp.pos = inpdata->inp.len = 0;
@@ -138,7 +139,7 @@ void Input(char *istr, size_t len, int mode, InputCallback *finfunc, void *priv,
 	inpdata->inpmode = mode;
 	inpdata->privdata = data;
 	if (!priv)
-		priv = (char *)&inpdata->privdata;
+		priv = &inpdata->privdata;
 	inpdata->priv = priv;
 	inpdata->inpstringlen = 0;
 	inpdata->inpstring = NULL;
