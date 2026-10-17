@@ -4,7 +4,8 @@
 #include <stdlib.h>
 
 void  inp_setprompt (char *, char *);
-void  Input (char *, size_t, int, void (*)(char *, size_t, void *), char *, int);
+typedef  void InputCallback(char *, size_t, void *);
+void  Input (char *, size_t, int, InputCallback, void *, int);
 int   InInput (void);
 
 #endif /* SCREEN_INPUT_H */
