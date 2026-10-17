@@ -15,7 +15,6 @@ void  FreeTransTable (void);
 
 extern char screenterm[];
 extern char Term[];
-extern char Termcap[];
 extern char *extra_incap;
 extern char *extra_outcap;
 
