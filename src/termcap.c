@@ -32,6 +32,7 @@
 
 #include <sys/types.h>
 #include <stdint.h>
+#include <ctype.h>
 
 /* to get index() declaration on Solaris */
 #if defined(_sun_)
@@ -1077,7 +1078,7 @@ static char *findcap(char *cap, char **tepp, int n)
 {
 	char *tep;
 	char c, *p, *cp;
-	int mode;		/* mode: 0=LIT  1=^  2=\x  3,4,5=\nnn */
+	enum { M_LIT, M_CARET, M_BSLASH, M_OCTAL, M__LAST = M_OCTAL+3 } mode = M_LIT;
 	int num = 0, capl;
 
 	if (!extra_incap)
@@ -1085,7 +1086,6 @@ static char *findcap(char *cap, char **tepp, int n)
 	tep = *tepp;
 	capl = strlen(cap);
 	cp = NULL;
-	mode = 0;
 	for (p = extra_incap; *p;) {
 		if (strncmp(p, cap, capl) == 0) {
 			p += capl;
@@ -1097,18 +1097,18 @@ static char *findcap(char *cap, char **tepp, int n)
 		}
 		while ((c = *p)) {
 			p++;
-			if (mode == 0) {
+			if (mode == M_LIT) {
 				if (c == ':')
 					break;
 				if (c == '^')
-					mode = 1;
+					mode = M_CARET;
 				if (c == '\\')
-					mode = 2;
-			} else if (mode == 1) {
-				mode = 0;
+					mode = M_BSLASH;
+			} else if (mode == M_CARET) {
+				mode = M_LIT;
 				c = c & 0x1f;
-			} else if (mode == 2) {
-				mode = 0;
+			} else if (mode == M_BSLASH) {
+				mode = M_LIT;
 				switch (c) {
 				case '0':
 				case '1':
@@ -1120,7 +1120,7 @@ static char *findcap(char *cap, char **tepp, int n)
 				case '7':
 				case '8':
 				case '9':
-					mode = 3;
+					mode = M_OCTAL;
 					num = 0;
 					break;
 				case 'E':
@@ -1143,14 +1143,15 @@ static char *findcap(char *cap, char **tepp, int n)
 					break;
 				}
 			}
-			if (mode > 2) {
+			if (mode >= M_OCTAL) {
 				num = num * 8 + (c - '0');
-				if (mode++ == 5 || (*p < '0' || *p > '9')) {
+                                ++mode;	/* counting digits */
+				if (! isdigit(*p) || mode == M_OCTAL+3) {
 					c = num;
-					mode = 0;
+					mode = M_LIT;
 				}
 			}
-			if (mode)
+			if (mode != M_LIT)
 				continue;
 
 			if (cp && n != 1) {
@@ -1181,27 +1182,20 @@ static int e_tgetflag(char *cap)
 	char *tep;
 	bufp = buf;
 	if ((tep = findcap(cap, &bufp, 2)))
-		return (*tep == '@') ? 0 : 1;
+		return *tep != '@';
 	return tgetflag(cap) > 0;
 }
 
 static int e_tgetnum(char *cap)
 {
-	char buf[20], *bufp;
-	char *tep, c;
-	int res, base = 10;
+	char buf[20], *bufp = buf;
 
-	bufp = buf;
-	if ((tep = findcap(cap, &bufp, 20))) {
-		c = *tep;
-		if (c == '@')
+	char *tep = findcap(cap, &bufp, 20);
+
+	if (tep) {
+		if (*tep == '@')
 			return -1;
-		if (c == '0')
-			base = 8;
-		res = 0;
-		while ((c = *tep++) >= '0' && c <= '9')
-			res = res * base + (c - '0');
-		return res;
+		return strtoul(tep, &tep, 0);	/* auto-detects octal & hex */
 	}
 	return tgetnum(cap);
 }
