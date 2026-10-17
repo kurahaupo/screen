@@ -4348,7 +4348,7 @@ static void DoCommandIdle(struct action *act)
 	}
 	if (msgok) {
 		if (idletimo)
-			OutputMsg(0, "idle timeout %ds, %s", idletimo / 1000, comms[idleaction.nr].name);
+			OutputMsg(0, "idle timeout %fs, %s", idletimo / 1000.0, comms[idleaction.nr].name);
 		else
 			OutputMsg(0, "idle off");
 	}
