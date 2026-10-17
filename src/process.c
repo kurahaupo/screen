@@ -4288,11 +4288,11 @@ static void DoCommandAltscreen(struct action *act)
 
 static void DoCommandAuth(struct action *act)
 {
-        int msgok = display && !*rc_name;
+	int msgok = display && !*rc_name;
 
-        (void)ParseSwitch(act, &do_auth);
-        if (msgok)
-                OutputMsg(0, "Authentication: %s" , do_auth ? "enabled" : "disabled");
+	(void)ParseSwitch(act, &do_auth);
+	if (msgok)
+		OutputMsg(0, "Authentication: %s" , do_auth ? "enabled" : "disabled");
 }
 
 
