@@ -5297,9 +5297,9 @@ static void SaveAction(struct action *act, int nr, char **args, int *argl)
 		act->argl = NULL;
 		return;
 	}
-	if ((pp = malloc((unsigned)(argc + 1) * sizeof(char *))) == NULL)
+	if ((pp = malloc((size_t)(argc + 1) * sizeof(*pp))) == NULL)
 		Panic(0, "%s", strnomem);
-	if ((lp = malloc((unsigned)(argc) * sizeof(int))) == NULL)
+	if ((lp = malloc((size_t)(argc) * sizeof(*lp))) == NULL)
 		Panic(0, "%s", strnomem);
 	act->nr = nr;
 	act->args = pp;
