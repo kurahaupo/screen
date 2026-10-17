@@ -5316,13 +5316,10 @@ static void SaveAction(struct action *act, int nr, char **args, int *argl)
 static char **SaveArgs(char **args)
 {
 	char **ap, **pp;
-	int argc = 0;
 
-	while (args[argc])
-		argc++;
-	if ((pp = ap = malloc((unsigned)(argc + 1) * sizeof(char *))) == NULL)
+	if ((pp = ap = malloc((CountArgs(args) + 1) * sizeof *ap)) == NULL)
 		Panic(0, "%s", strnomem);
-	while (argc--)
+	while (*args)
 		*pp++ = SaveStr(*args++);
 	*pp = NULL;
 	return ap;
@@ -5340,29 +5337,27 @@ static char **SaveArgs(char **args)
 int Parse(char *buf, int bufl, char **args, int *argl)
 {
 	char *p = buf, **ap = args, *pp;
-	int delim, argc;
+	int delim;
 	int *lp = argl;
 
-	argc = 0;
 	pp = buf;
 	delim = 0;
 	for (;;) {
 		*lp = 0;
 		while (*p && (*p == ' ' || *p == '\t'))
 			++p;
-		if (argc == 0 && *p == '!') {
+		if (ap == args && *p == '!') {
 			*ap++ = "exec";
 			*lp++ = 4;
 			p++;
-			argc++;
 			continue;
 		}
 		if (*p == '\0' || *p == '#' || *p == '\n') {
 			*p = '\0';
-			args[argc] = NULL;
-			return argc;
+			*ap = NULL;
+			return ap-args;
 		}
-		if (++argc >= MAXARGS) {
+		if (ap-args >= MAXARGS) {
 			Msg(0, "%s: too many tokens.", rc_name);
 			return 0;
 		}
