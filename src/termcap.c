@@ -1168,7 +1168,7 @@ static char *findcap(char *cap, char **tepp, int n)
 			}
 			if (mode >= M_OCTAL) {
 				num = num * 8 + (c - '0');
-                                ++mode;	/* counting digits */
+				++mode;	/* counting digits */
 				if (! isdigit(*p) || mode == M_OCTAL+3) {
 					c = num;
 					mode = M_LIT;
