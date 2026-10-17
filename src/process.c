@@ -68,7 +68,7 @@
 #include "viewport.h"
 #include "winmsg.h"
 
-static bool CheckArgCount(struct comm *, int);
+static bool CheckArgCount(struct comm *, size_t);
 static int CheckArgNum(int, char **);
 static void ClearAction(struct action *);
 static void SaveAction(struct action *, int, char **, int *);
@@ -834,7 +834,7 @@ static inline int log_lo_bit(int x)
 
 #endif	/*FANCY_ERROR_REPORTING*/
 
-static bool CheckArgCount(struct comm *c, int argc)
+static bool CheckArgCount(struct comm *c, size_t argc)
 {
 	int allowed_counts_mask = c->flags & ARGS_MASK;
 	if (allowed_counts_mask == 0
