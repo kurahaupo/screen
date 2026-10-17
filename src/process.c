@@ -379,7 +379,6 @@ int enter_window_name_mode = 0;
 void InitKeytab(void)
 {
 	unsigned int i;
-	char *argarr[2];
 
 	for (i = 0; i < ARRAY_SIZE(ktab); i++)
 		ktab[i] = (struct action){
@@ -395,7 +394,6 @@ void InitKeytab(void)
 				.args = noargs,
 				.argl = NULL,
 			};
-	argarr[1] = NULL;
 	for (i = 0; i < NKMAPDEF; i++) {
 		if (i + KMAPDEFSTART < T_CAPS)
 			continue;
@@ -403,8 +401,8 @@ void InitKeytab(void)
 			continue;
 		if (kmapdef[i] == NULL)
 			continue;
-		argarr[0] = kmapdef[i];
-		SaveAction(dmtab + i + (KMAPDEFSTART - T_CAPS), RC_STUFF, argarr, NULL);
+		SaveAction(dmtab + i + (KMAPDEFSTART - T_CAPS), RC_STUFF,
+			   (char *[2]){ kmapdef[i] }, NULL);
 	}
 	for (i = 0; i < NKMAPADEF; i++) {
 		if (i + KMAPADEFSTART < T_CURSOR)
@@ -413,8 +411,8 @@ void InitKeytab(void)
 			continue;
 		if (kmapadef[i] == NULL)
 			continue;
-		argarr[0] = kmapadef[i];
-		SaveAction(dmtab + i + (KMAPADEFSTART - T_CURSOR + KMAP_KEYS), RC_STUFF, argarr, NULL);
+		SaveAction(dmtab + i + (KMAPADEFSTART - T_CURSOR + KMAP_KEYS), RC_STUFF,
+			   (char *[2]){ kmapadef[i] }, NULL);
 	}
 	for (i = 0; i < NKMAPMDEF; i++) {
 		if (i + KMAPMDEFSTART < T_CAPS)
@@ -423,9 +421,8 @@ void InitKeytab(void)
 			continue;
 		if (kmapmdef[i] == NULL)
 			continue;
-		argarr[0] = kmapmdef[i];
-		argarr[1] = NULL;
-		SaveAction(mmtab + i + (KMAPMDEFSTART - T_CAPS), RC_STUFF, argarr, NULL);
+		SaveAction(mmtab + i + (KMAPMDEFSTART - T_CAPS), RC_STUFF,
+			   (char *[2]){ kmapmdef[i] }, NULL);
 	}
 
 	ktab['h'].nr = RC_HARDCOPY;
@@ -435,13 +432,9 @@ void InitKeytab(void)
 	ktab['N'].nr = RC_NUMBER;
 	ktab[Ctrl('h')].nr = ktab[0177].nr = ktab['p'].nr = ktab[Ctrl('p')].nr = RC_PREV;
 	ktab['u'].nr = ktab[Ctrl('u')].nr = RC_PARENT;
-	{
-		char *args[2];
-		args[0] = "--confirm";
-		args[1] = NULL;
-		SaveAction(ktab + 'k', RC_KILL, args, NULL);
-		SaveAction(ktab + Ctrl('k'), RC_KILL, args, NULL);
-	}
+	static char *confirm_args[2] = { "--confirm" };
+	SaveAction(ktab + 'k', RC_KILL, confirm_args, NULL);
+	SaveAction(ktab + Ctrl('k'), RC_KILL, confirm_args, NULL);
 	ktab['l'].nr = ktab[Ctrl('l')].nr = RC_REDISPLAY;
 	ktab['w'].nr = ktab[Ctrl('w')].nr = RC_WINDOWS;
 	ktab['v'].nr = RC_VERSION;
@@ -457,19 +450,9 @@ void InitKeytab(void)
 	ktab[','].nr = RC_LICENSE;
 	ktab['W'].nr = RC_WIDTH;
 	ktab['.'].nr = RC_DUMPTERMCAP;
-	{
-		char *args[2];
-		args[0] = "--confirm";
-		args[1] = NULL;
-		SaveAction(ktab + Ctrl('\\'), RC_QUIT, args, NULL);
-	}
+	SaveAction(ktab + Ctrl('\\'), RC_QUIT, confirm_args, NULL);
 	ktab['d'].nr = ktab[Ctrl('d')].nr = RC_DETACH;
-	{
-		char *args[2];
-		args[0] = "--confirm";
-		args[1] = NULL;
-		SaveAction(ktab + 'D', RC_POW_DETACH, args, NULL);
-	}
+	SaveAction(ktab + 'D', RC_POW_DETACH, confirm_args, NULL);
 	ktab['r'].nr = ktab[Ctrl('r')].nr = RC_WRAP;
 	ktab['f'].nr = ktab[Ctrl('f')].nr = RC_FLOW;
 	ktab['C'].nr = RC_CLEAR;
@@ -478,33 +461,21 @@ void InitKeytab(void)
 	ktab['M'].nr = RC_MONITOR;
 	ktab['?'].nr = RC_HELP;
 	ktab['*'].nr = RC_DISPLAYS;
-	{
-		char *args[2];
-		args[0] = "-";
-		args[1] = NULL;
-		SaveAction(ktab + '-', RC_SELECT, args, NULL);
-	}
+	SaveAction(ktab + '-', RC_SELECT,
+		   (char *[2]){ "-" }, NULL);
 	for (i = 0; i < 10; i++) {
-		char *args[2], arg1[10];
-		args[0] = arg1;
-		args[1] = NULL;
-		sprintf(arg1, "%d", i);
-		SaveAction(ktab + '0' + i, RC_SELECT, args, NULL);
+		char arg1[10];
+		snprintf(arg1, sizeof arg1, "%d", i);
+		SaveAction(ktab + '0' + i, RC_SELECT,
+			   (char *[2]){ arg1 }, NULL);
 	}
 	ktab['\''].nr = RC_SELECT;	/* calling a window by name */
-	{
-		char *args[2];
-		args[0] = "-b";
-		args[1] = NULL;
-		SaveAction(ktab + '"', RC_WINDOWLIST, args, NULL);
-	}
+	SaveAction(ktab + '"', RC_WINDOWLIST, (char *[2]){ "-b" }, NULL);
 	ktab[Ctrl('G')].nr = RC_VBELL;
 	ktab[':'].nr = RC_COLON;
 	ktab['['].nr = ktab[Ctrl('[')].nr = RC_COPY;
 	{
-		char *args[2];
-		args[0] = ".";
-		args[1] = NULL;
+		char *args[2] = { "." };
 		SaveAction(ktab + ']', RC_PASTE, args, NULL);
 		SaveAction(ktab + Ctrl(']'), RC_PASTE, args, NULL);
 	}
@@ -522,18 +493,10 @@ void InitKeytab(void)
 	ktab['X'].nr = RC_REMOVE;
 	ktab['F'].nr = RC_FIT;
 	ktab['\t'].nr = RC_FOCUS;
-	{
-		char *args[2];
-		args[0] = "prev";
-		args[1] = NULL;
-		SaveAction(ktab + T_BACKTAB - T_CAPS + 256, RC_FOCUS, args, NULL);
-	}
-	{
-		char *args[2];
-		args[0] = "-v";
-		args[1] = NULL;
-		SaveAction(ktab + '|', RC_SPLIT, args, NULL);
-	}
+	SaveAction(ktab + T_BACKTAB - T_CAPS + 256, RC_FOCUS,
+		   (char *[2]){ "prev" }, NULL);
+	SaveAction(ktab + '|', RC_SPLIT,
+		   (char *[2]){ "-v" }, NULL);
 	/* These come last; they may want overwrite others: */
 	if (DefaultEsc >= 0) {
 		ClearAction(&ktab[DefaultEsc]);
