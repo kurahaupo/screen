@@ -1,4 +1,4 @@
-/* 
+/*
  *      Authors:  Hadi Bargi Rangin  bargi@dots.physics.orst.edu
  *                Bill Barry         barryb@dots.physics.orst.edu
  *                Randy Lundquist    randyl@dots.physics.orst.edu
@@ -37,7 +37,7 @@ struct braille_display
   struct event bd_selectev;
   int   bd_fd;		/* file descriptor */
   int   bd_obuflen;	/* current number of charactors in output buffer */
-  char  bd_obuf[IOSIZE]; 
+  char  bd_obuf[IOSIZE];
   int   bd_info;	/* default, no info, 0,1,2,3 */
   int   bd_ncrc;	/* default 1, numbers of cells on the right side of real cursor, 1...bd_width */
   int   bd_skip;	/* default off, on/off */

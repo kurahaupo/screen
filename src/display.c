@@ -340,7 +340,7 @@ int
 MakeDefaultCanvas()
 {
   struct canvas *cv;
- 
+
   ASSERT(display);
   if ((cv = (struct canvas *)calloc(1, sizeof *cv)) == 0)
     return -1;
@@ -674,7 +674,7 @@ int adapt;
   D_x = D_y = 0;
   Flush();
   ClearDisplay();
-  debug1("we %swant to adapt all our windows to the display\n", 
+  debug1("we %swant to adapt all our windows to the display\n",
 	 (adapt) ? "" : "don't ");
   /* In case the size was changed by a init sequence */
   CheckScreenSize((adapt) ? 2 : 0);
@@ -1288,7 +1288,7 @@ int x1, y1, xs, xe, x2, y2, uselayfn;
 	  D_y = D_x = 0;
 	  return;
 	}
-      /* 
+      /*
        * Workaround a hp700/22 terminal bug. Do not use CD where CE
        * is also appropriate.
        */
@@ -1541,7 +1541,7 @@ int xs, ys, xe, ye, n;
   if (D_top != ys && !(alok && dlok))
     ChangeScrollRegion(ys, ye);
 
-  if (D_lp_missing && 
+  if (D_lp_missing &&
       (oldbot != D_bot ||
        (oldbot == D_bot && up && D_top == ys && D_bot == ye)))
     {
@@ -1791,7 +1791,7 @@ char *msg;
 
   if (!display)
     return;
-  
+
   if (!D_tcinited)
     {
       debug("tc not inited, just writing msg\n");
@@ -1909,7 +1909,7 @@ RemoveStatus()
     return;
   if (!(where = D_status))
     return;
-  
+
   D_status = 0;
   D_status_bell = 0;
   evdeq(&D_statusev);
@@ -2502,9 +2502,9 @@ Flush()
     {
       register int wr;
       wr = write(D_userfd, p, l);
-      if (wr <= 0) 
+      if (wr <= 0)
 	{
-	  if (errno == EINTR) 
+	  if (errno == EINTR)
 	    continue;
 	  debug1("Writing to display: %d\n", errno);
 	  wr = l;
@@ -2582,7 +2582,7 @@ NukePending()
   oldrend = D_rend;
   len = D_obufp - D_obuf;
   debug1("NukePending: nuking %d chars\n", len);
-  
+
   /* Throw away any output that we can... */
 # ifdef POSIX
   tcflush(D_userfd, TCOFLUSH);
@@ -2683,7 +2683,7 @@ char *data;
     size = len;
   ASSERT(len >= 0);
   size = write(D_userfd, D_obuf, size);
-  if (size >= 0) 
+  if (size >= 0)
     {
       len -= size;
       if (len)
@@ -2696,7 +2696,7 @@ char *data;
 	D_nonblock = 1;
       D_obufp -= size;
       D_obuffree += size;
-    } 
+    }
   else
     {
       if (errno != EINTR)

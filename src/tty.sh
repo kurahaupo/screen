@@ -4,7 +4,7 @@
 # and generates tty.c
 
 #
-# Stupid cpp on A/UX barfs on ``#if defined(FOO) && FOO < 17'' when 
+# Stupid cpp on A/UX barfs on ``#if defined(FOO) && FOO < 17'' when
 # FOO is undefined. Reported by Robert C. Tindall (rtindall@uidaho.edu)
 #
 rm -f $1
@@ -33,7 +33,7 @@ exit 0
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; either version 2, or (at your option)
  * any later version.
- *  
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
@@ -187,7 +187,7 @@ char *line, *opt;
   else
 #endif
     InitTTY(&Mode, W_TYPE_PLAIN);
-  
+
   SttyMode(&Mode, opt);
 #ifdef DEBUG
   DebugTTY(&Mode);
@@ -221,7 +221,7 @@ int ttyflag;
 {
   bzero((char *)m, sizeof(*m));
 #ifdef POSIX
-  /* struct termios tio 
+  /* struct termios tio
    * defaults, as seen on SunOS 4.1.3
    */
   debug1("InitTTY: POSIX: termios defaults based on SunOS 4.1.3, but better (%d)\n", ttyflag);
@@ -234,8 +234,8 @@ IF{IXON}	m->tio.c_iflag |= IXON;
   if (!ttyflag)	/* may not even be good for ptys.. */
     {
 IF{ICRNL}	m->tio.c_iflag |= ICRNL;
-IF{ONLCR}	m->tio.c_oflag |= ONLCR; 
-IF{TAB3}	m->tio.c_oflag |= TAB3; 
+IF{ONLCR}	m->tio.c_oflag |= ONLCR;
+IF{TAB3}	m->tio.c_oflag |= TAB3;
 IF{OXTABS}      m->tio.c_oflag |= OXTABS;
 /* IF{PARENB}	m->tio.c_cflag |= PARENB;	nah! jw. */
     }
@@ -309,9 +309,9 @@ XIF{VSTATUS}	m->tio.c_cc[VSTATUS]  = Ctrl('T');
 
 # ifdef TERMIO
   debug1("InitTTY: nonPOSIX, struct termio a la Motorola SYSV68 (%d)\n", ttyflag);
-  /* struct termio tio 
+  /* struct termio tio
    * defaults, as seen on Mototola SYSV68:
-   * input: 7bit, CR->NL, ^S/^Q flow control 
+   * input: 7bit, CR->NL, ^S/^Q flow control
    * output: POSTprocessing: NL->NL-CR, Tabs to spaces
    * control: 9600baud, 8bit CSIZE, enable input
    * local: enable signals, erase/kill processing, echo on.
@@ -358,7 +358,7 @@ XIF{VSWTCH}	m->tio.c_cc[VSWTCH] = 0000;
    {
       m->tio.c_cc[VMIN] = TTYVMIN;
       m->tio.c_cc[VTIME] = TTYVTIME;
-    } 
+    }
 
 # else /* TERMIO */
   debug1("InitTTY: BSD: defaults a la SunOS 4.1.3 (%d)\n", ttyflag);
@@ -409,7 +409,7 @@ IF{LCRTBS}	| LCRTBS
 #endif
 }
 
-void 
+void
 SetTTY(fd, mp)
 int fd;
 struct mode *mp;
@@ -524,19 +524,19 @@ IF{IEXTEN}  np->tio.c_lflag &= ~IEXTEN;
    * (process group membership has not been restored or the new tty could not
    * be made controlling again). In my solution, it is the attacher who
    * receives SIGINT (because it is always correctly associated with the real
-   * tty) and forwards it to the master [kill(MasterPid, SIGINT)]. 
+   * tty) and forwards it to the master [kill(MasterPid, SIGINT)].
    * Marc Boucher (marc@CAM.ORG)
    */
   if (interrupt)
     np->tio.c_lflag |= ISIG;
   else
     np->tio.c_lflag &= ~ISIG;
-  /* 
+  /*
    * careful, careful catche monkey..
    * never set VMIN and VTIME to zero, if you want blocking io.
    *
-   * We may want to do a VMIN > 0, VTIME > 0 read on the ptys too, to 
-   * reduce interrupt frequency.  But then we would not know how to 
+   * We may want to do a VMIN > 0, VTIME > 0 read on the ptys too, to
+   * reduce interrupt frequency.  But then we would not know how to
    * handle read returning 0. jw.
    */
   np->tio.c_cc[VMIN] = 1;
@@ -821,7 +821,7 @@ int fd;
   return 0;
 }
 
-/* 
+/*
  * The alm boards on our sparc center 1000 have a lousy driver.
  * We cannot generate long breaks unless we use the most ugly form
  * of ioctls. jw.
@@ -865,9 +865,9 @@ int fd, n, type;
       if (tcsendbreak(fd, n) < 0)
         Msg(errno, "cannot send BREAK (tcsendbreak)");
 # else
-      /* 
+      /*
        * here we hope, that multiple calls to tcsendbreak() can
-       * be concatenated to form a long break, as we do not know 
+       * be concatenated to form a long break, as we do not know
        * what exact interpretation the second parameter has:
        *
        * - sunos 4: duration in quarter seconds
@@ -898,7 +898,7 @@ int fd, n, type;
       if (!n)
         n++;
       /*
-       * Here too, we assume that short breaks can be concatenated to 
+       * Here too, we assume that short breaks can be concatenated to
        * perform long breaks. But for SOLARIS, this is not true, of course.
        */
       debug2("%d * TCSBRK fd=%d\n", n, fd);
@@ -945,12 +945,12 @@ int fd, n, type;
     }
 }
 
-/* 
+/*
  * Send a break for n * 0.25 seconds. Tty must be PLAIN.
  * The longest possible break allowed here is 15 seconds.
  */
 
-void 
+void
 SendBreak(wp, n, closeopen)
 struct win *wp;
 int n, closeopen;
@@ -1173,7 +1173,7 @@ IF{MCTS}#  define TIOCM_CTS MCTS
       if (!rtscts)
         {
           *p++ = '(';
-          s = "!CTS) "; 
+          s = "!CTS) ";
 	}
       if (mflags & TIOCM_CTS) s++;
       while (*s) *p++ = *s++;
@@ -1196,7 +1196,7 @@ IF{MCTS}#  define TIOCM_CTS MCTS
 	 }
       else
 #  endif
-      s = "!CD "; 
+      s = "!CD ";
 #  ifdef TIOCM_CD
       if (mflags & TIOCM_CD) s++;
 #  else
@@ -1267,9 +1267,9 @@ IFN{EXTB}#define	EXTB	15
 #endif
 
 /*
- * On hpux, idx and sym will be different. 
+ * On hpux, idx and sym will be different.
  * Rumor has it that, we need idx in D_dospeed to make tputs
- * padding correct. 
+ * padding correct.
  * Frequently used entries come first.
  */
 static struct baud_values btable[] =
@@ -1304,7 +1304,7 @@ IF{B0}   	{	0,	0,	B0	},
 
 /*
  * baud may either be a bits-per-second value or a symbolic
- * value as returned by cfget?speed() 
+ * value as returned by cfget?speed()
  */
 struct baud_values *
 lookup_baud(baud)

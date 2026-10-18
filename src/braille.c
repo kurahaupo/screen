@@ -45,7 +45,7 @@ extern int bd_init_powerbraille_80 __P((void));
 extern int bd_init_navigator_40 __P((void));
 
 extern struct layer *flayer;
-extern struct display *displays, *display; 
+extern struct display *displays, *display;
 extern char *rc_name;
 
 
@@ -60,10 +60,10 @@ struct bd_type {
   int (*init) __P((void));
 };
 
-static struct bd_type bd_typelist[] = 
+static struct bd_type bd_typelist[] =
 {
-  {"powerbraille_40", bd_init_powerbraille_40}, 
-  {"powerbraille_80", bd_init_powerbraille_80}, 
+  {"powerbraille_40", bd_init_powerbraille_40},
+  {"powerbraille_80", bd_init_powerbraille_80},
   {"navigator_40"   , bd_init_navigator_40}
 };
 
@@ -86,9 +86,9 @@ static void bd_readev_fn __P((struct event *, char *));
 static void bd_writeev_fn __P((struct event *, char *));
 static void bd_selectev_fn __P((struct event *, char *));
 
-static unsigned char btable_local [] = 
+static unsigned char btable_local [] =
 {
-  0xC8,0xC1,0xC3,0xC9,0xD9,0xD1,0xCB,0xDB, 
+  0xC8,0xC1,0xC3,0xC9,0xD9,0xD1,0xCB,0xDB,
   0xD3,0xCA,0xDA,0xC5,0xC7,0xCD,0xDD,0xD5,
   0xCF,0xDF,0xD7,0xCE,0xDE,0xE5,0xE7,0xFA,
   0xED,0xFD,0xF5,0xEA,0xF3,0xFB,0xD8,0xF8,
@@ -127,7 +127,7 @@ InitBraille()
 {
   bd.bd_start_braille=0;
   bd.bd_port = 0;
-  bd.bd_braille_table = SaveStr("internal us-braille.tbl"); 
+  bd.bd_braille_table = SaveStr("internal us-braille.tbl");
   bd.bd_type = 0;
   bd.bd_baud = 9600;
   bd.bd_bell = 1;
@@ -145,12 +145,12 @@ InitBraille()
   bcopy((char *)btable_local, bd.bd_btable, 256);
 }
 
-static int 
+static int
 initialize_braille_display_type(s)
 char *s;
 {
   int i;
-  
+
   for (i = 0; i < sizeof(bd_typelist)/sizeof(*bd_typelist); i++)
     if (!strcmp(s, bd_typelist[i].name))
       break;
@@ -222,7 +222,7 @@ StartBraille()
 }
 
 
-static int 
+static int
 load_braille_table(tablename)
 char *tablename;
 {
@@ -230,7 +230,7 @@ char *tablename;
   FILE *fp;
   char buffer[80], a[10];
 
-  if ((fp = fopen(tablename, "r")) == 0) 
+  if ((fp = fopen(tablename, "r")) == 0)
     {
       Msg(0, "Braille table not found: %s ", tablename);
       return -1;
@@ -238,7 +238,7 @@ char *tablename;
   bzero(bd.bd_btable, 256);
   while (fgets(buffer, sizeof(buffer), fp))
     {
-      if (buffer[0] == '#') 
+      if (buffer[0] == '#')
 	continue;
       sscanf(buffer,"%d %x %s", &i, &j, a);
       for (j=1, p=1, c=0; j<9; j++, p*=2)
@@ -251,7 +251,7 @@ char *tablename;
 }
 
 
-static int 
+static int
 open_braille_device(s)
 char *s;
 {
@@ -314,7 +314,7 @@ RefreshBraille()
       position_braille_cursor();
     }
   bclear(bd.bd_line, bd.bd_ncells);
-  
+
   y = BD_FORE->w_bd_y;
   xs = BD_FORE->w_bd_x;
 
@@ -358,7 +358,7 @@ RefreshBraille()
     if (bd.bd_line[i] != bd.bd_oline[i])
       break;
   if (bd.bd_cursorpos != cursor_pos || i < bd.bd_ncells)
-    bd.write_line_braille(bd.bd_line, bd.bd_ncells, cursor_pos); 
+    bd.write_line_braille(bd.bd_line, bd.bd_ncells, cursor_pos);
   bd.bd_cursorpos = cursor_pos;
 }
 
@@ -377,7 +377,7 @@ RefreshBraille()
 static void
 bd_signal()
 {
-  if (!bd.bd_bell) 
+  if (!bd.bd_bell)
     return;
   display = bd.bd_dpy;
   if (D_obufp != D_obuf)
@@ -709,7 +709,7 @@ int msgok;
       /* bd_width at the beginning is unknown */
       if (bd.bd_width == 0)
         break;
-      
+
       o = (bd.bd_info * 2 + 2) & 12;
       l = (n * 2 + 2) & 12;
       if (l >= bd.bd_ncells)
@@ -753,7 +753,7 @@ int msgok;
 	bd_signal();
       if (msgok)
         Msg(0, bd.bd_skip ? "bd_skip is on." : "bd_skip is off.");
-      break; 
+      break;
 
     case RC_BD_SCROLL:
       if (ParseSwitch(act, &bd.bd_scroll) || !msgok)
@@ -764,7 +764,7 @@ int msgok;
       Msg(0, bd.bd_scroll ? "bd_scroll is on." : "bd_scroll is off.");
       break;
 
-    case RC_BD_NCRC: 
+    case RC_BD_NCRC:
       n = bd.bd_ncrc;
       if (*args)
 	{
@@ -781,7 +781,7 @@ int msgok;
 	  break;
 	}
       bd.bd_ncrc = n;
-      if (msgok) 
+      if (msgok)
 	Msg(0, "bd_ncrc status is: %d ", bd.bd_ncrc);
       position_braille_cursor();
       break;

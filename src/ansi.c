@@ -7,7 +7,7 @@
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; either version 2, or (at your option)
  * any later version.
- *  
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
@@ -70,7 +70,7 @@ struct mchar mchar_blank = {' ' /* , 0, 0, ... */};
 struct mchar mchar_so    = {' ', A_SO /* , 0, 0, ... */};
 
 /* keep string_t and string_t_string in sync! */
-static char *string_t_string[] = 
+static char *string_t_string[] =
 {
   "NONE",
   "DCS",			/* Device control string */
@@ -342,7 +342,7 @@ register int len;
 #ifdef KANJI
           curr->w_FontL != KANJI && curr->w_FontL != KANA && !curr->w_mbcs &&
 #endif
-          c >= ' ' && 
+          c >= ' ' &&
           ((c & 0x80) == 0 || ((c >= 0xa0 || !curr->w_c1) && !curr->w_gr)) && !curr->w_ss &&
           !curr->w_insert && curr->w_x < cols - 1)
 	{
@@ -1986,7 +1986,7 @@ RestorePosRendition()
   LSetRendition(&curr->w_layer, &curr->w_rend);
 }
 
-/* Send a terminal report as if it were typed. */ 
+/* Send a terminal report as if it were typed. */
 static void
 Report(fmt, n1, n2)
 char *fmt;
@@ -2310,7 +2310,7 @@ struct mline *ml;
   q = ml->attr; o = hml->attr; hml->attr = q; ml->attr = null;
   if (o != null)
     free(o);
- 
+
 #ifdef FONT
   q = ml->font; o = hml->font; hml->font = q; ml->font = null;
   if (o != null)

@@ -95,7 +95,7 @@ char DefaultShell[] = "/bin/sh";
 static char DefaultPath[] = ":/usr/ucb:/bin:/usr/bin";
 
 /* keep this in sync with the structure definition in window.h */
-struct NewWindow nwin_undef   = 
+struct NewWindow nwin_undef   =
 {
   -1,		/* StartAt */
   (char *)0,	/* aka */
@@ -119,15 +119,15 @@ struct NewWindow nwin_undef   =
   (char *)0	/* charset */
 };
 
-struct NewWindow nwin_default = 
-{ 
+struct NewWindow nwin_default =
+{
   0, 		/* StartAt */
   0, 		/* aka */
   ShellArgs, 	/* args */
   0, 		/* dir */
   screenterm, 	/* term */
   0, 		/* aflag */
-  1*FLOW_NOW,	/* flowflag */ 
+  1*FLOW_NOW,	/* flowflag */
   LOGINDEFAULT, /* lflag */
   DEFAULTHISTHEIGHT, 	/* histheight */
   MON_OFF, 	/* monitor */
@@ -175,7 +175,7 @@ struct NewWindow *def, *new, *res;
   COMPOSE(charset);
 #undef COMPOSE
 }
- 
+
 /*****************************************************************
  *
  *  The window layer functions
@@ -227,7 +227,7 @@ int *lenp;
 {
   int l2 = 0, f, *ilen, l = *lenp, trunc;
   char *ibuf;
-  
+
   debug1("WinProcess: %d bytes\n", *lenp);
   fore = (struct win *)flayer->l_data;
 
@@ -249,7 +249,7 @@ int *lenp;
 	    fore->w_number, fore->w_wlockuser->u_name);
    }
  /* if w_wlock is set, only one user may write, else we check acls */
-  if (display && ((fore->w_wlock == WLOCK_OFF) ? 
+  if (display && ((fore->w_wlock == WLOCK_OFF) ?
       AclCheckPermWin(D_user, ACL_WRITE, fore) :
       (D_user != fore->w_wlockuser)))
     {
@@ -457,12 +457,12 @@ WinRestore()
 
 
 /*
- * DoStartLog constructs a path for the "want to be logfile" in buf and 
+ * DoStartLog constructs a path for the "want to be logfile" in buf and
  * attempts logfopen.
  *
  * returns 0 on success.
  */
-int 
+int
 DoStartLog(w, buf, bufsize)
 struct win *w;
 char *buf;
@@ -494,8 +494,8 @@ int bufsize;
   return 0;
 }
 
-/* 
- * Umask & wlock are set for the user of the display, 
+/*
+ * Umask & wlock are set for the user of the display,
  * The display d (if specified) switches to that window.
  */
 int
@@ -580,8 +580,8 @@ struct NewWindow *newwin;
 
   p->w_number = n;
 #ifdef MULTIUSER
-  /* 
-   * This is dangerous: without a display we use creators umask 
+  /*
+   * This is dangerous: without a display we use creators umask
    * This is intended to be usefull for detached startup.
    * But is still better than default bits with a NULL user.
    */
@@ -638,7 +638,7 @@ struct NewWindow *newwin;
   strncpy(p->w_tty, TtyName, MAXSTR - 1);
 
   if (ChangeWindowSize(p, display ? D_defwidth : 80,
-		       display ? D_defheight : 24, 
+		       display ? D_defheight : 24,
 		       nwin.histheight))
     {
       FreeWindow(p);
@@ -760,9 +760,9 @@ struct NewWindow *newwin;
 }
 
 /*
- * Resurrect a window from Zombie state. 
+ * Resurrect a window from Zombie state.
  * The command vector is therefore stored in the window structure.
- * Note: The terminaltype defaults to screenterm again, the current 
+ * Note: The terminaltype defaults to screenterm again, the current
  * working directory is lost.
  */
 int
@@ -954,7 +954,7 @@ char **namep;
     {
       if (access(arg, R_OK | W_OK) == -1)
 	{
-	  Msg(errno, "Cannot access line '%s' for R/W", arg); 
+	  Msg(errno, "Cannot access line '%s' for R/W", arg);
 	  return -1;
 	}
       debug("OpenDevice: OpenTTY\n");
@@ -1037,11 +1037,11 @@ char **namep;
 /*
  * Fields w_width, w_height, aflag, number (and w_tty)
  * are read from struct win *win. No fields written.
- * If pwin is nonzero, filedescriptors are distributed 
+ * If pwin is nonzero, filedescriptors are distributed
  * between win->w_tty and open(ttyn)
  *
  */
-static int 
+static int
 ForkWindow(win, args, ttyn)
 struct win *win;
 char **args, *ttyn;
@@ -1127,7 +1127,7 @@ char **args, *ttyn;
       if (dfp)	/* do not produce child debug, when debug is "off" */
 	{
 	  char buf[256];
-	  
+
 	  sprintf(buf, "%s/screen.child", DEBUGDIR);
 	  if ((dfp = fopen(buf, "a")) == 0)
 	    dfp = stderr;
@@ -1141,11 +1141,11 @@ char **args, *ttyn;
       close(1);
       close(2);
       newfd = -1;
-      /* 
+      /*
        * distribute filedescriptors between the ttys
        */
 #ifdef PSEUDOS
-      pat = pwin ? pwin->p_fdpat : 
+      pat = pwin ? pwin->p_fdpat :
 		   ((F_PFRONT<<(F_PSHIFT*2)) | (F_PFRONT<<F_PSHIFT) | F_PFRONT);
       wfdused = 0;
       for(i = 0; i < 3; i++)
@@ -1168,8 +1168,8 @@ char **args, *ttyn;
 	}
       if (wfdused)
 	{
-	    /* 
-	     * the pseudo window process should not be surprised with a 
+	    /*
+	     * the pseudo window process should not be surprised with a
 	     * nonblocking filedescriptor. Poor Backend!
 	     */
 	    debug1("Clearing NBLOCK on window-fd(%d)\n", win->w_ptyfd);
@@ -1351,7 +1351,7 @@ char **av;
   extern struct win *windows;
   struct pseudowin *pwin;
   int type;
- 
+
   if ((w = display ? fore : windows) == NULL)
     return -1;
   if (!*av || w->w_pwin)
@@ -1384,7 +1384,7 @@ char **av;
       l = F_UWP;
       p++;
     }
-  if (*p) 
+  if (*p)
     av[0] = p;
   else
     av++;
@@ -1407,7 +1407,7 @@ char **av;
 	  break;
 	}
     }
-  
+
   if (l & F_UWP)
     {
       *t++ = '|';
@@ -1422,7 +1422,7 @@ char **av;
   *t++ = ' ';
   pwin->p_fdpat = l;
   debug1("winexec: '%#x'\n", pwin->p_fdpat);
-  
+
   l = MAXSTR - 4;
   for (pp = av; *pp; pp++)
     {
@@ -1435,7 +1435,7 @@ char **av;
     }
   *--t = '\0';
   debug1("%s\n", pwin->p_cmd);
-  
+
   if ((pwin->p_ptyfd = OpenDevice(av, 0, &type, &t)) < 0)
     {
       free((char *)pwin);
@@ -1461,7 +1461,7 @@ char **av;
       }
   }
 #endif /* TIOCPKT */
-  
+
   pwin->p_readev.fd = pwin->p_writeev.fd = pwin->p_ptyfd;
   pwin->p_readev.type = EV_READ;
   pwin->p_writeev.type = EV_WRITE;
@@ -1501,15 +1501,15 @@ struct win *w;
 
 
 #ifdef MULTIUSER
-/* 
- * returns 0, if the lock really has been released 
+/*
+ * returns 0, if the lock really has been released
  */
 int
 ReleaseAutoWritelock(dis, w)
 struct display *dis;
 struct win *w;
 {
-  debug2("ReleaseAutoWritelock: user %s, window %d\n", 
+  debug2("ReleaseAutoWritelock: user %s, window %d\n",
          dis->d_user->u_name, w->w_number);
 
   /* release auto writelock when user has no other display here */
@@ -1520,7 +1520,7 @@ struct win *w;
       for (d = displays; d; d = d->d_next)
 	if (( d != dis) && (d->d_fore == w) && (d->d_user == dis->d_user))
 	  break;
-      debug3("%s %s autolock on win %d\n", 
+      debug3("%s %s autolock on win %d\n",
 	     dis->d_user->u_name, d ? "keeps" : "releases", w->w_number);
       if (!d)
         {
@@ -1531,8 +1531,8 @@ struct win *w;
   return 1;
 }
 
-/* 
- * returns 0, if the lock really could be obtained 
+/*
+ * returns 0, if the lock really could be obtained
  */
 int
 ObtainAutoWritelock(d, w)
@@ -1623,7 +1623,7 @@ char *data;
 #ifdef PSEUDOS
   int wtop;
 #endif
-  
+
   bp = buf;
   size = IOSIZE;
 
@@ -1828,7 +1828,7 @@ char *data;
 {
   struct win *p = (struct win *)data;
   struct canvas *cv;
-  debug1("FOUND silence win %d\n", p->w_number); 
+  debug1("FOUND silence win %d\n", p->w_number);
   for (display = displays; display; display = display->d_next)
     {
       for (cv = D_cvlist; cv; cv = cv->c_next)

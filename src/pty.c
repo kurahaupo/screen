@@ -187,7 +187,7 @@ OpenPTY(ttyn)
 char **ttyn;
 {
   int f;
-  char *name, *_getpty(); 
+  char *name, *_getpty();
   sigret_t (*sigcld)__P(SIGPROTOARG);
 
   /*
@@ -216,7 +216,7 @@ char **ttyn;
 {
   register int f;
   struct stat buf;
-   
+
   strcpy(PtyName, "/dev/ptc");
   if ((f = open(PtyName, O_RDWR | O_NOCTTY | O_NONBLOCK)) < 0)
     return -1;
@@ -259,7 +259,7 @@ char **ttyn;
       signal(SIGCHLD, sigcld);
       close(f);
       return -1;
-    } 
+    }
   signal(SIGCHLD, sigcld);
   strncpy(TtyName, m, sizeof(TtyName));
   initmaster(f);

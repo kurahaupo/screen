@@ -263,7 +263,7 @@ helppage()
 
   /* Clear the help screen */
   ClearLayer(flayer, 0);
-  
+
   sprintf(cbuf,"Screen key bindings, page %d of %d.", helpdata->grow / (flayer->l_height-5) + 1, helpdata->numpages);
   centerline(cbuf, 0);
   crow = 2;
@@ -311,7 +311,7 @@ helppage()
 	    }
           helpdata->grow++;
         }
-      else if (helpdata->grow-2-helpdata->numrows >= helpdata->numskip 
+      else if (helpdata->grow-2-helpdata->numrows >= helpdata->numskip
                && helpdata->grow-2-helpdata->numrows-helpdata->numskip < helpdata->command_bindings)
         {
 	  while ((n = ktab[helpdata->command_search].nr) == RC_ILLEGAL
@@ -354,7 +354,7 @@ int x, y;
   if (fr <= 0)
     return;
   l = strlen(comms[act->nr].name);
-  
+
   if (l + 1 > fr)
     l = fr - 1;
   PadStr(comms[act->nr].name, l, x, y);
@@ -434,7 +434,7 @@ int y, xs, xe, isblank;
 
 /*
 **
-**    here is all the copyright stuff 
+**    here is all the copyright stuff
 **
 */
 
@@ -643,7 +643,7 @@ int y, xs, xe, isblank;
 
 /*
 **
-**    here is all the displays stuff 
+**    here is all the displays stuff
 **
 */
 
@@ -723,7 +723,7 @@ xterm 80x42      jnweiger@/dev/ttyp4    0(m11)    &rWx
 facit 80x24 nb   mlschroe@/dev/ttyhf   11(tcsh)    rwx
 xterm 80x42      jnhollma@/dev/ttyp5    0(m11)    &R.x
 
-  |     |    |      |         |         |   |     | ¦___ window permissions 
+  |     |    |      |         |         |   |     | ¦___ window permissions
   |     |    |      |         |         |   |     |      (R. is locked r-only,
   |     |    |      |         |         |   |     |       W has wlock)
   |     |    |      |         |         |   |     |___ Window is shared
@@ -734,7 +734,7 @@ xterm 80x42      jnhollma@/dev/ttyp5    0(m11)    &R.x
   |     |    |___ Display is in nonblocking mode. Shows 'NB' if obuf is full.
   |     |___ Displays geometry as width x height.
   |___ the terminal type known by screen for this display.
- 
+
  */
 
 static void
@@ -750,10 +750,10 @@ displayspage()
 
   ClearLayer(flayer, 0);
 
-  leftline("term-type   size         user interface           window", 0);  
+  leftline("term-type   size         user interface           window", 0);
   leftline("---------- ------- ---------- ----------------- ----------", 1);
   y = 2;
-  
+
   for (d = displays; d; d = d->d_next)
     {
       w = d->d_fore;
@@ -761,19 +761,19 @@ displayspage()
       if (y >= flayer->l_height - 3)
 	break;
       sprintf(tbuf, "%-10.10s%4dx%-4d%10.10s@%-16.16s%s",
-	      d->d_termname, d->d_width, d->d_height, d->d_user->u_name, 
-	      d->d_usertty, 
+	      d->d_termname, d->d_width, d->d_height, d->d_user->u_name,
+	      d->d_usertty,
 	      d->d_nonblock ? ((( d->d_obufp - d->d_obuf) > d->d_obufmax) ?
 	        "NB" : "nb") : "  ");
 
       if (w)
 	{
           l = 10 - strlen(w->w_title);
-	  if (l < 0) 
+	  if (l < 0)
 	    l = 0;
 	  sprintf(tbuf + strlen(tbuf), "%3d(%.10s)%*s%c%c%c%c",
-		  w->w_number, w->w_title, l, "", 
-		  /* w->w_dlist->next */ 0 ? '&' : ' ', 
+		  w->w_number, w->w_title, l, "",
+		  /* w->w_dlist->next */ 0 ? '&' : ' ',
 		  /*
 		   * The rwx triple:
 		   * -,r,R	no read, read, read only due to foreign wlock
@@ -782,7 +782,7 @@ displayspage()
 		   * -,x	no execute, execute
 		   */
 #ifdef MULTIUSER
-		  (AclCheckPermWin(d->d_user, ACL_READ, w) ? '-' : 
+		  (AclCheckPermWin(d->d_user, ACL_READ, w) ? '-' :
 		   ((w->w_wlock == WLOCK_OFF || d->d_user == w->w_wlockuser) ?
 		    'r' : 'R')),
 		  (AclCheckPermWin(d->d_user, ACL_READ, w) ? '-' :
@@ -883,7 +883,7 @@ struct action *tab;
   bindkeydata = (struct bindkeydata *)flayer->l_data;
   bindkeydata->title = title;
   bindkeydata->tab = tab;
-  
+
   n = 0;
   for (i = 0; i < KMAP_KEYS+KMAP_AKEYS+KMAP_EXT; i++)
     {
@@ -972,7 +972,7 @@ bindkeypage()
   centerline(tbuf, flayer->l_height - 2);
   SetCursor();
 }
- 
+
 static void
 BindkeyProcess(ppbuf, plen)
 char **ppbuf;

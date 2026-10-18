@@ -33,7 +33,7 @@ RCS_ID("$Id$ FAU")
 # include <signal.h>
 #endif
 
-#include "config.h" 
+#include "config.h"
 #include "screen.h"
 #include "extern.h"
 
@@ -81,7 +81,7 @@ register char *str1, *str2;
 	return 0;
       if ((cp = malloc((unsigned) len1 + add_colon + 1)) == NULL)
 	Panic(0, strnomem);
-      cp[len1 + add_colon] = '\0'; 
+      cp[len1 + add_colon] = '\0';
     }
   bcopy(str1, cp, len1);
   if (add_colon)
@@ -248,7 +248,7 @@ char *rcfilename;
       if (RcFileName && strcmp(RcFileName, rc_name) == 0)
 	{
     	  /*
- 	   * User explicitly gave us that name, 
+ 	   * User explicitly gave us that name,
 	   * this is the only case, where we get angry, if we can't read
 	   * the file.
 	   */
@@ -294,7 +294,7 @@ char *ubuf;
   if (!display)
     {
       /* the session owner does it, when there is no display here */
-      EffectiveAclUser = users;        
+      EffectiveAclUser = users;
       debug1("RcLine: WARNING, no display no user! Session owner does: %s",
              ubuf);
     }
@@ -316,7 +316,7 @@ int dump;
    * dump==1:	hardcopy,
    * #ifdef COPY_PASTE
    * dump==2:	BUFFERFILE
-   * #endif COPY_PASTE 
+   * #endif COPY_PASTE
    */
   register int i, j, k;
   register char *p;
@@ -477,7 +477,7 @@ int dump;
 
 /*
  * returns an allocated buffer which holds a copy of the file named fn.
- * lenp (if nonzero) points to a location, where the buffer size should be 
+ * lenp (if nonzero) points to a location, where the buffer size should be
  * stored.
  */
 char *
@@ -512,7 +512,7 @@ int *lenp;
   errno = 0;
   if ((l = read(i, buf, size)) != size)
     {
-      if (l < 0) 
+      if (l < 0)
         l = 0;
       Msg(errno, "Got only %d bytes from %s", l, fn);
       close(i);
@@ -520,7 +520,7 @@ int *lenp;
   else
     {
       if (read(i, &c, 1) > 0)
-	Msg(0, "Slurped only %d characters (of %d) into buffer - try again", 
+	Msg(0, "Slurped only %d characters (of %d) into buffer - try again",
 	    l, size);
       else
 	Msg(0, "Slurped %d characters into buffer", l);

@@ -141,7 +141,7 @@ char *nam;
 {
 #ifdef apollo
   char *p;
-  
+
   if (nam == NULL)
     return NULL;
 # ifdef SVR4
@@ -313,7 +313,7 @@ int except;
   int f;
 #ifdef SVR4
   struct rlimit rl;
-  
+
   if ((getrlimit(RLIMIT_NOFILE, &rl) == 0) && rl.rlim_max != RLIM_INFINITY)
     f = rl.rlim_max;
   else

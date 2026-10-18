@@ -37,7 +37,7 @@ main()
       fprintf(stderr, "cm capability required\n");
       exit(1);
     }
-  
+
   if ((s = getenv("COLUMNS")))
       CO = atoi(s);
   if ((s = getenv("LINES")))

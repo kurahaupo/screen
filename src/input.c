@@ -81,7 +81,7 @@ inp_setprompt(p, s)
 char *p, *s;
 {
   struct inpdata *inpdata;
-  
+
   inpdata = (struct inpdata *)flayer->l_data;
   if (p)
     {
@@ -118,7 +118,7 @@ char *data;
 {
   int maxlen;
   struct inpdata *inpdata;
-  
+
   if (len > 100)
     len = 100;
   if (!(mode & INP_NOECHO))
@@ -293,7 +293,7 @@ int *plen;
 
   	  x = inpdata->inpstringlen;
 	  p = inpdata->inp.buf;
-	  
+
 	  if (!(inpdata->inpmode & INP_NOECHO))
 	    {
 	      while (p < inpdata->inp.buf+inpdata->inp.len)
@@ -315,7 +315,7 @@ int *plen;
 
 	  if (inpdata->inp.len && inpdata->inpmode == 0)
 	    inphist = inpdata->inp;	/* structure copy */
-	  
+
   	  flayer->l_data = 0;
           InpAbort();		/* redisplays... */
 	  *ppbuf = pbuf;
@@ -351,7 +351,7 @@ int y, xs, xe, isblank;
 {
   int q, r, s, l, v;
   struct inpdata *inpdata;
-  
+
   inpdata = (struct inpdata *)flayer->l_data;
   if (y != INPUTLINE)
     {

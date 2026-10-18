@@ -25,7 +25,7 @@
 #ifdef MULTIUSER
 
 /* three known bits: */
-#define ACL_EXEC 0		
+#define ACL_EXEC 0
 #define ACL_WRITE 1
 #define ACL_READ 2
 
@@ -55,7 +55,7 @@ struct usergroup
  */
 
 /*
- * A User has a list of groups, and points to other users.  
+ * A User has a list of groups, and points to other users.
  * users is the User entry of the session owner (creator)
  * and anchors all other users. Add/Delete users there.
  */

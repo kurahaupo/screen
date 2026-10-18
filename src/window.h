@@ -80,7 +80,7 @@ struct pseudowin
  * ... wants to write to pseudo */
 #define W_WP(w) ((w)->w_pwin && ((w)->w_pwin->p_fdpat & F_PFRONT))
 
-/* ... wants to write to window: user writes to window 
+/* ... wants to write to window: user writes to window
  * or stdout/stderr of pseudo are duplicated to window */
 #define W_WW(w) (!((w)->w_pwin) || \
 (((w)->w_pwin->p_fdpat & F_PMASK) == F_PBACK) || \
@@ -126,7 +126,7 @@ struct paster
 struct paster;
 #endif
 
-struct win 
+struct win
 {
   struct win *w_next;		/* next window */
   int    w_type;		/* type of window */
@@ -175,7 +175,7 @@ struct win
   int	 w_CharsetR;		/* charset number GR */
   int	 w_charsets[4];		/* Font = charsets[Charset] */
 #endif
-  int	 w_ss;		
+  int	 w_ss;
   int	 w_saved;
   int	 w_Saved_x, w_Saved_y;
   struct mchar w_SavedRend;
@@ -211,7 +211,7 @@ struct win
   int	 w_monitor;		/* monitor status */
   int	 w_silencewait;		/* wait for silencewait secs */
   int	 w_silence;		/* silence status (Lloyd Zusman) */
-  char	 w_vbwait;            
+  char	 w_vbwait;
   char	 w_norefresh;		/* dont redisplay when switching to that win */
 #ifdef HAVE_BRAILLE
   int	 w_bd_x, w_bd_y;	/* Braille cursor position */
@@ -226,7 +226,7 @@ struct win
 #else
   int	 w_histheight;		/* always 0 */
 #endif
-  int	 w_pid;			/* process at the other end of ptyfd */	
+  int	 w_pid;			/* process at the other end of ptyfd */
 
   char  *w_cmdargs[MAXARGS];	/* command line argument vector */
   char	*w_dir;			/* directory for chdir */
@@ -272,7 +272,7 @@ struct win
  *   011  +(+)	flow on , auto would be on
  *   100  -	flow auto, currently off
  *   111  +	flow auto, currently on
- * Application controls auto_flow via TIOCPKT, if available, 
+ * Application controls auto_flow via TIOCPKT, if available,
  * else via application keypad mode.
  */
 #define FLOW_NOW	(1<<0)

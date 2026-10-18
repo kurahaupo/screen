@@ -170,7 +170,7 @@ struct mode
  * versions of struct msg:
  * 0:	screen version 3.6.6 (version count introduced)
  */
-#define MSG_VERSION	0	
+#define MSG_VERSION	0
 #define MSG_REVISION	(('m'<<24) | ('s'<<16) | ('g'<<8) | MSG_VERSION)
 struct msg
 {
@@ -203,7 +203,7 @@ struct msg
 	  char envterm[20 + 1];	/* terminal type */
 	}
       attach;
-      struct 
+      struct
 	{
 	  char duser[20 + 1];	/* username */
 	  int dpid;		/* pid of frontend */

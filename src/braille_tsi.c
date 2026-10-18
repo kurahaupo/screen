@@ -6,7 +6,7 @@
  *                Bill Barry         barryb@dots.physics.orst.edu
  *
  * Copyright (c) 1995 by Science Access Project, Oregon State University.
- *      
+ *
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -20,7 +20,7 @@
  *
  * You should have received a copy of the GNU General Public License
  * along with this program (see the file COPYING); if not, write to the
- * Free Software Foundation, Inc., 
+ * Free Software Foundation, Inc.,
  * 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA
  *
  ****************************************************************
@@ -89,7 +89,7 @@ bd_init_navigator_40()
   return 0;
 }
 
-static int 
+static int
 display_status_tsi()
 {
   char obuf[3],ibuf[20];
@@ -104,7 +104,7 @@ display_status_tsi()
     return -1;
 
   /* we have written to the display asking for a response
-     we wait 1 second for the response, read it and if no 
+     we wait 1 second for the response, read it and if no
      response we wait 2 seconds, if still no response,
      return -1 to indicate no braille  display available */
   sleep(1);
@@ -117,7 +117,7 @@ display_status_tsi()
   debug2("first chars from braille display %d %d\n",ibuf[0],ibuf[1]);
   if (r != 2 || ibuf[0] != 0 || ibuf[1] != 5)
     return -1;
-  
+
   r= read(bd.bd_fd,ibuf,2);
   if (r != 2)
     return -1;
@@ -136,16 +136,16 @@ display_status_tsi()
   if (r != 3)
     return -1;
   ibuf[3] = 0;
-  debug1("braille display version %s\n", ibuf); 
+  debug1("braille display version %s\n", ibuf);
   bd.bd_version = atof(ibuf);
   return 0;
 }
-		
 
-static int 
-write_line_tsi (bstr,line_length,  cursor_pos) 
+
+static int
+write_line_tsi (bstr,line_length,  cursor_pos)
 char *bstr;
-int line_length, cursor_pos; 
+int line_length, cursor_pos;
 {
   int obp, i;
   bd.bd_obuf[0] = 0xff;
@@ -156,18 +156,18 @@ int line_length, cursor_pos;
   bd.bd_obuf[5] = tsi_ctype;
   obp=6;
 
-  for (i=0; i < line_length; i++) 
+  for (i=0; i < line_length; i++)
     {
-      bd.bd_obuf[2*i+obp] = 0; 
+      bd.bd_obuf[2*i+obp] = 0;
       bd.bd_obuf[2*i+1+obp] = bd.bd_btable[(int)(unsigned char)bstr[i]];
-    }      
-  for (i=line_length; i < bd.bd_ncells; i++) 
+    }
+  for (i=line_length; i < bd.bd_ncells; i++)
     {
-      bd.bd_obuf[2*i+obp] = 0; 
+      bd.bd_obuf[2*i+obp] = 0;
       bd.bd_obuf[2*i+1+obp] = bd.bd_btable[(int)' '];
-    }      
+    }
 
-  bd.bd_obuflen = 2*bd.bd_ncells + obp ;  
+  bd.bd_obuflen = 2*bd.bd_ncells + obp ;
   return 0;
 }
 
@@ -260,7 +260,7 @@ struct key2rc *tab;
   nb = read(bd.bd_fd, buf, 10);
   debug1("buttonpress_tsi: read %d bytes\n", nb);
   for (i=0, bkeys=0; i < nb; i++)
-    {   
+    {
       switch (buf[i] & 0xE0)
 	{
 	case 0x00: bkeys += ((int)(buf[i] & 0x1f)       );  break;
@@ -281,7 +281,7 @@ struct key2rc *tab;
   if (tab[i].key != -1 && tab[i].nr != RC_ILLEGAL)
     {
       char *args[3];
-      
+
       struct action act;
       args[0] = tab[i].arg1;
       args[1] = tab[i].arg2;

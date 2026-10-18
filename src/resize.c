@@ -110,7 +110,7 @@ int change_flag;
   wi = D_CO;
   he = D_LI;
 #endif
-  
+
   debug2("CheckScreenSize: screen is (%d,%d)\n", wi, he);
 
 #if 0 /* XXX: Fixme */
@@ -356,7 +356,7 @@ struct display *norefdisp;
   if (oldflayer && (l == oldflayer || Layer2Window(oldflayer) == p))
     while(oldflayer->l_next)
       oldflayer = oldflayer->l_next;
-    
+
   if (p)
     {
       for (d = displays; d; d = d->d_next)
@@ -608,7 +608,7 @@ register int n;
         : &p->w_mlines[y - p->w_histheight])
 
 #define NEWWIN(y) ((y < hi) ? &nhlines[y] : &nmlines[y - hi])
-	
+
 #else
 
 #define OLDWIN(y) (&p->w_mlines[y])
@@ -913,8 +913,8 @@ int wi, he, hi;
 	      return -1;
 	    }
 	  for (; t < wi; t++)
-	    p->w_tabs[t] = t && !(t & 7) ? 1 : 0; 
-	  p->w_tabs[wi] = 0; 
+	    p->w_tabs[t] = t && !(t & 7) ? 1 : 0;
+	  p->w_tabs[wi] = 0;
 	}
       else
 	{
