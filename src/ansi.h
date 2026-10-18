@@ -35,18 +35,21 @@
 #include <stdlib.h>
 
 enum attr_e {
-			/*			Terminfo name	TermCap code	ECMA48 SGR code	Screen custom	*/
-	ATTR_BD,	/* Bold mode		bold		md		1				*/
-	ATTR_DI,	/* Dim mode		dim		mh		2				*/
-	ATTR_IT,	/* Italicized		simt		ZH / ZR		3		3:0		*/
-	ATTR_US,	/* Underscore mode	smul		us / ue		4				*/
-	ATTR_BL,	/* Blinking		blink		mb		5				*/
-	ATTR_FB,	/* Fast Blinking	-		-		6				*/
-	ATTR_RV,	/* Reverse mode		rev		mr		7				*/
-	ATTR_HI,	/* Hidden		invis		mk		8				*/
-	ATTR_ST,	/* StrikeThru		smxx				9				*/
-	ATTR_SO,	/* Standout mode	smso		so		-		3:1		*/
-	NATTR
+		 // attribute           terminfo code   termcap code    ECMA-48 SGR     custom SGR
+		 //                     (on   / off)    (on / off)      (on / off)      (on / off)
+		 //
+	ATTR_BD, // bold mode           bold  / *        md               1 / 21
+	ATTR_DI, // dim mode            dim   / *        mh               2 / 22
+	ATTR_IT, // italicized          simt  / ritm     ZH / ZR          3 / 23        3:0 / 23:0
+	ATTR_US, // underscore mode     smul  / rmul     us / ue          4 / 24
+	ATTR_BL, // slow blink          blink / *        mb               5 / 25                        (> 0.4s; < 2.5hz; < 150/min)
+	ATTR_FB, // fast blink          -                -                6 / 26                        (≤ 0.4s; ≥ 2.5hz; ≥ 150/min; SGR only)
+	ATTR_RV, // reverse video       rev   / *        mr               7 / 27
+	ATTR_HI, // hidden              invis / *        mk               8 / 28
+	ATTR_ST, // strikeThru          smxx  / rmxx     -                9 / 29                        (terminfo only)
+	ATTR_SO, // standout mode       smso  / rmso     so / se          - / -         3:1 / 23:1
+	NATTR    //
+		 //      * reset all    -     / sgr0     -  / me          - / 0
 };
 
 enum attr_mask_e {
@@ -172,7 +175,14 @@ enum move_t {
 
 typedef struct Window Window;
 
-void  ConfigCode3Standout(bool on);
+typedef enum sgr3_mode_e {
+	SGR3_STRICT = 0,
+	SGR3_LEGACY = 1,
+	SGR3_UNSET = 2,
+} sgr3_mode_t;
+void  ConfigSGR3Mode(sgr3_mode_t);
+void  ConfigSGR3ModeDef(sgr3_mode_t);
+const char * sgr3_mode_desc(sgr3_mode_t);
 
 void  ResetAnsiState (Window *);
 void  ResetCharsets (Window *);

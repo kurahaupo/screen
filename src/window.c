@@ -111,7 +111,8 @@ struct NewWindow nwin_undef = {
 	.encoding            = -1,
 	.hstatus             = NULL,
 	.charset             = NULL,
-	.poll_zombie_timeout = 0
+	.poll_zombie_timeout = 0,
+	.sgr3_mode           = SGR3_UNSET,
 };
 
 struct NewWindow nwin_default = {
@@ -139,7 +140,8 @@ struct NewWindow nwin_default = {
 	.bce        = 0,
 	.encoding   = 0,
 	.hstatus    = NULL,
-	.charset    = NULL
+	.charset    = NULL,
+	.sgr3_mode  = SGR3_LEGACY,
 };
 
 struct NewWindow nwin_options;
@@ -175,6 +177,7 @@ void nwin_compose(struct NewWindow *def, struct NewWindow *new, struct NewWindow
 	COMPOSE(hstatus);
 	COMPOSE(charset);
 	COMPOSE(poll_zombie_timeout);
+	COMPOSE(sgr3_mode);
 #undef COMPOSE
 }
 
@@ -696,6 +699,8 @@ int MakeWindow(struct NewWindow *newwin)
 	p->w_zombieev.type = EV_TIMEOUT;
 	p->w_zombieev.data = (char *)p;
 	p->w_zombieev.handler = win_resurrect_zombie_fn;
+
+	p->w_sgr3_mode = nwin.sgr3_mode;
 
 	p->w_readev.fd = p->w_writeev.fd = p->w_ptyfd;
 	p->w_readev.type = EV_READ;
