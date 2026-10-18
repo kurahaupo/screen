@@ -68,6 +68,7 @@ struct NewWindow {
 	char	*hstatus;
 	char	*charset;
 	int	poll_zombie_timeout;
+	sgr3_mode_t sgr3_mode;
 };
 
 
@@ -182,7 +183,7 @@ struct Window {
 					 * (seps[MAX_CS_PARAMS-1] != 0) */
 	  bool	 has_colons;		/* are any of the separators colons? */
 	}	 w_cs;			/* track state while parsing a Control Sequence */
-	bool	 w_strict_standout;
+	sgr3_mode_t w_sgr3_mode;	/* does \e[3m cause italic or standout? */
 
 	int    w_wlock;		/* WLOCK_AUTO, WLOCK_OFF, WLOCK_ON */
 	struct acluser *w_wlockuser;	/* NULL when unlocked or user who writes */

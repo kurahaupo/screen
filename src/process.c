@@ -4126,14 +4126,53 @@ static void DoCommandSplit(struct action *act)
 	Activate(-1);
 }
 
-static void DoCommandStandout(struct action *act)
+static bool ParseSGR3Mode(struct action *act, sgr3_mode_t *m)
 {
-	int msgok = display && !*rc_name;
-	bool x;
+	char **args = act->args;
+	if (!args[0])
+		return true;
+	if (!strcmp(args[0], "legacy")) {
+		*m = SGR3_LEGACY;
+		return true;
+	}
+	if (!strcmp(args[0], "strict")
+	      || !strcmp(args[0], "on")) {
+		*m = SGR3_STRICT;
+		return true;
+	}
 
-	if (ParseOnOff(act, &x) == 0 && msgok)
-		OutputMsg(0, "\\e[3m will select %s", x ? "standout" : "italic");
-	ConfigCode3Standout(x);
+	bool msgok = display && !*rc_name;
+	if (msgok)
+		OutputMsg(0, "Invalid parameter; need 'legacy' or 'strict'");
+	return false;
+}
+
+static void DoCommandDefsgr3mode(struct action *act)
+{
+	if (ParseSGR3Mode(act, &nwin_default.sgr3_mode)) {
+		bool msgok = display && !*rc_name;
+		if (msgok)
+			OutputMsg(0, "In new windows, SGR 3 (\\e[3m) will select %s",
+				  sgr3_mode_desc(nwin_default.sgr3_mode));
+	}
+}
+
+static void DoCommandSgr3mode(struct action *act)
+{
+	bool msgok = display && !*rc_name;
+
+	if (!display || !D_fore) {
+		if (msgok)
+			OutputMsg(0, "No window selected");
+		return;
+	}
+
+	if (ParseSGR3Mode(act, &nwin_default.sgr3_mode)) {
+		if (msgok)
+			OutputMsg(0, "In window %u, SGR 3 (\\e[3m) will select %s",
+				  D_fore->w_number,
+				  sgr3_mode_desc(nwin_default.sgr3_mode));
+	}
 }
 
 static void DoCommandRemove(struct action *act)
@@ -4752,6 +4791,7 @@ void DoAction(struct action *act)
 		[RC_DEFNONBLOCK]	= DoCommandDefnonblock,
 		[RC_DEFOBUFLIMIT]	= DoCommandDefobuflimit,
 		[RC_DEFSCROLLBACK]	= DoCommandDefscrollback,
+		[RC_DEFSGR3MODE]	= DoCommandDefsgr3mode,
 		[RC_DEFSHELL]		= DoCommandShell,
 		[RC_DEFSILENCE]		= DoCommandDefsilence,
 		[RC_DEFSLOWPASTE]	= DoCommandDefslowpaste,
@@ -4841,6 +4881,7 @@ void DoAction(struct action *act)
 		[RC_SESSIONNAME]	= DoCommandSessionname,
 		[RC_SETENV]		= DoCommandSetenv,
 		[RC_SETSID]		= DoCommandSetsid,
+		[RC_SGR3MODE]		= DoCommandSgr3mode,
 		[RC_SHELLTITLE]		= DoCommandShelltitle,
 		[RC_SHELL]		= DoCommandShell,
 		[RC_SILENCEWAIT]	= DoCommandSilencewait,
@@ -4851,7 +4892,6 @@ void DoAction(struct action *act)
 		[RC_SORT]		= DoCommandSort,
 		[RC_SOURCE]		= DoCommandSource,
 		[RC_SPLIT]		= DoCommandSplit,
-		[RC_STANDOUT]		= DoCommandStandout,
 		[RC_STARTUP_MESSAGE]	= DoCommandStartup_message,
 		[RC_STATUS]		= DoCommandStatus,
 		[RC_STUFF]		= DoCommandStuff,
