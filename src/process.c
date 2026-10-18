@@ -4066,8 +4066,8 @@ static void DoCommandRendition(struct action *act)
 		WindowChanged(NULL, 0);
 	}
 	if (msgok)
-		OutputMsg(0, "Standout attributes 0x%02x  colorbg 0x%02x  colorfg 0x%02x", (unsigned char)mchar_so.attr,
-			  (unsigned char)mchar_so.colorbg, (unsigned char)mchar_so.colorfg);
+		OutputMsg(0, "Standout attributes 0x%02hhx  colorbg 0x%02hhx  colorfg 0x%02hhx",
+			  mchar_so.attr, mchar_so.colorbg, mchar_so.colorfg);
 
 }
 
@@ -4084,8 +4084,8 @@ static void DoCommandSorendition(struct action *act)
 		WindowChanged(NULL, 0);
 	}
 	if (msgok)
-		OutputMsg(0, "Standout attributes 0x%02x  colorbg 0x%02x  colorfg 0x%02x", (unsigned char)mchar_so.attr,
-			  (unsigned char)mchar_so.colorbg, (unsigned char)mchar_so.colorfg);
+		OutputMsg(0, "Standout attributes %#02hhx  colorbg %#02hhx  colorfg %#02hhx",
+			  mchar_so.attr, mchar_so.colorbg, mchar_so.colorfg);
 }
 
 static void DoCommandSource(struct action *act)
@@ -5312,7 +5312,7 @@ static int ParseNum1000(struct action *act, int *var)
 		while (dig++ < 4)
 			i *= 10;
 	if (i < 0)
-		i = (int)((unsigned int)~0 >> 1);
+		i = INT_MIN;
 	*var = i;
 	return 0;
 }
