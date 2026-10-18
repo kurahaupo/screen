@@ -47,6 +47,8 @@
 #include "resize.h"
 #include "winmsg.h"
 
+#include "inline.h" /* must follow ansi.h and image.h */
+
 /* widths for Z0/Z1 switching */
 const int Z0width = 132;
 const int Z1width = 80;
@@ -1690,7 +1692,7 @@ static void ASetMode(Window *win, bool on)
 	}
 }
 
-static enum attr_mask_e rendlist[] = {
+static enum attr_mask_e rendlist[2][] = {{
 	[0]  = ~A__MASK,
 	[1]  = A_BD,
 	[2]  = A_DI,
@@ -1709,15 +1711,44 @@ static enum attr_mask_e rendlist[] = {
 	[27] = ~A_RV,
 	[28] = ~A_HI,
 	[29] = ~A_ST,
-};
+},
+{
+	[0]  = ~A__MASK,
+	[1]  = A_BD,
+	[2]  = A_DI,
+	[3]  = A_SO,
+	[4]  = A_US,
+	[5]  = A_BL,
+	[6]  = A_FB,
+	[7]  = A_RV,
+	[8]  = A_HI,
+	[9]  = A_ST,
+	[22] = ~(A_BD | A_DI),
+	[23] = ~A_SO;
+	[24] = ~A_US,
+	[25] = ~(A_BL | A_FB),
+	[26] = ~(A_BL | A_FB),
+	[27] = ~A_RV,
+	[28] = ~A_HI,
+	[29] = ~A_ST,
+}};
+
+static bool legacy_mode = true;
+
+			/*
+			 * exact 'italic'; example control sequences:
+			 *  \e[3:m	⎱ enables italic
+			 *  \e[3:0m	⎰
+			 *  \e[23:m	⎱ disables italic
+			 *  \e[23:0m	⎰
+			 *
+			 * exact 'standout'; example control sequences:
+			 *  \e[3:1m	enables standout
+			 *  \e[23:1m	disables standout
+			 */
 
 void ConfigCode3Standout(bool on) {
-	if (on)
-		rendlist[3] = A_SO,
-		rendlist[23] = ~A_SO;
-	else
-		rendlist[3] = A_IT,
-		rendlist[23] = ~A_IT;
+	legacy_mode = !on;
 }
 
 static void SelectRendition(Window *win)
@@ -1766,8 +1797,9 @@ static void SelectRendition(Window *win)
 			cs_param_t const cm2 = cs->params[i + 1];
 
 			/* Indexed colour space aka 256 colours; example control sequences:
-			 *  \e[48:2:12m			Standard
-			 *  \e[48;2;12m			Customary
+			 *  \e[48:5:12m			Standard
+			 *  \e[48;5;12m			Customary
+			 * where 12 is usually the palette element for bright blue
 			 */
 			if (cm2 == 5) {
 
@@ -1789,11 +1821,11 @@ static void SelectRendition(Window *win)
 			}
 
 			/* Truecolor (24bit) colour space; example control sequences:
-			 *   \e[48:5:0:12:13:14m	Standard
-			 *   \e[48;5;12;13;14m		Customary
-			 *   \e[48:5:12:13:14m		Fix for botched clients
+			 *  \e[48:2:0:12:13:14m		Standard
+			 *  \e[48;2;12;13;14m		Customary
+			 *  \e[48:2:12:13:14m		Fix for botched clients
 			 * which sets red=12, green=13, blue=14, color-space=0/empty (application)
-			 * giving very dark gun-metal gray)
+			 * giving very dark gun-metal gray
 			 */
 			if (cm2 == 2) {
 
@@ -1820,34 +1852,6 @@ static void SelectRendition(Window *win)
 			}
 			continue;
 		}
-		if (k == i + 2 && cs->params[i + 1] == 0) {
-			/*
-			 * exact 'italic'; example control sequences:
-			 *  \e[3:m	⎱ enables italic
-			 *  \e[3:0m	⎰
-			 *  \e[23:m	⎱ disables italic
-			 *  \e[23:0m	⎰
-			 */
-			if (j == 3)
-				attr |= A_IT;
-			else if (j == 23)
-				attr &= ~A_IT;
-			continue;
-		}
-		if (k == i + 2 && cs->params[i + 1] == 1) {
-			/*
-			 * exact 'standout'; example control sequences:
-			 *  \e[3:1m	enables standout
-			 *  \e[23:1m	disables standout
-			 */
-			if (j == 3)
-				attr |= A_SO;
-			else if (j == 23)
-				attr &= ~A_SO;
-			continue;
-		}
-		if (k != i + 1)
-			continue;
 
 		/* 0 = reset all attributes, including colors */
 		if (j == 0) {
@@ -1857,13 +1861,28 @@ static void SelectRendition(Window *win)
 			colorfg = 0;
 		}
 
-		if (j < 0 || j >= (int)(ARRAY_SIZE(rendlist)))
-			continue;
-		j = rendlist[j];
-		if (j & A__UNSET)
-			attr &= j;
-		else
-			attr |= j;
+		if (j >= 0 && j < (int)(ARRAY_SIZE(rendlist[0]))) {
+			size_t lm = legacy_mode;
+
+			if (k >= i + 2) {
+				lm = cs->params[i + 1];
+				/* permitted subparam values */
+				if (lm >= ARRAY_SIZE(rendlist))
+					continue;
+				/* only allow subparams for params where they make a difference */
+				if (rendlist[0][j] == rendlist[1][j])
+					continue;
+				if (k > i + 2)
+					continue;
+			}
+
+			enum attr_mask_e l = rendlist[lm][j];
+
+			if (j & A__UNSET)
+				attr &= j;
+			else
+				attr |= j;
+		}
 	}
 
 	win->w_rend.attr = attr;
