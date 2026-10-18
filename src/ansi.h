@@ -44,8 +44,8 @@ enum attr_e {
 	ATTR_FB,	/* Fast Blinking	-		-		6				*/
 	ATTR_RV,	/* Reverse mode		rev		mr		7				*/
 	ATTR_HI,	/* Hidden		invis		mk		8				*/
-	ATTR_ST,	/* StrikeThru		smxx		Yh/Y-		9				*/
-	ATTR_SO,	/* Standout mode	smso		so		-				*/
+	ATTR_ST,	/* StrikeThru		smxx				9				*/
+	ATTR_SO,	/* Standout mode	smso		so		-		3:1		*/
 	NATTR
 };
 
