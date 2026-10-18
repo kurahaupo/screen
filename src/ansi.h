@@ -38,14 +38,14 @@ typedef enum attr_e {
 		 // attribute           terminfo code   termcap code    ECMA-48 SGR     custom SGR
 		 //                     (on   / off)    (on / off)      (on / off)      (on / off)
 		 //
-	ATTR_BD, // bold mode           bold  / *        md               1 / 21
-	ATTR_DI, // dim mode            dim   / *        mh               2 / 22
+	ATTR_BD, // bold mode           bold  / *        md / *           1 / 21
+	ATTR_DI, // dim mode            dim   / *        mh / *           2 / 22
 	ATTR_IT, // italicized          simt  / ritm     ZH / ZR          3 / 23        3:0 / 23:0
 	ATTR_US, // underscore mode     smul  / rmul     us / ue          4 / 24
-	ATTR_BL, // slow blink          blink / *        mb               5 / 25                        (> 0.4s; < 2.5hz; < 150/min)
+	ATTR_BL, // slow blink          blink / *        mb / *           5 / 25                        (> 0.4s; < 2.5hz; < 150/min)
 	ATTR_FB, // fast blink          -                -                6 / 26                        (≤ 0.4s; ≥ 2.5hz; ≥ 150/min; SGR only)
-	ATTR_RV, // reverse video       rev   / *        mr               7 / 27
-	ATTR_HI, // hidden              invis / *        mk               8 / 28
+	ATTR_RV, // reverse video       rev   / *        mr / *           7 / 27
+	ATTR_HI, // hidden              invis / *        mk / *           8 / 28
 	ATTR_ST, // strikeThru          smxx  / rmxx     -                9 / 29                        (terminfo only)
 	ATTR_SO, // standout mode       smso  / rmso     so / se          - / -         3:1 / 23:1
 	NATTR    //
