@@ -1692,63 +1692,81 @@ static void ASetMode(Window *win, bool on)
 	}
 }
 
-static enum attr_mask_e rendlist[2][] = {{
-	[0]  = ~A__MASK,
-	[1]  = A_BD,
-	[2]  = A_DI,
-	[3]  = A_IT,
-	[4]  = A_US,
-	[5]  = A_BL,
-	[6]  = A_FB,
-	[7]  = A_RV,
-	[8]  = A_HI,
-	[9]  = A_ST,
-	[22] = ~(A_BD | A_DI),
-	[23] = ~A_IT,
-	[24] = ~A_US,
-	[25] = ~(A_BL | A_FB),
-	[26] = ~(A_BL | A_FB),
-	[27] = ~A_RV,
-	[28] = ~A_HI,
-	[29] = ~A_ST,
-},
-{
-	[0]  = ~A__MASK,
-	[1]  = A_BD,
-	[2]  = A_DI,
-	[3]  = A_SO,
-	[4]  = A_US,
-	[5]  = A_BL,
-	[6]  = A_FB,
-	[7]  = A_RV,
-	[8]  = A_HI,
-	[9]  = A_ST,
-	[22] = ~(A_BD | A_DI),
-	[23] = ~A_SO;
-	[24] = ~A_US,
-	[25] = ~(A_BL | A_FB),
-	[26] = ~(A_BL | A_FB),
-	[27] = ~A_RV,
-	[28] = ~A_HI,
-	[29] = ~A_ST,
-}};
+/*
+ * SGR3:
+ *  \e[3m
+ * selects either standout or italic, depending on sgr3mode
+ *
+ * exact 'italic'; example control sequences:
+ *  \e[3:m	⎱ enable
+ *  \e[3:0m	⎰
+ *  \e[23:m	⎱ disable
+ *  \e[23:0m	⎰
+ *
+ * exact 'standout'; example control sequences:
+ *  \e[3:1m	} enable
+ *  \e[23:1m	} disable
+ */
 
-static bool legacy_mode = true;
+static enum attr_mask_e rendlist[][30] = {
+	[SGR3_STRICT] = {	/* strict mode */
+		[0]  = ~A__MASK,
+		[1]  = A_BD,
+		[2]  = A_DI,
+		[3]  = A_IT,
+		[4]  = A_US,
+		[5]  = A_BL,
+		[6]  = A_FB,
+		[7]  = A_RV,
+		[8]  = A_HI,
+		[9]  = A_ST,
+		[22] = ~(A_BD | A_DI),
+		[23] = ~A_IT,
+		[24] = ~A_US,
+		[25] = ~(A_BL | A_FB),
+		[26] = ~(A_BL | A_FB),
+		[27] = ~A_RV,
+		[28] = ~A_HI,
+		[29] = ~A_ST,
+	},
+	[SGR3_LEGACY] = {	/* legacy mode */
+		[0]  = ~A__MASK,
+		[1]  = A_BD,
+		[2]  = A_DI,
+		[3]  = A_SO,
+		[4]  = A_US,
+		[5]  = A_BL,
+		[6]  = A_FB,
+		[7]  = A_RV,
+		[8]  = A_HI,
+		[9]  = A_ST,
+		[22] = ~(A_BD | A_DI),
+		[23] = ~A_SO,
+		[24] = ~A_US,
+		[25] = ~(A_BL | A_FB),
+		[26] = ~(A_BL | A_FB),
+		[27] = ~A_RV,
+		[28] = ~A_HI,
+		[29] = ~A_ST,
+	}
+};
 
-			/*
-			 * exact 'italic'; example control sequences:
-			 *  \e[3:m	⎱ enables italic
-			 *  \e[3:0m	⎰
-			 *  \e[23:m	⎱ disables italic
-			 *  \e[23:0m	⎰
-			 *
-			 * exact 'standout'; example control sequences:
-			 *  \e[3:1m	enables standout
-			 *  \e[23:1m	disables standout
-			 */
+const char * sgr3_mode_desc(sgr3_mode_t m){
+	static const char * const desc[] = {
+		[SGR3_STRICT] = "strict",
+		[SGR3_LEGACY] = "legacy",
+		[SGR3_UNSET]  = "(unset)",
+	};
+	if (m >= 0 && m < ARRAY_SIZE(desc) && desc[m])
+		return desc[m];
+	return "(unknown mode)";
+}
 
-void ConfigCode3Standout(bool on) {
-	legacy_mode = !on;
+static sgr3_mode_t rend_mode = 1;
+
+void ConfigSGR3Mode(sgr3_mode_t v) {
+	if (v < ARRAY_SIZE(rendlist))
+		rend_mode = v;
 }
 
 static void SelectRendition(Window *win)
@@ -1863,12 +1881,12 @@ static void SelectRendition(Window *win)
 		}
 
 		if (j >= 0 && j < (int)(ARRAY_SIZE(rendlist[0]))) {
-			size_t lm = legacy_mode;
+			size_t m = rend_mode;
 
 			if (k >= i + 2) {
-				lm = cs->params[i + 1];
+				m = cs->params[i + 1];
 				/* permitted subparam values */
-				if (lm >= ARRAY_SIZE(rendlist))
+				if (m >= ARRAY_SIZE(rendlist))
 					continue;
 				/* only allow subparams for params where they make a difference */
 				if (rendlist[0][j] == rendlist[1][j])
@@ -1877,12 +1895,12 @@ static void SelectRendition(Window *win)
 					continue;
 			}
 
-			enum attr_mask_e l = rendlist[lm][j];
+			attr_mask_t l = rendlist[m][j];
 
-			if (j & A__UNSET)
-				attr &= j;
+			if (l & A__UNSET)
+				attr &= l;
 			else
-				attr |= j;
+				attr |= l;
 		}
 	}
 
