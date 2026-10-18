@@ -34,22 +34,25 @@
 #include <stdint.h>
 #include <stdlib.h>
 
-enum attr_e {
-			/*			Terminfo name	TermCap code	ECMA48 SGR code	Screen custom	*/
-	ATTR_BD,	/* Bold mode		bold		md		1				*/
-	ATTR_DI,	/* Dim mode		dim		mh		2				*/
-	ATTR_IT,	/* Italicized		simt		ZH / ZR		3		3:0		*/
-	ATTR_US,	/* Underscore mode	smul		us / ue		4				*/
-	ATTR_BL,	/* Blinking		blink		mb		5				*/
-	ATTR_FB,	/* Fast Blinking	-		-		6				*/
-	ATTR_RV,	/* Reverse mode		rev		mr		7				*/
-	ATTR_HI,	/* Hidden		invis		mk		8				*/
-	ATTR_ST,	/* StrikeThru		smxx				9				*/
-	ATTR_SO,	/* Standout mode	smso		so		-		3:1		*/
-	NATTR
-};
+typedef enum attr_e {
+		 // attribute           terminfo code   termcap code    ECMA-48 SGR     custom SGR
+		 //                     (on   / off)    (on / off)      (on / off)      (on / off)
+		 //
+	ATTR_BD, // bold mode           bold  / *        md               1 / 21
+	ATTR_DI, // dim mode            dim   / *        mh               2 / 22
+	ATTR_IT, // italicized          simt  / ritm     ZH / ZR          3 / 23        3:0 / 23:0
+	ATTR_US, // underscore mode     smul  / rmul     us / ue          4 / 24
+	ATTR_BL, // slow blink          blink / *        mb               5 / 25                        (> 0.4s; < 2.5hz; < 150/min)
+	ATTR_FB, // fast blink          -                -                6 / 26                        (≤ 0.4s; ≥ 2.5hz; ≥ 150/min; SGR only)
+	ATTR_RV, // reverse video       rev   / *        mr               7 / 27
+	ATTR_HI, // hidden              invis / *        mk               8 / 28
+	ATTR_ST, // strikeThru          smxx  / rmxx     -                9 / 29                        (terminfo only)
+	ATTR_SO, // standout mode       smso  / rmso     so / se          - / -         3:1 / 23:1
+	NATTR    //
+		 //      * reset all    -     / sgr0     -  / me          - / 0
+} attr_t;
 
-enum attr_mask_e {
+typedef enum attr_mask_e {
 
 	A_BD = 1 << ATTR_BD,
 	A_DI = 1 << ATTR_DI,
@@ -65,21 +68,21 @@ enum attr_mask_e {
 	A__UNSET = 1 << NATTR,
 	A__MASK = A__UNSET - 1,
 
-};
+} attr_mask_t;
 
-enum atyp_mask_e {
+typedef enum atyp_mask_e {
 
 	ATYP_M = 1 << 0,
 	ATYP_S = 1 << 1,
 	ATYP_U = 1 << 2,
 
-};
+} atyp_mask_t;
 
 /*
  *  Parser state
  */
 /* keep state_t and state_t_string in sync! */
-enum state_t {
+typedef enum state_t {
 	LIT,				/* Literal input */
 	ESC,				/* Start of escape sequence */
 	ASTR,				/* Start of control string */
@@ -89,7 +92,7 @@ enum state_t {
 	PRINESC,			/* ESC seen in printer mode */
 	PRINCSI,			/* CSI seen in printer mode */
 	PRIN4				/* CSI 4 seen in printer mode */
-};
+} state_t;
 
 #define MAX_CS_PARAMS	64		/* ISO-6429 specifies 16, and recommends
 					 * silently ignoring any more, but we
@@ -99,7 +102,7 @@ enum state_t {
 					 * step with common usage. */
 
 /* keep string_t and string_t_string in sync! */
-enum string_t {
+typedef enum string_t {
 	NONE,
 	DCS,				/* Device Control String */
 	OSC,				/* Operating System Command */
@@ -109,12 +112,12 @@ enum string_t {
 	AKA,				/* Title for current screen */
 	GM,				/* Global Message (to every display) */
 	STATUS				/* User hardstatus line */
-};
+} string_t;
 
 /*
  *  Types of movement used by GotoPos()
  */
-enum move_t {
+typedef enum move_t {
 	M_NONE,
 	M_UP,
 	M_CUP,
@@ -126,7 +129,7 @@ enum move_t {
 	M_CRI,
 	M_RW,
 	M_CR			/* CR and rewrite */
-};
+} move_t;
 
 #define EXPENSIVE	1000
 
@@ -170,7 +173,14 @@ enum move_t {
 
 typedef struct Window Window;
 
-void  ConfigCode3Standout(bool on);
+typedef enum sgr3_mode_e {
+	SGR3_STRICT = 0,
+	SGR3_LEGACY = 1,
+	SGR3_UNSET = 2,
+} sgr3_mode_t;
+void  ConfigSGR3Mode(sgr3_mode_t);
+void  ConfigSGR3ModeDef(sgr3_mode_t);
+const char * sgr3_mode_desc(sgr3_mode_t);
 
 void  ResetAnsiState (Window *);
 void  ResetCharsets (Window *);
