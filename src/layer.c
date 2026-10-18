@@ -37,6 +37,8 @@
 #include "screen.h"
 #include "tty.h"
 
+#include "inline.h" /* must follow ansi.h and image.h */
+
 /*
  * Layer subsystem.
  *
