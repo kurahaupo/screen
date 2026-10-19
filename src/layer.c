@@ -62,12 +62,9 @@ mloff(struct mline *ml, int off)
 # define RECODE_MCHAR(mc) ((l->l_encoding == UTF8) != (D_encoding == UTF8) ? recode_mchar(mc, l->l_encoding, D_encoding) : (mc))
 # define RECODE_MLINE(ml) ((l->l_encoding == UTF8) != (D_encoding == UTF8) ? recode_mline(ml, l->l_width, l->l_encoding, D_encoding) : (ml))
 
-#define FOR_EACH_UNPAUSED_CANVAS(l, fn) for (cv = (l)->l_cvlist; cv; cv = cv->c_lnext) \
-  {	\
-    if ((l)->l_pause.d && cv->c_slorient)	\
-      continue;	\
-    fn	\
-  }
+#define FOR_EACH_UNPAUSED_CANVAS(l) \
+		for (cv = (l)->l_cvlist; cv; cv = cv->c_lnext) \
+			if ((l)->l_pause.d && cv->c_slorient) {} else
 
 void
 LGotoPos(struct layer *l, int x, int y)
@@ -79,7 +76,7 @@ LGotoPos(struct layer *l, int x, int y)
   if (l->l_pause.d)
     LayPauseUpdateRegion(l, x, x, y, y);
 
-  FOR_EACH_UNPAUSED_CANVAS(l,
+  FOR_EACH_UNPAUSED_CANVAS(l)
     {
       display = cv->c_display;
       if (D_blocked)
@@ -107,7 +104,6 @@ LGotoPos(struct layer *l, int x, int y)
 	  break;
 	}
     }
-  );
 }
 
 void
@@ -121,7 +117,7 @@ LScrollH(struct layer *l, int n, int y, int xs, int xe, int bce, struct mline *o
     return;
   if (l->l_pause.d)
     LayPauseUpdateRegion(l, xs, xe, y, y);
-  FOR_EACH_UNPAUSED_CANVAS(l,
+  FOR_EACH_UNPAUSED_CANVAS(l)
     for (vp = cv->c_vplist; vp; vp = vp->v_next)
       {
 	y2 = y + vp->v_yoff;
@@ -158,7 +154,6 @@ LScrollH(struct layer *l, int n, int y, int xs, int xe, int bce, struct mline *o
 	if (xs2 <= xe2)
 	  RefreshArea(xs2, y2, xe2, y2, 1);
       }
-  );
 }
 
 void
@@ -171,7 +166,7 @@ LScrollV(struct layer *l, int n, int ys, int ye, int bce)
     return;
   if (l->l_pause.d)
     LayPauseUpdateRegion(l, 0, l->l_width - 1, ys, ye);
-  FOR_EACH_UNPAUSED_CANVAS(l,
+  FOR_EACH_UNPAUSED_CANVAS(l)
     for (vp = cv->c_vplist; vp; vp = vp->v_next)
       {
 	xs2 = vp->v_xoff;
@@ -215,7 +210,7 @@ LScrollV(struct layer *l, int n, int ys, int ye, int bce)
 	if (ys2 <= ye2)
 	  RefreshArea(xs2, ys2, xe2, ye2, 1);
       }
-  );
+
 }
 
 void
@@ -229,7 +224,7 @@ LInsChar(struct layer *l, struct mchar *c, int x, int y, struct mline *ol)
 
   if (l->l_pause.d)
     LayPauseUpdateRegion(l, x, l->l_width - 1, y, y);
-  FOR_EACH_UNPAUSED_CANVAS(l,
+  FOR_EACH_UNPAUSED_CANVAS(l)
     for (vp = cv->c_vplist; vp; vp = vp->v_next)
       {
 	y2 = y + vp->v_yoff;
@@ -268,7 +263,7 @@ LInsChar(struct layer *l, struct mchar *c, int x, int y, struct mline *ol)
 	if (f)
 	  RefreshArea(xs2, y2, xs2, y2, 1);
       }
-  );
+
 }
 
 void
@@ -283,7 +278,7 @@ LPutChar(struct layer *l, struct mchar *c, int x, int y)
 	x + (c->mbcs ? 1 : 0)
 	, y, y);
 
-  FOR_EACH_UNPAUSED_CANVAS(l,
+  FOR_EACH_UNPAUSED_CANVAS(l)
     {
       display = cv->c_display;
       if (D_blocked)
@@ -300,7 +295,7 @@ LPutChar(struct layer *l, struct mchar *c, int x, int y)
 	  break;
 	}
     }
-  );
+
 }
 
 void
@@ -316,7 +311,7 @@ LPutStr(struct layer *l, char *s, int n, struct mchar *r, int x, int y)
   if (l->l_pause.d)
     LayPauseUpdateRegion(l, x, x + n - 1, y, y);
 
-  FOR_EACH_UNPAUSED_CANVAS(l,
+  FOR_EACH_UNPAUSED_CANVAS(l)
     for (vp = cv->c_vplist; vp; vp = vp->v_next)
       {
 	y2 = y + vp->v_yoff;
@@ -350,7 +345,7 @@ LPutStr(struct layer *l, char *s, int n, struct mchar *r, int x, int y)
 	while (xs2++ <= xe2)
 	  PUTCHARLP(*s2++);
       }
-  );
+
 }
 
 void
@@ -368,7 +363,7 @@ LPutWinMsg(struct layer *l, char *s, int n, struct mchar *r, int x, int y)
   len = strlen(s);
   if (len > n)
     len = n;
-  FOR_EACH_UNPAUSED_CANVAS(l,
+  FOR_EACH_UNPAUSED_CANVAS(l)
     for (vp = cv->c_vplist; vp; vp = vp->v_next)
       {
 	y2 = y + vp->v_yoff;
@@ -400,7 +395,7 @@ LPutWinMsg(struct layer *l, char *s, int n, struct mchar *r, int x, int y)
 	while (xs2++ <= xe2)
 	  PUTCHARLP(' ');
       }
-  );
+
 }
 
 void
@@ -417,7 +412,7 @@ LClearLine(struct layer *l, int y, int xs, int xe, int bce, struct mline *ol)
     xe = l->l_width - 1;
   if (l->l_pause.d)
       LayPauseUpdateRegion(l, xs, xe, y, y);
-  FOR_EACH_UNPAUSED_CANVAS(l,
+  FOR_EACH_UNPAUSED_CANVAS(l)
     for (vp = cv->c_vplist; vp; vp = vp->v_next)
       {
 	xs2 = xs + vp->v_xoff;
@@ -436,7 +431,7 @@ LClearLine(struct layer *l, int y, int xs, int xe, int bce, struct mline *ol)
 	  continue;
 	ClearLine(ol ? mloff(RECODE_MLINE(ol), -vp->v_xoff) : (struct mline *)0, y2, xs2, xe2, bce);
       }
-  );
+
 }
 
 void
@@ -456,7 +451,7 @@ LClearArea(struct layer *l, int xs, int ys, int xe, int ye, int bce, int uself)
     xe = l->l_width - 1;
   if (l->l_pause.d)
     LayPauseUpdateRegion(l, xs, xe, ys, ye);
-  FOR_EACH_UNPAUSED_CANVAS(l,
+  FOR_EACH_UNPAUSED_CANVAS(l)
     {
       display = cv->c_display;
       if (D_blocked)
@@ -499,7 +494,7 @@ LClearArea(struct layer *l, int xs, int ys, int xe, int ye, int bce, int uself)
 	    }
 	}
     }
-  );
+
 }
 
 void
@@ -510,7 +505,7 @@ LCDisplayLine(struct layer *l, struct mline *ml, int y, int xs, int xe, int isbl
   int xs2, xe2, y2;
   if (l->l_pause.d)
     LayPauseUpdateRegion(l, xs, xe, y, y);
-  FOR_EACH_UNPAUSED_CANVAS(l,
+  FOR_EACH_UNPAUSED_CANVAS(l)
     {
       display = cv->c_display;
       if (D_blocked)
@@ -534,7 +529,7 @@ LCDisplayLine(struct layer *l, struct mline *ml, int y, int xs, int xe, int isbl
 	  DisplayLine(isblank ? &mline_blank : &mline_null, mloff(RECODE_MLINE(ml), -vp->v_xoff), y2, xs2, xe2);
 	}
     }
-  );
+
 }
 
 void
@@ -587,7 +582,7 @@ LWrapChar(struct layer *l, struct mchar *c, int y, int top, int bot, int ins)
       /* cursor after wrapping */
       yy = y == l->l_height - 1 ? y : y + 1;
 
-      FOR_EACH_UNPAUSED_CANVAS(l,
+      FOR_EACH_UNPAUSED_CANVAS(l)
 	{
 	  y2 = 0;       /* gcc -Wall */
 	  display = cv->c_display;
@@ -627,13 +622,13 @@ LWrapChar(struct layer *l, struct mchar *c, int y, int top, int bot, int ins)
 	      WrapChar(RECODE_MCHAR(c), vp->v_xoff + l->l_width, y2, vp->v_xoff, -1, vp->v_xoff + l->l_width - 1, -1, ins);
 	    }
 	}
-      );
+
     }
   else
     {
       /* hard case: scroll up*/
 
-      FOR_EACH_UNPAUSED_CANVAS(l,
+      FOR_EACH_UNPAUSED_CANVAS(l)
 	{
 	  display = cv->c_display;
 	  if (D_blocked)
@@ -681,7 +676,6 @@ LWrapChar(struct layer *l, struct mchar *c, int y, int top, int bot, int ins)
 	      WrapChar(RECODE_MCHAR(c), vp->v_xoff + l->l_width, bot2, vp->v_xoff, top2, vp->v_xoff + l->l_width - 1, bot2, ins);
 	    }
 	}
-      );
     }
 }
 
