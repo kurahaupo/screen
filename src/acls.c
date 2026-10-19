@@ -451,8 +451,9 @@ char *DoSu(struct acluser **up, char *name, char *pw1, char *pw2)
 				debug("screen password mismatch\n");
 				sorry++;
 			}
-		} else /* no pasword provided */ if (*u->u_password)	/* but need one */
-			sorry++;
+		} else	/* no password provided */
+			if (*u->u_password)	/* but need one */
+				sorry++;
 	}
 
 	debug("syslog(LOG_NOTICE, \"screen %s: \"su %s\" ", SockPath, name);

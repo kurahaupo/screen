@@ -619,7 +619,7 @@ int main(int argc, char **argv)
 			newbuf[newsz] = '\0';
 			nwin_options.aka = newbuf;
 		} else {
-			/* If we just use the original value from av,
+			/* If we just use the original value from argv,
 			   subsequent shelltitle invocations will attempt to free
 			   space we don't own... */
 			nwin_options.aka = SaveStr(nwin_options.aka);
@@ -2732,9 +2732,10 @@ static void serv_select_fn(struct event *ev, char *data)
 					LScrollV(flayer, -n, 0, flayer->l_height - 1, 0);
 					LayRedisplayLine(-1, -1, -1, 1);
 					for (i = 0; i < n; i++)
-					LayRedisplayLine(i, 0, flayer->l_width - 1, 1);
+						LayRedisplayLine(i, 0, flayer->l_width - 1, 1);
 					if (cv == cv->c_display->d_forecv)
-					LaySetCursor();) ;
+						LaySetCursor();
+				);
 			} else if (ly + cv->c_yoff > cv->c_ye) {
 				int i, n = ly + cv->c_yoff - cv->c_ye;
 				cv->c_yoff = cv->c_ye - ly;
@@ -2745,9 +2746,10 @@ static void serv_select_fn(struct event *ev, char *data)
 					LScrollV(flayer, n, 0, cv->c_layer->l_height - 1, 0);
 					LayRedisplayLine(-1, -1, -1, 1);
 					for (i = 0; i < n; i++)
-					LayRedisplayLine(i + flayer->l_height - n, 0, flayer->l_width - 1, 1);
+						LayRedisplayLine(i + flayer->l_height - n, 0, flayer->l_width - 1, 1);
 					if (cv == cv->c_display->d_forecv)
-					LaySetCursor();) ;
+						LaySetCursor();
+				);
 			}
 			if (lx + cv->c_xoff < cv->c_xs) {
 				int i, n = cv->c_xs - (lx + cv->c_xoff);
@@ -2759,12 +2761,15 @@ static void serv_select_fn(struct event *ev, char *data)
 				RethinkViewportOffsets(cv);
 				if (n > cv->c_layer->l_width)
 					n = cv->c_layer->l_width;
-				CV_CALL(cv, LayRedisplayLine(-1, -1, -1, 1);
+				CV_CALL(cv,
+					LayRedisplayLine(-1, -1, -1, 1);
 					for (i = 0; i < flayer->l_height; i++) {
-					LScrollH(flayer, -n, i, 0, flayer->l_width - 1, 0, 0);
-					LayRedisplayLine(i, 0, n - 1, 1);}
+						LScrollH(flayer, -n, i, 0, flayer->l_width - 1, 0, NULL);
+						LayRedisplayLine(i, 0, n - 1, 1);
+					}
 					if (cv == cv->c_display->d_forecv)
-					LaySetCursor();) ;
+						LaySetCursor();
+				);
 			} else if (lx + cv->c_xoff > cv->c_xe) {
 				int i, n = lx + cv->c_xoff - cv->c_xe;
 				if (n < (cv->c_xe - cv->c_xs + 1) / 2)
@@ -2775,21 +2780,27 @@ static void serv_select_fn(struct event *ev, char *data)
 				RethinkViewportOffsets(cv);
 				if (n > cv->c_layer->l_width)
 					n = cv->c_layer->l_width;
-				CV_CALL(cv, LayRedisplayLine(-1, -1, -1, 1);
+				CV_CALL(cv,
+					LayRedisplayLine(-1, -1, -1, 1);
 					for (i = 0; i < flayer->l_height; i++) {
-					LScrollH(flayer, n, i, 0, flayer->l_width - 1, 0, 0);
-					LayRedisplayLine(i, flayer->l_width - n, flayer->l_width - 1, 1);}
+						LScrollH(flayer, n, i, 0, flayer->l_width - 1, 0, NULL);
+						LayRedisplayLine(i, flayer->l_width - n, flayer->l_width - 1, 1);
+					}
 					if (cv == cv->c_display->d_forecv)
-					LaySetCursor();) ;
+						LaySetCursor();
+				);
 			}
 		}
 	}
 
 	for (display = displays; display; display = display->d_next) {
-		if (D_status == STATUS_ON_WIN || D_cvlist == 0 || D_cvlist->c_next == 0)
+		if (D_status == STATUS_ON_WIN || D_cvlist == NULL || D_cvlist->c_next == NULL)
 			continue;
 		debug("serv_select_fn: Restore on cv %#x\n", (int)D_forecv);
-		CV_CALL(D_forecv, LayRestore(); LaySetCursor());
+		CV_CALL(D_forecv,
+			LayRestore();
+			LaySetCursor()
+		);
 	}
 }
 
@@ -2865,3 +2876,47 @@ static int ParseEscape(char *p)
 	}
 	return 0;
 }
+<<<<<<< HEAD
+=======
+
+static void SetTtyname(bool fatal, struct stat *st)
+{
+	int ret;
+	int saved_errno = 0;
+
+	attach_tty_is_in_new_ns = false;
+	memset(&attach_tty_name_in_ns, 0, ARRAY_SIZE(attach_tty_name_in_ns));
+
+	errno = 0;
+	/* ttyname implies isatty */
+	attach_tty = ttyname(0);
+	if (!attach_tty) {
+		if (errno == ENODEV) {
+			saved_errno = errno;
+			attach_tty = "/proc/self/fd/0";
+			attach_tty_is_in_new_ns = true;
+			ret = readlink(attach_tty, attach_tty_name_in_ns, ARRAY_SIZE(attach_tty_name_in_ns));
+			if (ret < 0 || (size_t)ret >= ARRAY_SIZE(attach_tty_name_in_ns))
+				Panic(0, "Bad tty '%s'", attach_tty);
+		} else if (fatal) {
+			Panic(0, "Must be connected to a terminal.");
+		} else {
+			attach_tty = "";
+		}
+	}
+
+	if (attach_tty && strcmp(attach_tty, "")) {
+		if (stat(attach_tty, st))
+			Panic(errno, "Cannot access '%s'", attach_tty);
+
+		if (strlen(attach_tty) >= MAXPATHLEN)
+			Panic(0, "TtyName too long - sorry.");
+
+		/* Only call CheckTtyname() if the device does not exist in
+		 * another namespace.
+		 */
+		if (saved_errno != ENODEV && CheckTtyname(attach_tty))
+			Panic(0, "Bad tty '%s'", attach_tty);
+	}
+}
+>>>>>>> 0467e1f (ws+nl)

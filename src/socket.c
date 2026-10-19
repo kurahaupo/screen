@@ -192,7 +192,11 @@ int FindSocket(int *fdp, int *nfoundp, int *notherp, char *match)
 			continue;
 #endif
 		mode = (int)st.st_mode & 0777;
+<<<<<<< HEAD
 		debug("  has mode 0%03o\n", mode);
+=======
+
+>>>>>>> 0467e1f (ws+nl)
 		if (multi && ((mode & 0677) != 0601)) {
 			debug("  is not a MULTI-USER session");
 			if (strcmp(multi, LoginName)) {
@@ -260,7 +264,8 @@ int FindSocket(int *fdp, int *nfoundp, int *notherp, char *match)
 		 */
 		if ((mode != 0700 && mode != 0600) ||
 		    (dflag && !rflag && !xflag && mode == 0600) ||
-		    (!dflag && rflag && mode == 0700 && !xflag) || (!dflag && !rflag && !xflag)) {
+		    (!dflag && rflag && mode == 0700 && !xflag) ||
+		    (!dflag && !rflag && !xflag)) {
 			close(sockfd);
 			debug("  no!\n");
 			npriv++;	/* a good socket that was not for us */
@@ -790,8 +795,13 @@ static int CreateTempDisplay(struct msg *m, int recvfd, struct win *win)
 
 void ReceiveMsg()
 {
+<<<<<<< HEAD
 	int left, len;
 	static struct msg m;
+=======
+	int left, len;	/*TODO: socklen_t len*/
+	static Message m;
+>>>>>>> 0467e1f (ws+nl)
 	char *p;
 	int ns = ServerSocket;
 	struct win *wi;
@@ -827,7 +837,7 @@ void ReceiveMsg()
 	msg.msg_controllen = sizeof(control);
 	msg.msg_control = &control;
 	while (left > 0) {
-		len = recvmsg(ns, &msg, 0);
+		len = recvmsg(ns, &msg, left);
 		if (len < 0 && errno == EINTR)
 			continue;
 		if (len < 0) {
@@ -835,6 +845,9 @@ void ReceiveMsg()
 			Msg(errno, "read");
 			return;
 		}
+		/*TODO
+		if (len <= 0)
+			break;*/
 		if (msg.msg_controllen) {
 			struct cmsghdr *cmsg;
 			for (cmsg = CMSG_FIRSTHDR(&msg); cmsg; cmsg = CMSG_NXTHDR(&msg, cmsg)) {

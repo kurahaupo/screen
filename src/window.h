@@ -125,6 +125,7 @@ struct paster {
 	struct event pa_slowev;	/* slowpaste event */
 };
 
+<<<<<<< HEAD
 struct win {
 	struct win *w_next;	/* next window */
 	int w_type;		/* type of window */
@@ -132,6 +133,20 @@ struct win {
 	struct layer w_layer;	/* our layer */
 	struct layer *w_savelayer;	/* the layer to keep */
 	int w_blocked;		/* block input */
+=======
+typedef struct Window Window;
+struct Window {
+	Window *w_prev;			/* previous window */
+	Window *w_next;			/* next window */
+	Window *w_prev_mru;		/* previous most recently used window */
+	int	w_type;			/* type of window */
+	//void *w_data;
+	bool	w_list_order;		/* MRU list order for window groups */
+	bool	w_list_nested;		/* show nested children in window groups */
+	Layer	w_layer;		/* our layer */
+	Layer  *w_savelayer;		/* the layer to keep */
+	int	w_blocked;		/* block input */
+>>>>>>> 0467e1f (ws+nl)
 	struct pseudowin *w_pwin;	/* ptr to pseudo */
 	struct display *w_pdisplay;	/* display for printer relay */
 	struct display *w_lastdisp;	/* where the last input was made */
@@ -181,6 +196,7 @@ struct win {
 		int CharsetR;
 		int Charsets[4];
 	} w_saved;
+<<<<<<< HEAD
 	int w_top, w_bot;	/* scrollregion */
 	int w_wrap;		/* autowrap */
 	int w_origin;		/* origin mode */
@@ -211,6 +227,43 @@ struct win {
 	char w_norefresh;	/* dont redisplay when switching to that win */
 	char w_xtermosc[4][MAXSTR];	/* special xterm/rxvt escapes */
 	int w_mouse;		/* mouse mode 0,9,1000 */
+=======
+	int	w_top, w_bot;		/* scrollregion */
+	bool	w_wrap;			/* autowrap */
+	int	w_origin;		/* origin mode */
+	bool	w_insert;		/* window is in insert mode */
+	int	w_keypad;		/* keypad mode */
+	int	w_cursorkeys;		/* appl. cursorkeys mode */
+	bool	w_revvid;		/* reverse video */
+	int	w_curinv;		/* cursor invisible */
+	int	w_curvvis;		/* cursor very visible */
+	int	w_autolf;		/* automatic linefeed */
+	char   *w_hstatus;		/* hardstatus line */
+	int	w_gr;			/* enable GR flag */
+	bool	w_c1;			/* enable C1 flag */
+	int	w_decodestate;		/* state of our input decoder */
+#ifdef KANJI
+	int	w_kanji;		/* for input and paste */
+#endif
+	int	w_mbcs;			/* saved char for multibytes charset */
+	char	w_string[MAXSTR];
+	char   *w_stringp;
+	char   *w_tabs;			/* line with tabs */
+	int	w_bell;			/* bell status of this window */
+	int	w_flow;			/* flow flags */
+	Log    *w_log;			/* log to file */
+	int	w_logsilence;		/* silence in secs */
+	int	w_monitor;		/* monitor status */
+	int	w_silencewait;		/* wait for silencewait secs */
+	int	w_silence;		/* silence status (Lloyd Zusman) */
+	char	w_norefresh;		/* dont redisplay when switching to that win */
+	//char	w_vbwait;
+	char	w_xtermosc[5][2560];	/* special xterm/rxvt escapes */
+	int	w_mouse;		/* mouse mode 0,9,1000 */
+	int	w_extmouse;		/* extended mouse mode 0,1006 */
+	bool	w_bracketed;		/* bracketed paste mode */
+	int	w_cursorstyle;		/* cursor style */
+>>>>>>> 0467e1f (ws+nl)
 
 	int w_slowpaste;	/* do careful writes to the window */
 	int w_histheight;	/* all histbases are malloced with width * histheight */
