@@ -38,7 +38,7 @@
 
 
 #ifdef DEBUG
-# define STATIC		/* a function that the debugger should see */
+# define STATIC			/* a function that the debugger should see */
 #else
 # define STATIC static
 #endif
@@ -46,7 +46,7 @@
 #ifdef DEBUG
 # define DEBUGDIR "/tmp/debug"
 # define debug(format, ...) {if(dfp){fprintf(dfp, format, ##__VA_ARGS__);}}
-  extern FILE *dfp;
+extern FILE *dfp;
 #else
 # define debug(format, ...) {}
 #endif
@@ -88,17 +88,16 @@
 # define DEFAULT_BUFFERFILE	"/tmp/screen-exchange"
 #endif
 
-struct mode
-{
-  struct termios tio;
+struct mode {
+	struct termios tio;
 #if defined(KANJI) && defined(TIOCKSET)
-  struct jtchars m_jtchars;
-  int m_knjmode;
+	struct jtchars m_jtchars;
+	int m_knjmode;
 #endif
 };
 
 
-/* #include "logfile.h" */	/* (requires stat.h) struct logfile */
+				/* #include "logfile.h" *//* (requires stat.h) struct logfile */
 #include "image.h"
 #include "canvas.h"
 #include "display.h"
@@ -142,58 +141,48 @@ struct mode
 #define MSG_VERSION	4
 
 #define MSG_REVISION	(('m'<<24) | ('s'<<16) | ('g'<<8) | MSG_VERSION)
-struct msg
-{
-  int protocol_revision;	/* reduce harm done by incompatible messages */
-  int type;
-  char m_tty[MAXPATHLEN];	/* ttyname */
-  union
-    {
-      struct
-	{
-	  int lflag;
-	  int aflag;
-	  int flowflag;
-	  int hheight;		/* size of scrollback buffer */
-	  int nargs;
-	  char line[MAXPATHLEN];
-	  char dir[MAXPATHLEN];
-	  char screenterm[MAXTERMLEN];	/* is screen really "screen" ? */
-	}
-      create;
-      struct
-	{
-	  char auser[MAXLOGINLEN + 1];	/* username */
-	  int apid;		/* pid of frontend */
-	  int adaptflag;	/* adapt window size? */
-	  int lines, columns;	/* display size */
-	  char preselect[20];
-	  int esc;		/* his new escape character unless -1 */
-	  int meta_esc;		/* his new meta esc character unless -1 */
-	  char envterm[MAXTERMLEN + 1];	/* terminal type */
-	  int encoding;		/* encoding of display */
-	  int detachfirst;      /* whether to detach remote sessions first */
-	}
-      attach;
-      struct
-	{
-	  char duser[MAXLOGINLEN + 1];	/* username */
-	  int dpid;		/* pid of frontend */
-	}
-      detach;
-      struct
-	{
-	  char auser[MAXLOGINLEN + 1];	/* username */
-	  int nargs;
-	  char cmd[MAXPATHLEN + 1];	/* command */
-	  int apid;		/* pid of frontend */
-	  char preselect[20];
-	  char writeback[MAXPATHLEN];  /* The socket to write the result.
-					  Only used for MSG_QUERY */
-	}
-      command;
-      char message[MAXPATHLEN * 2];
-    } m;
+struct msg {
+	int protocol_revision;	/* reduce harm done by incompatible messages */
+	int type;
+	char m_tty[MAXPATHLEN];	/* ttyname */
+	union {
+		struct {
+			int lflag;
+			int aflag;
+			int flowflag;
+			int hheight;	/* size of scrollback buffer */
+			int nargs;
+			char line[MAXPATHLEN];
+			char dir[MAXPATHLEN];
+			char screenterm[MAXTERMLEN];	/* is screen really "screen" ? */
+		} create;
+		struct {
+			char auser[MAXLOGINLEN + 1];	/* username */
+			int apid;	/* pid of frontend */
+			int adaptflag;	/* adapt window size? */
+			int lines, columns;	/* display size */
+			char preselect[20];
+			int esc;	/* his new escape character unless -1 */
+			int meta_esc;	/* his new meta esc character unless -1 */
+			char envterm[MAXTERMLEN + 1];	/* terminal type */
+			int encoding;	/* encoding of display */
+			int detachfirst;	/* whether to detach remote sessions first */
+		} attach;
+		struct {
+			char duser[MAXLOGINLEN + 1];	/* username */
+			int dpid;	/* pid of frontend */
+		} detach;
+		struct {
+			char auser[MAXLOGINLEN + 1];	/* username */
+			int nargs;
+			char cmd[MAXPATHLEN + 1];	/* command */
+			int apid;	/* pid of frontend */
+			char preselect[20];
+			char writeback[MAXPATHLEN];	/* The socket to write the result.
+							   Only used for MSG_QUERY */
+		} command;
+		char message[MAXPATHLEN * 2];
+	} m;
 };
 
 /*
@@ -204,33 +193,33 @@ struct msg
 #define SIG_LOCK	SIGUSR2
 #define SIG_STOP	SIGTSTP
 #ifdef SIGIO
-#define SIG_NODEBUG	SIGIO		/* triggerd by command 'debug off' */
+#define SIG_NODEBUG	SIGIO	/* triggerd by command 'debug off' */
 #endif
 
 
 #define BELL		(Ctrl('g'))
-#define VBELLWAIT	1 /* No. of seconds a vbell will be displayed */
+#define VBELLWAIT	1	/* No. of seconds a vbell will be displayed */
 
-#define BELL_ON		0 /* No bell has occurred in the window */
-#define BELL_FOUND	1 /* A bell has occurred, but user not yet notified */
-#define BELL_DONE	2 /* A bell has occured, user has been notified */
+#define BELL_ON		0	/* No bell has occurred in the window */
+#define BELL_FOUND	1	/* A bell has occurred, but user not yet notified */
+#define BELL_DONE	2	/* A bell has occured, user has been notified */
 
-#define BELL_VISUAL	3 /* A bell has occured in fore win, notify him visually */
+#define BELL_VISUAL	3	/* A bell has occured in fore win, notify him visually */
 
-#define MON_OFF 	0 /* Monitoring is off in the window */
-#define MON_ON		1 /* No activity has occurred in the window */
-#define MON_FOUND	2 /* Activity has occured, but user not yet notified */
-#define MON_DONE	3 /* Activity has occured, user has been notified */
+#define MON_OFF 	0	/* Monitoring is off in the window */
+#define MON_ON		1	/* No activity has occurred in the window */
+#define MON_FOUND	2	/* Activity has occured, but user not yet notified */
+#define MON_DONE	3	/* Activity has occured, user has been notified */
 
-#define DUMP_TERMCAP	0 /* WriteFile() options */
+#define DUMP_TERMCAP	0	/* WriteFile() options */
 #define DUMP_HARDCOPY	1
 #define DUMP_EXCHANGE	2
 #define DUMP_SCROLLBACK 3
 
-#define SILENCE_OFF	0 /* Not checking for silence */
-#define SILENCE_ON	1 /* Window being monitored for silence */
-#define SILENCE_FOUND   2 /* Window is silent */
-#define SILENCE_DONE    3 /* Window is silent and user is notified */
+#define SILENCE_OFF	0	/* Not checking for silence */
+#define SILENCE_ON	1	/* Window being monitored for silence */
+#define SILENCE_FOUND   2	/* Window is silent */
+#define SILENCE_DONE    3	/* Window is silent and user is notified */
 
 extern char strnomem[];
 
@@ -243,20 +232,18 @@ extern char strnomem[];
 #define INP_EVERY	4
 
 
-struct acl
-{
-  struct acl *next;
-  char *name;
+struct acl {
+	struct acl *next;
+	char *name;
 };
 
 /* register list */
 #define MAX_PLOP_DEFS 256
 
-struct baud_values
-{
-  int idx;	/* the index in the bsd-is padding lookup table */
-  int bps;	/* bits per seconds */
-  int sym;	/* symbol defined in ttydev.h */
+struct baud_values {
+	int idx;		/* the index in the bsd-is padding lookup table */
+	int bps;		/* bits per seconds */
+	int sym;		/* symbol defined in ttydev.h */
 };
 
 /*

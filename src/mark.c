@@ -534,7 +534,7 @@ static void MarkProcess(char **inbufp, int *inlenp)
 			}
 		}
 
- processchar:
+	      processchar:
 		switch (od) {
 		case 'f':	/* fall through */
 		case 'F':	/* fall through */

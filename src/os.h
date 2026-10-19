@@ -117,17 +117,17 @@
 #  define VDISABLE _POSIX_VDISABLE
 # else
 #  define VDISABLE 0377
-# endif /* _POSIX_VDISABLE */
-#endif /* !VDISABLE */
+# endif				/* _POSIX_VDISABLE */
+#endif				/* !VDISABLE */
 
 /*****************************************************************
  *   utmp handling
  */
 
 #ifdef GETUTENT
-  typedef char *slot_t;
+typedef char *slot_t;
 #else
-  typedef int slot_t;
+typedef int slot_t;
 #endif
 
 #if defined(UTMPOK) || defined(BUGGYGETLOGIN)
@@ -141,11 +141,11 @@
 #    define UTMPFILE	_PATH_UTMP
 #   else
 #    define UTMPFILE	"/etc/utmp"
-#   endif /* _PATH_UTMP */
+#   endif			/* _PATH_UTMP */
 #  endif
 # endif
 
-#endif /* UTMPOK || BUGGYGETLOGIN */
+#endif				/* UTMPOK || BUGGYGETLOGIN */
 
 #if !defined(UTMPOK) && defined(USRLIMIT)
 # undef USRLIMIT
@@ -254,9 +254,9 @@
 #define signal xsignal
 
 /* used in screen.c and attacher.c */
-#ifndef NSIG		/* kbeal needs these w/o SYSV */
+#ifndef NSIG			/* kbeal needs these w/o SYSV */
 # define NSIG 32
-#endif /* !NSIG */
+#endif				/* !NSIG */
 
 
 /*****************************************************************
@@ -310,4 +310,3 @@
  * MSG_VERSION */
 #define MAXTERMLEN	32
 #define MAXLOGINLEN	256
-

@@ -1225,7 +1225,7 @@ void WindowDied(struct win *p, int wstat, int wstat_valid)
 			s[strlen(s) - 1] = '\0';
 		debug("window %d (%s) going into zombie state fd %d", p->w_number, p->w_title, p->w_ptyfd);
 #ifdef UTMPOK
-		if (p->w_slot != (slot_t) 0 && p->w_slot != (slot_t) - 1) {
+		if (p->w_slot != (slot_t)0 && p->w_slot != (slot_t)-1) {
 			RemoveUtmp(p);
 			p->w_slot = 0;	/* "detached" */
 		}
@@ -1573,13 +1573,13 @@ void Detach(int mode)
 #ifdef UTMPOK
 	if (displays->d_next == 0) {
 		for (p = windows; p; p = p->w_next) {
-			if (p->w_slot != (slot_t) - 1 && !(p->w_lflag & 2)) {
+			if (p->w_slot != (slot_t)-1 && !(p->w_lflag & 2)) {
 				RemoveUtmp(p);
 				/*
 				 * Set the slot to 0 to get the window
 				 * logged in again.
 				 */
-				p->w_slot = (slot_t) 0;
+				p->w_slot = (slot_t)0;
 			}
 		}
 	}
@@ -2730,7 +2730,8 @@ static void serv_select_fn(struct event *ev, char *data)
 					n = cv->c_layer->l_height;
 				CV_CALL(cv,
 					LScrollV(flayer, -n, 0, flayer->l_height - 1, 0);
-					LayRedisplayLine(-1, -1, -1, 1); for (i = 0; i < n; i++)
+					LayRedisplayLine(-1, -1, -1, 1);
+					for (i = 0; i < n; i++)
 					LayRedisplayLine(i, 0, flayer->l_width - 1, 1);
 					if (cv == cv->c_display->d_forecv)
 					LaySetCursor();) ;
@@ -2742,7 +2743,8 @@ static void serv_select_fn(struct event *ev, char *data)
 					n = cv->c_layer->l_height;
 				CV_CALL(cv,
 					LScrollV(flayer, n, 0, cv->c_layer->l_height - 1, 0);
-					LayRedisplayLine(-1, -1, -1, 1); for (i = 0; i < n; i++)
+					LayRedisplayLine(-1, -1, -1, 1);
+					for (i = 0; i < n; i++)
 					LayRedisplayLine(i + flayer->l_height - n, 0, flayer->l_width - 1, 1);
 					if (cv == cv->c_display->d_forecv)
 					LaySetCursor();) ;
@@ -2757,7 +2759,8 @@ static void serv_select_fn(struct event *ev, char *data)
 				RethinkViewportOffsets(cv);
 				if (n > cv->c_layer->l_width)
 					n = cv->c_layer->l_width;
-				CV_CALL(cv, LayRedisplayLine(-1, -1, -1, 1); for (i = 0; i < flayer->l_height; i++) {
+				CV_CALL(cv, LayRedisplayLine(-1, -1, -1, 1);
+					for (i = 0; i < flayer->l_height; i++) {
 					LScrollH(flayer, -n, i, 0, flayer->l_width - 1, 0, 0);
 					LayRedisplayLine(i, 0, n - 1, 1);}
 					if (cv == cv->c_display->d_forecv)
@@ -2772,7 +2775,8 @@ static void serv_select_fn(struct event *ev, char *data)
 				RethinkViewportOffsets(cv);
 				if (n > cv->c_layer->l_width)
 					n = cv->c_layer->l_width;
-				CV_CALL(cv, LayRedisplayLine(-1, -1, -1, 1); for (i = 0; i < flayer->l_height; i++) {
+				CV_CALL(cv, LayRedisplayLine(-1, -1, -1, 1);
+					for (i = 0; i < flayer->l_height; i++) {
 					LScrollH(flayer, n, i, 0, flayer->l_width - 1, 0, 0);
 					LayRedisplayLine(i, flayer->l_width - n, flayer->l_width - 1, 1);}
 					if (cv == cv->c_display->d_forecv)
@@ -2785,8 +2789,7 @@ static void serv_select_fn(struct event *ev, char *data)
 		if (D_status == STATUS_ON_WIN || D_cvlist == 0 || D_cvlist->c_next == 0)
 			continue;
 		debug("serv_select_fn: Restore on cv %#x\n", (int)D_forecv);
-		CV_CALL(D_forecv, LayRestore();
-			LaySetCursor());
+		CV_CALL(D_forecv, LayRestore(); LaySetCursor());
 	}
 }
 

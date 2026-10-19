@@ -310,7 +310,7 @@ void WriteString(struct win *wp, register char *buf, register int len)
 					debug("read UNICODE %04x\n", c);
 			}
 
- tryagain:
+		      tryagain:
 			switch (curr->w_state) {
 			case PRIN:
 				switch (c) {
@@ -1888,7 +1888,7 @@ static void FindAKA()
 
 	y = (wp->w_autoaka > 0 && wp->w_autoaka <= wp->w_height) ? wp->w_autoaka - 1 : wp->w_y;
 	cols = wp->w_width;
- try_line:
+      try_line:
 	cp = line = wp->w_mlines[y].image;
 	if (wp->w_autoaka > 0 && *wp->w_akabuf != '\0') {
 		for (;;) {

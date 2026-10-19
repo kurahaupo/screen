@@ -82,12 +82,12 @@ static int AclSetPermWin(struct acluser *, struct acluser *, char *, struct win 
 static int UserAcl(struct acluser *, struct acluser **, int, char **);
 static int UserAclCopy(struct acluser **, struct acluser **);
 
-static int GrowBitfield(AclBits * bfp, int len, int delta, int defaultbit)
+static int GrowBitfield(AclBits *bfp, int len, int delta, int defaultbit)
 {
 	AclBits n, o = *bfp;
 	int i;
 
-	if (!(n = (AclBits) calloc(1, (unsigned long)(&ACLBYTE((char *)0, len + delta + 1)))))
+	if (!(n = (AclBits)calloc(1, (unsigned long)(&ACLBYTE((char *)0, len + delta + 1)))))
 		return -1;
 	for (i = 0; i < (len + delta); i++) {
 		if (((i < len) && (ACLBIT(i) & ACLBYTE(o, i))) || ((i >= len) && (defaultbit)))

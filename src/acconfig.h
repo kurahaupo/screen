@@ -119,7 +119,7 @@
  */
 #ifndef NONETHACK
 # define NETHACK
-#endif /* NONETHACK */
+#endif				/* NONETHACK */
 
 /*
  * If screen is installed with permissions to update /etc/utmp (such
@@ -189,7 +189,7 @@
  * that this feature may cause screen to lock up.
  */
 #ifdef bsdi
-# define TTY_DISABLE_FNBLOCK /* select barfs without it ... */
+# define TTY_DISABLE_FNBLOCK	/* select barfs without it ... */
 #endif
 
 
@@ -428,4 +428,3 @@
  */
 #undef PTYRANGE0
 #undef PTYRANGE1
-
