@@ -28,7 +28,7 @@
 
 
 /* three known bits: */
-#define ACL_EXEC 0		
+#define ACL_EXEC 0
 #define ACL_WRITE 1
 #define ACL_READ 2
 

@@ -101,8 +101,8 @@ struct display
   int   d_status_buflen;	/* last message buffer len */
   int	d_status_lastx;		/* position of the cursor */
   int	d_status_lasty;		/*   before status was displayed */
-  int   d_status_obuflen;	/* saved obuflen */ 
-  int   d_status_obuffree;	/* saved obuffree */ 
+  int   d_status_obuflen;	/* saved obuflen */
+  int   d_status_obuffree;	/* saved obuffree */
   int	d_status_obufpos;	/* end of status position in obuf */
   struct event d_statusev;	/* timeout event */
   struct event d_hstatusev;	/* hstatus changed event */
