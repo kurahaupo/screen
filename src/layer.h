@@ -27,32 +27,30 @@
  * layer over the current windows.
  */
 
-struct mchar;	/* forward declaration */
+struct mchar;			/* forward declaration */
 
-struct LayFuncs
-{
-  void	(*LayProcess) __P((char **, int *));
-  void	(*LayAbort) __P((void));
-  void	(*LayRedisplayLine) __P((int, int, int, int));
-  void	(*LayClearLine) __P((int, int, int));
-  int	(*LayRewrite) __P((int, int, int, struct mchar *, int));
-  int	(*LayResize) __P((int, int));
-  void	(*LayRestore) __P((void));
+struct LayFuncs {
+    void (*LayProcess) __P( (char **, int *));
+    void (*LayAbort) __P( (void));
+    void (*LayRedisplayLine) __P( (int, int, int, int));
+    void (*LayClearLine) __P( (int, int, int));
+    int (*LayRewrite) __P( (int, int, int, struct mchar *, int));
+    int (*LayResize) __P( (int, int));
+    void (*LayRestore) __P( (void));
 };
 
-struct layer
-{
-  struct canvas *l_cvlist;	/* list of canvases displaying layer */
-  int	 l_width;
-  int	 l_height;
-  int    l_x;			/* cursor position */
-  int    l_y;
-  struct LayFuncs *l_layfn;
-  char	*l_data;
+struct layer {
+    struct canvas *l_cvlist;	/* list of canvases displaying layer */
+    int l_width;
+    int l_height;
+    int l_x;			/* cursor position */
+    int l_y;
+    struct LayFuncs *l_layfn;
+    char *l_data;
 
-  struct layer *l_next;		/* layer stack, should be in data? */
-  struct layer *l_bottom;	/* bottom element of layer stack */
-  int	 l_blocking;
+    struct layer *l_next;	/* layer stack, should be in data? */
+    struct layer *l_bottom;	/* bottom element of layer stack */
+    int l_blocking;
 };
 
 #define Process		(*flayer->l_layfn->LayProcess)
@@ -101,4 +99,3 @@ struct layer
 	    }						\
 	  display = olddisplay;				\
 	} while(0)
-

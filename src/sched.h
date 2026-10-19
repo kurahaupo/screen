@@ -1,17 +1,16 @@
 
-struct event
-{
-  struct event *next;
-  void (*handler) __P((struct event *, char *));
-  char *data;
-  int fd;
-  int type;
-  int pri;
-  struct timeval timeout;
-  int queued;		/* in evs queue */
-  int active;		/* in fdset */
-  int *condpos;		/* only active if condpos - condneg > 0 */
-  int *condneg;
+struct event {
+    struct event *next;
+    void (*handler) __P( (struct event *, char *));
+    char *data;
+    int fd;
+    int type;
+    int pri;
+    struct timeval timeout;
+    int queued;			/* in evs queue */
+    int active;			/* in fdset */
+    int *condpos;		/* only active if condpos - condneg > 0 */
+    int *condneg;
 };
 
 #define EV_TIMEOUT	0

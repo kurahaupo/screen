@@ -37,18 +37,17 @@
 #define ACLBYTE(data, w)   ((data)[(w) >> 3])
 #define ACLBIT(w)   (0x80 >> ((w) & 7))
 
-typedef unsigned char * AclBits;
+typedef unsigned char *AclBits;
 
 /*
  * How a user joins a group.
  * Here is the node to construct one list per user.
  */
-struct usergroup
-{
-  struct user *u;	/* the user who borrows us his rights */
-  struct usergroup *next;
+struct usergroup {
+    struct user *u;		/* the user who borrows us his rights */
+    struct usergroup *next;
 };
-#endif /* MULTIUSER */
+#endif				/* MULTIUSER */
 
 /***************
  *  ==> user.h
@@ -59,25 +58,23 @@ struct usergroup
  * users is the User entry of the session owner (creator)
  * and anchors all other users. Add/Delete users there.
  */
-typedef struct user
-{
-  struct user *u_next;		/* continue the main user list */
-  char u_name[20+1];		/* login name how he showed up */
-  char *u_password;		/* his password (may be NullStr). */
-  int  u_checkpassword;		/* nonzero if this u_password is valid */
-  int  u_detachwin;		/* the window where he last detached */
-  int  u_detachotherwin;	/* window that was "other" when he detached */
-  int  u_Esc, u_MetaEsc;	/* the users screen escape character */
+typedef struct user {
+    struct user *u_next;	/* continue the main user list */
+    char u_name[20 + 1];	/* login name how he showed up */
+    char *u_password;		/* his password (may be NullStr). */
+    int u_checkpassword;	/* nonzero if this u_password is valid */
+    int u_detachwin;		/* the window where he last detached */
+    int u_detachotherwin;	/* window that was "other" when he detached */
+    int u_Esc, u_MetaEsc;	/* the users screen escape character */
 #ifdef COPY_PASTE
-  char  *u_copybuffer;
-  int   u_copylen;
+    char *u_copybuffer;
+    int u_copylen;
 #endif
 #ifdef MULTIUSER
-  int u_id;			/* a uniq index in the bitfields. */
-  AclBits u_umask_w_bits[ACL_BITS_PER_WIN];	/* his window create umask */
-  struct usergroup *u_group;	/* linked list of pointers to other users */
+    int u_id;			/* a uniq index in the bitfields. */
+    AclBits u_umask_w_bits[ACL_BITS_PER_WIN];	/* his window create umask */
+    struct usergroup *u_group;	/* linked list of pointers to other users */
 #endif
 } User;
 
 extern int DefaultEsc, DefaultMetaEsc;
-

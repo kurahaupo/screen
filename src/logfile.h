@@ -22,15 +22,14 @@
  * $Id$ FAU
  */
 
-struct logfile
-{
-  struct logfile *next;
-  FILE *fp;		/* a hopefully uniq filepointer to the log file */
-  char *name;		/* the name. used to reopen, when stat fails. */
-  int opencount;	/* synchronize logfopen() and logfclose() */
-  int writecount;	/* increments at logfwrite(), counts write() and fflush() */
-  int flushcount;	/* increments at logfflush(), zeroed at logfwrite() */
-  struct stat *st;	/* how the file looks like */
+struct logfile {
+    struct logfile *next;
+    FILE *fp;			/* a hopefully uniq filepointer to the log file */
+    char *name;			/* the name. used to reopen, when stat fails. */
+    int opencount;		/* synchronize logfopen() and logfclose() */
+    int writecount;		/* increments at logfwrite(), counts write() and fflush() */
+    int flushcount;		/* increments at logfflush(), zeroed at logfwrite() */
+    struct stat *st;		/* how the file looks like */
 };
 
 /*
@@ -39,7 +38,7 @@ struct logfile
  * otherwise.
  * example: l = logfopen(name, islogfile(name) : NULL ? fopen(name, "a"));
  */
-struct logfile *logfopen __P((char *name, FILE *fp));
+struct logfile *logfopen __P((char *name, FILE * fp));
 
 /*
  * lookup a logfile by name. This is useful, so that we can provide
@@ -59,7 +58,7 @@ int logfwrite __P((struct logfile *, char *, int));
  * all logfiles are flushed, else the specified file
  * the number of flushed filepointers is returned
  */
-int logfflush __P((struct logfile *ifany));
+int logfflush __P((struct logfile * ifany));
 
 /*
  * a reopen function may be registered here, in case you want to bring your
@@ -69,7 +68,8 @@ int logfflush __P((struct logfile *ifany));
  * if you provide NULL as parameter to logreopen_register, the builtin
  * reopen function will be reactivated.
  */
-void logreopen_register __P((int (*fn) __P((char *, int, struct logfile *)) ));
+void logreopen_register
+__P((int (*fn) __P((char *, int, struct logfile *))));
 
 /*
  * Your custom reopen function is required to reuse the exact

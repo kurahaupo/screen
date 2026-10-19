@@ -27,30 +27,34 @@
 #undef IFCOLOR
 
 #ifdef FONT
-# define IFFONT(x) x
+#define IFFONT(x) x
 #else
-# define IFFONT(x)
+#define IFFONT(x)
 #endif
 
 #ifdef COLOR
-# define IFCOLOR(x) x
+#define IFCOLOR(x) x
 #else
-# define IFCOLOR(x)
+#define IFCOLOR(x)
 #endif
 
 
 struct mchar {
-	char image;
-	char attr;
-IFFONT( char font;)
-IFCOLOR(char color;)
+    char image;
+    char attr;
+     IFFONT(char font;
+	)
+     IFCOLOR(char color;
+	)
 };
 
 struct mline {
-	char *image;
-	char *attr;
-IFFONT( char *font;)
-IFCOLOR(char *color;)
+    char *image;
+    char *attr;
+     IFFONT(char *font;
+	)
+     IFCOLOR(char *color;
+	)
 };
 
 
@@ -110,4 +114,3 @@ IFCOLOR((ml)->color[x] = (mc)->color;			       )\
 IFFONT(	(mc)->font  = (ml)->font[x];			       )\
 IFCOLOR((mc)->color = (ml)->color[x];			       )\
 } while (0)
-

@@ -47,48 +47,46 @@
  *  Parser state
  */
 /* keep state_t and state_t_string in sync! */
-enum state_t
-{
-  LIT,				/* Literal input */
-  ESC,				/* Start of escape sequence */
-  ASTR,				/* Start of control string */
-  STRESC,			/* ESC seen in control string */
-  CSI,				/* Reading arguments in "CSI Pn ;...*/
-  PRIN,				/* Printer mode */
-  PRINESC,			/* ESC seen in printer mode */
-  PRINCSI,			/* CSI seen in printer mode */
-  PRIN4				/* CSI 4 seen in printer mode */
+enum state_t {
+    LIT,			/* Literal input */
+    ESC,			/* Start of escape sequence */
+    ASTR,			/* Start of control string */
+    STRESC,			/* ESC seen in control string */
+    CSI,			/* Reading arguments in "CSI Pn ;... */
+    PRIN,			/* Printer mode */
+    PRINESC,			/* ESC seen in printer mode */
+    PRINCSI,			/* CSI seen in printer mode */
+    PRIN4			/* CSI 4 seen in printer mode */
 };
 
 /* keep string_t and string_t_string in sync! */
-enum string_t
-{
-  NONE,
-  DCS,				/* Device control string */
-  OSC,				/* Operating system command */
-  APC,				/* Application program command */
-				/*  - used for status change */
-  PM,				/* Privacy message */
-  AKA,				/* title for current screen */
-  GM,				/* Global message to every display */
-  STATUS			/* User hardstatus line */
+enum string_t {
+    NONE,
+    DCS,			/* Device control string */
+    OSC,			/* Operating system command */
+    APC,			/* Application program command */
+    /*  - used for status change */
+    PM,				/* Privacy message */
+    AKA,			/* title for current screen */
+    GM,				/* Global message to every display */
+    STATUS			/* User hardstatus line */
 };
 
 /*
  *  Types of movement used by GotoPos()
  */
 enum move_t {
-	M_NONE,
-	M_UP,
-	M_CUP,
-	M_DO,
-	M_CDO,
-	M_LE,
-	M_CLE,
-	M_RI,
-	M_CRI,
-	M_RW,
-	M_CR	/* CR and rewrite */
+    M_NONE,
+    M_UP,
+    M_CUP,
+    M_DO,
+    M_CDO,
+    M_LE,
+    M_CLE,
+    M_RI,
+    M_CRI,
+    M_RW,
+    M_CR			/* CR and rewrite */
 };
 
 #define EXPENSIVE	 1000

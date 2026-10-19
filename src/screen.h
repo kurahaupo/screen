@@ -25,14 +25,14 @@
 #include "os.h"
 
 #if defined(__STDC__)
-# ifndef __P
-#  define __P(a) a
-# endif
+#ifndef __P
+#define __P(a) a
+#endif
 #else
-# ifndef __P
-#  define __P(a) ()
-# endif
-# define const
+#ifndef __P
+#define __P(a) ()
+#endif
+#define const
 #endif
 
 #include "osdef.h"
@@ -46,39 +46,39 @@
 
 
 #ifdef DEBUG
-# define STATIC		/* a function that the debugger should see */
+#define STATIC			/* a function that the debugger should see */
 #else
-# define STATIC static
+#define STATIC static
 #endif
 
 #ifdef DEBUG
-# define DEBUGDIR "/tmp/debug"
-# define debugf(a)       do {if(dfp){fprintf a;fflush(dfp);}} while (0)
-# define debug(x)        debugf((dfp,x))
-# define debug1(x,a)     debugf((dfp,x,a))
-# define debug2(x,a,b)   debugf((dfp,x,a,b))
-# define debug3(x,a,b,c) debugf((dfp,x,a,b,c))
-  extern FILE *dfp;
+#define DEBUGDIR "/tmp/debug"
+#define debugf(a)       do {if(dfp){fprintf a;fflush(dfp);}} while (0)
+#define debug(x)        debugf((dfp,x))
+#define debug1(x,a)     debugf((dfp,x,a))
+#define debug2(x,a,b)   debugf((dfp,x,a,b))
+#define debug3(x,a,b,c) debugf((dfp,x,a,b,c))
+extern FILE *dfp;
 #else
-# define debugf(a)       do {} while (0)
-# define debug(x)        debugf(x)
-# define debug1(x,a)     debugf(x)
-# define debug2(x,a,b)   debugf(x)
-# define debug3(x,a,b,c) debugf(x)
+#define debugf(a)       do {} while (0)
+#define debug(x)        debugf(x)
+#define debug1(x,a)     debugf(x)
+#define debug2(x,a,b)   debugf(x)
+#define debug3(x,a,b,c) debugf(x)
 #endif
 
 #ifndef DEBUG
-# define NOASSERT
+#define NOASSERT
 #endif
 
 #ifndef NOASSERT
-# if defined(__STDC__)
-#  define ASSERT(lousy_cpp) do {if (!(lousy_cpp)) {if (!dfp) opendebug(0, 1);debug2("ASSERT("#lousy_cpp") failed file %s line %d\n", __FILE__, __LINE__);abort();}} while (0)
-# else
-#  define ASSERT(lousy_cpp) do {if (!(lousy_cpp)) {if (!dfp) opendebug(0, 1);debug2("ASSERT(lousy_cpp) failed file %s line %d\n", __FILE__, __LINE__);abort();}} while (0)
-# endif
+#if defined(__STDC__)
+#define ASSERT(lousy_cpp) do {if (!(lousy_cpp)) {if (!dfp) opendebug(0, 1);debug2("ASSERT("#lousy_cpp") failed file %s line %d\n", __FILE__, __LINE__);abort();}} while (0)
 #else
-# define ASSERT(lousy_cpp) do {} while (0)
+#define ASSERT(lousy_cpp) do {if (!(lousy_cpp)) {if (!dfp) opendebug(0, 1);debug2("ASSERT(lousy_cpp) failed file %s line %d\n", __FILE__, __LINE__);abort();}} while (0)
+#endif
+#else
+#define ASSERT(lousy_cpp) do {} while (0)
 #endif
 
 /* here comes my own Free: jw. */
@@ -99,47 +99,46 @@
 #define MAXHISTHEIGHT		3000
 #define DEFAULTHISTHEIGHT	100
 #ifdef NAME_MAX
-# define DEFAULT_BUFFERFILE     "/tmp/screen-xchg"
+#define DEFAULT_BUFFERFILE     "/tmp/screen-xchg"
 #else
-# define DEFAULT_BUFFERFILE	"/tmp/screen-exchange"
+#define DEFAULT_BUFFERFILE	"/tmp/screen-exchange"
 #endif
 
 
 #if defined(hpux) && !(defined(VSUSP) && defined(VDSUSP) && defined(VWERASE) && defined(VLNEXT))
-# define HPUX_LTCHARS_HACK
+#define HPUX_LTCHARS_HACK
 #endif
 
-struct mode
-{
+struct mode {
 #ifdef POSIX
-  struct termios tio;
-# ifdef HPUX_LTCHARS_HACK
-  struct ltchars m_ltchars;
-# endif /* HPUX_LTCHARS_HACK */
-#else /* POSIX */
-# ifdef TERMIO
-  struct termio tio;
-#  ifdef CYTERMIO
-  int m_mapkey;
-  int m_mapscreen;
-  int m_backspace;
-#  endif
-# else /* TERMIO */
-  struct sgttyb m_ttyb;
-  struct tchars m_tchars;
-  struct ltchars m_ltchars;
-  int m_ldisc;
-  int m_lmode;
-# endif /* TERMIO */
+    struct termios tio;
+#ifdef HPUX_LTCHARS_HACK
+    struct ltchars m_ltchars;
+#endif				/* HPUX_LTCHARS_HACK */
+#else				/* POSIX */
+#ifdef TERMIO
+    struct termio tio;
+#ifdef CYTERMIO
+    int m_mapkey;
+    int m_mapscreen;
+    int m_backspace;
+#endif
+#else				/* TERMIO */
+    struct sgttyb m_ttyb;
+    struct tchars m_tchars;
+    struct ltchars m_ltchars;
+    int m_ldisc;
+    int m_lmode;
+#endif				/* TERMIO */
 #if defined(KANJI) && defined(TIOCKSET)
-  struct jtchars m_jtchars;
-  int m_knjmode;
-# endif
-#endif /* POSIX */
+    struct jtchars m_jtchars;
+    int m_knjmode;
+#endif
+#endif				/* POSIX */
 };
 
 
-/* #include "logfile.h" */	/* (requires stat.h) struct logfile */
+				/* #include "logfile.h" *//* (requires stat.h) struct logfile */
 #include "image.h"
 #include "display.h"
 #include "window.h"
@@ -172,44 +171,36 @@ struct mode
  */
 #define MSG_VERSION	0
 #define MSG_REVISION	(('m'<<24) | ('s'<<16) | ('g'<<8) | MSG_VERSION)
-struct msg
-{
-  int protocol_revision;	/* reduce harm done by incompatible messages */
-  int type;
-  char m_tty[MAXPATHLEN];	/* ttyname */
-  union
-    {
-      struct
-	{
-	  int lflag;
-	  int aflag;
-	  int flowflag;
-	  int hheight;		/* size of scrollback buffer */
-	  int nargs;
-	  char line[MAXPATHLEN];
-	  char dir[MAXPATHLEN];
-	  char screenterm[20];	/* is screen really "screen" ? */
-	}
-      create;
-      struct
-	{
-	  char auser[20 + 1];	/* username */
-	  int apid;		/* pid of frontend */
-	  int adaptflag;	/* adapt window size? */
-	  int lines, columns;	/* display size */
-	  char preselect[20];
-	  int esc;		/* his new escape character unless -1 */
-	  int meta_esc;		/* his new meta esc character unless -1 */
-	  char envterm[20 + 1];	/* terminal type */
-	}
-      attach;
-      struct
-	{
-	  char duser[20 + 1];	/* username */
-	  int dpid;		/* pid of frontend */
-	}
-      detach;
-      char message[MAXPATHLEN * 2];
+struct msg {
+    int protocol_revision;	/* reduce harm done by incompatible messages */
+    int type;
+    char m_tty[MAXPATHLEN];	/* ttyname */
+    union {
+	struct {
+	    int lflag;
+	    int aflag;
+	    int flowflag;
+	    int hheight;	/* size of scrollback buffer */
+	    int nargs;
+	    char line[MAXPATHLEN];
+	    char dir[MAXPATHLEN];
+	    char screenterm[20];	/* is screen really "screen" ? */
+	} create;
+	struct {
+	    char auser[20 + 1];	/* username */
+	    int apid;		/* pid of frontend */
+	    int adaptflag;	/* adapt window size? */
+	    int lines, columns;	/* display size */
+	    char preselect[20];
+	    int esc;		/* his new escape character unless -1 */
+	    int meta_esc;	/* his new meta esc character unless -1 */
+	    char envterm[20 + 1];	/* terminal type */
+	} attach;
+	struct {
+	    char duser[20 + 1];	/* username */
+	    int dpid;		/* pid of frontend */
+	} detach;
+	char message[MAXPATHLEN * 2];
     } m;
 };
 
@@ -221,25 +212,25 @@ struct msg
 #define SIG_LOCK	SIGUSR2
 #define SIG_STOP	SIGTSTP
 #ifdef SIGIO
-#define SIG_NODEBUG	SIGIO		/* triggerd by command 'debug off' */
+#define SIG_NODEBUG	SIGIO	/* triggerd by command 'debug off' */
 #endif
 
 
 #define BELL		(Ctrl('g'))
-#define VBELLWAIT	1 /* No. of seconds a vbell will be displayed */
+#define VBELLWAIT	1	/* No. of seconds a vbell will be displayed */
 
-#define BELL_ON		0 /* No bell has occurred in the window */
-#define BELL_FOUND 	1 /* A bell has occurred, but user not yet notified */
-#define BELL_DONE	2 /* A bell has occured, user has been notified */
+#define BELL_ON		0	/* No bell has occurred in the window */
+#define BELL_FOUND 	1	/* A bell has occurred, but user not yet notified */
+#define BELL_DONE	2	/* A bell has occured, user has been notified */
 
-#define BELL_VISUAL	3 /* A bell has occured in fore win, notify him visually */
+#define BELL_VISUAL	3	/* A bell has occured in fore win, notify him visually */
 
-#define MON_OFF 	0 /* Monitoring is off in the window */
-#define MON_ON		1 /* No activity has occurred in the window */
-#define MON_FOUND	2 /* Activity has occured, but user not yet notified */
-#define MON_DONE	3 /* Activity has occured, user has been notified */
+#define MON_OFF 	0	/* Monitoring is off in the window */
+#define MON_ON		1	/* No activity has occurred in the window */
+#define MON_FOUND	2	/* Activity has occured, but user not yet notified */
+#define MON_DONE	3	/* Activity has occured, user has been notified */
 
-#define DUMP_TERMCAP	0 /* WriteFile() options */
+#define DUMP_TERMCAP	0	/* WriteFile() options */
 #define DUMP_HARDCOPY	1
 #define DUMP_EXCHANGE	2
 
@@ -258,24 +249,21 @@ extern char strnomem[];
 
 
 #ifdef MULTIUSER
-struct acl
-{
-  struct acl *next;
-  char *name;
+struct acl {
+    struct acl *next;
+    char *name;
 };
 #endif
 
 /* register list */
 #define MAX_PLOP_DEFS 256
-struct plop
-{
-  char *buf;
-  int len;
+struct plop {
+    char *buf;
+    int len;
 };
 
-struct baud_values
-{
-  int idx;	/* the index in the bsd-is padding lookup table */
-  int bps;	/* bits per seconds */
-  int sym;	/* symbol defined in ttydev.h */
+struct baud_values {
+    int idx;			/* the index in the bsd-is padding lookup table */
+    int bps;			/* bits per seconds */
+    int sym;			/* symbol defined in ttydev.h */
 };

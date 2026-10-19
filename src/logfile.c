@@ -23,12 +23,9 @@
 
 #include "rcs.h"
 RCS_ID("$Id$ FAU")
-
 #include <sys/types.h>		/* dev_t, ino_t, off_t, ... */
 #include <sys/stat.h>		/* struct stat */
 #include <fcntl.h>		/* O_WRONLY for logfile_reopen */
-
-
 #if 1
 #include "config.h"
 #include "screen.h"
@@ -41,16 +38,16 @@ extern int fwrite();
 extern int fflush();
 extern void fclose();
 extern char *strdup();
-# define debug(a)
-# define debug1(a)
-# define debug2(a)
-# ifndef __P
-#  if defined(__STDC__)
-#   define __P(a) a
-#  else
-#   define __P(a) ()
-#  endif
-# endif
+#define debug(a)
+#define debug1(a)
+#define debug2(a)
+#ifndef __P
+#if defined(__STDC__)
+#define __P(a) a
+#else
+#define __P(a) ()
+#endif
+#endif
 #endif
 
 #include "logfile.h"
@@ -61,18 +58,16 @@ static int stolen_logfile __P((struct logfile *));
 
 static struct logfile *logroot = NULL;
 
-static void
-changed_logfile(l)
+static void changed_logfile(l)
 struct logfile *l;
 {
-  struct stat o, *s = l->st;
+    struct stat o, *s = l->st;
 
-  if (fstat(fileno(l->fp), &o) < 0)		/* get trouble later */
-    return;
-  if (o.st_size > s->st_size)		/* aha, appended text */
-    {
-      s->st_size = o.st_size;		/* this should have changed */
-      s->st_mtime = o.st_mtime;		/* only size and mtime */
+    if (fstat(fileno(l->fp), &o) < 0)	/* get trouble later */
+	return;
+    if (o.st_size > s->st_size) {	/* aha, appended text */
+	s->st_size = o.st_size;	/* this should have changed */
+	s->st_mtime = o.st_mtime;	/* only size and mtime */
     }
 }
 
@@ -84,42 +79,39 @@ struct logfile *l;
  *
  * need_fd is returned on success, else -1 is returned.
  */
-int
-lf_move_fd(fd, need_fd)
+int lf_move_fd(fd, need_fd)
 int need_fd, fd;
 {
-  int r = -1;
+    int r = -1;
 
-  if (fd == need_fd)
-    return fd;
-  if (fd >=0 && fd < need_fd)
-    r = lf_move_fd(dup(fd), need_fd);
-  close(fd);
-  return r;
+    if (fd == need_fd)
+	return fd;
+    if (fd >= 0 && fd < need_fd)
+	r = lf_move_fd(dup(fd), need_fd);
+    close(fd);
+    return r;
 }
 
-static int
-logfile_reopen(name, wantfd, l)
+static int logfile_reopen(name, wantfd, l)
 char *name;
 int wantfd;
 struct logfile *l;
 {
-  int got_fd;
+    int got_fd;
 
-  close(wantfd);
-  if (((got_fd = open(name, O_WRONLY | O_CREAT | O_APPEND, 0666)) < 0) ||
-      lf_move_fd(got_fd, wantfd) < 0)
-    {
-      logfclose(l);
-      debug1("logfile_reopen: failed for %s\n", name);
-      return -1;
+    close(wantfd);
+    if (((got_fd = open(name, O_WRONLY | O_CREAT | O_APPEND, 0666)) < 0) ||
+	lf_move_fd(got_fd, wantfd) < 0) {
+	logfclose(l);
+	debug1("logfile_reopen: failed for %s\n", name);
+	return -1;
     }
-  changed_logfile(l);
-  debug2("logfile_reopen: %d = %s\n", wantfd, name);
-  return 0;
+    changed_logfile(l);
+    debug2("logfile_reopen: %d = %s\n", wantfd, name);
+    return 0;
 }
 
-static int (* lf_reopen_fn)() = logfile_reopen;
+static int (*lf_reopen_fn)() = logfile_reopen;
 
 /*
  * Whenever logfwrite discoveres that it is required to close and
@@ -133,11 +125,10 @@ static int (* lf_reopen_fn)() = logfile_reopen;
  *    reinitialise itself.
  * d) return 0 on success.
  */
-void
-logreopen_register(fn)
-int (*fn) __P((char *, int, struct logfile *));
+void logreopen_register(fn)
+int (*fn) __P( (char *, int, struct logfile *));
 {
-  lf_reopen_fn = fn ? fn : logfile_reopen;
+    lf_reopen_fn = fn ? fn : logfile_reopen;
 }
 
 /*
@@ -146,126 +137,118 @@ int (*fn) __P((char *, int, struct logfile *));
  * The l->st structure initialised by logfopen is updated
  * on every call.
  */
-static int
-stolen_logfile(l)
+static int stolen_logfile(l)
 struct logfile *l;
 {
-  struct stat o, *s = l->st;
+    struct stat o, *s = l->st;
 
-  o = *s;
-  if (fstat(fileno(l->fp), s) < 0)		/* remember that stat failed */
-    s->st_ino = s->st_dev = 0;
-  ASSERT(s == l->st);
-  if (!o.st_dev && !o.st_ino)			/* nothing to compare with */
-    return 0;
+    o = *s;
+    if (fstat(fileno(l->fp), s) < 0)	/* remember that stat failed */
+	s->st_ino = s->st_dev = 0;
+    ASSERT(s == l->st);
+    if (!o.st_dev && !o.st_ino)	/* nothing to compare with */
+	return 0;
 
-  if ((!s->st_dev && !s->st_ino) ||	/* stat failed, that's new! */
-      !s->st_nlink ||			/* red alert: file unlinked */
-      (s->st_size < o.st_size) ||		/*           file truncated */
-      (s->st_mtime != o.st_mtime) ||		/*            file modified */
-      ((s->st_ctime != o.st_ctime) &&   	/*     file changed (moved) */
-       !(s->st_mtime == s->st_ctime && 		/*  and it was not a change */
-         o.st_ctime < s->st_ctime)))		/* due to delayed nfs write */
-    {
-      debug1("stolen_logfile: %s stolen!\n", l->name);
-      debug3("st_dev %d, st_ino %d, st_nlink %d\n",
-             (int)s->st_dev, (int)s->st_ino, (int)s->st_nlink);
-      debug2("s->st_size %d, o.st_size %d\n", (int)s->st_size, (int)o.st_size);
-      debug2("s->st_mtime %d, o.st_mtime %d\n",
-             (int)s->st_mtime, (int)o.st_mtime);
-      debug2("s->st_ctime %d, o.st_ctime %d\n",
-             (int)s->st_ctime, (int)o.st_ctime);
-      return -1;
+    if ((!s->st_dev && !s->st_ino) ||	/* stat failed, that's new! */
+	!s->st_nlink ||		/* red alert: file unlinked */
+	(s->st_size < o.st_size) ||	/*           file truncated */
+	(s->st_mtime != o.st_mtime) ||	/*            file modified */
+	((s->st_ctime != o.st_ctime) &&	/*     file changed (moved) */
+	 !(s->st_mtime == s->st_ctime &&	/*  and it was not a change */
+	   o.st_ctime < s->st_ctime))) {	/* due to delayed nfs write */
+	debug1("stolen_logfile: %s stolen!\n", l->name);
+	debug3("st_dev %d, st_ino %d, st_nlink %d\n",
+	       (int) s->st_dev, (int) s->st_ino, (int) s->st_nlink);
+	debug2("s->st_size %d, o.st_size %d\n", (int) s->st_size,
+	       (int) o.st_size);
+	debug2("s->st_mtime %d, o.st_mtime %d\n", (int) s->st_mtime,
+	       (int) o.st_mtime);
+	debug2("s->st_ctime %d, o.st_ctime %d\n", (int) s->st_ctime,
+	       (int) o.st_ctime);
+	return -1;
     }
 
-  debug1("stolen_logfile: %s o.k.\n", l->name);
-  return 0;
+    debug1("stolen_logfile: %s o.k.\n", l->name);
+    return 0;
 }
 
-static struct logfile *
-lookup_logfile(name)
+static struct logfile *lookup_logfile(name)
 char *name;
 {
-  struct logfile *l;
+    struct logfile *l;
 
-  for (l = logroot; l; l = l->next)
-    if (!strcmp(name, l->name))
-      return l;
-  return NULL;
+    for (l = logroot; l; l = l->next)
+	if (!strcmp(name, l->name))
+	    return l;
+    return NULL;
 }
 
-struct logfile *
-logfopen(name, fp)
+struct logfile *logfopen(name, fp)
 char *name;
 FILE *fp;
 {
-  struct logfile *l;
+    struct logfile *l;
 
-  if (!fp)
-    {
-      if (!(l = lookup_logfile(name)))
-        return NULL;
-      l->opencount++;
-      return l;
+    if (!fp) {
+	if (!(l = lookup_logfile(name)))
+	    return NULL;
+	l->opencount++;
+	return l;
     }
 
-  if (!(l = (struct logfile *)malloc(sizeof(struct logfile))))
-    return NULL;
-  if (!(l->st = (struct stat *)malloc(sizeof(struct stat))))
-    {
-      free((char *)l);
-      return NULL;
+    if (!(l = (struct logfile *) malloc(sizeof(struct logfile))))
+	return NULL;
+    if (!(l->st = (struct stat *) malloc(sizeof(struct stat)))) {
+	free((char *) l);
+	return NULL;
     }
 
-  if (!(l->name = strdup(name)))
-    {
-      free((char *)l->st);
-      free((char *)l);
-      return NULL;
+    if (!(l->name = strdup(name))) {
+	free((char *) l->st);
+	free((char *) l);
+	return NULL;
     }
-  l->fp = fp;
-  l->opencount = 1;
-  l->writecount = 0;
-  l->flushcount = 0;
-  changed_logfile(l);
+    l->fp = fp;
+    l->opencount = 1;
+    l->writecount = 0;
+    l->flushcount = 0;
+    changed_logfile(l);
 
-  l->next = logroot;
-  logroot = l;
-  return l;
+    l->next = logroot;
+    logroot = l;
+    return l;
 }
 
-int
-islogfile(name)
+int islogfile(name)
 char *name;
 {
-  if (!name)
-    return logroot ? 1 : 0;
-  return lookup_logfile(name) ? 1 : 0;
+    if (!name)
+	return logroot ? 1 : 0;
+    return lookup_logfile(name) ? 1 : 0;
 }
 
-int
-logfclose(l)
+int logfclose(l)
 struct logfile *l;
 {
-  struct logfile **lp;
+    struct logfile **lp;
 
-  for (lp = &logroot; *lp; lp = &(*lp)->next)
-    if (*lp == l)
-      break;
+    for (lp = &logroot; *lp; lp = &(*lp)->next)
+	if (*lp == l)
+	    break;
 
-  if (!*lp)
-    return -1;
+    if (!*lp)
+	return -1;
 
-  if ((--l->opencount) > 0)
+    if ((--l->opencount) > 0)
+	return 0;
+    if (l->opencount < 0)
+	abort();
+
+    *lp = l->next;
+    fclose(l->fp);
+    free(l->name);
+    free((char *) l);
     return 0;
-  if (l->opencount < 0)
-    abort();
-
-  *lp = l->next;
-  fclose(l->fp);
-  free(l->name);
-  free((char *)l);
-  return 0;
 }
 
 /*
@@ -273,46 +256,41 @@ struct logfile *l;
  * write and flush both *should* check the file's stat, if it disappeared
  * or changed, re-open it.
  */
-int
-logfwrite(l, buf, n)
+int logfwrite(l, buf, n)
 struct logfile *l;
 char *buf;
 int n;
 {
-  int r;
+    int r;
 
-  if (stolen_logfile(l) && lf_reopen_fn(l->name, fileno(l->fp), l))
-    return -1;
-  r = fwrite(buf, n, 1, l->fp);
-  l->writecount += l->flushcount + 1;
-  l->flushcount = 0;
-  changed_logfile(l);
-  return r;
+    if (stolen_logfile(l) && lf_reopen_fn(l->name, fileno(l->fp), l))
+	return -1;
+    r = fwrite(buf, n, 1, l->fp);
+    l->writecount += l->flushcount + 1;
+    l->flushcount = 0;
+    changed_logfile(l);
+    return r;
 }
 
-int
-logfflush(l)
+int logfflush(l)
 struct logfile *l;
 {
-  int r = 0;
+    int r = 0;
 
-  if (!l)
-    for (l = logroot; l; l = l->next)
-      {
+    if (!l)
+	for (l = logroot; l; l = l->next) {
+	    if (stolen_logfile(l)
+		&& lf_reopen_fn(l->name, fileno(l->fp), l))
+		return -1;
+	    r |= fflush(l->fp);
+	    l->flushcount++;
+	    changed_logfile(l);
+    } else {
 	if (stolen_logfile(l) && lf_reopen_fn(l->name, fileno(l->fp), l))
-	  return -1;
-	r |= fflush(l->fp);
+	    return -1;
+	r = fflush(l->fp);
 	l->flushcount++;
 	changed_logfile(l);
-      }
-  else
-    {
-      if (stolen_logfile(l) && lf_reopen_fn(l->name, fileno(l->fp), l))
-	return -1;
-      r = fflush(l->fp);
-      l->flushcount++;
-      changed_logfile(l);
     }
-  return r;
+    return r;
 }
-

@@ -27,147 +27,147 @@
 
 #ifdef __hpux
 /* workaround for HPUX-11 which manages to include sys/user.h! */
-# define _SYS_USER_INCLUDED
+#define _SYS_USER_INCLUDED
 #endif
 
 #include <sys/param.h>
 
 /* In strict ANSI mode, HP-UX machines define __hpux but not hpux */
 #if defined(__hpux) && !defined(hpux)
-# define hpux
+#define hpux
 #endif
 
 #if defined(__bsdi__) || defined(__386BSD__) || defined(_CX_UX) || defined(hpux) || defined(_IBMR2)
-# include <signal.h>
-#endif /* __bsdi__ || __386BSD__ || _CX_UX || hpux || _IBMR2 */
+#include <signal.h>
+#endif				/* __bsdi__ || __386BSD__ || _CX_UX || hpux || _IBMR2 */
 
 #ifdef ISC
-# ifdef ENAMETOOLONG
-#  undef ENAMETOOLONG
-# endif
-# ifdef ENOTEMPTY
-#  undef ENOTEMPTY
-# endif
-# include <sys/bsdtypes.h>
-# include <net/errno.h>
+#ifdef ENAMETOOLONG
+#undef ENAMETOOLONG
+#endif
+#ifdef ENOTEMPTY
+#undef ENOTEMPTY
+#endif
+#include <sys/bsdtypes.h>
+#include <net/errno.h>
 #endif
 
 #ifdef sun
-# define getpgrp __getpgrp
-# define exit __exit
+#define getpgrp __getpgrp
+#define exit __exit
 #endif
 #ifdef POSIX
-# include <unistd.h>
-# if defined(__STDC__)
-#  include <stdlib.h>
-# endif /* __STDC__ */
-#endif /* POSIX */
+#include <unistd.h>
+#if defined(__STDC__)
+#include <stdlib.h>
+#endif				/* __STDC__ */
+#endif				/* POSIX */
 #ifdef sun
-# undef getpgrp
-# undef exit
-#endif /* sun */
+#undef getpgrp
+#undef exit
+#endif				/* sun */
 
-#ifndef linux /* all done in <errno.h> */
+#ifndef linux			/* all done in <errno.h> */
 extern int errno;
-#endif /* linux */
+#endif				/* linux */
 #ifndef HAVE_STRERROR
 /* No macros, please */
 #undef strerror
 #endif
 
 #ifndef SYSV
-# ifdef NEWSOS
-#  define strlen ___strlen___
-#  include <strings.h>
-#  undef strlen
-# else /* NEWSOS */
-#  include <strings.h>
-# endif /* NEWSOS */
-#else /* SYSV */
-# if defined(SVR4) || defined(NEWSOS)
-#  define strlen ___strlen___
-#  include <string.h>
-#  undef strlen
-#  if !defined(NEWSOS) && !defined(__hpux)
-    extern size_t strlen(const char *);
-#  endif
-# else /* SVR4 */
-#  include <string.h>
-# endif /* SVR4 */
-#endif /* SYSV */
+#ifdef NEWSOS
+#define strlen ___strlen___
+#include <strings.h>
+#undef strlen
+#else				/* NEWSOS */
+#include <strings.h>
+#endif				/* NEWSOS */
+#else				/* SYSV */
+#if defined(SVR4) || defined(NEWSOS)
+#define strlen ___strlen___
+#include <string.h>
+#undef strlen
+#if !defined(NEWSOS) && !defined(__hpux)
+extern size_t strlen(const char *);
+#endif
+#else				/* SVR4 */
+#include <string.h>
+#endif				/* SVR4 */
+#endif				/* SYSV */
 
 #ifdef USEVARARGS
-# if defined(__STDC__)
-#  include <stdarg.h>
-#  define VA_LIST(var) va_list var;
-#  define VA_DOTS ...
-#  define VA_DECL
-#  define VA_START(ap, fmt) va_start(ap, fmt)
-#  define VA_ARGS(ap) ap
-#  define VA_END(ap) va_end(ap)
-# else
-#  include <varargs.h>
-#  define VA_LIST(var) va_list var;
-#  define VA_DOTS va_alist
-#  define VA_DECL va_dcl
-#  define VA_START(ap, fmt) va_start(ap)
-#  define VA_ARGS(ap) ap
-#  define VA_END(ap) va_end(ap)
-# endif
+#if defined(__STDC__)
+#include <stdarg.h>
+#define VA_LIST(var) va_list var;
+#define VA_DOTS ...
+#define VA_DECL
+#define VA_START(ap, fmt) va_start(ap, fmt)
+#define VA_ARGS(ap) ap
+#define VA_END(ap) va_end(ap)
 #else
-# define VA_LIST(var)
-# define VA_DOTS p1, p2, p3, p4, p5, p6
-# define VA_DECL unsigned long VA_DOTS;
-# define VA_START(ap, fmt)
-# define VA_ARGS(ap) VA_DOTS
-# define VA_END(ap)
-# undef vsnprintf
-# define vsnprintf xsnprintf
+#include <varargs.h>
+#define VA_LIST(var) va_list var;
+#define VA_DOTS va_alist
+#define VA_DECL va_dcl
+#define VA_START(ap, fmt) va_start(ap)
+#define VA_ARGS(ap) ap
+#define VA_END(ap) va_end(ap)
+#endif
+#else
+#define VA_LIST(var)
+#define VA_DOTS p1, p2, p3, p4, p5, p6
+#define VA_DECL unsigned long VA_DOTS;
+#define VA_START(ap, fmt)
+#define VA_ARGS(ap) VA_DOTS
+#define VA_END(ap)
+#undef vsnprintf
+#define vsnprintf xsnprintf
 #endif
 
 #if !defined(sun) && !defined(B43) && !defined(ISC) && !defined(pyr) && !defined(_CX_UX)
-# include <time.h>
+#include <time.h>
 #endif
 #include <sys/time.h>
 
-#ifdef M_UNIX   /* SCO */
-# include <sys/stream.h>
-# include <sys/ptem.h>
-# define ftruncate(fd, s) chsize(fd, s)
+#ifdef M_UNIX			/* SCO */
+#include <sys/stream.h>
+#include <sys/ptem.h>
+#define ftruncate(fd, s) chsize(fd, s)
 #endif
 
 #ifdef SYSV
-# define index strchr
-# define rindex strrchr
-# define bzero(poi,len) memset(poi,0,len)
-# define bcmp memcmp
-# define killpg(pgrp,sig) kill( -(pgrp), sig)
+#define index strchr
+#define rindex strrchr
+#define bzero(poi,len) memset(poi,0,len)
+#define bcmp memcmp
+#define killpg(pgrp,sig) kill( -(pgrp), sig)
 #endif
 
 #ifndef HAVE_GETCWD
-# define getcwd(b,l) getwd(b)
+#define getcwd(b,l) getwd(b)
 #endif
 
 #ifndef USEBCOPY
-# ifdef USEMEMMOVE
-#  define bcopy(s,d,len) memmove(d,s,len)
-# else
-#  ifdef USEMEMCPY
-#   define bcopy(s,d,len) memcpy(d,s,len)
-#  else
-#   define NEED_OWN_BCOPY
-#   define bcopy xbcopy
-#  endif
-# endif
+#ifdef USEMEMMOVE
+#define bcopy(s,d,len) memmove(d,s,len)
+#else
+#ifdef USEMEMCPY
+#define bcopy(s,d,len) memcpy(d,s,len)
+#else
+#define NEED_OWN_BCOPY
+#define bcopy xbcopy
+#endif
+#endif
 #endif
 
 #ifdef hpux
-# define setreuid(ruid, euid) setresuid(ruid, euid, -1)
-# define setregid(rgid, egid) setresgid(rgid, egid, -1)
+#define setreuid(ruid, euid) setresuid(ruid, euid, -1)
+#define setregid(rgid, egid) setresgid(rgid, egid, -1)
 #endif
 
 #if defined(HAVE_SETEUID) || defined(HAVE_SETREUID)
-# define USE_SETEUID
+#define USE_SETEUID
 #endif
 
 #if !defined(HAVE__EXIT) && !defined(_exit)
@@ -175,14 +175,14 @@ extern int errno;
 #endif
 
 #ifndef HAVE_UTIMES
-# define utimes utime
+#define utimes utime
 #endif
 #ifndef HAVE_VSNPRINTF
-# define vsnprintf xvsnprintf
+#define vsnprintf xvsnprintf
 #endif
 
 #ifdef BUILTIN_TELNET
-# include <netinet/in.h>
+#include <netinet/in.h>
 #endif
 
 /*****************************************************************
@@ -190,38 +190,38 @@ extern int errno;
  */
 
 #ifdef POSIX
-# include <termios.h>
-# ifdef hpux
-#  include <bsdtty.h>
-# endif /* hpux */
-# ifdef NCCS
-#  define MAXCC NCCS
-# else
-#  define MAXCC 256
-# endif
-#else /* POSIX */
-# ifdef TERMIO
-#  include <termio.h>
-#  ifdef NCC
-#   define MAXCC NCC
-#  else
-#   define MAXCC 256
-#  endif
-#  ifdef CYTERMIO
-#   include <cytermio.h>
-#  endif
-# else /* TERMIO */
-#  include <sgtty.h>
-# endif /* TERMIO */
-#endif /* POSIX */
+#include <termios.h>
+#ifdef hpux
+#include <bsdtty.h>
+#endif				/* hpux */
+#ifdef NCCS
+#define MAXCC NCCS
+#else
+#define MAXCC 256
+#endif
+#else				/* POSIX */
+#ifdef TERMIO
+#include <termio.h>
+#ifdef NCC
+#define MAXCC NCC
+#else
+#define MAXCC 256
+#endif
+#ifdef CYTERMIO
+#include <cytermio.h>
+#endif
+#else				/* TERMIO */
+#include <sgtty.h>
+#endif				/* TERMIO */
+#endif				/* POSIX */
 
 #ifndef VDISABLE
-# ifdef _POSIX_VDISABLE
-#  define VDISABLE _POSIX_VDISABLE
-# else
-#  define VDISABLE 0377
-# endif /* _POSIX_VDISABLE */
-#endif /* !VDISABLE */
+#ifdef _POSIX_VDISABLE
+#define VDISABLE _POSIX_VDISABLE
+#else
+#define VDISABLE 0377
+#endif				/* _POSIX_VDISABLE */
+#endif				/* !VDISABLE */
 
 
 /* on sgi, regardless of the stream head's read mode (RNORM/RMSGN/RMSGD)
@@ -236,12 +236,12 @@ extern int errno;
  * uses TIOCPKT (select fails to return on pty read).
  */
 #if defined(sgi) || defined(DGUX) || defined(_IBMR2)
-# undef TIOCPKT
+#undef TIOCPKT
 #endif
 
 /* linux ncurses is broken, we have to use our own tputs */
 #if defined(linux) && defined(TERMINFO)
-# define tputs xtputs
+#define tputs xtputs
 #endif
 
 
@@ -250,63 +250,63 @@ extern int errno;
  */
 
 #ifdef GETUTENT
-  typedef char *slot_t;
+typedef char *slot_t;
 #else
-  typedef int slot_t;
+typedef int slot_t;
 #endif
 
 #if defined(UTMPOK) || defined(BUGGYGETLOGIN)
-# if defined(SVR4) && !defined(DGUX) && !defined(__hpux)
-#  include <utmpx.h>
-#  define UTMPFILE	UTMPX_FILE
-#  define utmp		utmpx
-#  define getutent	getutxent
-#  define getutid	getutxid
-#  define getutline	getutxline
-#  define pututline	pututxline
-#  define setutent	setutxent
-#  define endutent	endutxent
-#  define ut_time	ut_xtime
-# else /* SVR4 */
-#  include <utmp.h>
-# endif /* SVR4 */
-# ifdef apollo
+#if defined(SVR4) && !defined(DGUX) && !defined(__hpux)
+#include <utmpx.h>
+#define UTMPFILE	UTMPX_FILE
+#define utmp		utmpx
+#define getutent	getutxent
+#define getutid	getutxid
+#define getutline	getutxline
+#define pututline	pututxline
+#define setutent	setutxent
+#define endutent	endutxent
+#define ut_time	ut_xtime
+#else				/* SVR4 */
+#include <utmp.h>
+#endif				/* SVR4 */
+#ifdef apollo
    /*
     * We don't have GETUTENT, so we dig into utmp ourselves.
     * But we save the permanent filedescriptor and
     * open utmp just when we need to.
     * This code supports an unsorted utmp. jw.
     */
-#  define UTNOKEEP
-# endif /* apollo */
+#define UTNOKEEP
+#endif				/* apollo */
 
-# ifndef UTMPFILE
-#  ifdef UTMP_FILE
-#   define UTMPFILE	UTMP_FILE
-#  else
-#   ifdef _PATH_UTMP
-#    define UTMPFILE	_PATH_UTMP
-#   else
-#    define UTMPFILE	"/etc/utmp"
-#   endif /* _PATH_UTMP */
-#  endif
-# endif
+#ifndef UTMPFILE
+#ifdef UTMP_FILE
+#define UTMPFILE	UTMP_FILE
+#else
+#ifdef _PATH_UTMP
+#define UTMPFILE	_PATH_UTMP
+#else
+#define UTMPFILE	"/etc/utmp"
+#endif				/* _PATH_UTMP */
+#endif
+#endif
 
-#endif /* UTMPOK || BUGGYGETLOGIN */
+#endif				/* UTMPOK || BUGGYGETLOGIN */
 
 #if !defined(UTMPOK) && defined(USRLIMIT)
-# undef USRLIMIT
+#undef USRLIMIT
 #endif
 
 #ifdef LOGOUTOK
-# ifndef LOGINDEFAULT
-#  define LOGINDEFAULT 0
-# endif
+#ifndef LOGINDEFAULT
+#define LOGINDEFAULT 0
+#endif
 #else
-# ifdef LOGINDEFAULT
-#  undef LOGINDEFAULT
-# endif
-# define LOGINDEFAULT 1
+#ifdef LOGINDEFAULT
+#undef LOGINDEFAULT
+#endif
+#define LOGINDEFAULT 1
 #endif
 
 
@@ -368,21 +368,21 @@ extern int errno;
  * For this simple reason I now favour O_NDELAY. jw. 4.5.95
  */
 #if defined(sun) && !defined(SVR4)
-# undef O_NONBLOCK
+#undef O_NONBLOCK
 #endif
 
 #if !defined(O_NONBLOCK) && defined(O_NDELAY)
-# define O_NONBLOCK O_NDELAY
+#define O_NONBLOCK O_NDELAY
 #endif
 
 #if !defined(FNBLOCK) && defined(FNONBLOCK)
-# define FNBLOCK FNONBLOCK
+#define FNBLOCK FNONBLOCK
 #endif
 #if !defined(FNBLOCK) && defined(FNDELAY)
-# define FNBLOCK FNDELAY
+#define FNBLOCK FNDELAY
 #endif
 #if !defined(FNBLOCK) && defined(O_NONBLOCK)
-# define FNBLOCK O_NONBLOCK
+#define FNBLOCK O_NONBLOCK
 #endif
 
 #ifndef POSIX
@@ -391,7 +391,7 @@ extern int errno;
 #endif
 
 #if !defined(HAVE_LSTAT) && !defined(lstat)
-# define lstat stat
+#define lstat stat
 #endif
 
 /*****************************************************************
@@ -399,26 +399,26 @@ extern int errno;
  */
 
 #ifdef SIGVOID
-# define SIGRETURN
-# define sigret_t void
+#define SIGRETURN
+#define sigret_t void
 #else
-# define SIGRETURN return 0;
-# define sigret_t int
+#define SIGRETURN return 0;
+#define sigret_t int
 #endif
 
 /* Geeeee, reverse it? */
 #if defined(SVR4) || (defined(SYSV) && defined(ISC)) || defined(_AIX) || defined(linux) || defined(ultrix) || defined(__386BSD__) || defined(__bsdi__) || defined(POSIX) || defined(NeXT)
-# define SIGHASARG
+#define SIGHASARG
 #endif
 
 #ifdef SIGHASARG
-# define SIGPROTOARG   (int)
-# define SIGDEFARG     (sigsig) int sigsig;
-# define SIGARG        0
+#define SIGPROTOARG   (int)
+#define SIGDEFARG     (sigsig) int sigsig;
+#define SIGARG        0
 #else
-# define SIGPROTOARG   (void)
-# define SIGDEFARG     ()
-# define SIGARG
+#define SIGPROTOARG   (void)
+#define SIGDEFARG     ()
+#define SIGARG
 #endif
 
 #ifndef SIGCHLD
@@ -426,17 +426,17 @@ extern int errno;
 #endif
 
 #if defined(POSIX) || defined(hpux)
-# define signal xsignal
+#define signal xsignal
 #else
-# ifdef USESIGSET
-#  define signal sigset
-# endif /* USESIGSET */
+#ifdef USESIGSET
+#define signal sigset
+#endif				/* USESIGSET */
 #endif
 
 /* used in screen.c and attacher.c */
-#ifndef NSIG		/* kbeal needs these w/o SYSV */
-# define NSIG 32
-#endif /* !NSIG */
+#ifndef NSIG			/* kbeal needs these w/o SYSV */
+#define NSIG 32
+#endif				/* !NSIG */
 
 
 /*****************************************************************
@@ -444,44 +444,44 @@ extern int errno;
  */
 
 #if (!defined(sysV68) && !defined(M_XENIX)) || defined(NeXT) || defined(M_UNIX)
-# include <sys/wait.h>
+#include <sys/wait.h>
 #endif
 
 #ifndef WTERMSIG
-# ifndef BSDWAIT /* if wait is NOT a union: */
-#  define WTERMSIG(status) (status & 0177)
-# else
-#  define WTERMSIG(status) status.w_T.w_Termsig
-# endif
+#ifndef BSDWAIT			/* if wait is NOT a union: */
+#define WTERMSIG(status) (status & 0177)
+#else
+#define WTERMSIG(status) status.w_T.w_Termsig
+#endif
 #endif
 
 #ifndef WSTOPSIG
-# ifndef BSDWAIT /* if wait is NOT a union: */
-#  define WSTOPSIG(status) ((status >> 8) & 0377)
-# else
-#  define WSTOPSIG(status) status.w_S.w_Stopsig
-# endif
+#ifndef BSDWAIT			/* if wait is NOT a union: */
+#define WSTOPSIG(status) ((status >> 8) & 0377)
+#else
+#define WSTOPSIG(status) status.w_S.w_Stopsig
+#endif
 #endif
 
 /* NET-2 uses WCOREDUMP */
 #if defined(WCOREDUMP) && !defined(WIFCORESIG)
-# define WIFCORESIG(status) WCOREDUMP(status)
+#define WIFCORESIG(status) WCOREDUMP(status)
 #endif
 
 #ifndef WIFCORESIG
-# ifndef BSDWAIT /* if wait is NOT a union: */
-#  define WIFCORESIG(status) (status & 0200)
-# else
-#  define WIFCORESIG(status) status.w_T.w_Coredump
-# endif
+#ifndef BSDWAIT			/* if wait is NOT a union: */
+#define WIFCORESIG(status) (status & 0200)
+#else
+#define WIFCORESIG(status) status.w_T.w_Coredump
+#endif
 #endif
 
 #ifndef WEXITSTATUS
-# ifndef BSDWAIT /* if wait is NOT a union: */
-#  define WEXITSTATUS(status) ((status >> 8) & 0377)
-# else
-#  define WEXITSTATUS(status) status.w_T.w_Retcode
-# endif
+#ifndef BSDWAIT			/* if wait is NOT a union: */
+#define WEXITSTATUS(status) ((status >> 8) & 0377)
+#else
+#define WEXITSTATUS(status) status.w_T.w_Retcode
+#endif
 #endif
 
 
@@ -498,13 +498,15 @@ extern int errno;
  * tschmidt@vax.micron.com
  */
 #ifndef FD_SET
-# ifndef SUNOS3
-typedef struct fd_set { int fds_bits[1]; } fd_set;
-# endif
-# define FD_ZERO(fd) ((fd)->fds_bits[0] = 0)
-# define FD_SET(b, fd) ((fd)->fds_bits[0] |= 1 << (b))
-# define FD_ISSET(b, fd) ((fd)->fds_bits[0] & 1 << (b))
-# define FD_SETSIZE 32
+#ifndef SUNOS3
+typedef struct fd_set {
+    int fds_bits[1];
+} fd_set;
+#endif
+#define FD_ZERO(fd) ((fd)->fds_bits[0] = 0)
+#define FD_SET(b, fd) ((fd)->fds_bits[0] |= 1 << (b))
+#define FD_ISSET(b, fd) ((fd)->fds_bits[0] & 1 << (b))
+#define FD_SETSIZE 32
 #endif
 
 
@@ -513,11 +515,11 @@ typedef struct fd_set { int fds_bits[1]; } fd_set;
  */
 
 #ifndef TERMCAP_BUFSIZE
-# define TERMCAP_BUFSIZE 2048
+#define TERMCAP_BUFSIZE 2048
 #endif
 
 #ifndef MAXPATHLEN
-# define MAXPATHLEN 1024
+#define MAXPATHLEN 1024
 #endif
 
 /*
@@ -526,4 +528,3 @@ typedef struct fd_set { int fds_bits[1]; } fd_set;
  * how many characters your pty's can buffer.
  */
 #define IOSIZE		4096
-
