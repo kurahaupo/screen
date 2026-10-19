@@ -1,7 +1,8 @@
-
 -kr
+
 -i8
 -l120
+-lps
 -ncs
 -ss
 
@@ -20,12 +21,12 @@
 -TListRow
 -TLog
 -TMessage
+-Tslot_t
 -TUser
 -TViewport
+-TWindow
 -TWinMsgBuf
 -TWinMsgBufContext
 -TWinMsgCond
 -TWinMsgEsc
 -TWinMsgEscapeChar
--TWindow
--Tslot_t	
