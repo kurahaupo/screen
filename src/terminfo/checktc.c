@@ -116,18 +116,18 @@ main()
       GotoPos(0, 10);
       RETURN();
       if (XN)
-        {
-          GotoPos(0, 6);
+	{
+	  GotoPos(0, 6);
 	  printf(" last col in last row is not usable");
-          GotoPos(CO-1, LI-1);
+	  GotoPos(CO-1, LI-1);
 	  printf(" ");
-          GotoPos(0, 6);
+	  GotoPos(0, 6);
 	  printf("                                          ");
 	  GotoPos(0, 0);
 	  printf("testing magic margins in last row");
 	  GotoPos(0, 10);
 	  RETURN();
-        }
+	}
     }
   if ((CS = tgetstr("cs", &tp)))
     {

@@ -258,7 +258,7 @@ LInsChar(struct layer *l, struct mchar *c, int x, int y, struct mline *ol)
 	display = cv->c_display;
 	if (D_blocked)
 	  continue;
-        rol = RECODE_MLINE(ol);
+	rol = RECODE_MLINE(ol);
 	InsChar(RECODE_MCHAR(c2), xs2, xe2, y2, mloff(rol, -vp->v_xoff));
 	if (f)
 	  RefreshArea(xs2, y2, xs2, y2, 1);
@@ -326,7 +326,7 @@ LPutStr(struct layer *l, char *s, int n, struct mchar *r, int x, int y)
 	if (xs2 > xe2)
 	  continue;
 	display = cv->c_display;
-        if (D_blocked)
+	if (D_blocked)
 	  continue;
 	GotoPos(xs2, y2);
 	SetRendition(r);
@@ -338,7 +338,7 @@ LPutStr(struct layer *l, char *s, int n, struct mchar *r, int x, int y)
 	    while (xs2 <= xe2)
 	      {
 		mc.image = *s2++;
-	        PutChar(RECODE_MCHAR(&mc), xs2++, y2);
+		PutChar(RECODE_MCHAR(&mc), xs2++, y2);
 	      }
 	    continue;
 	  }
@@ -378,7 +378,7 @@ LPutWinMsg(struct layer *l, char *s, int n, struct mchar *r, int x, int y)
 	if (xs2 > xe2)
 	  continue;
 	display = cv->c_display;
-        if (D_blocked)
+	if (D_blocked)
 	  continue;
 	GotoPos(xs2, y2);
 	SetRendition(r);
@@ -427,7 +427,7 @@ LClearLine(struct layer *l, int y, int xs, int xe, int bce, struct mline *ol)
 	if (xs2 > xe2)
 	  continue;
 	display = cv->c_display;
-        if (D_blocked)
+	if (D_blocked)
 	  continue;
 	ClearLine(ol ? mloff(RECODE_MLINE(ol), -vp->v_xoff) : (struct mline *)0, y2, xs2, xe2, bce);
       }
@@ -613,7 +613,7 @@ LWrapChar(struct layer *l, struct mchar *c, int y, int top, int bot, int ins)
 	      if (ins)
 		LInsChar(l, c, 0, yy, 0);
 	      else
-	        LPutChar(l, c, 0, yy);
+		LPutChar(l, c, 0, yy);
 	      l->l_cvlist = cvlist;
 	      cv->c_lnext = cvlnext;
 	    }
@@ -908,10 +908,10 @@ InitOverlayPage(int datasize, struct LayFuncs *lf, int block)
     {
       LAY_DISPLAYS(flayer, RemoveStatus());
       if (block)
-        debug("layer is blocking\n");
+	debug("layer is blocking\n");
       if (block && flayer->l_layfn == &WinLf)
 	{
-          debug("...and is first, so window gets blocked\n");
+	  debug("...and is first, so window gets blocked\n");
 	  ASSERT(p->w_blocked == 0);
 	  p->w_blocked++;
 	  newlay->l_blocking = 1;
@@ -962,12 +962,12 @@ ExitOverlayPage()
 	{
 	  ASSERT(p->w_blocked > 0);
 	  p->w_blocked--;
-          debug("layer was blocking, -> w_blocked now %d\n", p->w_blocked);
+	  debug("layer was blocking, -> w_blocked now %d\n", p->w_blocked);
 	}
       /* don't warp dead layers: check cvlist */
       if (p->w_blocked && p->w_savelayer && p->w_savelayer != flayer && oldlay->l_cvlist)
 	{
-          debug("warping to top of blocking chain!\n");
+	  debug("warping to top of blocking chain!\n");
 	  /* warp ourself into savelayer */
 	  flayer = p->w_savelayer;
 	  doredisplay = 1;
