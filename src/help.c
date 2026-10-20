@@ -494,13 +494,13 @@ static void CopyrightProcess(char **ppbuf, int *plen)
 	}
 }
 
-static void CopyrightAbort()
+static void CopyrightAbort(void)
 {
 	LAY_CALL_UP(LRefreshAll(flayer, 0));
 	ExitOverlayPage();
 }
 
-void display_copyright()
+void display_copyright(void)
 {
 	struct copydata *copydata;
 
@@ -518,7 +518,7 @@ void display_copyright()
 	copypage();
 }
 
-static void copypage()
+static void copypage(void)
 {
 	char *cps;
 	char *ws;

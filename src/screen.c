@@ -1252,7 +1252,7 @@ void WindowDied(struct win *p, int wstat, int wstat_valid)
 #endif
 }
 
-static void SigChldHandler()
+static void SigChldHandler(void)
 {
 	struct stat st;
 #ifdef DEBUG
@@ -1340,7 +1340,7 @@ static void CoreDump(int sigsig)
 	return;
 }
 
-static void DoWait()
+static void DoWait(void)
 {
 	int pid;
 	struct win *p, *next;
@@ -1475,7 +1475,7 @@ void eexit(int e)
 	exit(e);
 }
 
-void Hangup()
+void Hangup(void)
 {
 	if (display == 0)
 		return;
@@ -1633,7 +1633,7 @@ static int IsSymbol(char *e, char *s)
 	return strncmp(e, s, l) == 0 && e[l] == '=';
 }
 
-void MakeNewEnv()
+void MakeNewEnv(void)
 {
 	char **op, **np;
 	static char stybuf[MAXSTR];
@@ -2620,7 +2620,7 @@ static void fds1(int i, int j)
 	}
 }
 
-static void fds()
+static void fds(void)
 {
 	debug("fds: ");
 	fds1(-1, -1);
