@@ -2728,26 +2728,32 @@ static void serv_select_fn(struct event *ev, char *data)
 				RethinkViewportOffsets(cv);
 				if (n > cv->c_layer->l_height)
 					n = cv->c_layer->l_height;
-				CV_CALL(cv,
+				CV_CALL_START(cv);
+				{
 					LScrollV(flayer, -n, 0, flayer->l_height - 1, 0);
 					LayRedisplayLine(-1, -1, -1, 1);
 					for (i = 0; i < n; i++)
-					LayRedisplayLine(i, 0, flayer->l_width - 1, 1);
+						LayRedisplayLine(i, 0, flayer->l_width - 1, 1);
 					if (cv == cv->c_display->d_forecv)
-					LaySetCursor();) ;
+						LaySetCursor();
+				}
+				CV_CALL_END(cv);
 			} else if (ly + cv->c_yoff > cv->c_ye) {
 				int i, n = ly + cv->c_yoff - cv->c_ye;
 				cv->c_yoff = cv->c_ye - ly;
 				RethinkViewportOffsets(cv);
 				if (n > cv->c_layer->l_height)
 					n = cv->c_layer->l_height;
-				CV_CALL(cv,
+				CV_CALL_START(cv);
+				{
 					LScrollV(flayer, n, 0, cv->c_layer->l_height - 1, 0);
 					LayRedisplayLine(-1, -1, -1, 1);
 					for (i = 0; i < n; i++)
-					LayRedisplayLine(i + flayer->l_height - n, 0, flayer->l_width - 1, 1);
+						LayRedisplayLine(i + flayer->l_height - n, 0, flayer->l_width - 1, 1);
 					if (cv == cv->c_display->d_forecv)
-					LaySetCursor();) ;
+						LaySetCursor();
+				}
+				CV_CALL_END(cv);
 			}
 			if (lx + cv->c_xoff < cv->c_xs) {
 				int i, n = cv->c_xs - (lx + cv->c_xoff);
@@ -2759,12 +2765,17 @@ static void serv_select_fn(struct event *ev, char *data)
 				RethinkViewportOffsets(cv);
 				if (n > cv->c_layer->l_width)
 					n = cv->c_layer->l_width;
-				CV_CALL(cv, LayRedisplayLine(-1, -1, -1, 1);
+				CV_CALL_START(cv);
+				{
+					LayRedisplayLine(-1, -1, -1, 1);
 					for (i = 0; i < flayer->l_height; i++) {
-					LScrollH(flayer, -n, i, 0, flayer->l_width - 1, 0, 0);
-					LayRedisplayLine(i, 0, n - 1, 1);}
+						LScrollH(flayer, -n, i, 0, flayer->l_width - 1, 0, 0);
+						LayRedisplayLine(i, 0, n - 1, 1);
+					}
 					if (cv == cv->c_display->d_forecv)
-					LaySetCursor();) ;
+						LaySetCursor();
+				}
+				CV_CALL_END(cv);
 			} else if (lx + cv->c_xoff > cv->c_xe) {
 				int i, n = lx + cv->c_xoff - cv->c_xe;
 				if (n < (cv->c_xe - cv->c_xs + 1) / 2)
@@ -2775,12 +2786,17 @@ static void serv_select_fn(struct event *ev, char *data)
 				RethinkViewportOffsets(cv);
 				if (n > cv->c_layer->l_width)
 					n = cv->c_layer->l_width;
-				CV_CALL(cv, LayRedisplayLine(-1, -1, -1, 1);
+				CV_CALL_START(cv);
+				{
+					LayRedisplayLine(-1, -1, -1, 1);
 					for (i = 0; i < flayer->l_height; i++) {
-					LScrollH(flayer, n, i, 0, flayer->l_width - 1, 0, 0);
-					LayRedisplayLine(i, flayer->l_width - n, flayer->l_width - 1, 1);}
+						LScrollH(flayer, n, i, 0, flayer->l_width - 1, 0, 0);
+						LayRedisplayLine(i, flayer->l_width - n, flayer->l_width - 1, 1);
+					}
 					if (cv == cv->c_display->d_forecv)
-					LaySetCursor();) ;
+						LaySetCursor();
+				}
+				CV_CALL_END(cv);
 			}
 		}
 	}
@@ -2789,7 +2805,7 @@ static void serv_select_fn(struct event *ev, char *data)
 		if (D_status == STATUS_ON_WIN || D_cvlist == 0 || D_cvlist->c_next == 0)
 			continue;
 		debug("serv_select_fn: Restore on cv %#x\n", (int)D_forecv);
-		CV_CALL(D_forecv, LayRestore(); LaySetCursor());
+		CV_CALL(D_forecv, LayRestoreAndSetCursor());
 	}
 }
 

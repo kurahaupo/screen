@@ -978,7 +978,7 @@ void Redisplay(int cur_only)
 	else
 		RefreshAll(1);
 	RefreshHStatus();
-	CV_CALL(D_forecv, LayRestore(); LaySetCursor());
+	CV_CALL(D_forecv, LayRestoreAndSetCursor());
 }
 
 void RedisplayDisplays(int cur_only)

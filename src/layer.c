@@ -908,8 +908,7 @@ void ExitOverlayPage()
 	oldlay->l_cvlist = 0;
 	LayerCleanupMemory(oldlay);
 	free((char *)oldlay);
-	LayRestore();
-	LaySetCursor();
+	LayRestoreAndSetCursor();
 }
 
 int LayProcessMouse(struct layer *l, unsigned char ch)

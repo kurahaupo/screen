@@ -5776,7 +5776,7 @@ void SetForeCanvas(struct display *d, struct canvas *cv)
 		RefreshHStatus();
 		RefreshXtermOSC();
 		flayer = D_forecv->c_layer;
-		CV_CALL(D_forecv, LayRestore(); LaySetCursor());
+		CV_CALL(D_forecv, LayRestoreAndSetCursor());
 		WindowChanged(0, 'F');
 	}
 

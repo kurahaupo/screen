@@ -80,8 +80,8 @@ extern void EqualizeCanvas(struct canvas *, int);
 extern void DupLayoutCv(struct canvas *, struct canvas *, int);
 extern void PutWindowCv(struct canvas *);
 
-#define CV_CALL(cv, cmd)			\
-{						\
+#define CV_CALL_START(cv)			\
+do {						\
   struct display *olddisplay = display;		\
   struct layer *oldflayer = flayer;		\
   struct layer *l = cv->c_layer;		\
@@ -90,11 +90,18 @@ extern void PutWindowCv(struct canvas *);
   flayer = l;					\
   l->l_cvlist = cv;				\
   cv->c_lnext = 0;				\
-  cmd;						\
+  (void) 0			/* obliging ';' */
+
+#define CV_CALL_END(cv)				\
   flayer = oldflayer;				\
   l->l_cvlist = cvlist;				\
   cv->c_lnext = cvlnext;			\
   display = olddisplay;				\
-}
+} while (0)			/* obliging ';' */
+
+#define CV_CALL(cv, simple_cmd)			\
+  CV_CALL_START(cv);				\
+  simple_cmd;					\
+  CV_CALL_END(cv);
 
 #endif				/* SCREEN_CANVAS_H */
