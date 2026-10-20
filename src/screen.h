@@ -153,7 +153,7 @@ struct Message {
 			pid_t apid;	/* pid of frontend */
 			char preselect[20];
 			char writeback[MAXPATHLEN];	/* The socket to write the result.
-							   Only used for MSG_QUERY */
+							 * Only used for MSG_QUERY */
 		} command;
 		char message[MAXPATHLEN * 2];
 	} m;
