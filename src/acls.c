@@ -443,7 +443,7 @@ char *DoSu(struct acluser **up, char *name, char *pw1, char *pw2)
 				debug("System password mismatch\n");
 				sorry++;
 			}
-		} else /* no pasword provided */
+		} else /* no password provided */
 			if (*pass)	/* but need one */
 				sorry++;
 #endif				/* CHECKLOGIN */
@@ -452,7 +452,7 @@ char *DoSu(struct acluser **up, char *name, char *pw1, char *pw2)
 				debug("screen password mismatch\n");
 				sorry++;
 			}
-		} else	/* no pasword provided */
+		} else	/* no password provided */
 			if (*u->u_password)	/* but need one */
 				sorry++;
 	}
