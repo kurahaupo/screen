@@ -453,8 +453,8 @@ static void MakeBlankLine(uint32_t *p, int n)
 }
 
 #define OLDWIN(y) ((y < p->w_histheight) \
-        ? &p->w_hlines[(p->w_histidx + y) % p->w_histheight] \
-        : &p->w_mlines[y - p->w_histheight])
+	? &p->w_hlines[(p->w_histidx + y) % p->w_histheight] \
+	: &p->w_mlines[y - p->w_histheight])
 
 #define NEWWIN(y) ((y < hi) ? &nhlines[y] : &nmlines[y - hi])
 
