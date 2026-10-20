@@ -889,7 +889,7 @@ static void StuffFin(char *buf, int len, char *data)
  */
 #define OutputMsg	(!act->quiet ? Msg : queryflag >= 0 ? QueryMsg : Dummy)
 
- /*ARGSUSED*/ void DoAction(struct action *act, int key)
+/*ARGSUSED*/ void DoAction(struct action *act, int key)
 {
 	int nr = act->nr;
 	char **args = act->args;
@@ -1098,10 +1098,10 @@ static void StuffFin(char *buf, int len, char *data)
 		}
 		if (strcmp("off", *args))
 			opendebug(0, 1);
-#ifdef SIG_NODEBUG
+# ifdef SIG_NODEBUG
 		else if (display)
 			kill(D_userpid, SIG_NODEBUG);	/* a one shot item, but hey... */
-#endif				/* SIG_NODEBUG */
+# endif				/* SIG_NODEBUG */
 #else
 		if (*args == 0 || strcmp("off", *args))
 			OutputMsg(0, "Sorry, screen was compiled without -DDEBUG option.");
@@ -2641,13 +2641,13 @@ static void StuffFin(char *buf, int len, char *data)
 		break;
 	case RC_SLOWPASTE:
 		if (*args == 0)
-			OutputMsg(0, fore->w_slowpaste ?
-				  "Slowpaste in window %d is %d milliseconds." :
-				  "Slowpaste in window %d is unset.", fore->w_number, fore->w_slowpaste);
+			OutputMsg(0, fore->w_slowpaste ? "Slowpaste in window %d is %d milliseconds."
+						       : "Slowpaste in window %d is unset.",
+				  fore->w_number, fore->w_slowpaste);
 		else if (ParseNum(act, &fore->w_slowpaste) == 0 && msgok)
-			OutputMsg(0, fore->w_slowpaste ?
-				  "Slowpaste in window %d set to %d milliseconds." :
-				  "Slowpaste in window %d now unset.", fore->w_number, fore->w_slowpaste);
+			OutputMsg(0, fore->w_slowpaste ? "Slowpaste in window %d set to %d milliseconds."
+						       : "Slowpaste in window %d now unset.",
+				  fore->w_number, fore->w_slowpaste);
 		break;
 	case RC_MARKKEYS:
 		if (CompileKeys(*args, *argl, mark_key_tab)) {
@@ -4585,8 +4585,7 @@ char *AddWindowFlags(char *buf, int len, struct win *p)
 	}
 	if (p->w_layer.l_cvlist && p->w_layer.l_cvlist->c_lnext)
 		*s++ = '&';
-	if (p->w_monitor == MON_DONE && (ACLBYTE(p->w_mon_notify, D_user->u_id) & ACLBIT(D_user->u_id))
-	    )
+	if (p->w_monitor == MON_DONE && (ACLBYTE(p->w_mon_notify, D_user->u_id) & ACLBIT(D_user->u_id)))
 		*s++ = '@';
 	if (p->w_bell == BELL_DONE)
 		*s++ = '!';
@@ -4706,8 +4705,7 @@ static void ShowInfo()
 		sprintf(p += strlen(p), " app");
 	if (wp->w_log)
 		sprintf(p += strlen(p), " log");
-	if (wp->w_monitor != MON_OFF && (ACLBYTE(wp->w_mon_notify, D_user->u_id) & ACLBIT(D_user->u_id))
-	    )
+	if (wp->w_monitor != MON_OFF && (ACLBYTE(wp->w_mon_notify, D_user->u_id) & ACLBIT(D_user->u_id)))
 		sprintf(p += strlen(p), " mon");
 	if (wp->w_mouse)
 		sprintf(p += strlen(p), " mouse");
