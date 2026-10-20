@@ -443,16 +443,18 @@ char *DoSu(struct acluser **up, char *name, char *pw1, char *pw2)
 				debug("System password mismatch\n");
 				sorry++;
 			}
-		} else /* no pasword provided */ if (*pass)	/* but need one */
-			sorry++;
+		} else /* no pasword provided */
+			if (*pass)	/* but need one */
+				sorry++;
 #endif				/* CHECKLOGIN */
 		if (pw1 && *pw1 && *pw1 != '\377') {	/* provided a screen password */
 			if (!PasswordMatches(pw1, u->u_password)) {
 				debug("screen password mismatch\n");
 				sorry++;
 			}
-		} else /* no pasword provided */ if (*u->u_password)	/* but need one */
-			sorry++;
+		} else	/* no pasword provided */
+			if (*u->u_password)	/* but need one */
+				sorry++;
 	}
 
 	debug("syslog(LOG_NOTICE, \"screen %s: \"su %s\" ", SockPath, name);

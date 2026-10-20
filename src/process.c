@@ -5123,8 +5123,7 @@ int CompileKeys(char *s, int sl, unsigned char *array)
 			sl -= 2;
 			value = *(unsigned char *)s++;
 			array[value] = key;
-		}
-		while (*s == '=' && sl >= 2);
+		} while (*s == '=' && sl >= 2);
 		if (sl == 0)
 			break;
 		if (*s++ != ':')
@@ -5250,7 +5249,7 @@ static void su_fin(char *buf, int len, char *data)
 		l = sizeof(i->pw2) - 1;
 	}
 	if (buf && len)
-		strncpy(p, buf, 1 + ((l < len) ? l : len));
+		strncpy(p, buf, 1 + ((l < len) ? l : len));	//TODO: verify this logic
 	if (!*i->name)
 		Input("Screen User: ", sizeof(i->name) - 1, INP_COOKED, su_fin, (char *)i, 0);
 	else if (!*i->pw1)
