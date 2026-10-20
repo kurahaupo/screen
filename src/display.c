@@ -477,14 +477,14 @@ STATIC void RAW_PUTCHAR(int c)
 	}
 	if (D_encoding)
 		c = PrepareEncodedChar(c);
- kanjiloop:
+      kanjiloop:
 	if (D_xtable && D_xtable[(int)(unsigned char)D_rend.font]
 	    && D_xtable[(int)(unsigned char)D_rend.font][(int)(unsigned char)c])
 		AddStr(D_xtable[(int)(unsigned char)D_rend.font][(int)(unsigned char)c]);
 	else
 		AddChar(D_rend.font != '0' ? c : D_c0_tab[(int)(unsigned char)c]);
 
- addedutf8:
+      addedutf8:
 	if (++D_x >= D_width) {
 		if (D_AM == 0)
 			D_x = D_width - 1;
@@ -711,7 +711,7 @@ void GotoPos(int x2, int y2)
 	if (y1 < 0		/* don't know the y position */
 	    || (y2 > D_bot && y1 <= D_bot)	/* have to cross border */
 	    ||(y2 < D_top && y1 >= D_top)) {	/* of scrollregion ?    */
- DoCM:
+	      DoCM:
 		if (D_HO && !x2 && !y2)
 			AddCStr(D_HO);
 		else
@@ -978,8 +978,7 @@ void Redisplay(int cur_only)
 	else
 		RefreshAll(1);
 	RefreshHStatus();
-	CV_CALL(D_forecv, LayRestore();
-		LaySetCursor());
+	CV_CALL(D_forecv, LayRestore(); LaySetCursor());
 }
 
 void RedisplayDisplays(int cur_only)
@@ -2259,10 +2258,10 @@ void ChangeScrollRegion(int newtop, int newbot)
 void SetXtermOSC(int i, char *s)
 {
 	static char *oscs[][2] = {
-		{WT_FLAG ";", "screen"},	/* set window title */
-		{"20;", ""},	/* background */
-		{"39;", "black"},	/* default foreground (black?) */
-		{"49;", "white"}	/* default background (white?) */
+		{ WT_FLAG ";", "screen" },	/* set window title */
+		{ "20;", "" },	/* background */
+		{ "39;", "black" },	/* default foreground (black?) */
+		{ "49;", "white" }	/* default background (white?) */
 	};
 
 	ASSERT(display);

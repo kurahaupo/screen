@@ -480,7 +480,7 @@ void display_windows(int onblank, int order, struct win *group)
 	wdata = calloc(1, sizeof(struct gl_Window_Data));
 	wdata->group = group;
 	wdata->order = (order & ~WLIST_NESTED);
-	wdata->nested = ! !(order & WLIST_NESTED);
+	wdata->nested = !!(order & WLIST_NESTED);
 	wdata->onblank = onblank;
 
 	/* Set the most recent window as selected. */

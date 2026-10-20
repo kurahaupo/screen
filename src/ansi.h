@@ -58,31 +58,29 @@
  *  Parser state
  */
 /* keep state_t and state_t_string in sync! */
-enum state_t
-{
-  LIT,				/* Literal input */
-  ESC,				/* Start of escape sequence */
-  ASTR,				/* Start of control string */
-  STRESC,			/* ESC seen in control string */
-  CSI,				/* Reading arguments in "CSI Pn ;...*/
-  PRIN,				/* Printer mode */
-  PRINESC,			/* ESC seen in printer mode */
-  PRINCSI,			/* CSI seen in printer mode */
-  PRIN4				/* CSI 4 seen in printer mode */
+enum state_t {
+	LIT,			/* Literal input */
+	ESC,			/* Start of escape sequence */
+	ASTR,			/* Start of control string */
+	STRESC,			/* ESC seen in control string */
+	CSI,			/* Reading arguments in "CSI Pn ;... */
+	PRIN,			/* Printer mode */
+	PRINESC,		/* ESC seen in printer mode */
+	PRINCSI,		/* CSI seen in printer mode */
+	PRIN4			/* CSI 4 seen in printer mode */
 };
 
 /* keep string_t and string_t_string in sync! */
-enum string_t
-{
-  NONE,
-  DCS,				/* Device control string */
-  OSC,				/* Operating system command */
-  APC,				/* Application program command */
-				/*  - used for status change */
-  PM,				/* Privacy message */
-  AKA,				/* title for current screen */
-  GM,				/* Global message to every display */
-  STATUS			/* User hardstatus line */
+enum string_t {
+	NONE,
+	DCS,			/* Device control string */
+	OSC,			/* Operating system command */
+	APC,			/* Application program command */
+	/*  - used for status change */
+	PM,			/* Privacy message */
+	AKA,			/* title for current screen */
+	GM,			/* Global message to every display */
+	STATUS			/* User hardstatus line */
 };
 
 /*
@@ -99,7 +97,7 @@ enum move_t {
 	M_RI,
 	M_CRI,
 	M_RW,
-	M_CR	/* CR and rewrite */
+	M_CR			/* CR and rewrite */
 };
 
 #define EXPENSIVE	 1000
@@ -137,8 +135,8 @@ enum move_t {
 
 #define UTF8	8
 
-#define UCS_REPL    0xfffd  /* character for illegal codes */
-#define UCS_REPL_DW 0xff1f  /* character for illegal codes */
+#define UCS_REPL    0xfffd	/* character for illegal codes */
+#define UCS_REPL_DW 0xff1f	/* character for illegal codes */
 #define UCS_HIDDEN  0xffff
 
 #define is_dw_font(f) ((f) && ((f) & 0x60) == 0)
@@ -151,4 +149,3 @@ enum move_t {
 	(unsigned char)(ml)->font[x] == 0xff && (unsigned char)(ml)->image[x] == 0xff : \
 	((unsigned char)(ml)->font[x] & 0xe0) == 0x80 \
 	)
-

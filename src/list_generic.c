@@ -166,7 +166,7 @@ static void ListProcess(char **ppbuf, int *plen)
 
 		old = ldata->selected;
 
- processchar:
+	      processchar:
 		switch (ch) {
 		case ' ':
 			break;

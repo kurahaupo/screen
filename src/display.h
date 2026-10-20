@@ -39,121 +39,119 @@
 
 #define KMAP_NOTIMEOUT 0x4000
 
-struct kmap_ext
-{
-  char *str;
-  int fl;
-  struct action um;
-  struct action dm;
-  struct action mm;
+struct kmap_ext {
+	char *str;
+	int fl;
+	struct action um;
+	struct action dm;
+	struct action mm;
 };
 
 
 struct win;			/* forward declaration */
 
-struct display
-{
-  struct display *d_next;	/* linked list */
-  struct acluser *d_user;	/* user who owns that display */
-  struct canvas d_canvas;	/* our canvas slice */
-  struct canvas *d_cvlist;	/* the canvases of this display */
-  struct canvas *d_forecv;	/* current input focus */
-  struct layout *d_layout;	/* layout we're using */
-  void (*d_processinput) (char *, int);
-  char *d_processinputdata;	/* data for processinput */
-  int d_vpxmin, d_vpxmax;	/* min/max used position on display */
-  struct win *d_fore;		/* pointer to fore window */
-  struct win *d_other;		/* pointer to other window */
-  int   d_nonblock;		/* -1 don't block if obufmax reached */
-				/* >0: block after nonblock secs */
-  char  d_termname[MAXTERMLEN + 1];	/* $TERM */
-  char	*d_tentry;		/* buffer for tgetstr */
-  char	d_tcinited;		/* termcap inited flag */
-  int	d_width, d_height;	/* width/height of the screen */
-  int	d_defwidth, d_defheight;	/* default width/height of windows */
-  int	d_top, d_bot;		/* scrollregion start/end */
-  int	d_x, d_y;		/* cursor position */
-  struct mchar d_rend;		/* current rendition */
-  int   d_col16change;		/* the 16col bits changed in attr */
-  char	d_atyp;			/* current attribute types */
-  int   d_mbcs;			/* saved char for multibytes charset */
-  int   d_encoding;		/* what encoding type the display is */
-  int   d_decodestate;		/* state of our decoder */
-  int   d_realfont;		/* real font of terminal */
-  int	d_insert;		/* insert mode flag */
-  int	d_keypad;		/* application keypad flag */
-  int	d_cursorkeys;		/* application cursorkeys flag */
-  int	d_revvid;		/* reverse video */
-  int	d_curvis;		/* cursor visibility */
-  int   d_has_hstatus;		/* display has hardstatus line */
-  int	d_hstatus;		/* hardstatus used */
-  int	d_lp_missing;		/* last character on bot line missing */
-  int   d_mouse;		/* mouse mode */
-  int	d_mousetrack;		/* set when user wants to use mouse even when the window
+struct display {
+	struct display *d_next;	/* linked list */
+	struct acluser *d_user;	/* user who owns that display */
+	struct canvas d_canvas;	/* our canvas slice */
+	struct canvas *d_cvlist;	/* the canvases of this display */
+	struct canvas *d_forecv;	/* current input focus */
+	struct layout *d_layout;	/* layout we're using */
+	void (*d_processinput)(char *, int);
+	char *d_processinputdata;	/* data for processinput */
+	int d_vpxmin, d_vpxmax;	/* min/max used position on display */
+	struct win *d_fore;	/* pointer to fore window */
+	struct win *d_other;	/* pointer to other window */
+	int d_nonblock;		/* -1 don't block if obufmax reached */
+	/* >0: block after nonblock secs */
+	char d_termname[MAXTERMLEN + 1];	/* $TERM */
+	char *d_tentry;		/* buffer for tgetstr */
+	char d_tcinited;	/* termcap inited flag */
+	int d_width, d_height;	/* width/height of the screen */
+	int d_defwidth, d_defheight;	/* default width/height of windows */
+	int d_top, d_bot;	/* scrollregion start/end */
+	int d_x, d_y;		/* cursor position */
+	struct mchar d_rend;	/* current rendition */
+	int d_col16change;	/* the 16col bits changed in attr */
+	char d_atyp;		/* current attribute types */
+	int d_mbcs;		/* saved char for multibytes charset */
+	int d_encoding;		/* what encoding type the display is */
+	int d_decodestate;	/* state of our decoder */
+	int d_realfont;		/* real font of terminal */
+	int d_insert;		/* insert mode flag */
+	int d_keypad;		/* application keypad flag */
+	int d_cursorkeys;	/* application cursorkeys flag */
+	int d_revvid;		/* reverse video */
+	int d_curvis;		/* cursor visibility */
+	int d_has_hstatus;	/* display has hardstatus line */
+	int d_hstatus;		/* hardstatus used */
+	int d_lp_missing;	/* last character on bot line missing */
+	int d_mouse;		/* mouse mode */
+	int d_mousetrack;	/* set when user wants to use mouse even when the window
 				   does not */
-  int   d_xtermosc[4];		/* osc used */
-  struct mchar d_lpchar;	/* missing char */
-  struct timeval d_status_time;	/* time of status display */
-  int   d_status;		/* is status displayed? */
-  char	d_status_bell;		/* is it only a vbell? */
-  int	d_status_len;		/* length of status line */
-  char *d_status_lastmsg;	/* last displayed message */
-  int   d_status_buflen;	/* last message buffer len */
-  int	d_status_lastx;		/* position of the cursor */
-  int	d_status_lasty;		/*   before status was displayed */
-  int   d_status_obuflen;	/* saved obuflen */ 
-  int   d_status_obuffree;	/* saved obuffree */ 
-  int	d_status_obufpos;	/* end of status position in obuf */
-  struct event d_statusev;	/* timeout event */
-  struct event d_hstatusev;	/* hstatus changed event */
-  int	d_kaablamm;		/* display kaablamm msg */
-  struct action *d_ESCseen;	/* Was the last char an ESC (^a) */
-  int	d_userpid;		/* pid of attacher */
-  char	d_usertty[MAXPATHLEN];	/* tty we are attached to */
-  int	d_userfd;		/* fd of the tty */
-  struct event d_readev;	/* userfd read event */
-  struct event d_writeev;	/* userfd write event */
-  struct event d_blockedev;	/* blocked timeout */
-  struct mode d_OldMode;	/* tty mode when screen was started */
-  struct mode d_NewMode;	/* New tty mode */
-  int	d_flow;			/* tty's flow control on/off flag*/
-  int   d_intrc;		/* current intr when flow is on */
-  char *d_obuf;			/* output buffer */
-  int   d_obuflen;		/* len of buffer */
-  int	d_obufmax;		/* len where we are blocking the pty */
-  int	d_obuflenmax;		/* len - max */
-  char *d_obufp;		/* pointer in buffer */
-  int   d_obuffree;		/* free bytes in buffer */
-  int	d_auto_nuke;		/* autonuke flag */
-  int	d_nseqs;		/* number of valid mappings */
-  int	d_aseqs;		/* number of allocated mappings */
-  unsigned char  *d_kmaps;	/* keymaps */
-  unsigned char *d_seqp;	/* pointer into keymap array */
-  int	d_seql;			/* number of parsed chars */
-  unsigned char *d_seqh;	/* last hit */
-  struct event d_mapev;		/* timeout event */
-  int	d_dontmap;		/* do not map next */
-  int	d_mapdefault;		/* do map next to default */
-  union	tcu d_tcs[T_N];		/* terminal capabilities */
-  char *d_attrtab[NATTR];	/* attrib emulation table */
-  char  d_attrtyp[NATTR];	/* attrib group table */
-  int   d_hascolor;		/* do we support color */
-  short	d_dospeed;		/* baudrate of tty */
-  char	d_c0_tab[256];		/* conversion for C0 */
-  char ***d_xtable;		/* char translation table */
-  int	d_UPcost, d_DOcost, d_LEcost, d_NDcost;
-  int	d_CRcost, d_IMcost, d_EIcost, d_NLcost;
-  int   d_printfd;		/* fd for vt100 print sequence */
+	int d_xtermosc[4];	/* osc used */
+	struct mchar d_lpchar;	/* missing char */
+	struct timeval d_status_time;	/* time of status display */
+	int d_status;		/* is status displayed? */
+	char d_status_bell;	/* is it only a vbell? */
+	int d_status_len;	/* length of status line */
+	char *d_status_lastmsg;	/* last displayed message */
+	int d_status_buflen;	/* last message buffer len */
+	int d_status_lastx;	/* position of the cursor */
+	int d_status_lasty;	/*   before status was displayed */
+	int d_status_obuflen;	/* saved obuflen */
+	int d_status_obuffree;	/* saved obuffree */
+	int d_status_obufpos;	/* end of status position in obuf */
+	struct event d_statusev;	/* timeout event */
+	struct event d_hstatusev;	/* hstatus changed event */
+	int d_kaablamm;		/* display kaablamm msg */
+	struct action *d_ESCseen;	/* Was the last char an ESC (^a) */
+	int d_userpid;		/* pid of attacher */
+	char d_usertty[MAXPATHLEN];	/* tty we are attached to */
+	int d_userfd;		/* fd of the tty */
+	struct event d_readev;	/* userfd read event */
+	struct event d_writeev;	/* userfd write event */
+	struct event d_blockedev;	/* blocked timeout */
+	struct mode d_OldMode;	/* tty mode when screen was started */
+	struct mode d_NewMode;	/* New tty mode */
+	int d_flow;		/* tty's flow control on/off flag */
+	int d_intrc;		/* current intr when flow is on */
+	char *d_obuf;		/* output buffer */
+	int d_obuflen;		/* len of buffer */
+	int d_obufmax;		/* len where we are blocking the pty */
+	int d_obuflenmax;	/* len - max */
+	char *d_obufp;		/* pointer in buffer */
+	int d_obuffree;		/* free bytes in buffer */
+	int d_auto_nuke;	/* autonuke flag */
+	int d_nseqs;		/* number of valid mappings */
+	int d_aseqs;		/* number of allocated mappings */
+	unsigned char *d_kmaps;	/* keymaps */
+	unsigned char *d_seqp;	/* pointer into keymap array */
+	int d_seql;		/* number of parsed chars */
+	unsigned char *d_seqh;	/* last hit */
+	struct event d_mapev;	/* timeout event */
+	int d_dontmap;		/* do not map next */
+	int d_mapdefault;	/* do map next to default */
+	union tcu d_tcs[T_N];	/* terminal capabilities */
+	char *d_attrtab[NATTR];	/* attrib emulation table */
+	char d_attrtyp[NATTR];	/* attrib group table */
+	int d_hascolor;		/* do we support color */
+	short d_dospeed;	/* baudrate of tty */
+	char d_c0_tab[256];	/* conversion for C0 */
+	char ***d_xtable;	/* char translation table */
+	int d_UPcost, d_DOcost, d_LEcost, d_NDcost;
+	int d_CRcost, d_IMcost, d_EIcost, d_NLcost;
+	int d_printfd;		/* fd for vt100 print sequence */
 #ifdef UTMPOK
-  slot_t d_loginslot;		/* offset, where utmp_logintty belongs */
-  struct utmp d_utmp_logintty;	/* here the original utmp structure is stored */
-  int   d_loginttymode;
+	slot_t d_loginslot;	/* offset, where utmp_logintty belongs */
+	struct utmp d_utmp_logintty;	/* here the original utmp structure is stored */
+	int d_loginttymode;
 #endif
-  int   d_blocked;
-  int   d_blocked_fuzz;
-  struct event d_idleev;	/* screen blanker */
-  int   d_blankerpid;
-  struct event d_blankerev;
+	int d_blocked;
+	int d_blocked_fuzz;
+	struct event d_idleev;	/* screen blanker */
+	int d_blankerpid;
+	struct event d_blankerev;
 };
 
 #define DISPLAY(x) display->x
@@ -269,10 +267,10 @@ struct display
 #define D_blankerpid	DISPLAY(d_blankerpid)
 
 
-#define GRAIN 4096	/* Allocation grain size for output buffer */
-#define OBUF_MAX 256	/* default for obuflimit */
+#define GRAIN 4096		/* Allocation grain size for output buffer */
+#define OBUF_MAX 256		/* default for obuflimit */
 
-#define OUTPUT_BLOCK_SIZE 256  /* Block size of output to tty */
+#define OUTPUT_BLOCK_SIZE 256	/* Block size of output to tty */
 
 #define AddChar(c)		\
 do				\
@@ -294,5 +292,4 @@ while (0)
 #define HSTATUS_FIRSTLINE	4
 #define HSTATUS_ALWAYS		(1<<3)
 
-#endif /* SCREEN_DISPLAY_H */
-
+#endif				/* SCREEN_DISPLAY_H */

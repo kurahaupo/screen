@@ -589,7 +589,7 @@ static void LockTerminal()
 {
 	char *prg;
 	int sig, pid;
-	void (*sigs[NSIG]) (int);
+	void (*sigs[NSIG])(int);
 
 	for (sig = 1; sig < NSIG; sig++)
 		sigs[sig] = signal(sig, sig == SIGCHLD ? SIG_DFL : SIG_IGN);

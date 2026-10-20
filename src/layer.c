@@ -77,7 +77,8 @@ void LGotoPos(struct layer *l, int x, int y)
 		LayPauseUpdateRegion(l, x, x, y, y);
 
 	FOR_EACH_UNPAUSED_CANVAS(l, {
-				 display = cv->c_display; if (D_blocked)
+				 display = cv->c_display;
+				 if (D_blocked)
 				 continue; if (cv != D_forecv)
 				 continue;
 				 x2 = x + cv->c_xoff;
@@ -200,7 +201,8 @@ void LPutChar(struct layer *l, struct mchar *c, int x, int y)
 				     , y, y);
 
 	FOR_EACH_UNPAUSED_CANVAS(l, {
-				 display = cv->c_display; if (D_blocked)
+				 display = cv->c_display;
+				 if (D_blocked)
 				 continue; for (vp = cv->c_vplist; vp; vp = vp->v_next) {
 				 y2 = y + vp->v_yoff; if (y2 < vp->v_ys || y2 > vp->v_ye)
 				 continue; x2 = x + vp->v_xoff; if (x2 < vp->v_xs || x2 > vp->v_xe)
@@ -314,7 +316,8 @@ void LClearArea(struct layer *l, int xs, int ys, int xe, int ye, int bce, int us
 	if (l->l_pause.d)
 		LayPauseUpdateRegion(l, xs, xe, ys, ye);
 	FOR_EACH_UNPAUSED_CANVAS(l, {
-				 display = cv->c_display; if (D_blocked)
+				 display = cv->c_display;
+				 if (D_blocked)
 				 continue; for (vp = cv->c_vplist; vp; vp = vp->v_next) {
 				 xs2 = xs + vp->v_xoff;
 				 xe2 = xe + vp->v_xoff;
@@ -347,7 +350,8 @@ void LCDisplayLine(struct layer *l, struct mline *ml, int y, int xs, int xe, int
 	if (l->l_pause.d)
 		LayPauseUpdateRegion(l, xs, xe, y, y);
 	FOR_EACH_UNPAUSED_CANVAS(l, {
-				 display = cv->c_display; if (D_blocked)
+				 display = cv->c_display;
+				 if (D_blocked)
 				 continue; for (vp = cv->c_vplist; vp; vp = vp->v_next) {
 				 xs2 = xs + vp->v_xoff;
 				 xe2 = xe + vp->v_xoff; y2 = y + vp->v_yoff; if (y2 < vp->v_ys || y2 > vp->v_ye)
@@ -410,7 +414,8 @@ void LWrapChar(struct layer *l, struct mchar *c, int y, int top, int bot, int in
 
 		FOR_EACH_UNPAUSED_CANVAS(l, {
 					 y2 = 0;	/* gcc -Wall */
-					 display = cv->c_display; if (D_blocked)
+					 display = cv->c_display;
+					 if (D_blocked)
 					 continue;
 					 /* find the viewport of the wrapped character */
 					 for (vp = cv->c_vplist; vp; vp = vp->v_next) {
@@ -445,7 +450,8 @@ void LWrapChar(struct layer *l, struct mchar *c, int y, int top, int bot, int in
 		/* hard case: scroll up */
 
 		FOR_EACH_UNPAUSED_CANVAS(l, {
-					 display = cv->c_display; if (D_blocked)
+					 display = cv->c_display;
+					 if (D_blocked)
 					 continue;
 					 /* search for wrap viewport */
 					 for (vpp = &cv->c_vplist; (vp = *vpp); vpp = &vp->v_next) {
@@ -795,7 +801,7 @@ void LayPause(struct layer *layer, int pause)
 	int line;
 	struct win *win;
 
-	pause = ! !pause;
+	pause = !!pause;
 
 	if (layer->l_pause.d == pause)
 		return;

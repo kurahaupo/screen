@@ -647,7 +647,7 @@ int MakeWindow(struct NewWindow *newwin)
 
 	p->w_lflag = nwin.lflag;
 #ifdef UTMPOK
-	p->w_slot = (slot_t) - 1;
+	p->w_slot = (slot_t)-1;
 #ifdef LOGOUTOK
 	debug("MakeWindow will %slog in.\n", nwin.lflag ? "" : "not ");
 	if (nwin.lflag & 1)
@@ -655,7 +655,7 @@ int MakeWindow(struct NewWindow *newwin)
 	debug("MakeWindow will log in, LOGOUTOK undefined in config.h%s.\n", nwin.lflag ? "" : " (although lflag=0)");
 #endif				/* LOGOUTOK */
 	{
-		p->w_slot = (slot_t) 0;
+		p->w_slot = (slot_t)0;
 		if (display || (p->w_lflag & 2))
 			SetUtmp(p);
 	}
@@ -767,7 +767,7 @@ int RemakeWindow(struct win *p)
 			return -1;
 	}
 #ifdef UTMPOK
-	if (p->w_slot == (slot_t) 0 && (display || (p->w_lflag & 2)))
+	if (p->w_slot == (slot_t)0 && (display || (p->w_lflag & 2)))
 		SetUtmp(p);
 #ifdef CAREFULUTMP
 	CarefulUtmp();		/* If all 've been zombies, we've had no slot */
@@ -1882,11 +1882,11 @@ int SwapWindows(int old, int dest)
 	AclWinSwap(old, dest);
 #ifdef UTMPOK
 	/* exchange the utmp-slots for these windows */
-	if ((win_old->w_slot != (slot_t) - 1) && (win_old->w_slot != (slot_t) 0)) {
+	if ((win_old->w_slot != (slot_t)-1) && (win_old->w_slot != (slot_t)0)) {
 		RemoveUtmp(win_old);
 		SetUtmp(win_old);
 	}
-	if (p && (p->w_slot != (slot_t) - 1) && (p->w_slot != (slot_t) 0)) {
+	if (p && (p->w_slot != (slot_t)-1) && (p->w_slot != (slot_t)0)) {
 		display = win_old->w_layer.l_cvlist ? win_old->w_layer.l_cvlist->c_display : 0;
 		RemoveUtmp(p);
 		SetUtmp(p);

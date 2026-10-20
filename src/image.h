@@ -129,11 +129,9 @@ struct mline {
 
 #define coli2e(c) ((((c) & 0x1f8) == 0x108 ? (c) ^ 0x108 : (c & 0xff)) ^ 9)
 #define cole2i(c) ((c) >= 8 && (c) < 16 ? (c) ^ 0x109 : (c) ^ 9)
-enum
-{
-  REND_BELL = 0,
-  REND_MONITOR,
-  REND_SILENCE,
-  NUM_RENDS
+enum {
+	REND_BELL = 0,
+	REND_MONITOR,
+	REND_SILENCE,
+	NUM_RENDS
 };
-

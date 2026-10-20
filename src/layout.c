@@ -294,7 +294,7 @@ void UpdateLayoutCanvas(struct canvas *cv, struct win *wi)
 	}
 }
 
-static void dump_canvas(struct canvas *cv, FILE * file)
+static void dump_canvas(struct canvas *cv, FILE *file)
 {
 	struct canvas *c;
 	for (c = cv->c_slperp; c && c->c_slnext; c = c->c_slnext) {

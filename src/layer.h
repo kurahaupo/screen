@@ -35,54 +35,52 @@
  * layer over the current windows.
  */
 
-struct mchar;	/* forward declaration */
+struct mchar;			/* forward declaration */
 
-struct LayFuncs
-{
-  void	(*lf_LayProcess) (char **, int *);
-  void	(*lf_LayAbort) (void);
-  void	(*lf_LayRedisplayLine) (int, int, int, int);
-  void	(*lf_LayClearLine) (int, int, int, int);
-  int	(*lf_LayRewrite) (int, int, int, struct mchar *, int);
-  int	(*lf_LayResize) (int, int);
-  void	(*lf_LayRestore) (void);
-  void  (*lf_LayFree) (void *);		/* Should only free any data kept in
+struct LayFuncs {
+	void (*lf_LayProcess)(char **, int *);
+	void (*lf_LayAbort)(void);
+	void (*lf_LayRedisplayLine)(int, int, int, int);
+	void (*lf_LayClearLine)(int, int, int, int);
+	int (*lf_LayRewrite)(int, int, int, struct mchar *, int);
+	int (*lf_LayResize)(int, int);
+	void (*lf_LayRestore)(void);
+	void (*lf_LayFree)(void *);	/* Should only free any data kept in
 					   flayer->l_data (but not flayer->l_data itself). */
 };
 
-struct layer
-{
-  struct canvas *l_cvlist;	/* list of canvases displaying layer */
-  int	 l_width;
-  int	 l_height;
-  int    l_x;			/* cursor position */
-  int    l_y;
-  int    l_encoding;
-  struct LayFuncs *l_layfn;
-  void	*l_data;
+struct layer {
+	struct canvas *l_cvlist;	/* list of canvases displaying layer */
+	int l_width;
+	int l_height;
+	int l_x;		/* cursor position */
+	int l_y;
+	int l_encoding;
+	struct LayFuncs *l_layfn;
+	void *l_data;
 
-  struct layer *l_next;		/* layer stack, should be in data? */
-  struct layer *l_bottom;	/* bottom element of layer stack */
-  int	 l_blocking;
-  int	 l_mode;		/* non-zero == edit mode */
+	struct layer *l_next;	/* layer stack, should be in data? */
+	struct layer *l_bottom;	/* bottom element of layer stack */
+	int l_blocking;
+	int l_mode;		/* non-zero == edit mode */
 
-  struct {
-    unsigned char buffer[3];	/* [0]: the button
-				   [1]: x
-				   [2]: y
-				*/
-    unsigned int len;
-    int start;
-  } l_mouseevent;
+	struct {
+		unsigned char buffer[3];	/* [0]: the button
+						   [1]: x
+						   [2]: y
+						 */
+		unsigned int len;
+		int start;
+	} l_mouseevent;
 
-  struct {
-    int d : 1;		/* Is the output for the layer blocked? */
+	struct {
+		int d:1;	/* Is the output for the layer blocked? */
 
-    /* After unpausing, what region should we refresh? */
-    int *left, *right;
-    int top, bottom;
-    int lines;
-  } l_pause;
+		/* After unpausing, what region should we refresh? */
+		int *left, *right;
+		int top, bottom;
+		int lines;
+	} l_pause;
 };
 
 #define LayProcess		(*flayer->l_layfn->lf_LayProcess)
@@ -133,7 +131,7 @@ struct layer
 	  display = olddisplay;				\
 	} while(0)
 
-#endif /* SCREEN_LAYER_H */
+#endif				/* SCREEN_LAYER_H */
 
 /**
  * (Un)Pauses a layer.
@@ -141,7 +139,7 @@ struct layer
  * @param layer The layer that should be (un)paused.
  * @param pause Should we pause the layer?
  */
-void LayPause (struct layer *layer, int pause);
+void LayPause(struct layer *layer, int pause);
 
 /**
  * Update the region to refresh after a layer is unpaused.
@@ -152,12 +150,11 @@ void LayPause (struct layer *layer, int pause);
  * @param ys	The top-end of the region.
  * @param ye	The bottom-end of the region.
  */
-void LayPauseUpdateRegion (struct layer *layer, int xs, int xe, int ys, int ye);
+void LayPauseUpdateRegion(struct layer *layer, int xs, int xe, int ys, int ye);
 
 /**
  * Free any internal memory for the layer.
  *
  * @param layer The layer.
  */
-void LayerCleanupMemory (struct layer *layer);
-
+void LayerCleanupMemory(struct layer *layer);

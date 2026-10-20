@@ -145,7 +145,7 @@ void SlotToggle(int how)
 	}
 	if (how) {
 		debug(" try to log in\n");
-		if ((fore->w_slot == (slot_t) - 1) || (fore->w_slot == (slot_t) 0)) {
+		if ((fore->w_slot == (slot_t)-1) || (fore->w_slot == (slot_t)0)) {
 #ifdef USRLIMIT
 			if (CountUsers() >= USRLIMIT) {
 				Msg(0, "User limit reached.");
@@ -161,15 +161,15 @@ void SlotToggle(int how)
 			Msg(0, "This window is already logged in.");
 	} else {
 		debug(" try to log out\n");
-		if (fore->w_slot == (slot_t) - 1)
+		if (fore->w_slot == (slot_t)-1)
 			Msg(0, "This window is already logged out\n");
-		else if (fore->w_slot == (slot_t) 0) {
+		else if (fore->w_slot == (slot_t)0) {
 			debug("What a relief! In fact, it was not logged in\n");
 			Msg(0, "This window is not logged in.");
-			fore->w_slot = (slot_t) - 1;
+			fore->w_slot = (slot_t)-1;
 		} else {
 			RemoveUtmp(fore);
-			if (fore->w_slot != (slot_t) - 1)
+			if (fore->w_slot != (slot_t)-1)
 				Msg(0, "What? Cannot remove Utmp slot?");
 			else
 				Msg(0, "This window is no longer logged in.");
@@ -194,7 +194,7 @@ void CarefulUtmp()
 		return;
 	debug("CarefulUtmp counting slots\n");
 	for (p = windows; p; p = p->w_next)
-		if (p->w_ptyfd >= 0 && p->w_slot != (slot_t) - 1)
+		if (p->w_ptyfd >= 0 && p->w_slot != (slot_t)-1)
 			return;	/* found one, nothing to do */
 
 	debug("CarefulUtmp: no slots, log one in again.\n");
@@ -257,7 +257,7 @@ void RemoveLoginSlot()
 	ASSERT(display);
 	debug("RemoveLoginSlot: removing your logintty\n");
 	D_loginslot = TtyNameSlot(D_usertty);
-	if (D_loginslot == (slot_t) 0 || D_loginslot == (slot_t) - 1)
+	if (D_loginslot == (slot_t)0 || D_loginslot == (slot_t)-1)
 		return;
 #ifdef UTMP_HELPER
 	if (eff_uid)		/* helpers can't do login slots. sigh. */
@@ -281,7 +281,7 @@ void RemoveLoginSlot()
 		UT_CLOSE;
 	}
 	debug(" slot %d zapped\n", (int)D_loginslot);
-	if (D_loginslot == (slot_t) 0) {
+	if (D_loginslot == (slot_t)0) {
 		/* couldn't remove slot, do a 'mesg n' at least. */
 		struct stat stb;
 		char *tty;
@@ -304,13 +304,13 @@ void RestoreLoginSlot()
 
 	debug("RestoreLoginSlot()\n");
 	ASSERT(display);
-	if (utmpok && D_loginslot != (slot_t) 0 && D_loginslot != (slot_t) - 1) {
+	if (utmpok && D_loginslot != (slot_t)0 && D_loginslot != (slot_t)-1) {
 		debug(" logging you in again (slot %#x)\n", (int)D_loginslot);
 		if (pututslot(D_loginslot, &D_utmp_logintty, D_loginhost, (struct win *)0) == 0)
 			Msg(errno, "Could not write %s", UtmpName);
 	}
 	UT_CLOSE;
-	D_loginslot = (slot_t) 0;
+	D_loginslot = (slot_t)0;
 	if (D_loginttymode && (tty = ttyname(D_userfd)) && !CheckTtyname(tty))
 		chmod(tty, D_loginttymode);
 }
@@ -336,10 +336,10 @@ int SetUtmp(struct win *win)
 	char *host = 0;
 #endif				/* UTHOST */
 
-	win->w_slot = (slot_t) 0;
+	win->w_slot = (slot_t)0;
 	if (!utmpok || win->w_type != W_TYPE_PTY)
 		return -1;
-	if ((slot = TtyNameSlot(win->w_tty)) == (slot_t) 0) {
+	if ((slot = TtyNameSlot(win->w_tty)) == (slot_t)0) {
 		debug("SetUtmp failed (tty %s).\n", win->w_tty);
 		return -1;
 	}
@@ -357,7 +357,7 @@ int SetUtmp(struct win *win)
 	host[sizeof(host) - 15] = '\0';
 	if (display) {
 		strncpy(host, D_loginhost, sizeof(host) - 15);
-		if (D_loginslot != (slot_t) 0 && D_loginslot != (slot_t) - 1 && host[0] != '\0') {
+		if (D_loginslot != (slot_t)0 && D_loginslot != (slot_t)-1 && host[0] != '\0') {
 			/*
 			 * we want to set our ut_host field to something like
 			 * ":ttyhf:s.0" or
@@ -415,8 +415,8 @@ int RemoveUtmp(struct win *win)
 	debug("RemoveUtmp slot=%#x\n", slot);
 	if (!utmpok)
 		return -1;
-	if (slot == (slot_t) 0 || slot == (slot_t) - 1) {
-		win->w_slot = (slot_t) - 1;
+	if (slot == (slot_t)0 || slot == (slot_t)-1) {
+		win->w_slot = (slot_t)-1;
 		return 0;
 	}
 	memset((char *)&u, 0, sizeof(u));
@@ -433,7 +433,7 @@ int RemoveUtmp(struct win *win)
 		return -1;
 	}
 	debug("RemoveUtmp successfull\n");
-	win->w_slot = (slot_t) - 1;
+	win->w_slot = (slot_t)-1;
 	UT_CLOSE;
 	return 0;
 }

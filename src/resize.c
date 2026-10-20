@@ -726,7 +726,7 @@ int ChangeWindowSize(struct win *p, int wi, int he, int hi)
 			t = p->w_tabs ? p->w_width : 0;
 			p->w_tabs = xrealloc(p->w_tabs, wi + 1);
 			if (p->w_tabs == 0) {
- nomem:
+			      nomem:
 				if (nmlines) {
 					for (ty = he + hi - 1; ty >= 0; ty--) {
 						mlt = NEWWIN(ty);

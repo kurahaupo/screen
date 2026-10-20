@@ -1131,7 +1131,7 @@ static void FinishAttach(struct msg *m)
 	RemoveLoginSlot();
 	if (displays->d_next == 0)
 		for (wi = windows; wi; wi = wi->w_next)
-			if (wi->w_ptyfd >= 0 && wi->w_slot != (slot_t) - 1)
+			if (wi->w_ptyfd >= 0 && wi->w_slot != (slot_t)-1)
 				SetUtmp(wi);
 #endif
 
