@@ -2090,7 +2090,7 @@ static void MScrollV(struct win *p, int n, int ys, int ye, int bce)
 			if (ml->colorx != null)
 				free(ml->colorx);
 			ml->colorx = null;
-			bclear((char *)ml->image, p->w_width + 1);
+			memcpy(ml->image, blank, (win->w_width + 1) * sizeof *ml->image);
 			if (bce)
 				MBceLine(p, i, 0, p->w_width, bce);
 		}
@@ -2126,7 +2126,7 @@ static void MScrollV(struct win *p, int n, int ys, int ye, int bce)
 			if (ml->colorx != null)
 				free(ml->colorx);
 			ml->colorx = null;
-			bclear((char *)ml->image, p->w_width + 1);
+			memcpy(ml->image, blank, (win->w_width + 1) * sizeof *ml->image);
 			if (bce)
 				MBceLine(p, i, 0, p->w_width, bce);
 		}
@@ -2371,13 +2371,13 @@ int MFindUsedLine(struct win *p, int ye, int ys)
 
 	debug("MFindUsedLine: %d %d\n", ye, ys);
 	for (y = ye; y >= ys; y--, ml--) {
-		if (memcmp((char *)ml->image, blank, p->w_width))
+		if (memcmp(ml->image, blank, p->w_width * sizeof *ml->image))
 			break;
-		if (ml->attr != null && memcmp((char *)ml->attr, null, p->w_width))
+		if (ml->attr != null && memcmp(ml->attr, null, p->w_width * sizeof *ml->attr))
 			break;
-		if (ml->color != null && memcmp((char *)ml->color, null, p->w_width))
+		if (ml->color != null && memcmp(ml->color, null, p->w_width * sizeof *ml->color))
 			break;
-		if (ml->colorx != null && memcmp((char *)ml->colorx, null, p->w_width))
+		if (ml->colorx != null && memcmp(ml->colorx, null, p->w_width * sizeof *ml->colorx))
 			break;
 		if (p->w_encoding == UTF8) {
 			if (ml->font != null && bcmp((char *)ml->font, null, p->w_width))
