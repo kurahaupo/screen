@@ -256,3 +256,27 @@ int logfflush(struct logfile *l)
 	}
 	return r;
 }
+
+#if 0	/* FUTURE? */
+# if 0	/* WHY? */
+#  include "extern.h"
+#  define strdup SaveStr
+# else
+extern void *malloc();
+extern void free();
+extern int fwrite();
+extern int fflush();
+extern void fclose();
+extern char *strdup();
+#  define debug(a)
+#  define debug1(a)
+#  define debug2(a)
+#  ifndef __P
+#   if defined(__STDC__)
+#    define __P(a) a
+#   else
+#    define __P(a) ()
+#   endif
+#  endif
+# endif
+#endif	/* FUTURE? */

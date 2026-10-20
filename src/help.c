@@ -419,8 +419,8 @@ static void CopyrightAbort(void);
 static void copypage(void);
 
 struct copydata {
-	char *cps, *savedcps;	/* position in the message */
-	char *refcps, *refsavedcps;	/* backup for redisplaying */
+	char   *cps, *savedcps;		/* position in the message */
+	char   *refcps, *refsavedcps;	/* backup for redisplaying */
 };
 
 static struct LayFuncs CopyrightLf = {
@@ -575,7 +575,8 @@ static void copypage()
 	}
 	while (*cps == '\n')
 		cps++;
-	sprintf(cbuf, "[Press Space %s Return to end.]", *cps ? "for next page;" : "or");
+	sprintf(cbuf, "[Press Space %s Return to end.]",
+		*cps ? "for next page;" : "or");
 	centerline(cbuf, flayer->l_height - 2);
 	copydata->cps = cps;
 	LaySetCursor();
@@ -836,3 +837,173 @@ static void PadStr(char *str, int n, int x, int y)
 	if (l < n)
 		LPutStr(flayer, (char *)blank, n - l, &mchar_blank, x + l, y);
 }
+
+#if 0	/* FUTURE? */
+/*
+**
+**    here is all the displays stuff
+**
+*/
+
+static void DisplaysProcess(char **, int *);
+static void DisplaysRedisplayLine(int, int, int, int);
+static void displayspage(void);
+
+struct displaysdata {
+	int dummy_element_for_solaris;
+};
+
+static struct LayFuncs DisplaysLf = {
+	DisplaysProcess,
+	HelpAbort,
+	DisplaysRedisplayLine,
+	DefClearLine,
+	DefRewrite,
+	DefResize,
+	DefRestore
+};
+
+static void DisplaysProcess(char **ppbuf, int *plen)
+{
+	int done = 0;
+	struct displaysdata *displaysdata;
+
+	ASSERT(flayer);
+	displaysdata = (struct displaysdata *)flayer->l_data;
+	while (!done && *plen > 0) {
+		switch (**ppbuf) {
+		case ' ':
+			displayspage();
+			break;
+			/* FALLTHROUGH */
+		case '\r':
+		case '\n':
+			HelpAbort();
+			done = 1;
+			break;
+		default:
+			break;
+		}
+		++*ppbuf;
+		--*plen;
+	}
+}
+
+void display_displays()
+{
+	struct displaysdata *displaysdata;
+
+	if (flayer->l_width < 10 || flayer->l_height < 5) {
+		LMsg(0, "Window size too small for displays page");
+		return;
+	}
+	if (InitOverlayPage(sizeof(*displaysdata), &DisplaysLf, 0))
+		return;
+	displaysdata = (struct displaysdata *)flayer->l_data;
+	flayer->l_x = 0;
+	flayer->l_y = flayer->l_height - 1;
+	displayspage();
+}
+
+/*
+    * layout of the displays page is as follows:
+
+xterm 80x42      jnweiger@/dev/ttyp4    0(m11)    &rWx
+facit 80x24 nb   mlschroe@/dev/ttyhf   11(tcsh)    rwx
+xterm 80x42      jnhollma@/dev/ttyp5    0(m11)    &R.x
+
+	|     |    |      |         |         |   |     | ¦___ window permissions
+	|     |    |      |         |         |   |     |      (R. is locked r-only,
+	|     |    |      |         |         |   |     |       W has wlock)
+	|     |    |      |         |         |   |     |___ Window is shared
+	|     |    |      |         |         |   |___ Name/Title of window
+	|     |    |      |         |         |___ Number of window
+	|     |    |      |         |___ Name of the display (the attached device)
+	|     |    |      |___ Username who is logged in at the display
+	|     |    |___ Display is in nonblocking mode. Shows 'NB' if obuf is full.
+	|     |___ Displays geometry as width x height.
+	|___ the terminal type known by screen for this display.
+
+    */
+
+static void displayspage(void)
+{
+	int y, l;
+	char tbuf[80];
+	struct displaysdata *displaysdata;
+	struct display *d;
+	struct win *w;
+
+	displaysdata = (struct displaysdata *)flayer->l_data;
+
+	ClearLayer(flayer, 0);
+
+	leftline("term-type   size         user interface           window", 0);
+	leftline("---------- ------- ---------- ----------------- ----------", 1);
+	y = 2;
+
+	for (d = displays; d; d = d->d_next) {
+		w = d->d_fore;
+
+		if (y >= flayer->l_height - 3)
+			break;
+		sprintf(tbuf, "%-10.10s%4dx%-4d%10.10s@%-16.16s%s",
+						d->d_termname, d->d_width, d->d_height, d->d_user->u_name,
+						d->d_usertty,
+						d->d_nonblock ? ((( d->d_obufp - d->d_obuf) > d->d_obufmax) ?
+							"NB" : "nb") : "  ");
+
+		if (w) {
+			l = 10 - strlen(w->w_title);
+			if (l < 0)
+				l = 0;
+			sprintf(tbuf + strlen(tbuf), "%3d(%.10s)%*s%c%c%c%c",
+							w->w_number, w->w_title, l, "",
+							/* w->w_dlist->next */ 0 ? '&' : ' ',
+							/*
+							 * The rwx triple:
+							 * -,r,R	no read, read, read only due to foreign wlock
+							 * -,.,w,W	no write, write suppressed by foreign wlock,
+							 *            write, own wlock
+							 * -,x	no execute, execute
+							 */
+#ifdef MULTIUSER
+							(AclCheckPermWin(d->d_user, ACL_READ, w) ? '-' :
+							    ((w->w_wlock == WLOCK_OFF || d->d_user == w->w_wlockuser) ?
+								'r' : 'R')),
+							(AclCheckPermWin(d->d_user, ACL_READ, w) ? '-' :
+							    ((w->w_wlock == WLOCK_OFF) ? 'w' :
+								((d->d_user == w->w_wlockuser) ? 'W' : 'v'))),
+							(AclCheckPermWin(d->d_user, ACL_READ, w) ? '-' : 'x')
+#else
+							'r', 'w', 'x'
+#endif
+			);
+		}
+		leftline(tbuf, y);
+		y++;
+	}
+	sprintf(tbuf,"[Press Space %s Return to end.]",
+					1 ? "to refresh;" : "or");
+	centerline(tbuf, flayer->l_height - 2);
+	SetCursor();
+}
+
+static void DisplaysRedisplayLine(int y, int xs, int xe, int isblank)
+{
+	ASSERT(flayer);
+	if (y < 0) {
+		struct displaysdata *displaysdata;
+
+		displaysdata = (struct displaysdata *)flayer->l_data;
+		displayspage();
+		return;
+	}
+	if (y != 0 && y != flayer->l_height - 1)
+		return;
+	if (isblank)
+		return;
+	LClear(flayer, xs, y, xe, y, 0);
+	/* To be filled in... */
+}
+#endif  /* FUTURE? */

@@ -310,3 +310,156 @@ typedef int slot_t;
  * MSG_VERSION */
 #define MAXTERMLEN	32
 #define MAXLOGINLEN	256
+
+#if 0	/* FUTURE? */
+#  define utmp		utmpx
+#  define getutent	getutxent
+#  define getutid	getutxid
+#  define getutline	getutxline
+#  define pututline	pututxline
+#  define setutent	setutxent
+#  define endutent	endutxent
+#  define ut_time	ut_xtime
+# else /* SVR4 */
+#  include <utmp.h>
+# endif /* SVR4 */
+# ifdef apollo
+   /*
+    * We don't have GETUTENT, so we dig into utmp ourselves.
+    * But we save the permanent filedescriptor and
+    * open utmp just when we need to.
+    * This code supports an unsorted utmp. jw.
+    */
+#  define UTNOKEEP
+# endif /* apollo */
+#endif	/* FUTURE? */
+
+#if 0	/* FUTURE? */
+#ifndef POSIX
+#undef mkfifo
+#define mkfifo(n,m) mknod(n,S_IFIFO|(m),0)
+#endif
+
+#if !defined(HAVE_LSTAT) && !defined(lstat)
+# define lstat stat
+#endif
+
+/*****************************************************************
+ *    signal handling
+ */
+
+#ifdef SIGVOID
+# define SIGRETURN
+# define sigret_t void
+#else
+# define SIGRETURN return 0;
+# define sigret_t int
+#endif
+
+/* Geeeee, reverse it? */
+#if defined(SVR4) || (defined(SYSV) && defined(ISC)) || defined(_AIX) || defined(linux) || defined(ultrix) || defined(__386BSD__) || defined(__bsdi__) || defined(POSIX) || defined(NeXT)
+# define SIGHASARG
+#endif
+
+#ifdef SIGHASARG
+# define SIGPROTOARG   (int)
+# define SIGDEFARG     (sigsig) int sigsig;
+# define SIGARG        0
+#else
+# define SIGPROTOARG   (void)
+# define SIGDEFARG     ()
+# define SIGARG
+#endif
+
+#ifndef SIGCHLD
+#define SIGCHLD SIGCLD
+#endif
+
+#if defined(POSIX) || defined(hpux)
+# define signal xsignal
+#else
+# ifdef USESIGSET
+#  define signal sigset
+# endif /* USESIGSET */
+#endif
+
+/* used in screen.c and attacher.c */
+#ifndef NSIG		/* kbeal needs these w/o SYSV */
+# define NSIG 32
+#endif /* !NSIG */
+
+
+/*****************************************************************
+ *    Wait stuff
+ */
+
+#if (!defined(sysV68) && !defined(M_XENIX)) || defined(NeXT) || defined(M_UNIX)
+# include <sys/wait.h>
+#endif
+
+#ifndef WTERMSIG
+# ifndef BSDWAIT /* if wait is NOT a union: */
+#  define WTERMSIG(status) (status & 0177)
+# else
+#  define WTERMSIG(status) status.w_T.w_Termsig
+# endif
+#endif
+
+#ifndef WSTOPSIG
+# ifndef BSDWAIT /* if wait is NOT a union: */
+#  define WSTOPSIG(status) ((status >> 8) & 0377)
+# else
+#  define WSTOPSIG(status) status.w_S.w_Stopsig
+# endif
+#endif
+
+/* NET-2 uses WCOREDUMP */
+#if defined(WCOREDUMP) && !defined(WIFCORESIG)
+# define WIFCORESIG(status) WCOREDUMP(status)
+#endif
+
+#ifndef WIFCORESIG
+# ifndef BSDWAIT /* if wait is NOT a union: */
+#  define WIFCORESIG(status) (status & 0200)
+# else
+#  define WIFCORESIG(status) status.w_T.w_Coredump
+# endif
+#endif
+
+#ifndef WEXITSTATUS
+# ifndef BSDWAIT /* if wait is NOT a union: */
+#  define WEXITSTATUS(status) ((status >> 8) & 0377)
+# else
+#  define WEXITSTATUS(status) status.w_T.w_Retcode
+# endif
+#endif
+
+
+/*****************************************************************
+ *    select stuff
+ */
+
+#if defined(M_XENIX) || defined(M_UNIX) || defined(_SEQUENT_)
+#include <sys/select.h>		/* for timeval + FD... */
+#endif
+
+/*
+ * SunOS 3.5 - Tom Schmidt - Micron Semiconductor, Inc - 27-Jul-93
+ * tschmidt@vax.micron.com
+ */
+#ifndef FD_SET
+# ifndef SUNOS3
+typedef struct fd_set { int fds_bits[1]; } fd_set;
+# endif
+# define FD_ZERO(fd) ((fd)->fds_bits[0] = 0)
+# define FD_SET(b, fd) ((fd)->fds_bits[0] |= 1 << (b))
+# define FD_ISSET(b, fd) ((fd)->fds_bits[0] & 1 << (b))
+# define FD_SETSIZE 32
+#endif
+#endif	/* FUTURE? */
+
+#if 0	/* FUTURE? */
+#ifndef MAXPATHLEN
+# define MAXPATHLEN 1024
+#endif
+#endif	/* FUTURE? */

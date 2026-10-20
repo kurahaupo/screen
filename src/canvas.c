@@ -799,3 +799,120 @@ void PutWindowCv(struct canvas *cv)
 		SetCanvasWindow(cv, p);
 	}
 }
+
+#if 0	/* FUTURE? */
+#ifdef KANJI
+int
+badkanji(f, x)
+char *f;
+int x;
+{
+	int i, j;
+
+	f += x;
+	if (*f-- != KANJI)
+		return 0;
+	for (j = 0, i = x - 1; i >= 0; i--, j ^= 1)
+		if (*f-- != KANJI)
+			break;
+	return j;
+}
+#endif
+#endif	/* FUTURE? */
+
+#if 0	/* FUTURE? */
+static void
+disp_writeev_fn(ev, data)
+struct event *ev;
+char *data;
+{
+	int len, size = OUTPUT_BLOCK_SIZE;
+
+	display = (struct display *)data;
+	len = D_obufp - D_obuf;
+	if (len < size)
+		size = len;
+	ASSERT(len >= 0);
+	size = write(D_userfd, D_obuf, size);
+	if (size >= 0) {
+		len -= size;
+		if (len) {
+			memcpy(D_obuf + size, D_obuf, len);
+			debug2("ASYNC: wrote %d - remaining %d\n", size, len);
+		}
+		/* Great, reenable flow control for WriteString now. */
+		if ((D_nonblock > 1) && (len < D_obufmax/2))
+			D_nonblock = 1;
+		D_obufp -= size;
+		D_obuffree += size;
+	}
+	else {
+		if (errno != EINTR)
+# ifdef EWOULDBLOCK
+			if (errno != EWOULDBLOCK)
+# endif
+				Msg(errno, "Error writing output to display");
+	}
+#endif	/* FUTURE? */
+
+#if 0	/* FUTURE? */
+	cv = display->d_cvlist;
+	for (; cv; cv = cvp) {
+		cvp = cv->c_next;
+		FreeCanvas(cv);
+	}
+#endif	/* FUTURE? */
+
+#if 0	/* FUTURE? */
+	int hh, h, i, j;
+	struct canvas *cv, **cvpp;
+	int did = 0;
+
+	h = D_height - (D_has_hstatus == HSTATUS_LASTLINE);
+	for (cv = D_cvlist, j = 0; cv; cv = cv->c_next)
+		j++;
+	if (j == 1)
+		return;
+	i = 0;
+	j--;
+	for (cvpp = &D_cvlist; (cv = *cvpp); cvpp = &cv->c_next) {
+		if (cv == D_forecv && !did) {
+			*cvpp = cv->c_next;
+			FreeCanvas(cv);
+			cv = *cvpp;
+			D_forecv = cv ? cv : D_cvlist;
+			D_fore = Layer2Window(D_forecv->c_layer);
+			flayer = D_forecv->c_layer;
+			if (cv == 0)
+				break;
+			did = 1;
+#endif	/* FUTURE? */
+
+#if 0	/* FUTURE? */
+	int j;
+	for (cv = D_cvlist, j = 0; cv; cv = cv->c_next)
+		j++;
+	j++;	/* new canvas */
+	h = D_height - (D_has_hstatus == HSTATUS_LASTLINE);
+	if (h / j <= 1)
+		return -1;
+
+	cv = D_forecv;
+	Canvas **cvpp = &cv->c_next;
+
+	if ((cv = (struct canvas *)calloc(1, sizeof *cv)) == 0)
+		return -1;
+#endif	/* FUTURE? */
+
+#if 0	/* FUTURE? */
+	int i = 0;
+	for (cv = D_cvlist; cv; cv = cv->c_next) {
+		int hh = h / j-- - 1;
+		cv->c_ys = i;
+		cv->c_ye = i + hh - 1;
+		cv->c_yoff = i;
+		i += hh + 1;
+		h -= hh + 1;
+	}
+
+#endif	/* FUTURE? */
