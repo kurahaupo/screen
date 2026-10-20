@@ -6793,7 +6793,7 @@ void SetForeCanvas(Display *d, Canvas *cv)
 		RefreshHStatus();
 		RefreshXtermOSC();
 		flayer = D_forecv->c_layer;
-		CV_CALL(D_forecv, LayRestore(); LaySetCursor());
+		CV_CALL(D_forecv, LayRestoreAndSetCursor());
 		WindowChanged(NULL, WINESC_FOCUS);
 	}
 
