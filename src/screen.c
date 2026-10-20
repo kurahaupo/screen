@@ -662,7 +662,7 @@ int main(int argc, char **argv)
 			newbuf[newsz] = '\0';
 			nwin_options.aka = newbuf;
 		} else {
-			/* If we just use the original value from av,
+			/* If we just use the original value from argv,
 			   subsequent shelltitle invocations will attempt to free
 			   space we don't own... */
 			nwin_options.aka = SaveStr(nwin_options.aka);
