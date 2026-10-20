@@ -111,7 +111,7 @@ char *stripdev(char *name)
  *    Signal handling
  */
 
-void (*xsignal(int sig, void(*func)(int)))(int) {
+void (*xsignal(int sig, void (*func)(int)))(int) {
 	struct sigaction osa, sa;
 	sa.sa_handler = func;
 	(void)sigemptyset(&sa.sa_mask);
