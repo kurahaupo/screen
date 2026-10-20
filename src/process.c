@@ -3806,7 +3806,7 @@ void DoCommand(char **argv, int *argl)
 	const char *cmd = *argv;
 
 	act.quiet = 0;
-	/* For now, we actually treat both 'supress error' and 'suppress normal message' as the
+	/* For now, we actually treat both 'suppress error' and 'suppress normal message' as the
 	 * same, and ignore all messages on either flag. If we wanted to do otherwise, we would
 	 * need to change the definition of 'OutputMsg' slightly. */
 	if (*cmd == '@') {	/* Suppress error */
