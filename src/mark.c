@@ -97,8 +97,8 @@ static int is_letter(int c)
 
 static int linestart(int y)
 {
-	register int x;
-	register unsigned char *i;
+	int x;
+	unsigned char *i;
 
 	for (x = markdata->left_mar, i = WIN(y)->image + x; x < fore->w_width - 1; x++)
 		if (*i++ != ' ')
@@ -110,8 +110,8 @@ static int linestart(int y)
 
 static int lineend(int y)
 {
-	register int x;
-	register unsigned char *i;
+	int x;
+	unsigned char *i;
 
 	for (x = markdata->right_mar, i = WIN(y)->image + x; x >= 0; x--)
 		if (*i-- != ' ')
@@ -191,7 +191,7 @@ static int nextchar(int *xp, int *yp, int direction, char target, int num)
 static void nextword(int *xp, int *yp, int flags, int num)
 {
 	int xx = fore->w_width, yy = fore->w_histheight + fore->w_height;
-	register int sx, oq, q, x, y;
+	int sx, oq, q, x, y;
 	struct mline *ml;
 
 	x = *xp;

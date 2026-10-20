@@ -244,7 +244,7 @@ static char *locale_name(void)
 
 int main(int argc, char **argv)
 {
-	register int n;
+	int n;
 	char *ap;
 	char *av0;
 	char socknamebuf[2 * MAXSTR];
@@ -656,7 +656,7 @@ int main(int argc, char **argv)
 #endif
 
 	if (!ShellProg) {
-		register char *sh;
+		char *sh;
 
 		sh = getenv("SHELL");
 		ShellProg = SaveStr(sh ? sh : DefaultShell);
@@ -1342,7 +1342,7 @@ static void CoreDump(int sigsig)
 
 static void DoWait()
 {
-	register int pid;
+	int pid;
 	struct win *p, *next;
 	int wstat;
 
@@ -1627,7 +1627,7 @@ void Detach(int mode)
 
 static int IsSymbol(char *e, char *s)
 {
-	register int l;
+	int l;
 
 	l = strlen(s);
 	return strncmp(e, s, l) == 0 && e[l] == '=';
@@ -1635,7 +1635,7 @@ static int IsSymbol(char *e, char *s)
 
 void MakeNewEnv()
 {
-	register char **op, **np;
+	char **op, **np;
 	static char stybuf[MAXSTR];
 
 	for (op = environ; *op; ++op) ;

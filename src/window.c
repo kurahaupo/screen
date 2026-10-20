@@ -319,12 +319,12 @@ static void WinRedisplayLine(int y, int from, int to, int isblank)
 
 static int WinRewrite(int y, int x1, int x2, struct mchar *rend, int doit)
 {
-	register int cost, dx;
-	register unsigned char *p, *i;
-	register unsigned char *f;
-	register unsigned char *fx;
-	register unsigned char *c;
-	register unsigned char *cx;
+	int cost, dx;
+	unsigned char *p, *i;
+	unsigned char *f;
+	unsigned char *fx;
+	unsigned char *c;
+	unsigned char *cx;
 
 	debug("WinRewrite %d, %d-%d\n", y, x1, x2);
 	fore = (struct win *)flayer->l_data;
@@ -436,8 +436,8 @@ int DoStartLog(struct win *w, char *buf, int bufsize)
  */
 int MakeWindow(struct NewWindow *newwin)
 {
-	register struct win **pp, *p;
-	register int n, i;
+	struct win **pp, *p;
+	int n, i;
 	int f = -1;
 	struct NewWindow nwin;
 	int type, startat;
@@ -1202,10 +1202,10 @@ static int ForkWindow(struct win *win, char **args, char *ttyn)
 #ifndef HAVE_EXECVPE
 void execvpe(char *prog, char **args, char **env)
 {
-	register char *path = NULL, *p;
+	char *path = NULL, *p;
 	char buf[1024];
 	char *shargs[MAXARGS + 1];
-	register int i, eaccess = 0;
+	int i, eaccess = 0;
 
 	if (strrchr(prog, '/'))
 		path = "";

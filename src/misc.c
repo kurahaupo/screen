@@ -38,9 +38,9 @@
 static int close_func(void *, int);
 #endif
 
-char *SaveStr(register const char *str)
+char *SaveStr(const char *str)
 {
-	register char *cp;
+	char *cp;
 
 	if ((cp = malloc(strlen(str) + 1)) == NULL)
 		Panic(0, "%s", strnomem);
@@ -49,9 +49,9 @@ char *SaveStr(register const char *str)
 	return cp;
 }
 
-char *SaveStrn(register const char *str, int n)
+char *SaveStrn(const char *str, int n)
 {
-	register char *cp;
+	char *cp;
 
 	if ((cp = malloc(n + 1)) == NULL)
 		Panic(0, "%s", strnomem);
@@ -117,7 +117,7 @@ void leftline(char *str, int y, struct mchar *rend)
 
 char *Filename(char *s)
 {
-	register char *p = s;
+	char *p = s;
 
 	if (p)
 		while (*p)

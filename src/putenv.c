@@ -80,7 +80,7 @@ static int moreenv(void)
 				    /* incr. size of env. */
 int unsetenv(char *name)
 {
-	register int i;
+	int i;
 
 	if (envsize < 0) {	/* first time putenv called */
 		if (newenv() < 0)	/* copy env. to heap */
@@ -100,8 +100,8 @@ int unsetenv(char *name)
 
 int putenv(char *string)
 {
-	register int i;
-	register char *p;
+	int i;
+	char *p;
 
 	if (envsize < 0) {	/* first time putenv called */
 		if (newenv() < 0)	/* copy env. to heap */
@@ -133,8 +133,8 @@ int putenv(char *string)
 
 static int findenv(char *name)
 {
-	register char *namechar, *envchar;
-	register int i, found;
+	char *namechar, *envchar;
+	int i, found;
 
 	found = 0;
 	for (i = 0; environ[i] && !found; i++) {
@@ -151,8 +151,8 @@ static int findenv(char *name)
 
 static int newenv()
 {
-	register char **env, *elem;
-	register int i, esize;
+	char **env, *elem;
+	int i, esize;
 
 	for (i = 0; environ[i]; i++) ;
 	esize = i + EXTRASIZE + 1;
@@ -176,8 +176,8 @@ static int newenv()
 
 static int moreenv()
 {
-	register int esize;
-	register char **env;
+	int esize;
+	char **env;
 
 	esize = envsize + EXTRASIZE;
 	env = realloc((char *)environ, esize * sizeof(*env));

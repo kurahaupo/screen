@@ -611,7 +611,7 @@ static int CountChars(int c)
 	return c;
 }
 
-int CalcCost(register char *s)
+int CalcCost(char *s)
 {
 	ASSERT(display);
 	if (s) {
@@ -679,10 +679,10 @@ static int CallRewrite(int y, int xs, int xe, int doit)
 
 void GotoPos(int x2, int y2)
 {
-	register int dy, dx, x1, y1;
-	register int costx, costy;
-	register int m;
-	register char *s;
+	int dy, dx, x1, y1;
+	int costx, costy;
+	int m;
+	char *s;
 	int CMcost;
 	enum move_t xm = M_NONE, ym = M_NONE;
 
@@ -1175,9 +1175,9 @@ void ScrollV(int xs, int ys, int xe, int ye, int n, int bce)
 */
 }
 
-void SetAttr(register int new)
+void SetAttr(int new)
 {
-	register int i, j, old, typ;
+	int i, j, old, typ;
 
 	if (!display || (old = D_rend.attr) == new)
 		return;
@@ -1483,8 +1483,8 @@ void SetRenditionMline(struct mline *ml, int x)
 
 void MakeStatus(char *msg)
 {
-	register char *s, *t;
-	register int max;
+	char *s, *t;
+	int max;
 
 	if (!display)
 		return;
@@ -2017,7 +2017,7 @@ void ClearLine(struct mline *oml, int y, int from, int to, int bce)
 
 void DisplayLine(struct mline *oml, struct mline *ml, int y, int from, int to)
 {
-	register int x;
+	int x;
 	int last2flag = 0, delete_lp = 0;
 
 	ASSERT(display);
@@ -2299,7 +2299,7 @@ void ClearAllXtermOSC()
 
 void AddStr(char *str)
 {
-	register char c;
+	char c;
 
 	ASSERT(display);
 
@@ -2314,7 +2314,7 @@ void AddStr(char *str)
 
 void AddStrn(char *str, int n)
 {
-	register char c;
+	char c;
 
 	ASSERT(display);
 	if (D_encoding == UTF8) {
@@ -2329,9 +2329,9 @@ void AddStrn(char *str, int n)
 
 void Flush(int progress)
 {
-	register int l;
+	int l;
 	int wr;
-	register char *p;
+	char *p;
 
 	ASSERT(display);
 	l = D_obufp - D_obuf;
@@ -2418,7 +2418,7 @@ void freetty()
 
 void Resize_obuf()
 {
-	register int ind;
+	int ind;
 
 	ASSERT(display);
 	if (D_status_obuffree >= 0) {
