@@ -1197,13 +1197,13 @@ static void FinishAttach(struct msg *m)
 	}
 	debug("activated...\n");
 
-#if defined(DEBUG) && defined(SIG_NODEBUG)
+# if defined(DEBUG) && defined(SIG_NODEBUG)
 	if (!dfp) {
 		sleep(1);
 		debug("Attacher %d must not debug, as we have debug off.\n", pid);
 		kill(pid, SIG_NODEBUG);
 	}
-#endif				/* SIG_NODEBUG */
+# endif				/* SIG_NODEBUG */
 }
 
 static void FinishDetach(struct msg *m)

@@ -5962,5 +5962,6 @@ void ApplyAttrColor(int i, struct mchar *mc)
 	if ((i & 0xe0) == 0xe0)
 		i = (i & 0x0f) | (mc->color & 0xf0);
 	mc->color = 0x99 ^ i;
+
 	debug("ApplyAttrColor - %02x %02x\n", mc->attr, i);
 }

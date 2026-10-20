@@ -1069,19 +1069,19 @@ int main(int argc, char **argv)
 	ServerSocket = MakeServerSocket();
 	InitKeytab();
 #ifdef ETCSCREENRC
-#ifdef ALLOW_SYSSCREENRC
+# ifdef ALLOW_SYSSCREENRC
 	if ((ap = getenv("SYSSCREENRC")))
 		(void)StartRc(ap, 0);
 	else
-#endif
+# endif
 		(void)StartRc(ETCSCREENRC, 0);
 #endif
 	(void)StartRc(RcFileName, 0);
-#ifdef UTMPOK
-#ifndef UTNOKEEP
+# ifdef UTMPOK
+#  ifndef UTNOKEEP
 	InitUtmp();
-#endif				/* UTNOKEEP */
-#endif				/* UTMPOK */
+#  endif			/* UTNOKEEP */
+# endif				/* UTMPOK */
 	if (display) {
 		if (InitTermcap(0, 0)) {
 			debug("Could not init termcap - exiting\n");
@@ -2264,9 +2264,10 @@ char *MakeWinMsgEv(char *str, struct win *win, int esc, int padlen, struct event
 					oldfore = D_fore;
 					D_fore = win;
 				}
-				AddWindows(p, l - 1,
-					   (*s ==
-					    'w' ? 0 : 1) | (longflg ? 0 : 2) | (plusflg ? 4 : 0) | (minusflg ? 8 : 0),
+				AddWindows(p, l - 1, (*s == 'w' ? 0 : 1)
+						   | (longflg   ? 0 : 2)
+						   | (plusflg   ? 4 : 0)
+						   | (minusflg  ? 8 : 0),
 					   win ? win->w_number : -1);
 				if (display)
 					D_fore = oldfore;
