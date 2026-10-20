@@ -86,7 +86,7 @@ void EqualizeCanvas(Canvas *, bool);
 void DupLayoutCv(Canvas *, Canvas *, bool);
 void PutWindowCv(Canvas *);
 
-#define CV_CALL(cv, cmd)		\
+#define CV_CALL_START(cv)		\
 {					\
   Display *olddisplay = display;	\
   Layer *oldflayer = flayer;		\
@@ -96,11 +96,18 @@ void PutWindowCv(Canvas *);
   flayer = l;				\
   l->l_cvlist = cv;			\
   cv->c_lnext = NULL;			\
-  cmd;					\
+  (void) 0
+
+#define CV_CALL_END(cv)			\
   flayer = oldflayer;			\
   l->l_cvlist = cvlist;			\
   cv->c_lnext = cvlnext;		\
   display = olddisplay;			\
-}
+} while (0)	/* obliging ';' */
+
+#define CV_CALL(cv, simple_cmd)		\
+  CV_CALL_START(cv);			\
+  simple_cmd;				\
+  CV_CALL_END(cv);
 
 #endif				/* SCREEN_CANVAS_H */

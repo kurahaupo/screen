@@ -100,6 +100,8 @@ struct Layer {
 #define LaySetCursor()	LGotoPos(flayer, flayer->l_x, flayer->l_y)
 #define LayCanResize(l)	(l->l_layfn->LayResize != DefResize)
 
+#define LayRestoreAndSetCursor() (LayRestore(), LaySetCursor())
+
 /* XXX: AArgh! think again! */
 
 #define LAY_CALL_UP(fn) do				\
