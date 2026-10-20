@@ -132,10 +132,10 @@ static int stolen_logfile(struct logfile *l)
 	     !(s->st_mtime == s->st_ctime &&	/*  and it was not a change */
 	       o.st_ctime < s->st_ctime))) {	/* due to delayed nfs write */
 		debug("stolen_logfile: %s stolen!\n", l->name);
-		debug("st_dev %d, st_ino %d, st_nlink %d\n", (int)s->st_dev, (int)s->st_ino, (int)s->st_nlink);
-		debug("s->st_size %d, o.st_size %d\n", (int)s->st_size, (int)o.st_size);
-		debug("s->st_mtime %d, o.st_mtime %d\n", (int)s->st_mtime, (int)o.st_mtime);
-		debug("s->st_ctime %d, o.st_ctime %d\n", (int)s->st_ctime, (int)o.st_ctime);
+		debug("st_dev %u, st_ino %u, st_nlink %u\n", s->st_dev, s->st_ino, s->st_nlink);
+		debug("s->st_size %ju, o.st_size %ju\n", (uintmax_t)s->st_size, (uintmax_t)o.st_size);
+		debug("s->st_mtime %ld, o.st_mtime %ld\n", (long)s->st_mtime, (long)o.st_mtime);
+		debug("s->st_ctime %ld, o.st_ctime %ld\n", (long)s->st_ctime, (long)o.st_ctime);
 		return -1;
 	}
 

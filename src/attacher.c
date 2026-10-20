@@ -248,7 +248,7 @@ int Attach(int how)
 	eff_uid = real_uid;
 	eff_gid = real_gid;
 
-	debug("Attach: uid %d euid %d\n", (int)getuid(), (int)geteuid());
+	debug("Attach: uid %u euid %u\n", (unsigned)getuid(), (unsigned)geteuid());
 	MasterPid = 0;
 	for (s = SockName; *s; s++) {
 		if (*s > '9' || *s < '0')
@@ -302,7 +302,7 @@ int Attach(int how)
 	ASSERT(how == MSG_ATTACH || how == MSG_CONT);
 	strncpy(m.m.attach.envterm, attach_term, sizeof(m.m.attach.envterm) - 1);
 	m.m.attach.envterm[sizeof(m.m.attach.envterm) - 1] = 0;
-	debug("attach: sending %d bytes... ", (int)sizeof(m));
+	debug("attach: sending %zu bytes... ", sizeof(m));
 
 	strncpy(m.m.attach.auser, LoginName, sizeof(m.m.attach.auser) - 1);
 	m.m.attach.auser[sizeof(m.m.attach.auser) - 1] = 0;

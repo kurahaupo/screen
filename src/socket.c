@@ -893,7 +893,7 @@ void ReceiveMsg()
 	}
 	if (left > 0) {
 		if (left != sizeof(m))
-			Msg(0, "Message %d of %d bytes too small", left, (int)sizeof(m));
+			Msg(0, "Message %d of %zu bytes too small", left, sizeof(m));
 		else
 			debug("No data on socket.\n");
 		return;

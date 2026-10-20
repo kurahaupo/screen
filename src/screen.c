@@ -1131,7 +1131,7 @@ int main(int argc, char **argv)
 #endif
 	FinishRc(RcFileName);
 
-	debug("UID %d  EUID %d\n", (int)getuid(), (int)geteuid());
+	debug("UID %u  EUID %u\n", (unsigned)getuid(), (unsigned)geteuid());
 	if (windows == NULL) {
 		debug("We open one default window, as screenrc did not specify one.\n");
 		if (MakeWindow(&nwin) == -1) {

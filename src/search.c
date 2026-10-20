@@ -249,7 +249,7 @@ static int is_bm(char *str, int l, int p, int end, int dir)
 		markdata->isstr[markdata->isstrl++] = *p;
 		markdata->isistr[markdata->isistrl++] = *p;
 		markdata->isstr[markdata->isstrl] = 0;
-		debug("New char: %c - left %d\n", *p, (int)sizeof(markdata->isistr) - markdata->isistrl);
+		debug("New char: %c - left %zu\n", *p, sizeof(markdata->isistr) - markdata->isistrl);
 	}
 	if (*p && *p != '\b')
 		pos =

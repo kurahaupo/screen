@@ -280,7 +280,7 @@ void RemoveLoginSlot()
 		}
 		UT_CLOSE;
 	}
-	debug(" slot %d zapped\n", (int)D_loginslot);
+	debug(" slot %u zapped\n", (unsigned)D_loginslot);
 	if (D_loginslot == (slot_t)0) {
 		/* couldn't remove slot, do a 'mesg n' at least. */
 		struct stat stb;
@@ -343,7 +343,7 @@ int SetUtmp(struct win *win)
 		debug("SetUtmp failed (tty %s).\n", win->w_tty);
 		return -1;
 	}
-	debug("SetUtmp %d will get slot %d...\n", win->w_number, (int)slot);
+	debug("SetUtmp %u will get slot %u...\n", win->w_number, (unsigned)slot);
 
 	memset((char *)&u, 0, sizeof(u));
 	if ((saved_ut = memcmp((char *)&win->w_savut, (char *)&u, sizeof(u))))
