@@ -1491,7 +1491,7 @@ int LoadFontTranslation(int font, char *file)
 	int i;
 	int fo;
 	int x, u, c, ok;
-	unsigned short (*p)[2],(*tab)[2];
+	unsigned short (*p)[2], (*tab)[2];
 
 	myfile = file;
 	if (myfile == NULL) {
