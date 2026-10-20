@@ -99,23 +99,30 @@ struct layer {
 
 /* XXX: AArgh! think again! */
 
-#define LAY_CALL_UP(fn) do				\
-	{ 						\
-	  struct layer *oldlay = flayer; 		\
-	  struct canvas *oldcvlist, *cv;		\
-	  debug("LayCallUp\n");				\
-	  flayer = flayer->l_next;			\
-	  oldcvlist = flayer->l_cvlist;			\
-	  debug("oldcvlist: %x\n", oldcvlist);		\
-	  flayer->l_cvlist = oldlay->l_cvlist;		\
-	  for (cv = flayer->l_cvlist; cv; cv = cv->c_lnext)	\
+#define LAY_CALL_UP_START() \
+do {	 						\
+	struct layer *oldlay = flayer; 			\
+	struct canvas *oldcvlist, *cv;			\
+	debug("LayCallUp\n");				\
+	flayer = flayer->l_next;			\
+	oldcvlist = flayer->l_cvlist;			\
+	debug("oldcvlist: %x\n", oldcvlist);		\
+	flayer->l_cvlist = oldlay->l_cvlist;		\
+	for (cv = flayer->l_cvlist; cv; cv = cv->c_lnext) \
 		cv->c_layer = flayer;			\
-	  fn;						\
-	  flayer = oldlay;				\
-	  for (cv = flayer->l_cvlist; cv; cv = cv->c_lnext)	\
+	(void) 0		/* obliging ';' */
+
+#define LAY_CALL_UP_END() \
+	flayer = oldlay;				\
+	for (cv = flayer->l_cvlist; cv; cv = cv->c_lnext) \
 		cv->c_layer = flayer;			\
-	  flayer->l_next->l_cvlist = oldcvlist;		\
-	} while(0)
+	flayer->l_next->l_cvlist = oldcvlist;		\
+} while (0)			/* obliging ';' */
+
+#define LAY_CALL_UP(simple_cmd) \
+	LAY_CALL_UP_START(simple_cmd);			\
+		simple_cmd;				\
+	LAY_CALL_UP_END(simple_cmd)
 
 #define LAY_DISPLAYS(l, fn) do				\
 	{ 						\
