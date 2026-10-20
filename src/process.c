@@ -2447,15 +2447,15 @@ static void StuffFin(char *buf, int len, char *data)
 		break;
 	case RC_VBELLWAIT:
 		if (ParseNum1000(act, &VBellWait) == 0 && msgok)
-			OutputMsg(0, "vbellwait set to %.10g seconds", VBellWait / 1000.);
+			OutputMsg(0, "vbellwait set to %.3f seconds", VBellWait / 1000.0);
 		break;
 	case RC_MSGWAIT:
 		if (ParseNum1000(act, &MsgWait) == 0 && msgok)
-			OutputMsg(0, "msgwait set to %.10g seconds", MsgWait / 1000.);
+			OutputMsg(0, "msgwait set to %.3f seconds", MsgWait / 1000.0);
 		break;
 	case RC_MSGMINWAIT:
 		if (ParseNum1000(act, &MsgMinWait) == 0 && msgok)
-			OutputMsg(0, "msgminwait set to %.10g seconds", MsgMinWait / 1000.);
+			OutputMsg(0, "msgminwait set to %.3f seconds", MsgMinWait / 1000.0);
 		break;
 	case RC_SILENCEWAIT:
 		if (ParseNum(act, &SilenceWait))
