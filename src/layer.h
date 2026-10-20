@@ -124,21 +124,20 @@ do {	 						\
 		simple_cmd;				\
 	LAY_CALL_UP_END(simple_cmd)
 
-#define LAY_DISPLAYS(l, fn) do				\
-	{ 						\
-	  struct display *olddisplay = display;		\
-	  struct canvas *cv;				\
-	  for (display = displays; display; display = display->d_next) \
-	    {						\
-	      for (cv = D_cvlist; cv; cv = cv->c_next)	\
-		if (cv->c_layer == l)			\
-		  break;				\
-	      if (cv == 0)				\
-		continue;				\
-	      fn;					\
-	    }						\
-	  display = olddisplay;				\
-	} while(0)
+#define LAY_DISPLAYS(l, simple_cmd) \
+do { 							\
+	struct display *olddisplay = display;		\
+	struct canvas *cv;				\
+	for (display = displays; display; display = display->d_next) { \
+		for (cv = D_cvlist; cv; cv = cv->c_next) \
+                        if (cv->c_layer == l)	        \
+                                break;		        \
+			if (cv == 0)			\
+                                continue;	        \
+			simple_cmd;			\
+	}						\
+	display = olddisplay;				\
+} while (0)			/* obliging ';' */
 
 #endif				/* SCREEN_LAYER_H */
 
