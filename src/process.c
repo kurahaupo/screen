@@ -1753,8 +1753,8 @@ static void StuffFin(char *buf, int len, char *data)
 					break;
 				fore->w_wlock = n ? WLOCK_ON : WLOCK_OFF;
 			}
-			/* 
-			 * user may have permission to change the writelock setting, 
+			/*
+			 * user may have permission to change the writelock setting,
 			 * but he may never aquire the lock himself without write permission
 			 */
 			if (!AclCheckPermWin(D_user, ACL_WRITE, fore))

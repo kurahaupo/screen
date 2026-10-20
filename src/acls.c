@@ -55,8 +55,8 @@ int maxusercount = 0;		/* used in process.c: RC_MONITOR, RC_SILENCE */
 static AclBits userbits;
 
 /*
- * rights a new unknown user will have on windows and cmds. 
- * These are changed by a "umask ?-..." command: 
+ * rights a new unknown user will have on windows and cmds.
+ * These are changed by a "umask ?-..." command:
  */
 static char default_w_bit[ACL_BITS_PER_WIN] = {
 	1,			/* EXEC */
@@ -174,7 +174,7 @@ int UserAdd(char *name, char *pass, struct acluser **up)
 		/* (only if we generate commands dynamically) */
 /*
       for (j = 0; j < ACL_BITS_PER_CMD; j++)
-	if (GrowBitfield(&default_c_userbits[j], maxusercount, USER_CHUNK, 
+	if (GrowBitfield(&default_c_userbits[j], maxusercount, USER_CHUNK,
 	    default_c_bit[j]))
 	  {
 	    free((char *)*up); *up = NULL; return -1;
@@ -240,9 +240,9 @@ int UserAdd(char *name, char *pass, struct acluser **up)
 		AclSetPerm(NULL, *up, "+x", "version");
 	}
 
-	/* 
+	/*
 	 * Create his umask:
-	 * Give default_w_bit's for all users, 
+	 * Give default_w_bit's for all users,
 	 * but allow himself everything on "his" windows.
 	 */
 	for (j = 0; j < ACL_BITS_PER_WIN; j++) {
@@ -337,9 +337,9 @@ int UserFreeCopyBuffer(struct acluser *u)
 }
 
 /*
- * Traverses group nodes. It searches for a node that references user u. 
- * If recursive is true, nodes found in the users are also searched using 
- * depth first method.  If none of the nodes references u, the address of 
+ * Traverses group nodes. It searches for a node that references user u.
+ * If recursive is true, nodes found in the users are also searched using
+ * depth first method.  If none of the nodes references u, the address of
  * the last next pointer is returned. This address will contain NULL.
  */
 static struct aclusergroup **FindGroupPtr(struct aclusergroup **gp, struct acluser *u, int recursive)
@@ -366,9 +366,9 @@ const char *pw, *password;
 	return (buf && !strcmp(buf, password));
 }
 
-/* 
+/*
  * Returns nonzero if failed or already linked.
- * Both users are created on demand. 
+ * Both users are created on demand.
  * Cyclic links are prevented.
  */
 int AclLinkUser(char *from, char *to)
@@ -518,8 +518,8 @@ void FreeWindowAcl(struct win *w)
 
 /* if mode starts with '-' we remove the users exec bit for cmd */
 /*
- * NOTE: before you make this function look the same as 
- * AclSetPermWin, try to merge both functions. 
+ * NOTE: before you make this function look the same as
+ * AclSetPermWin, try to merge both functions.
  */
 static int AclSetPermCmd(struct acluser *u, char *mode, struct comm *cmd)
 {
@@ -615,7 +615,7 @@ static int AclSetPermWin(struct acluser *uu, struct acluser *u, char *mode, stru
 		}
 	}
 	if (uu && u->u_name[0] == '?' && u->u_name[1] == '\0') {
-		/* 
+		/*
 		 * It is Mr. '?', the unknown user. He deserves special treatment as
 		 * he defines the defaults. Sorry, this is global, not per user.
 		 */
@@ -626,7 +626,7 @@ static int AclSetPermWin(struct acluser *uu, struct acluser *u, char *mode, stru
 		} else {
 			/*
 			 * Hack. I do not want to duplicate all the above code for
-			 * AclSetPermCmd. This asumes that there are not more bits 
+			 * AclSetPermCmd. This asumes that there are not more bits
 			 * per cmd than per win.
 			 */
 			debug("AclSetPermWin: default_c_bits '%s'.\n", mode);
@@ -638,7 +638,7 @@ static int AclSetPermWin(struct acluser *uu, struct acluser *u, char *mode, stru
 	return 0;
 }
 
-/* 
+/*
  * String is broken down into comand and window names, mode applies
  * A command name matches first, so do not use these as window names.
  * uu should be NULL, except if you want to change his umask.
@@ -689,7 +689,7 @@ int AclSetPerm(struct acluser *uu, struct acluser *u, char *mode, char *s)
 	return 0;
 }
 
-/* 
+/*
  * Generic ACL Manager:
  *
  * This handles acladd and aclchg identical.
@@ -811,7 +811,7 @@ int UsersAcl(struct acluser *uu, int argc, char **argv)
 
 /*
  * Preprocess argments, so that umask can be set with UsersAcl
- * 
+ *
  * all current users		umask ±rwxn
  * one specific user		umask user1±rwxn
  * several users		umask user1,user2,...±rwxn

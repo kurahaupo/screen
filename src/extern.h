@@ -330,7 +330,7 @@ extern void closeallfiles(int);
 extern int UserContext(void);
 extern void UserReturn(int);
 extern int UserStatus(void);
-extern void (*xsignal(int, void(*)(int)))(int);
+extern void (*xsignal(int, void (*)(int)))(int);
 #ifndef HAVE_RENAME
 extern int rename(char *, char *);
 #endif

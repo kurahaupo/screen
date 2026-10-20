@@ -97,7 +97,7 @@ struct mode {
 };
 
 
-				/* #include "logfile.h" *//* (requires stat.h) struct logfile */
+/* #include "logfile.h" *//* (requires stat.h) struct logfile */
 #include "image.h"
 #include "canvas.h"
 #include "display.h"
