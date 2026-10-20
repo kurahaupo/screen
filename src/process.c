@@ -356,7 +356,7 @@ int enter_window_name_mode = 0;
 
 void InitKeytab()
 {
-	register unsigned int i;
+	unsigned int i;
 	char *argarr[2];
 
 	for (i = 0; i < sizeof(ktab) / sizeof(*ktab); i++) {
@@ -1143,7 +1143,7 @@ static void StuffFin(char *buf, int len, char *data)
 		break;
 	case RC_UNBINDALL:
 		{
-			register unsigned int i;
+			unsigned int i;
 
 			for (i = 0; i < sizeof(ktab) / sizeof(*ktab); i++)
 				ClearAction(&ktab[i]);
@@ -3829,7 +3829,7 @@ void DoCommand(char **argv, int *argl)
 
 static void SaveAction(struct action *act, int nr, char **args, int *argl)
 {
-	register int argc = 0;
+	int argc = 0;
 	char **pp;
 	int *lp;
 
@@ -3858,8 +3858,8 @@ static void SaveAction(struct action *act, int nr, char **args, int *argl)
 
 static char **SaveArgs(char **args)
 {
-	register char **ap, **pp;
-	register int argc = 0;
+	char **ap, **pp;
+	int argc = 0;
 
 	while (args[argc])
 		argc++;
@@ -3882,8 +3882,8 @@ static char **SaveArgs(char **args)
  */
 int Parse(char *buf, int bufl, char **args, int *argl)
 {
-	register char *p = buf, **ap = args, *pp;
-	register int delim, argc;
+	char *p = buf, **ap = args, *pp;
+	int delim, argc;
 	int *lp = argl;
 
 	debug("Parse %d %s\n", bufl, buf);
@@ -4090,7 +4090,7 @@ int ParseSwitch(struct action *act, int *var)
 
 static int ParseOnOff(struct action *act, int *var)
 {
-	register int num = -1;
+	int num = -1;
 	char **args = act->args;
 
 	if (args[1] == 0) {
@@ -4378,7 +4378,7 @@ void Activate(int norefresh)
 
 static int NextWindow()
 {
-	register struct win **pp;
+	struct win **pp;
 	int n = fore ? fore->w_number : maxwin;
 	struct win *group = fore ? fore->w_group : 0;
 
@@ -4397,7 +4397,7 @@ static int NextWindow()
 
 static int PreviousWindow()
 {
-	register struct win **pp;
+	struct win **pp;
 	int n = fore ? fore->w_number : -1;
 	struct win *group = fore ? fore->w_group : 0;
 
@@ -4510,9 +4510,9 @@ static void LogToggle(int on)
 
 char *AddWindows(char *buf, int len, int flags, int where)
 {
-	register char *s, *ss;
-	register struct win **pp, *p;
-	register char *cmd;
+	char *s, *ss;
+	struct win **pp, *p;
+	char *cmd;
 	int l;
 
 	s = ss = buf;
@@ -4681,8 +4681,8 @@ char *str;
 static void ShowInfo()
 {
 	char buf[512], *p;
-	register struct win *wp = fore;
-	register int i;
+	struct win *wp = fore;
+	int i;
 
 	if (wp == 0) {
 		Msg(0, "(%d,%d)/(%d,%d) no window", D_x + 1, D_y + 1, D_width, D_height);
@@ -4986,7 +4986,7 @@ static void InputSetenv(char *arg)
 void DoScreen(char *fn, char **av)
 {
 	struct NewWindow nwin;
-	register int num;
+	int num;
 	char buf[20];
 
 	nwin = nwin_undef;
