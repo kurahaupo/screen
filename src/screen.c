@@ -2021,8 +2021,8 @@ char *MakeWinMsgEv(char *str, struct win *win, int esc, int padlen, struct event
 {
 	static int tick;
 	char *s = str;
-	register char *p = winmsg_buf;
-	register int ctrl;
+	char *p = winmsg_buf;
+	int ctrl;
 	struct timeval now;
 	struct tm *tm;
 	int l, i, r;
