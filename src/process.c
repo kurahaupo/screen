@@ -5944,23 +5944,28 @@ int ParseAttrColor(char *s1, char *s2, int msgok)
 void ApplyAttrColor(int i, struct mchar *mc)
 {
 	debug("ApplyAttrColor %06x\n", i);
-	mc->attr |= i >> 8 & 255;
-	mc->attr ^= i & 255;
-	i = (i >> 16) ^ 0xff;
-	if ((i & 0x100) != 0) {
+	mc->attr |= i >> 8 & 0xff;
+	mc->attr ^= i      & 0xff;
+
+	i >>= 16;
+	i ^= 0xff;
+
+	if (i & 0x100) {
 		i &= 0xeff;
 		if (mc->attr & (A_SO | A_RV))
-			i = ((i & 0x0f) << 4) | ((i & 0xf0) >> 4) | ((i & 0x200) << 1) | ((i & 0x400) >> 1);
+			i = i << 4 & 0xf0
+			  | i >> 4 & 0x0f
+			  | i << 1 & 0x400
+			  | i >> 1 & 0x200;
 	}
-	if ((i & 0x0f) != 0x0f)
-		mc->attr = (mc->attr & 0xbf) | ((i >> 3) & 0x40);
-	if ((i & 0xf0) != 0xf0)
-		mc->attr = (mc->attr & 0x7f) | ((i >> 3) & 0x80);
-	mc->color = 0x99 ^ mc->color;
-	if ((i & 0x0e) == 0x0e)
-		i = (i & 0xf0) | (mc->color & 0x0f);
-	if ((i & 0xe0) == 0xe0)
-		i = (i & 0x0f) | (mc->color & 0xf0);
+	if (~i & 0x0f)
+		mc->attr = mc->attr & 0xbf | i >> 3 & 0x40;
+	if (~i & 0xf0)
+		mc->attr = mc->attr & 0x7f | i >> 3 & 0x80;
+
+	uint8_t j = 0x99 ^ mc->color;
+	if (! (~i & 0x0e)) i = i & 0xf0 | j & 0x0f;
+	if (! (~i & 0xe0)) i = i & 0x0f | j & 0xf0;
 	mc->color = 0x99 ^ i;
 
 	debug("ApplyAttrColor - %02x %02x\n", mc->attr, i);
