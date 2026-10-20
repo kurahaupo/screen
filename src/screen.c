@@ -1958,6 +1958,7 @@ static void SetTtyname(bool fatal, struct stat *st)
 	memset(&attach_tty_name_in_ns, 0, ARRAY_SIZE(attach_tty_name_in_ns));
 
 	errno = 0;
+	/* ttyname implies isatty */
 	attach_tty = ttyname(0);
 	if (!attach_tty) {
 		if (errno == ENODEV) {

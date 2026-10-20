@@ -2740,7 +2740,6 @@ static void DoCommandDeflogin(struct action *act)
 	else if (ParseOnOff(act, &b) == 0)
 		nwin_default.lflag = b ? 1 : 0;
 }
-
 #endif
 
 static void DoCommandDefflow(struct action *act)
