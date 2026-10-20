@@ -2470,9 +2470,9 @@ void DisplaySleep1000(int n, int eat)
 	debug("DisplaySleep(%d) ending, eat was %d\n", n, eat);
 }
 
-void NukePending()
+void NukePending(void)
 {				/* Nuke pending output in current display, clear screen */
-	register int len;
+	int len;
 	int oldtop = D_top, oldbot = D_bot;
 	struct mchar oldrend;
 	int oldkeypad = D_keypad, oldcursorkeys = D_cursorkeys;
