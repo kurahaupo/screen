@@ -936,7 +936,7 @@ static void displayspage(void)
 
 	displaysdata = (struct displaysdata *)flayer->l_data;
 
-	ClearLayer(flayer, 0);
+	LClearAll(flayer, 0);
 
 	leftline("term-type   size         user interface           window", 0);
 	leftline("---------- ------- ---------- ----------------- ----------", 1);
