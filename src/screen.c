@@ -2882,3 +2882,68 @@ static int ParseEscape(char *p)
 	}
 	return 0;
 }
+
+#if 0	/* FUTURE? */
+static void SetTtyname(bool fatal, struct stat *st)
+{
+	int ret;
+	int saved_errno = 0;
+
+	attach_tty_is_in_new_ns = false;
+	memset(&attach_tty_name_in_ns, 0, ARRAY_SIZE(attach_tty_name_in_ns));
+
+	errno = 0;
+	/* ttyname implies isatty */
+	attach_tty = ttyname(0);
+	if (!attach_tty) {
+		if (errno == ENODEV) {
+			saved_errno = errno;
+			attach_tty = "/proc/self/fd/0";
+			attach_tty_is_in_new_ns = true;
+			ret = readlink(attach_tty, attach_tty_name_in_ns, ARRAY_SIZE(attach_tty_name_in_ns));
+			if (ret < 0 || (size_t)ret >= ARRAY_SIZE(attach_tty_name_in_ns))
+				Panic(0, "Bad tty '%s'", attach_tty);
+		} else if (fatal) {
+			Panic(0, "Must be connected to a terminal.");
+		} else {
+			attach_tty = "";
+		}
+	}
+
+	if (attach_tty && strcmp(attach_tty, "")) {
+		if (stat(attach_tty, st))
+			Panic(errno, "Cannot access '%s'", attach_tty);
+
+		if (strlen(attach_tty) >= MAXPATHLEN)
+			Panic(0, "TtyName too long - sorry.");
+
+		/* Only call CheckTtyname() if the device does not exist in
+		 * another namespace.
+		 */
+		if (saved_errno != ENODEV && CheckTtyname(attach_tty))
+			Panic(0, "Bad tty '%s'", attach_tty);
+	}
+}
+
+void DisplaySleep(int n)
+{
+	char buf;
+	fd_set r;
+	struct timeval t;
+
+	if (!display) {
+		debug("DisplaySleep has no display sigh\n");
+		sleep(n);
+		return;
+	}
+	t.tv_usec = 0;
+	t.tv_sec = n;
+	FD_ZERO(&r);
+	FD_SET(D_userfd, &r);
+	if (select(FD_SETSIZE, &r, NULL, NULL, &t) > 0) {
+		debug("display activity stopped sleep\n");
+		read(D_userfd, &buf, 1);
+	}
+	debug1("DisplaySleep(%d) ending\n", n);
+}
+#endif

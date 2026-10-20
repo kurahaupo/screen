@@ -5968,7 +5968,6 @@ void ApplyAttrColor(int i, struct mchar *mc)
 	mc->attr    = i >> 56 & 0xff;
 	mc->colorbg = i >> 28 & 0x7000000 | i >> 24 &  0xffffff | 0;
 	mc->colorfg = i >> 24 & 0x7000000 | i       &  0xffffff | 0;
-
 #endif
 }
 
@@ -5995,7 +5994,6 @@ char *data;
 #endif
 
 #if 0   /* FUTURE? */
-
 static void
 pass2(buf, len, data)
 char *buf;
@@ -6246,7 +6244,6 @@ char *str;
 	}
 	return *s ? -1 : i;
 }
-
 #endif
 
 #if 0   /* FUTURE? */
@@ -6337,7 +6334,6 @@ char *p, *cp;
 	return p;
 }
 
-
 static int
 IsNum(s, base)
 char *s;
@@ -6393,7 +6389,6 @@ int n;
 	Activate(fore->w_norefresh);
 }
 
-
 void
 SetCanvasWindow(cv, wi)
 struct canvas *cv;
@@ -6432,7 +6427,6 @@ struct win *wi;
 	}
 	return i;
 }
-
 #endif
 
 #if 0   /* FUTURE? */
@@ -6446,10 +6440,7 @@ struct win *wi;
 #endif /* LOADAV */
 	Msg(0, "%s", buf);
 }
-
 #endif
-
-
 
 #if 0   /* FUTURE? */
 			if (n >= MAXWIN)
@@ -6512,7 +6503,6 @@ struct win *wi;
 
 ////////////////////////////////////////////// SPLIT HERE //////////////////////////////
 
-
 static void DoCommandSelect(struct action *act)
 {
 	char **args = act->args;
@@ -6570,7 +6560,6 @@ static void DoCommandDefautonuke(struct action *act)
 		D_auto_nuke = defautonuke;
 }
 
-
 static void DoCommandAutonuke(struct action *act)
 {
 	int msgok = display && !*rc_name;
@@ -6612,7 +6601,6 @@ static void DoCommandDumptermcap(struct action *act)
 	WriteFile(user, NULL, DUMP_TERMCAP);
 }
 
-
 static void DoCommandHardcopy(struct action *act)
 {
 	char **args = act->args;
@@ -6649,7 +6637,6 @@ static void DoCommandLog(struct action *act)
 	if (ParseSwitch(act, &b) == 0)
 		LogToggle(b);
 }
-
 
 static void DoCommandSuspend(struct action *act)
 {
@@ -7226,7 +7213,6 @@ static void DoCommandOther(struct action *act)
 		SwitchWindow(display && D_other ? D_other : NextWindow());
 }
 
-
 static void DoCommandMeta(struct action *act)
 {
 	struct acluser *user = display ? D_user : users;
@@ -7292,7 +7278,6 @@ static void DoCommandBreaktype(struct action *act)
 		}
 	}
 }
-
 
 static void DoCommandPow_break(struct action *act)
 {
@@ -7507,7 +7492,6 @@ static void DoCommandHeight(struct action *act)
 	}
 }
 
-
 static void DoCommandDefdynamictitle(struct action *act)
 {
 	(void)act; /* unused */
@@ -7565,7 +7549,6 @@ static void DoCommandScreen(struct action *act)
 
 	DoScreen("key", args);
 }
-
 
 static void DoCommandWrap(struct action *act)
 {
@@ -7766,7 +7749,6 @@ static void DoCommandLicense(struct action *act)
 
 	display_license();
 }
-
 
 static void DoCommandCopy(struct action *act)
 {
@@ -8394,7 +8376,6 @@ static void DoCommandDeflogin(struct action *act)
 	else if (ParseOnOff(act, &b) == 0)
 		nwin_default.lflag = b ? 1 : 0;
 }
-
 #endif
 
 static void DoCommandDefflow(struct action *act)
@@ -8667,7 +8648,6 @@ static void DoCommandPartial(struct action *act)
 	(void)ParseSwitch(act, &b);
 	fore->w_norefresh = b;
 }
-
 
 static void DoCommandVbell(struct action *act)
 {
@@ -9893,12 +9873,10 @@ static void DoCommandAltscreen(struct action *act)
 {
 	int msgok = display && !*rc_name;
 
-
 	(void)ParseSwitch(act, &use_altscreen);
 	if (msgok)
 		OutputMsg(0, "Will %sdo alternate screen switching", use_altscreen ? "" : "not ");
 }
-
 
 static void DoCommandAuth(struct action *act)
 {
@@ -9908,7 +9886,6 @@ static void DoCommandAuth(struct action *act)
         if (msgok)
                 OutputMsg(0, "Authentication: %s" , do_auth ? "enabled" : "disabled");
 }
-
 
 static void DoCommandBacktick(struct action *act)
 {
