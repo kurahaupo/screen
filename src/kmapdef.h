@@ -7,4 +7,4 @@ extern char *kmapadef[];
 extern char *kmapdef[];
 extern char *kmapmdef[];
 
-#endif /* SCREEN_KMAPDEF_H */
+#endif				/* SCREEN_KMAPDEF_H */

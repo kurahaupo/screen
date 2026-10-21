@@ -88,7 +88,7 @@ static void tel_connev_fn(Event *ev, void *data)
 {
 	Window *win = (Window *)data;
 
-	(void)ev; /* unused */
+	(void)ev;		/* unused */
 
 	if (connect(win->w_ptyfd, (struct sockaddr *)&win->w_telsa, sizeof(struct sockaddr_in)) && errno != EISCONN) {
 		char buf[1024];
@@ -181,7 +181,7 @@ int TelOpenAndConnect(Window *win)
 
 int TelIsline(Window *win)
 {
-	(void)win; /* unused */
+	(void)win;		/* unused */
 	return !fore->w_telropts[TO_SGA];
 }
 
@@ -436,8 +436,8 @@ void TelWindowSize(Window *win)
 
 	if (win->w_width == 0 || win->w_height == 0 || !win->w_telmopts[TO_NAWS])
 		return;
-	sprintf(s, "%c%c%c%c%c%c%c%c%c", TC_SB, TC_SB, TO_NAWS, win->w_width / 256, win->w_width & 255, win->w_height / 256,
-		win->w_height & 255, TC_SE, TC_SE);
+	sprintf(s, "%c%c%c%c%c%c%c%c%c", TC_SB, TC_SB, TO_NAWS, win->w_width / 256, win->w_width & 255,
+		win->w_height / 256, win->w_height & 255, TC_SE, TC_SE);
 	t = trepl;
 	for (size_t i = 0; i < 9; i++)
 		if ((unsigned char)(*t++ = s[i]) == TC_IAC)
@@ -452,7 +452,7 @@ static char to_s[] = TO_S;
 
 void TelStatus(Window *win, char *buf, size_t len)
 {
-	(void)len; /* unused */
+	(void)len;		/* unused */
 
 	*buf++ = '[';
 	for (size_t i = 0; to_s[i]; i++) {

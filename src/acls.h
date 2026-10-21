@@ -32,7 +32,7 @@
 #include "os.h"
 
 /* three known bits: */
-#define ACL_EXEC 0		
+#define ACL_EXEC 0
 #define ACL_WRITE 1
 #define ACL_READ 2
 
@@ -46,16 +46,15 @@
 
 typedef struct Window Window;
 
-typedef unsigned char * AclBits;
+typedef unsigned char *AclBits;
 
 /*
  * How a user joins a group.
  * Here is the node to construct one list per user.
  */
-struct aclusergroup
-{
-  struct acluser *u;	/* the user who borrows us his rights */
-  struct aclusergroup *next;
+struct aclusergroup {
+	struct acluser *u;	/* the user who borrows us his rights */
+	struct aclusergroup *next;
 };
 
 /***************
@@ -73,33 +72,32 @@ struct plop {
  * users is the User entry of the session owner (creator)
  * and anchors all other users. Add/Delete users there.
  */
-typedef struct acluser
-{
-  struct acluser *u_next;		/* continue the main user list */
-  char u_name[MAXLOGINLEN + 1];		/* login name how he showed up */
-  int  u_detachwin;		/* the window where he last detached */
-  int  u_detachotherwin;	/* window that was "other" when he detached */
-  int  u_Esc, u_MetaEsc;	/* the users screen escape character */
-  struct plop u_plop;
-  int u_id;			/* a uniq index in the bitfields. */
-  AclBits u_umask_w_bits[ACL_BITS_PER_WIN];	/* his window create umask */
-  struct aclusergroup *u_group;	/* linked list of pointers to other users */
+typedef struct acluser {
+	struct acluser *u_next;	/* continue the main user list */
+	char u_name[MAXLOGINLEN + 1];	/* login name how he showed up */
+	int u_detachwin;	/* the window where he last detached */
+	int u_detachotherwin;	/* window that was "other" when he detached */
+	int u_Esc, u_MetaEsc;	/* the users screen escape character */
+	struct plop u_plop;
+	int u_id;		/* a uniq index in the bitfields. */
+	AclBits u_umask_w_bits[ACL_BITS_PER_WIN];	/* his window create umask */
+	struct aclusergroup *u_group;	/* linked list of pointers to other users */
 } User;
 
 
 /* forward declaration */
 struct comm;
 
-int AclSetPerm (struct acluser *, struct acluser *, char *, char *);
-int AclUmask (struct acluser *, char *, char **);
-int UsersAcl (struct acluser *, int, char **);
-void AclWinSwap (int, int);
-char *DoSu (struct acluser **, char *, char *, char *);
-int AclLinkUser (char *, char *);
-int UserFreeCopyBuffer (struct acluser *);
-struct acluser **FindUserPtr (char *);
-int UserAdd (char *, struct acluser **);
-int UserDel (char *, struct acluser **);
+int AclSetPerm(struct acluser *, struct acluser *, char *, char *);
+int AclUmask(struct acluser *, char *, char **);
+int UsersAcl(struct acluser *, int, char **);
+void AclWinSwap(int, int);
+char *DoSu(struct acluser **, char *, char *, char *);
+int AclLinkUser(char *, char *);
+int UserFreeCopyBuffer(struct acluser *);
+struct acluser **FindUserPtr(char *);
+int UserAdd(char *, struct acluser **);
+int UserDel(char *, struct acluser **);
 int AclCheckPermWin(struct acluser *, int, Window *);
 int NewWindowAcl(Window *, struct acluser *);
 void FreeWindowAcl(Window *);
@@ -112,4 +110,4 @@ extern int maxusercount;
 
 extern struct acluser *users, *EffectiveAclUser;
 
-#endif /* SCREEN_ACLS_H */
+#endif				/* SCREEN_ACLS_H */

@@ -44,37 +44,37 @@ struct mline;
 typedef struct Canvas Canvas;
 
 struct LayFuncs {
-	void	(*lf_LayProcess) (char **, size_t *);
-	void	(*lf_LayAbort) (void);
-	void	(*lf_LayRedisplayLine) (int, int, int, int);
-	void	(*lf_LayClearLine) (int, int, int, int);
-	int	(*lf_LayResize) (int, int);
-	void	(*lf_LayRestore) (void);
-	void	(*lf_LayFree) (void *);		/* Should only free any data kept in
-						   flayer->l_data (but not flayer->l_data itself). */
+	void (*lf_LayProcess)(char **, size_t *);
+	void (*lf_LayAbort)(void);
+	void (*lf_LayRedisplayLine)(int, int, int, int);
+	void (*lf_LayClearLine)(int, int, int, int);
+	int (*lf_LayResize)(int, int);
+	void (*lf_LayRestore)(void);
+	void (*lf_LayFree)(void *);	/* Should only free any data kept in
+					   flayer->l_data (but not flayer->l_data itself). */
 };
 
 typedef struct Layer Layer;
 struct Layer {
 	Canvas *l_cvlist;	/* list of canvases displaying layer */
-	int	l_width;
-	int	l_height;
-	int	l_x;		/* cursor position */
-	int	l_y;
-	int	l_encoding;
+	int l_width;
+	int l_height;
+	int l_x;		/* cursor position */
+	int l_y;
+	int l_encoding;
 	const struct LayFuncs *l_layfn;
-	void	*l_data;
+	void *l_data;
 
-	Layer	*l_next;	/* layer stack, should be in data? */
-	Layer	*l_bottom;	/* bottom element of layer stack */
-	int	 l_blocking;
-	int	 l_mode;	/* non-zero == edit mode */
+	Layer *l_next;		/* layer stack, should be in data? */
+	Layer *l_bottom;	/* bottom element of layer stack */
+	int l_blocking;
+	int l_mode;		/* non-zero == edit mode */
 
 	struct {
 		unsigned char buffer[3];	/* [0]: the button
 						   [1]: x
 						   [2]: y
-						*/
+						 */
 		size_t len;
 		bool start;
 	} l_mouseevent;
@@ -141,7 +141,7 @@ struct Layer {
  * @param layer The layer that should be (un)paused.
  * @param pause Should we pause the layer?
  */
-void LayPause (Layer *layer, bool pause);
+void LayPause(Layer *layer, bool pause);
 
 /**
  * Update the region to refresh after a layer is unpaused.
@@ -152,43 +152,43 @@ void LayPause (Layer *layer, bool pause);
  * @param ys	The top-end of the region.
  * @param ye	The bottom-end of the region.
  */
-void LayPauseUpdateRegion (Layer *layer, int xs, int xe, int ys, int ye);
+void LayPauseUpdateRegion(Layer *layer, int xs, int xe, int ys, int ye);
 
 /**
  * Free any internal memory for the layer.
  *
  * @param layer The layer.
  */
-void LayerCleanupMemory (Layer *layer);
+void LayerCleanupMemory(Layer *layer);
 
-void  LGotoPos (Layer *, int, int);
-void  LPutChar (Layer *, struct mchar *, int, int);
-void  LInsChar (Layer *, struct mchar *, int, int, struct mline *);
-void  LPutStr (Layer *, char *, int, struct mchar *, int, int);
-void  LPutWinMsg (Layer *, char *, int, struct mchar *, int, int);
-void  LScrollH (Layer *, int, int, int, int, int, struct mline *);
-void  LScrollV (Layer *, int, int, int, int);
-void  LClearAll (Layer *, int);
-void  LClearArea (Layer *, int, int, int, int, int, int);
-void  LClearLine (Layer *, int, int, int, int, struct mline *);
-void  LRefreshAll (Layer *, int);
-void  LCDisplayLine (Layer *, struct mline *, int, int, int, int);
-void  LCDisplayLineWrap (Layer *, struct mline *, int, int, int, int);
-void  LSetRendition (Layer *, struct mchar *);
-void  LWrapChar  (Layer *, struct mchar *, int, int, int, bool);
-void  LCursorVisibility (Layer *, int);
-void  LSetFlow (Layer *, bool);
-void  LKeypadMode (Layer *, int);
-void  LCursorkeysMode (Layer *, int);
-void  LMouseMode (Layer *, int);
-void  LExtMouseMode (Layer *, int);
-void  LBracketedPasteMode (Layer *, bool);
-void  LCursorStyle (Layer *, int);
-void  LMsg (int, const char *, ...) __attribute__((format(printf, 2, 3)));
-void  KillLayerChain (Layer *);
-int   InitOverlayPage (int, const struct LayFuncs *, int);
-void  ExitOverlayPage (void);
-int   LayProcessMouse (Layer *, unsigned char);
-void  LayProcessMouseSwitch (Layer *, bool);
+void LGotoPos(Layer *, int, int);
+void LPutChar(Layer *, struct mchar *, int, int);
+void LInsChar(Layer *, struct mchar *, int, int, struct mline *);
+void LPutStr(Layer *, char *, int, struct mchar *, int, int);
+void LPutWinMsg(Layer *, char *, int, struct mchar *, int, int);
+void LScrollH(Layer *, int, int, int, int, int, struct mline *);
+void LScrollV(Layer *, int, int, int, int);
+void LClearAll(Layer *, int);
+void LClearArea(Layer *, int, int, int, int, int, int);
+void LClearLine(Layer *, int, int, int, int, struct mline *);
+void LRefreshAll(Layer *, int);
+void LCDisplayLine(Layer *, struct mline *, int, int, int, int);
+void LCDisplayLineWrap(Layer *, struct mline *, int, int, int, int);
+void LSetRendition(Layer *, struct mchar *);
+void LWrapChar(Layer *, struct mchar *, int, int, int, bool);
+void LCursorVisibility(Layer *, int);
+void LSetFlow(Layer *, bool);
+void LKeypadMode(Layer *, int);
+void LCursorkeysMode(Layer *, int);
+void LMouseMode(Layer *, int);
+void LExtMouseMode(Layer *, int);
+void LBracketedPasteMode(Layer *, bool);
+void LCursorStyle(Layer *, int);
+void LMsg(int, const char *, ...) __attribute__((format(printf, 2, 3)));
+void KillLayerChain(Layer *);
+int InitOverlayPage(int, const struct LayFuncs *, int);
+void ExitOverlayPage(void);
+int LayProcessMouse(Layer *, unsigned char);
+void LayProcessMouseSwitch(Layer *, bool);
 
-#endif /* SCREEN_LAYER_H */
+#endif				/* SCREEN_LAYER_H */

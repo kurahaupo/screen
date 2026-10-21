@@ -35,16 +35,16 @@
 typedef struct Viewport Viewport;
 struct Viewport {
 	Viewport *v_next;	/* next vp on canvas */
-	Canvas   *v_canvas;	/* back pointer to canvas */
-	int              v_xoff;	/* layer x offset on display */
-	int              v_yoff;	/* layer y offset on display */
-	int              v_xs;	/* vp upper left */
-	int              v_xe;	/* vp upper right */
-	int              v_ys;	/* vp lower left */
-	int              v_ye;	/* vp lower right */
+	Canvas *v_canvas;	/* back pointer to canvas */
+	int v_xoff;		/* layer x offset on display */
+	int v_yoff;		/* layer y offset on display */
+	int v_xs;		/* vp upper left */
+	int v_xe;		/* vp upper right */
+	int v_ys;		/* vp lower left */
+	int v_ye;		/* vp lower right */
 };
 
-int    RethinkDisplayViewports (void);
-void   RethinkViewportOffsets (Canvas *);
+int RethinkDisplayViewports(void);
+void RethinkViewportOffsets(Canvas *);
 
-#endif /* SCREEN_VIEWPORT_H */
+#endif				/* SCREEN_VIEWPORT_H */

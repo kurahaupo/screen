@@ -41,8 +41,8 @@
 /* Necessary to allow multiple SIGNATURE_CHECK lines in a unit test.
    Note that the checks must not occupy the same line.  */
 # define SIGNATURE_CHECK1(fn, ret, args, id) \
-  SIGNATURE_CHECK2 (fn, ret, args, id) /* macroexpand line */
+  SIGNATURE_CHECK2 (fn, ret, args, id)	/* macroexpand line */
 # define SIGNATURE_CHECK2(fn, ret, args, id) \
   static ret (* __attribute__((unused)) signature_check ## id) args = fn
 
-#endif /* SIGNATURE_CHECK */
+#endif				/* SIGNATURE_CHECK */

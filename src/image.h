@@ -39,7 +39,7 @@ struct mchar {
 	uint32_t font;		/* font :) */
 	uint32_t colorbg;	/* background color */
 	uint32_t colorfg;	/* foreground color */
-	uint32_t mbcs;		/* used for multi byte character sets; TODO: possible to remove? use image now that it has 32 bits*/
+	uint32_t mbcs;		/* used for multi byte character sets; TODO: possible to remove? use image now that it has 32 bits */
 };
 
 struct mline {
@@ -58,3 +58,4 @@ enum {
 };
 
 #endif /* SCREEN_IMAGE_H */
+

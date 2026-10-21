@@ -124,38 +124,38 @@ struct Message {
 			int Lflag;
 			bool aflag;
 			int flowflag;
-			int hheight;			/* size of scrollback buffer */
+			int hheight;	/* size of scrollback buffer */
 			int nargs;
 			char line[MAXPATHLEN];
 			char dir[MAXPATHLEN];
-			char screenterm[MAXTERMLEN + 1];/* is screen really "screen" ? */
+			char screenterm[MAXTERMLEN + 1];	/* is screen really "screen" ? */
 		} create;
 		struct {
 			char auser[MAXLOGINLEN + 1];	/* username */
-			pid_t apid;			/* pid of frontend */
-			int adaptflag;			/* adapt window size? */
-			int lines, columns;		/* display size */
+			pid_t apid;	/* pid of frontend */
+			int adaptflag;	/* adapt window size? */
+			int lines, columns;	/* display size */
 			char preselect[20];
-			int esc;			/* his new escape character unless -1 */
-			int meta_esc;			/* his new meta esc character unless -1 */
+			int esc;	/* his new escape character unless -1 */
+			int meta_esc;	/* his new meta esc character unless -1 */
 			char envterm[MAXTERMLEN + 1];	/* terminal type */
-			bool env_colorterm :1;		/* with COLORTERM in env */
+			bool env_colorterm :1;		/* with COLORTERM=truecolor in env */
 			int encoding;			/* encoding of display */
 			int detachfirst;		/* whether to detach remote sessions first */
 		} attach;
 		struct {
 			char duser[MAXLOGINLEN + 1];	/* username */
-			pid_t dpid;			/* pid of frontend */
+			pid_t dpid;	/* pid of frontend */
 		} detach;
 		struct {
 			char auser[MAXLOGINLEN + 1];	/* username */
 			int nargs;
 			char cmd[MAXPATHLEN + 1];	/* command */
-			pid_t apid;		/* pid of frontend */
+			pid_t apid;	/* pid of frontend */
 			char preselect[20];
 			char writeback[MAXPATHLEN];	/* The socket to write the result.
 							   Only used for MSG_QUERY */
-			} command;
+		} command;
 		char message[MAXPATHLEN * 2];
 	} m;
 };
@@ -169,28 +169,28 @@ struct Message {
 #define SIG_STOP	SIGTSTP
 
 #define BELL		(Ctrl('g'))
-#define VBELLWAIT	1 /* No. of seconds a vbell will be displayed */
+#define VBELLWAIT	1	/* No. of seconds a vbell will be displayed */
 
-#define BELL_ON		0 /* No bell has occurred in the window */
-#define BELL_FOUND	1 /* A bell has occurred, but user not yet notified */
-#define BELL_DONE	2 /* A bell has occured, user has been notified */
+#define BELL_ON		0	/* No bell has occurred in the window */
+#define BELL_FOUND	1	/* A bell has occurred, but user not yet notified */
+#define BELL_DONE	2	/* A bell has occured, user has been notified */
 
-#define BELL_VISUAL	3 /* A bell has occured in fore win, notify him visually */
+#define BELL_VISUAL	3	/* A bell has occured in fore win, notify him visually */
 
-#define MON_OFF 	0 /* Monitoring is off in the window */
-#define MON_ON		1 /* No activity has occurred in the window */
-#define MON_FOUND	2 /* Activity has occured, but user not yet notified */
-#define MON_DONE	3 /* Activity has occured, user has been notified */
+#define MON_OFF 	0	/* Monitoring is off in the window */
+#define MON_ON		1	/* No activity has occurred in the window */
+#define MON_FOUND	2	/* Activity has occured, but user not yet notified */
+#define MON_DONE	3	/* Activity has occured, user has been notified */
 
-#define DUMP_TERMCAP	0 /* WriteFile() options */
+#define DUMP_TERMCAP	0	/* WriteFile() options */
 #define DUMP_HARDCOPY	1
 #define DUMP_EXCHANGE	2
 #define DUMP_SCROLLBACK 3
 
-#define SILENCE_OFF	0 /* Not checking for silence */
-#define SILENCE_ON	1 /* Window being monitored for silence */
-#define SILENCE_FOUND   2 /* Window is silent */
-#define SILENCE_DONE    3 /* Window is silent and user is notified */
+#define SILENCE_OFF	0	/* Not checking for silence */
+#define SILENCE_ON	1	/* Window being monitored for silence */
+#define SILENCE_FOUND   2	/* Window is silent */
+#define SILENCE_DONE    3	/* Window is silent and user is notified */
 
 /*
  * line modes used by Input()
@@ -201,18 +201,17 @@ struct Message {
 #define INP_EVERY	4
 
 
-struct acl
-{
-  struct acl *next;
-  char *name;
+struct acl {
+	struct acl *next;
+	char *name;
 };
 
 /* register list */
 #define MAX_PLOP_DEFS 256
 
 struct baud_values {
-	int bps;	/* bits per seconds */
-	int sym;	/* symbol defined in bits/termios.h */
+	int bps;		/* bits per seconds */
+	int sym;		/* symbol defined in bits/termios.h */
 };
 
 /*
@@ -222,19 +221,19 @@ struct baud_values {
 #define WLIST_MRU 1
 #define WLIST_NESTED 2
 
-void  SigHup (int);
-void  eexit (int) __attribute__((__noreturn__));
-void  Detach (int);
-void  Hangup (void);
-void  Kill (pid_t, int);
-void  Msg (int, const char *, ...) __attribute__((format(printf, 2, 3)));
-void  Panic (int, const char *, ...) __attribute__((format(printf, 2, 3))) __attribute__((__noreturn__));
-void  QueryMsg (int, const char *, ...) __attribute__((format(printf, 2, 3)));
-void  Dummy (int, const char *, ...) __attribute__((format(printf, 2, 3)));
-void  Finit (int) __attribute__((__noreturn__));
-void  MakeNewEnv (void);
-void  PutWinMsg (char *, int, int);
-void  setbacktick (int, int, int, char **);
+void SigHup(int);
+void eexit(int) __attribute__((__noreturn__));
+void Detach(int);
+void Hangup(void);
+void Kill(pid_t, int);
+void Msg(int, const char *, ...) __attribute__((format(printf, 2, 3)));
+void Panic(int, const char *, ...) __attribute__((format(printf, 2, 3))) __attribute__((__noreturn__));
+void QueryMsg(int, const char *, ...) __attribute__((format(printf, 2, 3)));
+void Dummy(int, const char *, ...) __attribute__((format(printf, 2, 3)));
+void Finit(int) __attribute__((__noreturn__));
+void MakeNewEnv(void);
+void PutWinMsg(char *, int, int);
+void setbacktick(int, int, int, char **);
 
 /* global variables */
 
@@ -328,4 +327,4 @@ extern uid_t real_uid;
 
 extern struct passwd *ppp;
 
-#endif /* SCREEN_SCREEN_H */
+#endif				/* SCREEN_SCREEN_H */

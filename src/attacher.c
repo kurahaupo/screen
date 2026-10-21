@@ -66,19 +66,19 @@ static int QueryResult;
 
 static void AttachSigCont(int sigsig)
 {
-	(void)sigsig; /* unused */
+	(void)sigsig;		/* unused */
 	ContinuePlease = true;
 }
 
 static void QueryResultSuccess(int sigsig)
 {
-	(void)sigsig; /* unused */
+	(void)sigsig;		/* unused */
 	QueryResult = 1;
 }
 
 static void QueryResultFail(int sigsig)
 {
-	(void)sigsig; /* unused */
+	(void)sigsig;		/* unused */
 	QueryResult = 2;
 }
 
@@ -284,7 +284,7 @@ int Attach(int how)
 
 static void AttacherSigAlarm(int sigsig)
 {
-	(void)sigsig; /* unused */
+	(void)sigsig;		/* unused */
 }
 
 /*
@@ -293,7 +293,7 @@ static void AttacherSigAlarm(int sigsig)
  */
 static void AttacherSigInt(int sigsig)
 {
-	(void)sigsig; /* unused */
+	(void)sigsig;		/* unused */
 
 	xsignal(SIGINT, AttacherSigInt);
 	Kill(MasterPid, SIGINT);
@@ -310,7 +310,7 @@ void AttacherFinit(int sigsig)
 	Message m;
 	int s;
 
-	(void)sigsig; /* unused */
+	(void)sigsig;		/* unused */
 
 	xsignal(SIGHUP, SIG_IGN);
 	/* Check if signal comes from backend */
@@ -333,7 +333,7 @@ static void AttacherFinitBye(int sigsig)
 {
 	pid_t ppid;
 
-	(void)sigsig; /* unused */
+	(void)sigsig;		/* unused */
 
 	if (setgid(real_gid))
 		Panic(errno, "setgid");
@@ -348,21 +348,21 @@ static void AttacherFinitBye(int sigsig)
 
 static void SigStop(int sigsig)
 {
-	(void)sigsig; /* unused */
+	(void)sigsig;		/* unused */
 
 	SuspendPlease = true;
 }
 
 static void DoLock(int sigsig)
 {
-	(void)sigsig; /* unused */
+	(void)sigsig;		/* unused */
 
 	LockPlease = true;
 }
 
 static void AttacherWinch(int sigsig)
 {
-	(void)sigsig; /* unused */
+	(void)sigsig;		/* unused */
 
 	SigWinchPlease = true;
 }
@@ -433,10 +433,10 @@ void SendCmdMessage(char *sty, char *match, char **av, int query)
 		if (strlen(sty) > 2 * MAXSTR - 1)
 			sty[2 * MAXSTR - 1] = 0;
 
-        size_t used = strlen(SocketPath);
-        if (used + 1 + strlen(sty) >= sizeof(SocketPath))
-            Panic(0, "Socket path too long.");
-        snprintf(SocketPath + used, sizeof(SocketPath) - used, "/%s", sty);
+		size_t used = strlen(SocketPath);
+		if (used + 1 + strlen(sty) >= sizeof(SocketPath))
+			Panic(0, "Socket path too long.");
+		snprintf(SocketPath + used, sizeof(SocketPath) - used, "/%s", sty);
 
 		if ((s = MakeClientSocket(1)) == -1)
 			exit(1);
@@ -452,13 +452,13 @@ void SendCmdMessage(char *sty, char *match, char **av, int query)
 	size_t space_left = ARRAY_SIZE(m.m.command.cmd);
 
 	for (; *av && n < MAXARGS - 1; ++av, ++n) {
-               int printed = snprintf(p, space_left, "%s", *av);
-               if (printed < 0 || (size_t)printed >= space_left)
-                       Panic(0, "Total length of the command to send too large.\n");
+		int printed = snprintf(p, space_left, "%s", *av);
+		if (printed < 0 || (size_t)printed >= space_left)
+			Panic(0, "Total length of the command to send too large.\n");
 
-               printed += 1; // add null terminator
-               p += printed;
-               space_left -= printed;
+		printed += 1;	// add null terminator
+		p += printed;
+		space_left -= printed;
 	}
 	*p = 0;
 	m.m.command.nargs = n;

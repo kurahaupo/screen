@@ -6,17 +6,17 @@
 #include "window.h"
 
 #ifdef ENABLE_UTMP
-void  InitUtmp (void);
-void  RemoveLoginSlot (void);
-void  RestoreLoginSlot (void);
-int   SetUtmp (Window *);
-int   RemoveUtmp (Window *);
-#endif /* ENABLE_UTMP */
-void  SlotToggle (bool);
+void InitUtmp(void);
+void RemoveLoginSlot(void);
+void RestoreLoginSlot(void);
+int SetUtmp(Window *);
+int RemoveUtmp(Window *);
+#endif				/* ENABLE_UTMP */
+void SlotToggle(bool);
 #ifdef CAREFULUTMP
-void   CarefulUtmp (void);
+void CarefulUtmp(void);
 #else
-# define CarefulUtmp()  /* nothing */
-#endif /* CAREFULUTMP */
+# define CarefulUtmp()		/* nothing */
+#endif				/* CAREFULUTMP */
 
-#endif /* SCREEN_UTMP_H */
+#endif				/* SCREEN_UTMP_H */

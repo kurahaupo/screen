@@ -46,45 +46,45 @@ typedef struct Window Window;
 
 typedef struct Canvas Canvas;
 struct Canvas {
-	Canvas   *c_next;		/* next canvas on display */
-	Display  *c_display;		/* back pointer to display */
+	Canvas *c_next;		/* next canvas on display */
+	Display *c_display;	/* back pointer to display */
 
-	Canvas   *c_slnext;		/* next canvas in display slice */
-	Canvas   *c_slprev;		/* prev canvas in display slice */
-	Canvas   *c_slperp;		/* perpendicular slice */
-	Canvas   *c_slback;		/* perpendicular slice back pointer */
-	int              c_slorient;	/* our slice orientation */
-	int              c_slweight;	/* size ratio */
+	Canvas *c_slnext;	/* next canvas in display slice */
+	Canvas *c_slprev;	/* prev canvas in display slice */
+	Canvas *c_slperp;	/* perpendicular slice */
+	Canvas *c_slback;	/* perpendicular slice back pointer */
+	int c_slorient;		/* our slice orientation */
+	int c_slweight;		/* size ratio */
 
-	Viewport	*c_vplist;
-	Layer    *c_layer;		/* layer on this canvas */
-	Canvas   *c_lnext;		/* next canvas that displays layer */
-	Layer     c_blank;		/* bottom layer, always blank */
-	int              c_xoff;	/* canvas x offset on display */
-	int              c_yoff;	/* canvas y offset on display */
-	int              c_xs;
-	int              c_xe;
-	int              c_ys;
-	int              c_ye;
-	Event     c_captev;		/* caption changed event */
+	Viewport *c_vplist;
+	Layer *c_layer;		/* layer on this canvas */
+	Canvas *c_lnext;	/* next canvas that displays layer */
+	Layer c_blank;		/* bottom layer, always blank */
+	int c_xoff;		/* canvas x offset on display */
+	int c_yoff;		/* canvas y offset on display */
+	int c_xs;
+	int c_xe;
+	int c_ys;
+	int c_ye;
+	Event c_captev;		/* caption changed event */
 };
 
-void  SetCanvasWindow (Canvas *, Window *);
-void  SetForeCanvas (Display *, Canvas *);
-Canvas *FindCanvas (int, int);
-int   MakeDefaultCanvas (void);
-int   AddCanvas (int);
-void  RemCanvas (void);
-void  OneCanvas (void);
-void  FreeCanvas (Canvas *);
-int   CountCanvas (Canvas *);
-void  ResizeCanvas (Canvas *);
-void  RecreateCanvasChain (void);
-void  RethinkViewportOffsets (Canvas *);
-int   CountCanvasPerp (Canvas *);
-void  EqualizeCanvas (Canvas *, bool);
-void  DupLayoutCv (Canvas *, Canvas *, bool);
-void  PutWindowCv (Canvas *);
+void SetCanvasWindow(Canvas *, Window *);
+void SetForeCanvas(Display *, Canvas *);
+Canvas *FindCanvas(int, int);
+int MakeDefaultCanvas(void);
+int AddCanvas(int);
+void RemCanvas(void);
+void OneCanvas(void);
+void FreeCanvas(Canvas *);
+int CountCanvas(Canvas *);
+void ResizeCanvas(Canvas *);
+void RecreateCanvasChain(void);
+void RethinkViewportOffsets(Canvas *);
+int CountCanvasPerp(Canvas *);
+void EqualizeCanvas(Canvas *, bool);
+void DupLayoutCv(Canvas *, Canvas *, bool);
+void PutWindowCv(Canvas *);
 
 #define CV_CALL(cv, cmd)		\
 {					\
@@ -103,4 +103,4 @@ void  PutWindowCv (Canvas *);
   display = olddisplay;			\
 }
 
-#endif /* SCREEN_CANVAS_H */
+#endif				/* SCREEN_CANVAS_H */

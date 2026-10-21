@@ -46,37 +46,29 @@
 static char ListID[] = "license";
 
 static char license[] = {
-"Copyright (c) 2025-2026 Alexander Naumov\n"
-"Copyright (c) 2018-2024 Alexander Naumov, Amadeusz Slawinski\n"
-"Copyright (c) 2015-2017 Juergen Weigert, Alexander Naumov, Amadeusz Slawinski\n"
-"Copyright (c) 2010-2014 Juergen Weigert, Sadrul Habib Chowdhury\n"
-"Copyright (c) 2008-2009 Juergen Weigert, Michael Schroeder, Micah Cowan, Sadrul Habib Chowdhury\n"
-"Copyright (c) 1993-2007 Juergen Weigert, Michael Schroeder\n"
-"Copyright (c) 1987 Oliver Laumann\n"
-"\n"
-"This program is free software; you can redistribute it and/or modify it under \
+	"Copyright (c) 2025-2026 Alexander Naumov\n"
+	    "Copyright (c) 2018-2024 Alexander Naumov, Amadeusz Slawinski\n"
+	    "Copyright (c) 2015-2017 Juergen Weigert, Alexander Naumov, Amadeusz Slawinski\n"
+	    "Copyright (c) 2010-2014 Juergen Weigert, Sadrul Habib Chowdhury\n"
+	    "Copyright (c) 2008-2009 Juergen Weigert, Michael Schroeder, Micah Cowan, Sadrul Habib Chowdhury\n"
+	    "Copyright (c) 1993-2007 Juergen Weigert, Michael Schroeder\n"
+	    "Copyright (c) 1987 Oliver Laumann\n"
+	    "\n" "This program is free software; you can redistribute it and/or modify it under \
 the terms of the GNU General Public License as published by the Free \
 Software Foundation; either version 3, or (at your option) any later \
-version.\n"
-"\n"
-"This program is distributed in the hope that it will be useful, but WITHOUT \
+version.\n" "\n" "This program is distributed in the hope that it will be useful, but WITHOUT \
 ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or \
 FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for \
-more details.\n"
-"\n"
-"You should have received a copy of the GNU General Public License along with \
+more details.\n" "\n" "You should have received a copy of the GNU General Public License along with \
 this program (see the file COPYING); if not, see \
 https://www.gnu.org/licenses/, or contact Free Software Foundation, Inc., 51 \
-Franklin Street, Fifth Floor, Boston, MA  02111-1301  USA.\n"
-"\n"
-"Send bugreports, fixes, enhancements, t-shirts, money, beer & pizza to"
-" screen-devel@gnu.org\n"
+Franklin Street, Fifth Floor, Boston, MA  02111-1301  USA.\n" "\n" "Send bugreports, fixes, enhancements, t-shirts, money, beer & pizza to" " screen-devel@gnu.org\n"
 };
 
 static int gl_License_header(ListData *ldata)
 {
-	(void)ldata; /* unused */
-	char str_version[75]; /* 75 is strlen("Screen version ") + sizeof(version[60]); */
+	(void)ldata;		/* unused */
+	char str_version[75];	/* 75 is strlen("Screen version ") + sizeof(version[60]); */
 
 	snprintf(str_version, 75, "Screen version %s", version);
 
@@ -87,7 +79,7 @@ static int gl_License_header(ListData *ldata)
 
 static int gl_License_footer(ListData *ldata)
 {
-	(void)ldata; /* unused */
+	(void)ldata;		/* unused */
 
 	centerline("[Press Space for next page or Return to end.]", flayer->l_height - 1);
 	return 1;
@@ -95,7 +87,7 @@ static int gl_License_footer(ListData *ldata)
 
 static int gl_License_row(ListData *ldata, ListRow *lrow)
 {
-	(void)ldata; /* unused */
+	(void)ldata;		/* unused */
 
 	char *line = calloc(flayer->l_width + 1, sizeof(char));
 	char *start = (char *)lrow->data;
@@ -188,15 +180,15 @@ static int gl_License_input(ListData *ldata, char **inp, size_t *len)
 
 static int gl_License_freerow(ListData *ldata, ListRow *row)
 {
-	(void)ldata; /* unused */
-	(void)row; /* unused */
+	(void)ldata;		/* unused */
+	(void)row;		/* unused */
 	/* There was no allocation when row->data was set. So nothing to do here. */
 	return 0;
 }
 
 static int gl_License_free(ListData *ldata)
 {
-	(void)ldata; /* unused */
+	(void)ldata;		/* unused */
 	/* There was no allocation in ldata->data. So nothing to do here. */
 	return 0;
 }
