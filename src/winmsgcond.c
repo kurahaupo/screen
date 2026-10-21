@@ -80,8 +80,8 @@ int wmc_else(WinMsgCond *cond, int offset, bool *changed)
 	 * instead of the beginning of the true condition---that is, we're accepting
 	 * the destination string up until this point */
 	if (wmc_is_set(cond)) {
-		wmc_init(cond, offset);  /* track this as a new condition */
-		cond->locked = true;  /* "else" shall never succeed at this point */
+		wmc_init(cond, offset);	/* track this as a new condition */
+		cond->locked = true;	/* "else" shall never succeed at this point */
 
 		/* we want to keep the string we have so far (the truth string) */
 		if (changed)

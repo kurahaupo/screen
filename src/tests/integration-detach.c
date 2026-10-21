@@ -164,7 +164,7 @@ int main(void)
 	ASSERT(WIFEXITED(status) || WIFSIGNALED(status));
 	result = 0;
 
-cleanup:
+      cleanup:
 	if (attached_pid > 0 && waitpid(attached_pid, &status, WNOHANG) == 0) {
 		kill(attached_pid, SIGTERM);
 		waitpid(attached_pid, &status, 0);

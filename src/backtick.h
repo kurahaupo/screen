@@ -43,7 +43,7 @@ typedef struct backtick {
 	int tick;
 	int lifespan;
 	time_t bestbefore;
-	char result[MAXSTR];  /* TODO: not re-entrant */
+	char result[MAXSTR];	/* TODO: not re-entrant */
 	char **cmdv;
 	Event ev;
 	char *buf;

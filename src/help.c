@@ -246,7 +246,7 @@ static int helppage(void)
 			helpdata->grow++;
 		} else if (helpdata->grow - 2 - helpdata->numrows >= helpdata->numskip
 			   && helpdata->grow - 2 - helpdata->numrows - helpdata->numskip < helpdata->command_bindings) {
-			while (ktabp[helpdata->command_search].nr   == RC_ILLEGAL ||
+			while (ktabp[helpdata->command_search].nr == RC_ILLEGAL ||
 			       ktabp[helpdata->command_search].args == noargs) {
 				if (++helpdata->command_search >= 256 + KMAP_KEYS)
 					return -1;
