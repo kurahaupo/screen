@@ -78,7 +78,7 @@ static void zmodem_found(Window *, int, char *, int);
 static void zmodemFin(char *, size_t, void *);
 static int zmodem_parse(Window *, char *, int);
 
-bool VerboseCreate = false;		/* XXX move this to user.h */
+bool VerboseCreate = false;	/* XXX move this to user.h */
 
 char DefaultShell[] = "/bin/sh";
 #ifndef HAVE_EXECVPE
@@ -86,62 +86,61 @@ static char DefaultPath[] = ":/usr/ucb:/bin:/usr/bin";
 #endif
 
 struct NewWindow nwin_undef = {
-	.StartAt             = -1,
-	.aka                 = NULL,
-	.args                = NULL,
-	.dir                 = NULL,
-	.term                = NULL,
-	.hastruecolor	     = false,
-	.aflag               = false,
-	.dynamicaka          = false,
-	.flowflag            = -1,
-	.list_order          = false,
-	.list_nested         = false,
-	.lflag               = -1,
-	.histheight          = -1,
-	.monitor             = -1,
-	.wlock               = -1,
-	.silence             = -1,
-	.wrap                = false,
-	.Lflag               = false,
-	.slow                = -1,
-	.gr                  = -1,
-	.c1                  = false,
-	.bce                 = -1,
-	.encoding            = -1,
-	.hstatus             = NULL,
-	.charset             = NULL,
+	.StartAt = -1,
+	.aka = NULL,
+	.args = NULL,
+	.dir = NULL,
+	.term = NULL,
+	.hastruecolor = false,
+	.aflag = false,
+	.dynamicaka = false,
+	.flowflag = -1,
+	.list_order = false,
+	.list_nested = false,
+	.lflag = -1,
+	.histheight = -1,
+	.monitor = -1,
+	.wlock = -1,
+	.silence = -1,
+	.wrap = false,
+	.Lflag = false,
+	.slow = -1,
+	.gr = -1,
+	.c1 = false,
+	.bce = -1,
+	.encoding = -1,
+	.hstatus = NULL,
+	.charset = NULL,
 	.poll_zombie_timeout = 0,
-	.sgr3_mode           = SGR3_UNSET,
+	.sgr3_mode = SGR3_UNSET,
 };
 
 struct NewWindow nwin_default = {
-	.StartAt    = 0,
-	.aka        = NULL,
-	.args       = ShellArgs,
-	.dir        = NULL,
-	.term       = screenterm,
-	.hastruecolor = false,	/**/
-	.aflag      = false,
+	.StartAt = 0,
+	.aka = NULL,
+	.args = ShellArgs,
+	.dir = NULL,
+	.term = screenterm,
+	.hastruecolor = false, /**/.aflag = false,
 	.dynamicaka = true,
-	.flowflag   = FLOW_ON,
-	.list_order  = false,
+	.flowflag = FLOW_ON,
+	.list_order = false,
 	.list_nested = false,
-	.lflag      = 1,
+	.lflag = 1,
 	.histheight = DEFAULTHISTHEIGHT,
-	.monitor    = MON_OFF,
-	.wlock      = WLOCK_OFF,
-	.silence    = 0,
-	.wrap       = true,
-	.Lflag      = false,
-	.slow       = 0,
-	.gr         = 0,
-	.c1         = true,
-	.bce        = 0,
-	.encoding   = 0,
-	.hstatus    = NULL,
-	.charset    = NULL,
-	.sgr3_mode  = SGR3_LEGACY,
+	.monitor = MON_OFF,
+	.wlock = WLOCK_OFF,
+	.silence = 0,
+	.wrap = true,
+	.Lflag = false,
+	.slow = 0,
+	.gr = 0,
+	.c1 = true,
+	.bce = 0,
+	.encoding = 0,
+	.hstatus = NULL,
+	.charset = NULL,
+	.sgr3_mode = SGR3_LEGACY,
 };
 
 struct NewWindow nwin_options;
@@ -434,7 +433,7 @@ static void remove_window_from_list(Window *win)
 static void add_window_to_list(Window *p, Window *win)
 {
 	if (!p)
-		return; /* maybe we should just Panic? but we should always get window to place */
+		return;		/* maybe we should just Panic? but we should always get window to place */
 
 	/* most recently used list */
 
@@ -673,12 +672,11 @@ int MakeWindow(struct NewWindow *newwin)
 		WindowChanged(NULL, 0);
 		return startat;
 	}
-
 #ifdef ENABLE_UTMP
 	p->w_lflag = nwin.lflag;
-	p->w_slot = (slot_t) - 1;
+	p->w_slot = (slot_t)-1;
 	if (nwin.lflag & 1) {
-		p->w_slot = (slot_t) 0;
+		p->w_slot = (slot_t)0;
 		if (display || (p->w_lflag & 2))
 			SetUtmp(p);
 	}
@@ -752,7 +750,7 @@ int RemakeWindow(Window *window)
 		TtyName = "telnet";
 	} else
 #endif
-	{ /* see above #ifdef */
+	{			/* see above #ifdef */
 		if ((fd = OpenDevice(window->w_cmdargs, lflag, &window->w_type, &TtyName)) < 0)
 			return -1;
 	}
@@ -795,7 +793,7 @@ int RemakeWindow(Window *window)
 			return -1;
 	}
 #ifdef ENABLE_UTMP
-	if (window->w_slot == (slot_t) 0 && (display || (window->w_lflag & 2)))
+	if (window->w_slot == (slot_t)0 && (display || (window->w_lflag & 2)))
 		SetUtmp(window);
 #ifdef CAREFULUTMP
 	CarefulUtmp();		/* If all 've been zombies, we've had no slot */
@@ -867,7 +865,8 @@ void FreeWindow(Window *window)
 		free(window->w_term);
 	for (Display *display = displays; display; display = display->d_next) {
 		if (display->d_other == window)
-			display->d_other = display->d_fore && display->d_fore->w_prev_mru != window ? display->d_fore->w_prev_mru : window->w_prev_mru;
+			display->d_other = display->d_fore
+			    && display->d_fore->w_prev_mru != window ? display->d_fore->w_prev_mru : window->w_prev_mru;
 		if (display->d_fore == window)
 			display->d_fore = NULL;
 		for (Canvas *canvas = display->d_cvlist; canvas; canvas = canvas->c_next) {
@@ -916,7 +915,7 @@ int OpenDevice(char **args, int lflag, int *typep, char **namep)
 	int fd;
 
 #ifndef ENABLE_UTMP
-	(void)lflag; /* unused */
+	(void)lflag;		/* unused */
 #endif
 
 	if (!arg)
@@ -1023,7 +1022,7 @@ int OpenDevice(char **args, int lflag, int *typep, char **namep)
 static int ForkWindow(Window *win, char **args, char *ttyn)
 {
 	pid_t pid;
-	char tebuf[MAXTERMLEN + 5 + 1]; /* MAXTERMLEN + strlen("TERM=") + '\0' */
+	char tebuf[MAXTERMLEN + 5 + 1];	/* MAXTERMLEN + strlen("TERM=") + '\0' */
 	char ebuf[20];
 	char shellbuf[7 + MAXPATHLEN];
 	char *proc;
@@ -1081,7 +1080,7 @@ static int ForkWindow(Window *win, char **args, char *ttyn)
 			brktty(-1);
 		if (slave != -1) {
 			close(0);
-			if(dup(slave) < 0)
+			if (dup(slave) < 0)
 				Panic(errno, "Cannot duplicate file descriptor");
 			close(slave);
 			closeallfiles(win->w_ptyfd);
@@ -1118,7 +1117,7 @@ static int ForkWindow(Window *win, char **args, char *ttyn)
 				if (fgtty(newfd))
 					Msg(errno, "fgtty");
 			} else {
-				if(dup(win->w_ptyfd) < 0)
+				if (dup(win->w_ptyfd) < 0)
 					Panic(errno, "Cannot duplicate file descriptor");
 				wfdused = 1;
 			}
@@ -1161,7 +1160,8 @@ static int ForkWindow(Window *win, char **args, char *ttyn)
 		strncpy(shellbuf + 6, ShellProg + (*ShellProg == '-'), ARRAY_SIZE(shellbuf) - 7);
 		shellbuf[ARRAY_SIZE(shellbuf) - 1] = 0;
 		NewEnv[4] = shellbuf;
-		if (win->w_term && *win->w_term && strcmp(screenterm, win->w_term) && (strlen(win->w_term) < MAXTERMLEN)) {
+		if (win->w_term && *win->w_term && strcmp(screenterm, win->w_term)
+		    && (strlen(win->w_term) < MAXTERMLEN)) {
 			char *s1, *s2, tl;
 
 			snprintf(tebuf, ARRAY_SIZE(tebuf), "TERM=%s", win->w_term);
@@ -1432,7 +1432,7 @@ static void paste_slowev_fn(Event *event, void *data)
 	struct paster *pa = (struct paster *)data;
 	Window *p;
 
-	(void)event; /* unused */
+	(void)event;		/* unused */
 
 	size_t len = 1;
 	flayer = pa->pa_pastelayer;
@@ -1560,7 +1560,7 @@ static void win_resurrect_zombie_fn(Event *event, void *data)
 {
 	Window *p = (Window *)data;
 
-	(void)event; /* unused */
+	(void)event;		/* unused */
 
 	/* Already reconnected? */
 	if (p->w_deadpid != p->w_pid)
@@ -1577,7 +1577,7 @@ static void win_writeev_fn(Event *event, void *data)
 		if ((len = write(event->fd, p->w_inbuf, p->w_inlen)) <= 0)
 			len = p->w_inlen;	/* dead window */
 
-		if (p->w_miflag) { /* don't loop if not needed */
+		if (p->w_miflag) {	/* don't loop if not needed */
 			for (Window *win = mru_window; win; win = win->w_prev_mru) {
 				if (win != p && win->w_miflag)
 					write(win->w_ptyfd, p->w_inbuf, p->w_inlen);
@@ -1667,7 +1667,7 @@ static void win_silenceev_fn(Event *event, void *data)
 	Window *p = (Window *)data;
 	Canvas *cv;
 
-	(void)event; /* unused */
+	(void)event;		/* unused */
 
 	for (display = displays; display; display = display->d_next) {
 		for (cv = D_cvlist; cv; cv = cv->c_next)
@@ -1687,7 +1687,7 @@ static void win_destroyev_fn(Event *event, void *data)
 {
 	Window *p = (Window *)event->data;
 
-	(void)data; /* unused */
+	(void)data;		/* unused */
 
 	WindowDied(p, p->w_exitstatus, 1);
 }
@@ -1754,7 +1754,7 @@ static void zmodemFin(char *buf, size_t len, void *data)
 	char *s;
 	size_t l;
 
-	(void)data; /* unused */
+	(void)data;		/* unused */
 
 	if (len)
 		RcLine(buf, strlen(buf) + 1);
@@ -1880,11 +1880,11 @@ int SwapWindows(int old, int dest)
 	/* exchange the acls for these windows. */
 #ifdef ENABLE_UTMP
 	/* exchange the utmp-slots for these windows */
-	if ((win_a->w_slot != (slot_t) - 1) && (win_a->w_slot != (slot_t) 0)) {
+	if ((win_a->w_slot != (slot_t)-1) && (win_a->w_slot != (slot_t)0)) {
 		RemoveUtmp(win_a);
 		SetUtmp(win_a);
 	}
-	if (win_b && (win_b->w_slot != (slot_t) - 1) && (win_b->w_slot != (slot_t) 0)) {
+	if (win_b && (win_b->w_slot != (slot_t)-1) && (win_b->w_slot != (slot_t)0)) {
 		display = win_a->w_layer.l_cvlist ? win_a->w_layer.l_cvlist->c_display : NULL;
 		RemoveUtmp(win_b);
 		SetUtmp(win_b);
@@ -1944,7 +1944,7 @@ void WindowDied(Window *p, int wstat, int wstat_valid)
 		if (s && *s)
 			s[strlen(s) - 1] = '\0';
 #ifdef ENABLE_UTMP
-		if (p->w_slot != (slot_t) 0 && p->w_slot != (slot_t) - 1) {
+		if (p->w_slot != (slot_t)0 && p->w_slot != (slot_t)-1) {
 			RemoveUtmp(p);
 			p->w_slot = NULL;	/* "detached" */
 		}

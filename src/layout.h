@@ -36,34 +36,34 @@
 
 typedef struct Layout Layout;
 struct Layout {
-	Layout   *lay_next;
-	char            *lay_title;
-	int              lay_number;
-	Canvas           lay_canvas;
-	Canvas          *lay_forecv;
-	Canvas 	        *lay_cvlist;
-	int              lay_autosave;
+	Layout *lay_next;
+	char *lay_title;
+	int lay_number;
+	Canvas lay_canvas;
+	Canvas *lay_forecv;
+	Canvas *lay_cvlist;
+	int lay_autosave;
 };
 
-void  FreeLayoutCv(Canvas *c);
+void FreeLayoutCv(Canvas *c);
 Layout *CreateLayout(char *, int);
-void  AutosaveLayout (Layout *);
-void  LoadLayout (Layout *);
-void  NewLayout (char *, int);
-void  SaveLayout (char *, Canvas *);
-void  ShowLayouts (int);
-Layout *FindLayout (char *);
-void  UpdateLayoutCanvas (Canvas *, Window *);
-Layout *CreateLayout (char *, int);
-void  RemoveLayout (Layout *);
-int   LayoutDumpCanvas (Canvas *, char *);
+void AutosaveLayout(Layout *);
+void LoadLayout(Layout *);
+void NewLayout(char *, int);
+void SaveLayout(char *, Canvas *);
+void ShowLayouts(int);
+Layout *FindLayout(char *);
+void UpdateLayoutCanvas(Canvas *, Window *);
+Layout *CreateLayout(char *, int);
+void RemoveLayout(Layout *);
+int LayoutDumpCanvas(Canvas *, char *);
 
-void RenameLayout (Layout *, const char *);
-int RenumberLayout (Layout *, int);
+void RenameLayout(Layout *, const char *);
+int RenumberLayout(Layout *, int);
 
 /* global variables */
 
 extern Layout *layout_attach, *layout_last, layout_last_marker;
 extern Layout *layouts;
 
-#endif /* SCREEN_LAYOUT_H */
+#endif				/* SCREEN_LAYOUT_H */

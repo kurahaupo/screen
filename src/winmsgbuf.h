@@ -30,22 +30,22 @@
 /* Default window message buffer size */
 #define WINMSGBUF_SIZE MAXSTR
 
-#define MAX_WINMSG_REND 256 /* rendition changes */
+#define MAX_WINMSG_REND 256	/* rendition changes */
 
 /* TODO: complete truncation and rendition API */
 
 /* Represents a working buffer for window messages */
 typedef struct {
-	char     *buf;
-	size_t    size;
-	uint64_t  rend[MAX_WINMSG_REND];
-	int       rendpos[MAX_WINMSG_REND];
-	int       numrend;
+	char *buf;
+	size_t size;
+	uint64_t rend[MAX_WINMSG_REND];
+	int rendpos[MAX_WINMSG_REND];
+	int numrend;
 } WinMsgBuf;
 
 typedef struct {
 	WinMsgBuf *buf;
-	char      *p;    /* pointer within buffer */
+	char *p;		/* pointer within buffer */
 
 	/* truncation mark */
 	struct {
@@ -77,7 +77,7 @@ void wmbc_putchar(WinMsgBufContext *, char);
 const char *wmbc_strncpy(WinMsgBufContext *, const char *, size_t);
 const char *wmbc_strcpy(WinMsgBufContext *, const char *);
 int wmbc_printf(WinMsgBufContext *, const char *, ...)
-                __attribute__((format(printf,2,3)));
+    __attribute__((format(printf, 2, 3)));
 size_t wmbc_offset(WinMsgBufContext *);
 size_t wmbc_bytesleft(WinMsgBufContext *);
 const char *wmbc_mergewmb(WinMsgBufContext *, WinMsgBuf *);

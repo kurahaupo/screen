@@ -103,7 +103,7 @@ void FreeCanvas(Canvas *cv)
 		/* remove from canvas chain as SetCanvasWindow might call
 		 * some layer function */
 		for (Canvas **cvp = &D_cvlist; *cvp; cvp = &(*cvp)->c_next)
-			if (*cvp == cv) {
+			if(*cvp == cv) {
 				*cvp = cv->c_next;
 				break;
 			}

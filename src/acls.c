@@ -88,11 +88,11 @@ static int AclSetPermWin(struct acluser *, struct acluser *, char *, Window *);
 static int UserAcl(struct acluser *, struct acluser **, int, char **);
 static int UserAclCopy(struct acluser **, struct acluser **);
 
-static int GrowBitfield(AclBits * bfp, int len, int delta, int defaultbit)
+static int GrowBitfield(AclBits *bfp, int len, int delta, int defaultbit)
 {
 	AclBits n, o = *bfp;
 
-	if (!(n = (AclBits) calloc(1, (unsigned long)(&ACLBYTE((char *)NULL, len + delta) + 1))))
+	if (!(n = (AclBits)calloc(1, (unsigned long)(&ACLBYTE((char *)NULL, len + delta) + 1))))
 		return -1;
 	for (int i = 0; i < (len + delta); i++) {
 		if (((i < len) && (ACLBIT(i) & ACLBYTE(o, i))) || ((i >= len) && (defaultbit)))
@@ -192,7 +192,7 @@ int UserAdd(char *name, struct acluser **up)
 				}
 		}
 		/* fourth, default window creation bits per user */
-		for (struct acluser *u = users; u != *up; u = u->u_next) {
+		for (struct acluser * u = users; u != *up; u = u->u_next) {
 			for (int j = 0; j < ACL_BITS_PER_WIN; j++) {
 				if (GrowBitfield(&u->u_umask_w_bits[j], maxusercount, USER_CHUNK, default_w_bit[j])) {
 					free((char *)*up);
@@ -396,10 +396,10 @@ int AclLinkUser(char *from, char *to)
  */
 char *DoSu(struct acluser **up, char *name, char *pw1, char *pw2)
 {
-	(void) up;
-	(void) name;
-	(void) pw1;
-	(void) pw2;
+	(void)up;
+	(void)name;
+	(void)pw1;
+	(void)pw2;
 
 #if 0
 	struct acluser *u;
@@ -452,7 +452,8 @@ char *DoSu(struct acluser **up, char *name, char *pw1, char *pw2)
 	}
 
 	openlog("screen", LOG_PID, LOG_AUTHPRIV);
-	syslog(LOG_NOTICE, "%s: \"su %s\" %s for \"%s\"", SocketPath, name, sorry ? "failed" : "succeeded", (*up)->u_name);
+	syslog(LOG_NOTICE, "%s: \"su %s\" %s for \"%s\"", SocketPath, name, sorry ? "failed" : "succeeded",
+	       (*up)->u_name);
 	closelog();
 
 	if (sorry)
@@ -747,7 +748,7 @@ int UsersAcl(struct acluser *uu, int argc, char **argv)
 	}
 
 	if (argv[0][0] == '*' && argv[0][1] == '\0') {
-		for (struct acluser **u = &users; *u; u = &(*u)->u_next)
+		for (struct acluser ** u = &users; *u; u = &(*u)->u_next)
 			if (strcmp("nobody", (*u)->u_name) &&
 			    ((cf_u) ? ((UserAclCopy(u, cf_u)) < 0) : ((UserAcl(uu, u, argc, argv)) < 0)))
 				return -1;

@@ -32,54 +32,54 @@ typedef struct ListRow ListRow;
 typedef struct GenericList GenericList;
 
 struct ListRow {
-	void *data;			/* Some data relevant to this row */
-	ListRow *next, *prev;		/* doubly linked list */
-	int y;				/* -1 if not on display */
+	void *data;		/* Some data relevant to this row */
+	ListRow *next, *prev;	/* doubly linked list */
+	int y;			/* -1 if not on display */
 };
 
 struct GenericList {
-	int (*gl_printheader) (ListData *);			/* Print the header */
-	int (*gl_printfooter) (ListData *);			/* Print the footer */
-	int (*gl_printrow) (ListData *, ListRow *);		/* Print one row */
-	int (*gl_pinput) (ListData *, char **inp, size_t *len);	/* Process input */
-	int (*gl_freerow) (ListData *, ListRow *);		/* Free data for a row */
-	int (*gl_free) (ListData *);				/* Free data for the list */
-	int (*gl_rebuild) (ListData *);				/* Rebuild display */
-	int (*gl_matchrow) (ListData *, ListRow *, const char *);
+	int (*gl_printheader)(ListData *);	/* Print the header */
+	int (*gl_printfooter)(ListData *);	/* Print the footer */
+	int (*gl_printrow)(ListData *, ListRow *);	/* Print one row */
+	int (*gl_pinput)(ListData *, char **inp, size_t *len);	/* Process input */
+	int (*gl_freerow)(ListData *, ListRow *);	/* Free data for a row */
+	int (*gl_free)(ListData *);	/* Free data for the list */
+	int (*gl_rebuild)(ListData *);	/* Rebuild display */
+	int (*gl_matchrow)(ListData *, ListRow *, const char *);
 };
 
 struct ListData {
-	const char *name;		/* An identifier for the list */
-	ListRow *root;			/* The first item in the list */
-	ListRow *selected;		/* The selected row */
-	ListRow *top;			/* The topmost visible row */
+	const char *name;	/* An identifier for the list */
+	ListRow *root;		/* The first item in the list */
+	ListRow *selected;	/* The selected row */
+	ListRow *top;		/* The topmost visible row */
 
-	const GenericList *list_fn;		/* The functions that deal with the list */
+	const GenericList *list_fn;	/* The functions that deal with the list */
 
-	char *search;			/* The search term, if any */
+	char *search;		/* The search term, if any */
 
-	void *data;			/* List specific data */
+	void *data;		/* List specific data */
 };
 
 
-ListRow * glist_add_row (ListData *ldata, void *data, ListRow *after);
+ListRow *glist_add_row(ListData *ldata, void *data, ListRow *after);
 
-void glist_remove_rows (ListData *ldata);
+void glist_remove_rows(ListData *ldata);
 
-void glist_display_all (ListData *list);
+void glist_display_all(ListData *list);
 
-ListData * glist_display (const GenericList *list, const char *name);
+ListData *glist_display(const GenericList *list, const char *name);
 
-void glist_abort (void);
+void glist_abort(void);
 
-void display_displays (void);
+void display_displays(void);
 
-void display_license (void);
+void display_license(void);
 
-void display_windows (int onblank, int order, Window *group);
+void display_windows(int onblank, int order, Window *group);
 
 /* global variables */
 
 extern const struct LayFuncs ListLf;
 
-#endif /* SCREEN_LIST_GENERIC_H */
+#endif				/* SCREEN_LIST_GENERIC_H */
