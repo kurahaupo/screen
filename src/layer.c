@@ -31,13 +31,13 @@
 #include "layer.h"
 
 #include "encoding.h"
-#include "inline.h" /* must follow ansi.h and image.h */
+#include "inline.h"		/* must follow ansi.h and image.h */
 #include "mark.h"
 #include "misc.h"
 #include "screen.h"
 #include "tty.h"
 
-#include "inline.h" /* must follow ansi.h and image.h */
+#include "inline.h"		/* must follow ansi.h and image.h */
 
 /*
  * Layer subsystem.
@@ -392,8 +392,7 @@ void LClearLine(Layer *l, int y, int xs, int xe, int bce, struct mline *ol)
 			display = cv->c_display;
 			if (D_blocked)
 				continue;
-			ClearLine(ol ? mlineoffset(RECODE_MLINE(ol), -vp->v_xoff) : NULL, y2, xs2, xe2,
-				  bce);
+			ClearLine(ol ? mlineoffset(RECODE_MLINE(ol), -vp->v_xoff) : NULL, y2, xs2, xe2, bce);
 		}
 	}
 }

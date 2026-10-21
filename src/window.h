@@ -47,7 +47,7 @@ struct NewWindow {
 	char	**args;		/* argv vector */
 	char	*dir;		/* directory for chdir */
 	char	*term;		/* TERM to be set instead of "screen" */
-	bool	hastruecolor;	/* export COLORTERM=truecolor */
+	bool	hastruecolor;	/* export COLORTERM=truecolor? */
 	bool	aflag;
 	bool	dynamicaka;
 	int	flowflag;
@@ -73,25 +73,25 @@ struct NewWindow {
 
 
 struct pseudowin {
-	int	p_fdpat;
-	pid_t	p_pid;
-	int	p_ptyfd;
-	Event	p_readev;
-	Event	p_writeev;
-	char	p_cmd[MAXSTR];
-	char	p_tty[MAXSTR];
-	char	p_inbuf[IOSIZE];	/* buffered writing to p_ptyfd */
-	int	p_inlen;
+	int p_fdpat;
+	pid_t p_pid;
+	int p_ptyfd;
+	Event p_readev;
+	Event p_writeev;
+	char p_cmd[MAXSTR];
+	char p_tty[MAXSTR];
+	char p_inbuf[IOSIZE];	/* buffered writing to p_ptyfd */
+	int p_inlen;
 };
 
 /* bits for fdpat: */
 #define F_PMASK 	0x0003
 #define F_PSHIFT	2
-#define F_PFRONT	0x0001			/* . */
-#define F_PBACK 	0x0002			/* ! */
+#define F_PFRONT	0x0001	/* . */
+#define F_PBACK 	0x0002	/* ! */
 #define F_PBOTH 	(F_PFRONT | F_PBACK)	/* : */
 
-#define F_UWP		0x1000			/* | */
+#define F_UWP		0x1000	/* | */
 
 /* The screen process ...)
  * ... wants to write to pseudo */
@@ -130,11 +130,11 @@ struct pseudowin {
 
 
 struct paster {
-	char	*pa_pastebuf;		/* this gets pasted in the window */
-	char	*pa_pasteptr;		/* pointer in pastebuf */
-	size_t	 pa_pastelen;		/* bytes left to paste */
-	Layer	*pa_pastelayer;		/* layer to paste into */
-	Event	 pa_slowev;		/* slowpaste event */
+	char *pa_pastebuf;	/* this gets pasted in the window */
+	char *pa_pasteptr;	/* pointer in pastebuf */
+	size_t pa_pastelen;	/* bytes left to paste */
+	Layer *pa_pastelayer;	/* layer to paste into */
+	Event pa_slowev;	/* slowpaste event */
 };
 
 typedef uint16_t cs_param_t;
@@ -142,153 +142,152 @@ typedef uint16_t cs_param_t;
 
 typedef struct Window Window;
 struct Window {
-	Window *w_prev;			/* previous window */
-	Window *w_next;			/* next window */
-	Window *w_prev_mru;		/* previous most recently used window */
-	int	w_type;			/* type of window */
-	bool w_list_order;		/* MRU list order for window groups */
-	bool w_list_nested;		/* show nested children in window groups */
-	Layer w_layer;			/* our layer */
-	Layer *w_savelayer;		/* the layer to keep */
-	int    w_blocked;		/* block input */
+	Window *w_prev;		/* previous window */
+	Window *w_next;		/* next window */
+	Window *w_prev_mru;	/* previous most recently used window */
+	int w_type;		/* type of window */
+	bool w_list_order;	/* MRU list order for window groups */
+	bool w_list_nested;	/* show nested children in window groups */
+	Layer w_layer;		/* our layer */
+	Layer *w_savelayer;	/* the layer to keep */
+	int w_blocked;		/* block input */
 	struct pseudowin *w_pwin;	/* ptr to pseudo */
-	Display *w_pdisplay;		/* display for printer relay */
-	Display *w_lastdisp;		/* where the last input was made */
-	uint16_t w_number;		/* window number */
+	Display *w_pdisplay;	/* display for printer relay */
+	Display *w_lastdisp;	/* where the last input was made */
+	uint16_t w_number;	/* window number */
 	Event w_readev;
 	Event w_writeev;
-	Event w_silenceev;		/* silence event */
-	Event w_zombieev;		/* event to try to resurrect window */
-	int	 w_poll_zombie_timeout;
-	int	 w_ptyfd;		/* fd of the master pty */
-	char	 w_inbuf[IOSIZE];
-	int	 w_inlen;
-	char	 w_outbuf[IOSIZE];
-	int	 w_outlen;
-	bool	 w_aflag;		/* (-a option) */
-	bool	 w_dynamicaka;		/* should we change name */
-	char	*w_title;		/* name of the window */
-	char	*w_akachange;		/* autoaka hack */
-	char	 w_akabuf[MAXSTR];	/* aka buffer */
-	int	 w_autoaka;		/* autoaka hack */
-	Window  *w_group;		/* window group we belong to */
-	int	 w_intermediate;	/* char used while parsing ESC-seq */
+	Event w_silenceev;	/* silence event */
+	Event w_zombieev;	/* event to try to resurrect window */
+	int w_poll_zombie_timeout;
+	int w_ptyfd;		/* fd of the master pty */
+	char w_inbuf[IOSIZE];
+	int w_inlen;
+	char w_outbuf[IOSIZE];
+	int w_outlen;
+	bool w_aflag;		/* (-a option) */
+	bool w_dynamicaka;	/* should we change name */
+	char *w_title;		/* name of the window */
+	char *w_akachange;	/* autoaka hack */
+	char w_akabuf[MAXSTR];	/* aka buffer */
+	int w_autoaka;		/* autoaka hack */
+	Window *w_group;	/* window group we belong to */
+	int w_intermediate;	/* char used while parsing ESC-seq */
 	struct cs_parser {
-	  size_t num_params;
-	  cs_param_t
-		 params[MAX_CS_PARAMS];	/* emulator args */
-	  char	 seps[MAX_CS_PARAMS];	/* emulator arg separators;
-					 * (sep[n] terminates params[n]);
-					 * params overrun signalled by
-					 * (seps[MAX_CS_PARAMS-1] != 0) */
-	  bool	 has_colons;		/* are any of the separators colons? */
-	}	 w_cs;			/* track state while parsing a Control Sequence */
+		size_t num_params;
+		cs_param_t params[MAX_CS_PARAMS];	/* emulator args */
+		char seps[MAX_CS_PARAMS];	/* emulator arg separators;
+						 * (sep[n] terminates params[n]);
+						 * params overrun signalled by
+						 * (seps[MAX_CS_PARAMS-1] != 0) */
+		bool has_colons;	/* are any of the separators colons? */
+	} w_cs;			/* track state while parsing a Control Sequence */
 	sgr3_mode_t w_sgr3_mode;	/* does \e[3m cause italic or standout? */
 
-	int    w_wlock;		/* WLOCK_AUTO, WLOCK_OFF, WLOCK_ON */
+	int w_wlock;		/* WLOCK_AUTO, WLOCK_OFF, WLOCK_ON */
 	struct acluser *w_wlockuser;	/* NULL when unlocked or user who writes */
 	AclBits w_userbits[ACL_BITS_PER_WIN];
-	AclBits w_lio_notify;		/* whom to tell when lastio+seconds < time() */
-	AclBits w_mon_notify;		/* whom to tell monitor status */
+	AclBits w_lio_notify;	/* whom to tell when lastio+seconds < time() */
+	AclBits w_mon_notify;	/* whom to tell monitor status */
 
-	state_t w_state;		/* parser state */
+	state_t w_state;	/* parser state */
 	string_t w_StringType;
 	struct mline *w_mlines;
-	struct mchar w_rend;		/* current rendition */
-	char	 w_FontL;		/* character font GL */
-	char	 w_FontR;		/* character font GR */
-	char	 w_FontE;		/* character font GR locked */
-	int	 w_Charset;		/* charset number GL */
-	int	 w_CharsetR;		/* charset number GR */
-	int	 w_charsets[4];		/* Font = charsets[Charset] */
-	int	 w_ss;
+	struct mchar w_rend;	/* current rendition */
+	char w_FontL;		/* character font GL */
+	char w_FontR;		/* character font GR */
+	char w_FontE;		/* character font GR locked */
+	int w_Charset;		/* charset number GL */
+	int w_CharsetR;		/* charset number GR */
+	int w_charsets[4];	/* Font = charsets[Charset] */
+	int w_ss;
 	struct cursor {
-		int	 on;
-		int	 x, y;
+		int on;
+		int x, y;
 		struct mchar Rend;
-		int	 Charset;
-		int	 CharsetR;
-		int	 Charsets[4];
+		int Charset;
+		int CharsetR;
+		int Charsets[4];
 	} w_saved;
-	int	 w_top, w_bot;		/* scrollregion */
-	bool	 w_wrap;		/* autowrap */
-	int	 w_origin;		/* origin mode */
-	bool	 w_insert;		/* window is in insert mode */
-	int	 w_keypad;		/* keypad mode */
-	int	 w_cursorkeys;		/* appl. cursorkeys mode */
-	bool	 w_revvid;		/* reverse video */
-	int	 w_curinv;		/* cursor invisible */
-	int	 w_curvvis;		/* cursor very visible */
-	int	 w_autolf;		/* automatic linefeed */
-	char	*w_hstatus;		/* hardstatus line */
-	int	 w_gr;			/* enable GR flag */
-	bool     w_c1;			/* enable C1 flag */
-	int	 w_decodestate;		/* state of our input decoder */
-	int	 w_mbcs;		/* saved char for multibytes charset */
-	char	 w_string[MAXSTR];
-	char	*w_stringp;
-	char	*w_tabs;		/* line with tabs */
-	int	 w_bell;		/* bell status of this window */
-	int	 w_flow;		/* flow flags */
-	Log	 *w_log;	/* log to file */
-	int	 w_logsilence;		/* silence in secs */
-	int	 w_monitor;		/* monitor status */
-	int	 w_silencewait;		/* wait for silencewait secs */
-	int	 w_silence;		/* silence status (Lloyd Zusman) */
-	char	 w_norefresh;		/* dont redisplay when switching to that win */
-	char	 w_xtermosc[5][2560];	/* special xterm/rxvt escapes */
-	int	 w_mouse;		/* mouse mode 0,9,1000 */
-	int	 w_extmouse;		/* extended mouse mode 0,1006 */
-	bool	 w_bracketed;		/* bracketed paste mode */
-	int	 w_cursorstyle;		/* cursor style */
+	int w_top, w_bot;	/* scrollregion */
+	bool w_wrap;		/* autowrap */
+	int w_origin;		/* origin mode */
+	bool w_insert;		/* window is in insert mode */
+	int w_keypad;		/* keypad mode */
+	int w_cursorkeys;	/* appl. cursorkeys mode */
+	bool w_revvid;		/* reverse video */
+	int w_curinv;		/* cursor invisible */
+	int w_curvvis;		/* cursor very visible */
+	int w_autolf;		/* automatic linefeed */
+	char *w_hstatus;	/* hardstatus line */
+	int w_gr;		/* enable GR flag */
+	bool w_c1;		/* enable C1 flag */
+	int w_decodestate;	/* state of our input decoder */
+	int w_mbcs;		/* saved char for multibytes charset */
+	char w_string[MAXSTR];
+	char *w_stringp;
+	char *w_tabs;		/* line with tabs */
+	int w_bell;		/* bell status of this window */
+	int w_flow;		/* flow flags */
+	Log *w_log;		/* log to file */
+	int w_logsilence;	/* silence in secs */
+	int w_monitor;		/* monitor status */
+	int w_silencewait;	/* wait for silencewait secs */
+	int w_silence;		/* silence status (Lloyd Zusman) */
+	char w_norefresh;	/* dont redisplay when switching to that win */
+	char w_xtermosc[5][2560];	/* special xterm/rxvt escapes */
+	int w_mouse;		/* mouse mode 0,9,1000 */
+	int w_extmouse;		/* extended mouse mode 0,1006 */
+	bool w_bracketed;	/* bracketed paste mode */
+	int w_cursorstyle;	/* cursor style */
 
-	int	 w_slowpaste;		/* do careful writes to the window */
-	int	 w_histheight;		/* all histbases are malloced with width * histheight */
-	int	 w_histidx;		/* 0 <= histidx < histheight; where we insert lines */
-	int	 w_scrollback_height;	/* number of lines of output stored, to be updated with w_histidx, w_histheight */
-	struct	 mline *w_hlines;	/* history buffer */
-	struct	 paster w_paster;	/* paste info */
-	pid_t	 w_pid;			/* process at the other end of ptyfd */
-	pid_t	 w_deadpid;		/* saved w_pid of a process that closed the ptyfd to us */
+	int w_slowpaste;	/* do careful writes to the window */
+	int w_histheight;	/* all histbases are malloced with width * histheight */
+	int w_histidx;		/* 0 <= histidx < histheight; where we insert lines */
+	int w_scrollback_height;	/* number of lines of output stored, to be updated with w_histidx, w_histheight */
+	struct mline *w_hlines;	/* history buffer */
+	struct paster w_paster;	/* paste info */
+	pid_t w_pid;		/* process at the other end of ptyfd */
+	pid_t w_deadpid;	/* saved w_pid of a process that closed the ptyfd to us */
 
-	char	*w_cmdargs[MAXARGS];	/* command line argument vector */
-	char	*w_dir;			/* directory for chdir */
-	char	*w_term;		/* TERM to be set instead of "screen" */
-	bool	 w_truecolor;		/* set "COLORTERM=truecolor"? */
+	char *w_cmdargs[MAXARGS];	/* command line argument vector */
+	char *w_dir;		/* directory for chdir */
+	char *w_term;		/* TERM to be set instead of "screen" */
+	bool w_truecolor;	/* export COLORTERM=truecolor? */
 
 #if defined (ENABLE_UTMP)
-	int	 w_lflag;		/* login flag */
-	slot_t	 w_slot;		/* utmp slot */
-	struct	 utmpx w_savut;		/* utmp entry of this window */
+	int w_lflag;		/* login flag */
+	slot_t w_slot;		/* utmp slot */
+	struct utmpx w_savut;	/* utmp entry of this window */
 #endif
 
-	char	 w_tty[MAXSTR];
+	char w_tty[MAXSTR];
 
-	int    w_zauto;
+	int w_zauto;
 	Display *w_zdisplay;
 #ifdef ENABLE_TELNET
 	struct sockaddr_in w_telsa;
-	char   w_telbuf[IOSIZE];
-	int    w_telbufl;
-	char   w_telmopts[256];
-	char   w_telropts[256];
-	int    w_telstate;
-	char   w_telsubbuf[128];
-	int    w_telsubidx;
+	char w_telbuf[IOSIZE];
+	int w_telbufl;
+	char w_telmopts[256];
+	char w_telropts[256];
+	int w_telstate;
+	char w_telsubbuf[128];
+	int w_telsubidx;
 	Event w_telconnev;
 #endif
 	struct {
-		int    on;    		/* Is the alternate buffer currently being used? */
+		int on;		/* Is the alternate buffer currently being used? */
 		struct mline *mlines;
-		int    width;
-		int    height;
-		int    histheight;
+		int width;
+		int height;
+		int histheight;
 		struct mline *hlines;
-		int    histidx;
+		int histidx;
 		struct cursor cursor;
 	} w_alt;
 
-	Event w_destroyev;		/* window destroy event */
+	Event w_destroyev;	/* window destroy event */
 	int w_exitstatus;
 	bool w_miflag;
 };
@@ -336,21 +335,21 @@ struct Window {
 
 #define Layer2Window(l) ((Window *)(l)->l_bottom->l_data)
 
-int   SwapWindows (int, int);
-int   MakeWindow (struct NewWindow *);
-int   RemakeWindow (Window *);
-void  FreeWindow (Window *);
-int   winexec (char **);
-void  FreePseudowin (Window *);
-void  nwin_compose (struct NewWindow *, struct NewWindow *, struct NewWindow *);
-int   DoStartLog (Window *, char *, int);
-int   ReleaseAutoWritelock (Display *, Window *);
-int   ObtainAutoWritelock (Display *, Window *);
-int   OpenDevice(char **, int, int *, char **);
-void  CloseDevice (Window *);
-void  zmodem_abort(Window *, Display *);
-void  WindowDied (Window *, int, int);
-void  ResetWindow (Window *);
+int SwapWindows(int, int);
+int MakeWindow(struct NewWindow *);
+int RemakeWindow(Window *);
+void FreeWindow(Window *);
+int winexec(char **);
+void FreePseudowin(Window *);
+void nwin_compose(struct NewWindow *, struct NewWindow *, struct NewWindow *);
+int DoStartLog(Window *, char *, int);
+int ReleaseAutoWritelock(Display *, Window *);
+int ObtainAutoWritelock(Display *, Window *);
+int OpenDevice(char **, int, int *, char **);
+void CloseDevice(Window *);
+void zmodem_abort(Window *, Display *);
+void WindowDied(Window *, int, int);
+void ResetWindow(Window *);
 Window *GetWindowByNumber(uint16_t);
 #ifndef HAVE_EXECVPE
 #include <unistd.h>
@@ -366,4 +365,4 @@ extern bool VerboseCreate;
 extern const struct LayFuncs WinLf;
 extern struct NewWindow nwin_undef, nwin_default, nwin_options;
 
-#endif /* SCREEN_WINDOW_H */
+#endif				/* SCREEN_WINDOW_H */

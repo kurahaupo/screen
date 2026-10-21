@@ -39,7 +39,7 @@
 #include "encoding.h"
 #include "fileio.h"
 #include "help.h"
-#include "inline.h" /* must follow ansi.h and image.h */
+#include "inline.h"		/* must follow ansi.h and image.h */
 #include "logfile.h"
 #include "mark.h"
 #include "misc.h"
@@ -70,35 +70,35 @@ struct mchar mchar_so = { ' ', A_RV, 0, 0, 0, 0 };
 
 /* Default bell/monitor/silence renditions in ParseAttrColor() encoding. */
 uint64_t renditions[NUM_RENDS] = {
-	((uint64_t)(A_US | A_BD) << 56),	/* bell: ub */
-	((uint64_t)A_BD << 56),		/* monitor: b */
-	((uint64_t)A_US << 56)		/* silence: u */
+	((uint64_t) (A_US | A_BD) << 56),	/* bell: ub */
+	((uint64_t) A_BD << 56),	/* monitor: b */
+	((uint64_t) A_US << 56)	/* silence: u */
 };
 
 /* keep string_t and string_t_string in sync! */
 static char *string_t_string[] = {
-	[NONE]  	= "NONE",
-	[DCS]		= "DCS",	/* Device Control String */
-	[OSC]		= "OSC",	/* Operating System Command */
-	[APC]		= "APC",	/* Application Program Command
-					 *  - used for status change */
-	[PM]    	= "PM",		/* Privacy Message */
-	[AKA]   	= "AKA",	/* Title for current screen */
-	[GM]    	= "GM",		/* Global Message (to every display) */
-	[STATUS]	= "STATUS"	/* User hardstatus line */
+	[NONE] = "NONE",
+	[DCS] = "DCS",		/* Device Control String */
+	[OSC] = "OSC",		/* Operating System Command */
+	[APC] = "APC",		/* Application Program Command
+				 *  - used for status change */
+	[PM] = "PM",		/* Privacy Message */
+	[AKA] = "AKA",		/* Title for current screen */
+	[GM] = "GM",		/* Global Message (to every display) */
+	[STATUS] = "STATUS"	/* User hardstatus line */
 };
 
 /* keep state_t and state_t_string in sync! */
 static char *state_t_string[] = {
-	[LIT]		= "LIT",	/* Literal input */
-	[ESC]		= "ESC",	/* Start of escape sequence */
-	[ASTR]		= "ASTR",	/* Start of control string */
-	[STRESC]	= "STRESC",	/* ESC seen in control string */
-	[CSI]		= "CSI",	/* Reading arguments in "CSI Pn ;... */
-	[PRIN]		= "PRIN",	/* Printer mode */
-	[PRINESC]	= "PRINESC",	/* ESC seen in printer mode */
-	[PRINCSI]	= "PRINCSI",	/* CSI seen in printer mode */
-	[PRIN4]		= "PRIN4"	/* CSI 4 seen in printer mode */
+	[LIT] = "LIT",		/* Literal input */
+	[ESC] = "ESC",		/* Start of escape sequence */
+	[ASTR] = "ASTR",	/* Start of control string */
+	[STRESC] = "STRESC",	/* ESC seen in control string */
+	[CSI] = "CSI",		/* Reading arguments in "CSI Pn ;... */
+	[PRIN] = "PRIN",	/* Printer mode */
+	[PRINESC] = "PRINESC",	/* ESC seen in printer mode */
+	[PRINCSI] = "PRINCSI",	/* CSI seen in printer mode */
+	[PRIN4] = "PRIN4"	/* CSI 4 seen in printer mode */
 };
 
 static void DoESC(Window *, int, int);
@@ -226,7 +226,7 @@ void SetCharsets(Window *win, char *s)
  */
 void WriteString(Window *win, char *buf, size_t len)
 {
-	struct cs_parser * const cs = &win->w_cs;
+	struct cs_parser *const cs = &win->w_cs;
 
 	if (len == 0)
 		return;
@@ -258,7 +258,7 @@ void WriteString(Window *win, char *buf, size_t len)
 				}
 			}
 
- tryagain:
+		      tryagain:
 			switch (win->w_state) {
 			case PRIN:
 				switch (c) {
@@ -380,9 +380,11 @@ void WriteString(Window *win, char *buf, size_t len)
 				case 'k':
 					StringStart(win, AKA);
 					break;
+
 				C0ControlCases(win,
 					win->w_state = LIT;
 				);
+
 				default:
 					if (c >= ' ' && c <= '/') {
 						if (win->w_intermediate) {
@@ -434,7 +436,7 @@ void WriteString(Window *win, char *buf, size_t len)
 					break;
 				C0ControlCases(win,);
 				default:
-					if (c >= '@' && c <= '~') {		// (c & 0xc0) == 0x40 && c != 0x7f
+					if (c >= '@' && c <= '~') {	// (c & 0xc0) == 0x40 && c != 0x7f
 						if (cs->num_params < MAX_CS_PARAMS)
 							cs->num_params++;
 						DoControlSequence(win, c, win->w_intermediate);
@@ -626,8 +628,7 @@ void WriteString(Window *win, char *buf, size_t len)
 					if (win->w_insert) {
 						save_mline(&win->w_mlines[win->w_y], win->w_width);
 						MInsChar(win, &win->w_rend, win->w_x, win->w_y);
-						LInsChar(&win->w_layer, &win->w_rend, win->w_x, win->w_y,
-							 &mline_old);
+						LInsChar(&win->w_layer, &win->w_rend, win->w_x, win->w_y, &mline_old);
 						win->w_x++;
 					} else {
 						MPutChar(win, &win->w_rend, win->w_x, win->w_y);
@@ -640,8 +641,7 @@ void WriteString(Window *win, char *buf, size_t len)
 					if (win->w_wrap)
 						win->w_x++;
 				} else {
-					MWrapChar(win, &win->w_rend, win->w_y, win->w_top, win->w_bot,
-						  win->w_insert);
+					MWrapChar(win, &win->w_rend, win->w_y, win->w_top, win->w_bot, win->w_insert);
 					LWrapChar(&win->w_layer, &win->w_rend, win->w_y, win->w_top, win->w_bot,
 						  win->w_insert);
 					if (win->w_y != win->w_bot && win->w_y != win->w_height - 1)
@@ -818,12 +818,12 @@ static void DoESC(Window *win, int c, int intermediate)
 
 static void DoControlSequence(Window *win, int c, int intermediate)
 {
-	struct cs_parser * const cs = &win->w_cs;
+	struct cs_parser *const cs = &win->w_cs;
 	int a1 = cs->params[0], a2 = cs->params[1];
 
 #ifndef ALLOW_INVALID_COLON_DELIMITER
 	/* sub-args only valid for SelectRendition */
-	if (cs->has_colons && !( c == 'm' && !intermediate ))
+	if (cs->has_colons && !(c == 'm' && !intermediate))
 		return;
 #endif
 
@@ -1072,11 +1072,9 @@ static void DoControlSequence(Window *win, int c, int intermediate)
 					if (win->w_encoding)
 						break;
 					win->w_charsets[0] =
-					win->w_charsets[1] =
-					win->w_charsets[2] =
-					win->w_charsets[3] =
-					win->w_FontL =
-					win->w_FontR = ASCII;
+					    win->w_charsets[1] =
+					    win->w_charsets[2] =
+					    win->w_charsets[3] = win->w_FontL = win->w_FontR = ASCII;
 					win->w_Charset = 0;
 					win->w_CharsetR = 2;
 					win->w_ss = 0;
@@ -1088,7 +1086,7 @@ static void DoControlSequence(Window *win, int c, int intermediate)
 				win->w_y = 0;
 				WChangeSize(win, i ? Z0width : Z1width, win->w_height);
 				break;
-				/* case 4:        SCLM: scrolling mode */
+		     /*	case 4:        SCLM: scrolling mode */
 			case 5:	/* SCNM: screen mode */
 				if (i != win->w_revvid)
 					WReverseVideo(win, i);
@@ -1326,9 +1324,9 @@ static void PrintStart(Window *win)
 
 	/* find us a nice display to print on, fore preferred */
 	display = win->w_lastdisp;
-	if (!(display && win== D_fore && (printcmd || D_PO)))
+	if (!(display && win == D_fore && (printcmd || D_PO)))
 		for (display = displays; display; display = display->d_next)
-			if (win== D_fore && (printcmd || D_PO))
+			if (win == D_fore && (printcmd || D_PO))
 				break;
 	if (!display) {
 		Canvas *cv;
@@ -1668,16 +1666,16 @@ static void CursorLeft(Window *win, int n)
 
 static void ASetMode(Window *win, bool on)
 {
-	struct cs_parser * const cs = &win->w_cs;
+	struct cs_parser *const cs = &win->w_cs;
 
 	for (size_t i = 0; i < cs->num_params; ++i) {
 		switch (cs->params[i]) {
-			/* case 2:            KAM: Lock keyboard */
+	     /*	case 2:            KAM: Lock keyboard */
 		case 4:	/* IRM: Insert mode */
 			win->w_insert = on;
 			LAY_DISPLAYS(&win->w_layer, InsertMode(on));
 			break;
-			/* case 12:           SRM: Echo mode on */
+	     /*	case 12:           SRM: Echo mode on */
 		case 20:	/* LNM: Linefeed mode */
 			win->w_autolf = on;
 			break;
@@ -1709,52 +1707,53 @@ static void ASetMode(Window *win, bool on)
 
 static enum attr_mask_e rendlist[][30] = {
 	[SGR3_STRICT] = {	/* strict mode */
-		[0]  = ~A__MASK,
-		[1]  = A_BD,
-		[2]  = A_DI,
-		[3]  = A_IT,
-		[4]  = A_US,
-		[5]  = A_BL,
-		[6]  = A_FB,
-		[7]  = A_RV,
-		[8]  = A_HI,
-		[9]  = A_ST,
-		[22] = ~(A_BD | A_DI),
-		[23] = ~A_IT,
-		[24] = ~A_US,
-		[25] = ~(A_BL | A_FB),
-		[26] = ~(A_BL | A_FB),
-		[27] = ~A_RV,
-		[28] = ~A_HI,
-		[29] = ~A_ST,
-	},
+			 [0] = ~A__MASK,
+			 [1] = A_BD,
+			 [2] = A_DI,
+			 [3] = A_IT,
+			 [4] = A_US,
+			 [5] = A_BL,
+			 [6] = A_FB,
+			 [7] = A_RV,
+			 [8] = A_HI,
+			 [9] = A_ST,
+			 [22] = ~(A_BD | A_DI),
+			 [23] = ~A_IT,
+			 [24] = ~A_US,
+			 [25] = ~(A_BL | A_FB),
+			 [26] = ~(A_BL | A_FB),
+			 [27] = ~A_RV,
+			 [28] = ~A_HI,
+			 [29] = ~A_ST,
+			  },
 	[SGR3_LEGACY] = {	/* legacy mode */
-		[0]  = ~A__MASK,
-		[1]  = A_BD,
-		[2]  = A_DI,
-		[3]  = A_SO,
-		[4]  = A_US,
-		[5]  = A_BL,
-		[6]  = A_FB,
-		[7]  = A_RV,
-		[8]  = A_HI,
-		[9]  = A_ST,
-		[22] = ~(A_BD | A_DI),
-		[23] = ~A_SO,
-		[24] = ~A_US,
-		[25] = ~(A_BL | A_FB),
-		[26] = ~(A_BL | A_FB),
-		[27] = ~A_RV,
-		[28] = ~A_HI,
-		[29] = ~A_ST,
+			 [0]  = ~A__MASK,
+			 [1]  = A_BD,
+			 [2]  = A_DI,
+			 [3]  = A_SO,
+			 [4]  = A_US,
+			 [5]  = A_BL,
+			 [6]  = A_FB,
+			 [7]  = A_RV,
+			 [8]  = A_HI,
+			 [9]  = A_ST,
+			 [22] = ~(A_BD | A_DI),
+			 [23] = ~A_SO,
+			 [24] = ~A_US,
+			 [25] = ~(A_BL | A_FB),
+			 [26] = ~(A_BL | A_FB),
+			 [27] = ~A_RV,
+			 [28] = ~A_HI,
+			 [29] = ~A_ST,
 	},
 };
 
-const char * sgr3_mode_desc(sgr3_mode_t m){
-	static const char * const desc[] = {
+const char *sgr3_mode_desc(sgr3_mode_t m)
+{
+	static const char *const desc[] = {
 		[SGR3_STRICT] = "strict",
 		[SGR3_LEGACY] = "legacy",
-		[SGR3_UNSET]  = "(unset)",
+		[SGR3_UNSET] = "(unset)",
 	};
 	if (m >= 0 && m < ARRAY_SIZE(desc) && desc[m])
 		return desc[m];
@@ -1763,7 +1762,8 @@ const char * sgr3_mode_desc(sgr3_mode_t m){
 
 static sgr3_mode_t rend_mode = 1;
 
-void ConfigSGR3Mode(sgr3_mode_t v) {
+void ConfigSGR3Mode(sgr3_mode_t v)
+{
 	if (v < ARRAY_SIZE(rendlist))
 		rend_mode = v;
 }
@@ -1773,18 +1773,29 @@ static void SelectRendition(Window *win)
 	int attr = win->w_rend.attr;
 	int colorbg = win->w_rend.colorbg;
 	int colorfg = win->w_rend.colorfg;
-	struct cs_parser * const cs = &win->w_cs;
+	struct cs_parser *const cs = &win->w_cs;
 
 	for (size_t i = 0, k; i < cs->num_params; i = k) {
 		cs_param_t j = cs->params[i];
 
-		for (k = i + 1; k < cs->num_params && cs->seps[k - 1] == ':' ; ++k) {}
+		/* Take sub-parameters as a unit */
+		for (k = i + 1; k < cs->num_params && cs->seps[k - 1] == ':'; ++k) {}
 
 		int *target_color = NULL;
 		bool bright = 0;
-		switch (j/10) {
-			case 9:  bright = 1; /*FALLTHRU*/ case 3: target_color = &colorfg; break;
-			case 10: bright = 1; /*FALLTHRU*/ case 4: target_color = &colorbg; break;
+		switch (j / 10) {
+		case 9:
+			bright = 1;
+			/*FALLTHRU*/
+		case 3:
+			target_color = &colorfg;
+			break;
+		case 10:
+			bright = 1;
+			/*FALLTHRU*/
+		case 4:
+			target_color = &colorbg;
+			break;
 		}
 		if (target_color) {
 			int cm = j % 10;
@@ -1811,12 +1822,11 @@ static void SelectRendition(Window *win)
 				/* not enough params left */
 				break;
 
-			cs_param_t
-				cm2 = cs->params[i + 1];
+			cs_param_t cm2 = cs->params[i + 1];
 
 			/* Indexed colour space aka 256 colours; example control sequences:
-			 *  \e[48:5:12m			Standard
-			 *  \e[48;5;12m			Customary
+			 *  \e[48:5:12m                 Standard
+			 *  \e[48;5;12m                 Customary
 			 * where 12 is usually the palette element for bright blue
 			 */
 			if (cm2 == 5) {
@@ -1839,9 +1849,9 @@ static void SelectRendition(Window *win)
 			}
 
 			/* Truecolor (24bit) colour space; example control sequences:
-			 *  \e[48:2:0:12:13:14m		Standard
-			 *  \e[48;2;12;13;14m		Customary
-			 *  \e[48:2:12:13:14m		Fix for botched clients
+			 *  \e[48:2:0:12:13:14m                Standard
+			 *  \e[48;2;12;13;14m          Customary
+			 *  \e[48:2:12:13:14m          Fix for botched clients
 			 * which sets red=12, green=13, blue=14, color-space=0/empty (application)
 			 * giving very dark gun-metal gray
 			 */
@@ -1858,12 +1868,9 @@ static void SelectRendition(Window *win)
 					/* not enough params left */
 					break;
 
-				cs_param_t
-					r = cs->params[i + 2],
-					g = cs->params[i + 3],
-					b = cs->params[i + 4];
+				cs_param_t r = cs->params[i + 2], g = cs->params[i + 3], b = cs->params[i + 4];
 
-				if ( (r | g | b) & ~255U )
+				if ((r | g | b) & ~255U)
 					continue;
 				*target_color = 0x04000000 | r << 16 | g << 8 | b;
 				continue;
@@ -1965,7 +1972,7 @@ static void FindAKA(Window *win)
 	int y;
 
 	y = (win->w_autoaka > 0 && win->w_autoaka <= win->w_height) ? win->w_autoaka - 1 : win->w_y;
- try_line:
+try_line:
 	cp = line = win->w_mlines[y].image;
 	if (win->w_autoaka > 0 && *win->w_akabuf != '\0') {
 		for (;;) {
@@ -2172,7 +2179,7 @@ static void MScrollV(Window *win, int n, int ys, int ye, int bce)
 		if (ye - ys + 1 < n)
 			n = ye - ys + 1;
 		if (n > 256) {
-			MScrollV(win, - (n - 256), ys, ye, bce);
+			MScrollV(win, -(n - 256), ys, ye, bce);
 			n = 256;
 		}
 
@@ -2500,4 +2507,3 @@ static void WChangeSize(Window *win, int w, int h)
 			Redisplay(0);
 	}
 }
-

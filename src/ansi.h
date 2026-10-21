@@ -87,19 +87,19 @@ typedef enum state_e {
 	ESC,				/* Start of escape sequence */
 	ASTR,				/* Start of control string */
 	STRESC,				/* ESC seen in control string */
-	CSI,				/* Reading arguments in "CSI Pn ;...*/
+	CSI,				/* Reading arguments in "CSI Pn ;... */
 	PRIN,				/* Printer mode */
 	PRINESC,			/* ESC seen in printer mode */
 	PRINCSI,			/* CSI seen in printer mode */
 	PRIN4				/* CSI 4 seen in printer mode */
 } state_t;
 
-#define MAX_CS_PARAMS	64		/* ISO-6429 specifies 16, and recommends
-					 * silently ignoring any more, but we
-					 * need more to correctly support
-					 * colon-separated sub-parameters;
-					 * furthermore the ISO limit is out of
-					 * step with common usage. */
+#define MAX_CS_PARAMS	64	/* ISO-6429 specifies 16, and recommends
+				 * silently ignoring any more, but we
+				 * need more to correctly support
+				 * colon-separated sub-parameters;
+				 * furthermore the ISO limit is out of
+				 * step with common usage. */
 
 /* keep string_t and string_t_string in sync! */
 typedef enum string_e {
@@ -167,8 +167,8 @@ typedef enum move_e {
 
 #define UTF8		8
 
-#define UCS_REPL	0xfffd  /* character for illegal codes */
-#define UCS_REPL_DW	0xff1f  /* character for illegal codes */
+#define UCS_REPL	0xfffd	/* character for illegal codes */
+#define UCS_REPL_DW	0xff1f	/* character for illegal codes */
 #define UCS_HIDDEN	0xffff
 
 typedef struct Window Window;
@@ -178,20 +178,20 @@ typedef enum sgr3_mode_e {
 	SGR3_LEGACY = 1,
 	SGR3_UNSET = 2,
 } sgr3_mode_t;
-void  ConfigSGR3Mode(sgr3_mode_t);
-void  ConfigSGR3ModeDef(sgr3_mode_t);
-const char * sgr3_mode_desc(sgr3_mode_t);
+void ConfigSGR3Mode(sgr3_mode_t);
+void ConfigSGR3ModeDef(sgr3_mode_t);
+const char *sgr3_mode_desc(sgr3_mode_t);
 
-void  ResetAnsiState (Window *);
-void  ResetCharsets (Window *);
-void  WriteString (Window *, char *, size_t);
-void  ChangeAKA (Window *, char *, size_t);
-void  SetCharsets (Window *, char *);
-int   GetAnsiStatus (Window *, char *);
-void  WNewAutoFlow (Window *, int);
-void  WBell (Window *, bool);
-void  WMsg (Window *, int, char *);
-int   MFindUsedLine (Window *, int, int);
+void ResetAnsiState(Window *);
+void ResetCharsets(Window *);
+void WriteString(Window *, char *, size_t);
+void ChangeAKA(Window *, char *, size_t);
+void SetCharsets(Window *, char *);
+int GetAnsiStatus(Window *, char *);
+void WNewAutoFlow(Window *, int);
+void WBell(Window *, bool);
+void WMsg(Window *, int, char *);
+int MFindUsedLine(Window *, int, int);
 
 /* global variables */
 
@@ -217,4 +217,4 @@ extern struct mchar mchar_so;
 extern struct mchar mchar_blank;
 extern struct mchar mchar_null;
 
-#endif /* SCREEN_ANSI_H */
+#endif				/* SCREEN_ANSI_H */

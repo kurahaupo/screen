@@ -78,42 +78,42 @@ extern const long double randoml[1000];
 /* GNU supports malloc hooks; otherwise, assertions will be skipped (but calls
  * will still be run for side-effects) */
 #ifdef _GNU_SOURCE
-	extern size_t _mallocmock_malloc_size;
-	extern size_t _mallocmock_realloc_size;
-	extern bool   _mallocmock_fail;
-	void mallocmock_reset();
+extern size_t _mallocmock_malloc_size;
+extern size_t _mallocmock_realloc_size;
+extern bool _mallocmock_fail;
+void mallocmock_reset();
 
-	#define ASSERT_ALLOC(type, cmp, x) \
+#define ASSERT_ALLOC(type, cmp, x) \
 		MALLOC_RESET_COUNT(); x; ASSERT(_mallocmock_##type##_size cmp)
-	#define ASSERT_MALLOC(cmp, x) ASSERT_ALLOC(malloc, cmp, x);
-	#define ASSERT_REALLOC(cmp, x) ASSERT_ALLOC(realloc, cmp, x);
-	#define MALLOC_RESET_COUNT() mallocmock_reset()
+#define ASSERT_MALLOC(cmp, x) ASSERT_ALLOC(malloc, cmp, x);
+#define ASSERT_REALLOC(cmp, x) ASSERT_ALLOC(realloc, cmp, x);
+#define MALLOC_RESET_COUNT() mallocmock_reset()
 
-	#define ASSERT_NOALLOC(x) \
+#define ASSERT_NOALLOC(x) \
 		MALLOC_RESET_COUNT(); \
 		x; \
 		ASSERT(_mallocmock_malloc_size == 0); \
 		ASSERT(_mallocmock_realloc_size == 0);
 
 	/* Use only with ASSERT_GCC */
-	#define FAILLOC(x) ({ \
+#define FAILLOC(x) ({ \
 		_mallocmock_fail = true; \
 		__typeof__ (x) __ret = (x); \
 		_mallocmock_fail = false; \
 		__ret; \
 	})
-	#define FAILLOC_VOID(x) \
+#define FAILLOC_VOID(x) \
 		_mallocmock_fail = true; \
 		x; \
 		_mallocmock_fail = false;
 
-	#define ASSERT_GCC(x) ASSERT(x)
+#define ASSERT_GCC(x) ASSERT(x)
 #else
-	#define ASSERT_MALLOC(cmp, x) x
-	#define ASSERT_REALLOC(cmp, x) x
-	#define ASSERT_NOALLOC(cmp, x) x
-	#define MALLOC_RESET_COUNT()
-	#define FAILLOC(x) /* no portable equivalent! */
-	#define FAILLOC_VOID(x)  /* no portable equivalent! */
-	#define ASSERT_GCC(x)
+#define ASSERT_MALLOC(cmp, x) x
+#define ASSERT_REALLOC(cmp, x) x
+#define ASSERT_NOALLOC(cmp, x) x
+#define MALLOC_RESET_COUNT()
+#define FAILLOC(x)		/* no portable equivalent! */
+#define FAILLOC_VOID(x)		/* no portable equivalent! */
+#define ASSERT_GCC(x)
 #endif
