@@ -6340,7 +6340,7 @@ static void suFin(char *buf, size_t len, void *data)
 		l = ARRAY_SIZE(i->pw2) - 1;
 	}
 	if (buf && len)
-		strncpy(p, buf, 1 + ((l < len) ? l : len));
+		strncpy(p, buf, 1 + ((l < len) ? l : len));	//TODO: verify this logic
 	if (!*i->name)
 		Input("Screen User: ", ARRAY_SIZE(i->name) - 1, INP_COOKED, suFin, (char *)i, 0);
 	else if (!*i->pw1)
