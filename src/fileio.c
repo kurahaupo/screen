@@ -341,7 +341,7 @@ void WriteFile(struct acluser *user, char *fn, int dump)
 	case DUMP_TERMCAP:
 		if (fn == 0) {
 			i = SockName - SockPath;
-			if (i > (int)sizeof(fnbuf) - 9)
+			if ((size_t) i + 9 > sizeof fnbuf)
 				i = 0;
 			strncpy(fnbuf, SockPath, i);
 			strncpy(fnbuf + i, ".termcap", 9);

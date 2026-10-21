@@ -158,7 +158,7 @@ struct display *MakeDisplay(char *uname, char *utty, char *term, int fd, int pid
 	if (!*(u = FindUserPtr(uname)) && UserAdd(uname, (char *)0, u))
 		return 0;	/* could not find or add user */
 
-	if ((display = calloc(1, sizeof(*display))) == 0)
+	if ((display = calloc(1, sizeof *display)) == 0)
 		return 0;
 	display->d_next = displays;
 	displays = display;
@@ -220,10 +220,8 @@ struct display *MakeDisplay(char *uname, char *utty, char *term, int fd, int pid
 #endif
 	debug("New displays ospeed = %d\n", D_dospeed);
 
-	strncpy(D_usertty, utty, sizeof(D_usertty) - 1);
-	D_usertty[sizeof(D_usertty) - 1] = 0;
-	strncpy(D_termname, term, sizeof(D_termname) - 1);
-	D_termname[sizeof(D_termname) - 1] = 0;
+	snprintf(D_usertty, sizeof D_usertty, "%s", utty);
+	snprintf(D_termname, sizeof D_termname, "%s", term);
 	D_user = *u;
 	D_processinput = ProcessInput;
 	D_mousetrack = defmousetrack;
@@ -2749,7 +2747,9 @@ static void disp_readev_fn(struct event *ev, char *data)
 		}
 	}
 	if (D_encoding != (D_forecv ? D_forecv->c_layer->l_encoding : 0)) {
-		int i, j, c, enc;
+		size_t i, j;
+		int c;
+		int enc;
 		char buf2[IOSIZE * 2 + 10];
 		enc = D_forecv ? D_forecv->c_layer->l_encoding : 0;
 		for (i = j = 0; i < size; i++) {
@@ -2765,7 +2765,7 @@ static void disp_readev_fn(struct event *ev, char *data)
 				j += EncodeChar(buf2 + j, -1, enc, &font);
 			} else
 				j += EncodeChar(buf2 + j, c, enc, 0);
-			if (j > (int)sizeof(buf2) - 10)	/* just in case... */
+			if (j + 10 > sizeof buf2)	/* just in case... */
 				break;
 		}
 		(*D_processinput) (buf2, j);
@@ -2933,9 +2933,7 @@ void RunBlanker(char **cmdv)
 #endif
 	char **np;
 
-	strncpy(termname, "TERM=", 6);
-	strncpy(termname + 5, D_termname, sizeof(termname) - 6);
-	termname[sizeof(termname) - 1] = 0;
+	snprintf(termname, sizeof termname, "TERM=%s", D_termname);
 	KillBlanker();
 	D_blankerpid = -1;
 	if ((D_blankerev.fd = OpenPTY(&m)) == -1) {

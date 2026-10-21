@@ -356,15 +356,14 @@ int enter_window_name_mode = 0;
 
 void InitKeytab()
 {
-	unsigned int i;
 	char *argarr[2];
 
-	for (i = 0; i < sizeof(ktab) / sizeof(*ktab); i++) {
+	for (size_t i = 0; i < ARRAY_SIZE(ktab); i++) {
 		ktab[i].nr = RC_ILLEGAL;
 		ktab[i].args = noargs;
 		ktab[i].argl = 0;
 	}
-	for (i = 0; i < KMAP_KEYS + KMAP_AKEYS; i++) {
+	for (size_t i = 0; i < KMAP_KEYS + KMAP_AKEYS; i++) {
 		umtab[i].nr = RC_ILLEGAL;
 		umtab[i].args = noargs;
 		umtab[i].argl = 0;
@@ -376,7 +375,7 @@ void InitKeytab()
 		mmtab[i].argl = 0;
 	}
 	argarr[1] = 0;
-	for (i = 0; i < NKMAPDEF; i++) {
+	for (size_t i = 0; i < NKMAPDEF; i++) {
 		if (i + KMAPDEFSTART < T_CAPS)
 			continue;
 		if (i + KMAPDEFSTART >= T_CAPS + KMAP_KEYS)
@@ -386,7 +385,7 @@ void InitKeytab()
 		argarr[0] = kmapdef[i];
 		SaveAction(dmtab + i + (KMAPDEFSTART - T_CAPS), RC_STUFF, argarr, 0);
 	}
-	for (i = 0; i < NKMAPADEF; i++) {
+	for (size_t i = 0; i < NKMAPADEF; i++) {
 		if (i + KMAPADEFSTART < T_CURSOR)
 			continue;
 		if (i + KMAPADEFSTART >= T_CURSOR + KMAP_AKEYS)
@@ -396,7 +395,7 @@ void InitKeytab()
 		argarr[0] = kmapadef[i];
 		SaveAction(dmtab + i + (KMAPADEFSTART - T_CURSOR + KMAP_KEYS), RC_STUFF, argarr, 0);
 	}
-	for (i = 0; i < NKMAPMDEF; i++) {
+	for (size_t i = 0; i < NKMAPMDEF; i++) {
 		if (i + KMAPMDEFSTART < T_CAPS)
 			continue;
 		if (i + KMAPMDEFSTART >= T_CAPS + KMAP_KEYS)
@@ -519,7 +518,6 @@ void InitKeytab()
 static struct action *FindKtab(char *class, int create)
 {
 	struct kclass *kp, **kpp;
-	int i;
 
 	if (class == 0)
 		return ktab;
@@ -529,7 +527,7 @@ static struct action *FindKtab(char *class, int create)
 	if (kp == 0) {
 		if (!create)
 			return 0;
-		if (strlen(class) > 80) {
+		if (!memchr(class, 0, 81)) {	/*strlen ≥ 81*/
 			Msg(0, "Command class name too long.");
 			return 0;
 		}
@@ -539,7 +537,7 @@ static struct action *FindKtab(char *class, int create)
 			return 0;
 		}
 		kp->name = SaveStr(class);
-		for (i = 0; i < (int)(sizeof(kp->ktab) / sizeof(*kp->ktab)); i++) {
+		for (size_t i = 0; i < ARRAY_SIZE(kp->ktab); i++) {
 			kp->ktab[i].nr = RC_ILLEGAL;
 			kp->ktab[i].args = noargs;
 			kp->ktab[i].argl = 0;
@@ -1143,9 +1141,7 @@ static void StuffFin(char *buf, int len, char *data)
 		break;
 	case RC_UNBINDALL:
 		{
-			unsigned int i;
-
-			for (i = 0; i < sizeof(ktab) / sizeof(*ktab); i++)
+			for (size_t i = 0; i < ARRAY_SIZE(ktab); i++)
 				ClearAction(&ktab[i]);
 			OutputMsg(0, "Unbound all keys.");
 			break;
@@ -1535,24 +1531,16 @@ static void StuffFin(char *buf, int len, char *data)
 			static char *types[] = { "TIOCSBRK", "TCSBRK", "tcsendbreak", NULL };
 
 			if (*args) {
+				size_t j = ~0U;
 				if (ParseNum(act, &n))
-					for (n = 0; n < (int)(sizeof(types) / sizeof(*types)); n++) {
-						for (i = 0; i < 4; i++) {
-							ch = args[0][i];
-							if (ch >= 'a' && ch <= 'z')
-								ch -= 'a' - 'A';
-							if (ch != types[n][i] && (ch + ('a' - 'A')) != types[n][i])
-								break;
-						}
-						if (i == 4)
-							break;
-					}
-				if (n < 0 || n >= (int)(sizeof(types) / sizeof(*types)))
-					OutputMsg(0, "%s invalid, chose one of %s, %s or %s", *args, types[0], types[1],
-						  types[2]);
+					/* …casecmp requires setlocale(LC_COLLATE, "") */
+					for (j = 0; j < ARRAY_SIZE(types) && strncasecmp(args[0], types[j], 4); j++) ;
+				if (j >= ARRAY_SIZE(types))
+					OutputMsg(0, "%s invalid, chose one of %s, %s or %s", *args,
+						  types[0], types[1], types[2]);
 				else {
-					breaktype = n;
-					OutputMsg(0, "breaktype set to (%d) %s", n, types[n]);
+					breaktype = j;
+					OutputMsg(0, "breaktype set to (%zu) %s", j, types[j]);
 				}
 			}
 		}
@@ -2207,7 +2195,7 @@ static void StuffFin(char *buf, int len, char *data)
 	case RC_BELL_MSG:
 		if (*args == 0) {
 			char buf[256];
-			AddXChars(buf, sizeof(buf), BellString);
+			AddXChars(buf, sizeof buf, BellString);
 			OutputMsg(0, "bell_msg is '%s'", buf);
 			break;
 		}
@@ -2227,7 +2215,7 @@ static void StuffFin(char *buf, int len, char *data)
 	case RC_POW_DETACH_MSG:
 		if (*args == 0) {
 			char buf[256];
-			AddXChars(buf, sizeof(buf), PowDetachString);
+			AddXChars(buf, sizeof buf, PowDetachString);
 			OutputMsg(0, "pow_detach_msg is '%s'", buf);
 			break;
 		}
@@ -2342,7 +2330,7 @@ static void StuffFin(char *buf, int len, char *data)
 			else if (!strcmp(args[0], "string")) {
 				if (!args[1]) {
 					char buf[256];
-					AddXChars(buf, sizeof(buf), hstatusstring);
+					AddXChars(buf, sizeof buf, hstatusstring);
 					OutputMsg(0, "hardstatus string is '%s'", buf);
 					break;
 				}
@@ -2395,7 +2383,7 @@ static void StuffFin(char *buf, int len, char *data)
 		} else if (strcmp(args[0], "string") == 0) {
 			if (!args[1]) {
 				char buf[256];
-				AddXChars(buf, sizeof(buf), captionstring);
+				AddXChars(buf, sizeof buf, captionstring);
 				OutputMsg(0, "caption string is '%s'", buf);
 				break;
 			}
@@ -4179,7 +4167,7 @@ static int ParseNum1000(struct action *act, int *var)
 		while (dig++ < 4)
 			i *= 10;
 	if (i < 0)
-		i = (int)((unsigned int)~0 >> 1);
+		i = (int)(~0U >> 1);
 	debug("ParseNum1000 got %d\n", i);
 	*var = i;
 	return 0;
@@ -4893,7 +4881,7 @@ static void Colonfin(char *buf, int len, char *data)
 		return;
 
 	len = strlen(buf) + 1;
-	if (len > (int)sizeof(mbuf))
+	if ((size_t)len > sizeof(mbuf))
 		RcLine(buf, len);
 	else {
 		memmove(mbuf, buf, len);
@@ -7262,7 +7250,7 @@ static void DoCommandBreaktype(struct action *act)
 
 	if (*args) {
 		if (ParseNum(act, &n))
-			for (n = 0; n < (int)(ARRAY_SIZE(types)); n++) {
+			for (n = 0; (size_t) n < ARRAY_SIZE(types); n++) {
 				int i;
 				for (i = 0; i < 4; i++) {
 					ch = args[0][i];
@@ -7274,7 +7262,7 @@ static void DoCommandBreaktype(struct action *act)
 				if (i == 4)
 					break;
 			}
-		if (n < 0 || n >= (int)(ARRAY_SIZE(types)))
+		if (n < 0 || (size_t) n >= ARRAY_SIZE(types))
 			OutputMsg(0, "%s invalid, chose one of %s, %s or %s", *args, types[0], types[1],
 				  types[2]);
 		else {
@@ -8200,7 +8188,7 @@ static void DoCommandLogfile(struct action *act)
 		if (ParseSaveStr(act, &screenlogfile))
 			return;
 		if (fore && fore->w_log)
-			if (DoStartLog(fore, buf, ARRAY_SIZE(buf)))
+			if (DoStartLog(fore, buf, sizeof buf))
 				OutputMsg(0, "Error opening logfile \"%s\"", buf);
 		if (!msgok)
 			return;
@@ -8309,7 +8297,7 @@ static void DoCommandBell(struct action *act)
 
 	if (*args == NULL) {
 		char buf[256];
-		AddXChars(buf, ARRAY_SIZE(buf), BellString);
+		AddXChars(buf, sizeof buf, BellString);
 		OutputMsg(0, "bell_msg is '%s'", buf);
 		return;
 	}
@@ -8340,7 +8328,7 @@ static void DoCommandPow_detach_msg(struct action *act)
 
 	if (*args == NULL) {
 		char buf[256];
-		AddXChars(buf, ARRAY_SIZE(buf), PowDetachString);
+		AddXChars(buf, sizeof buf, PowDetachString);
 		OutputMsg(0, "pow_detach_msg is '%s'", buf);
 		return;
 	}
@@ -8506,7 +8494,7 @@ static void DoCommandHardstatus(struct action *act)
 		else if (!strcmp(args[0], "string")) {
 			if (!args[1]) {
 				char buf[256];
-				AddXChars(buf, ARRAY_SIZE(buf), hstatusstring);
+				AddXChars(buf, sizeof buf, hstatusstring);
 				OutputMsg(0, "hardstatus string is '%s'", buf);
 				return;
 			}
@@ -8600,7 +8588,7 @@ static void DoCommandCaption(struct action *act)
 	} else if (strcmp(args[0], "string") == 0) {
 		if (!args[1]) {
 			char buf[256];
-			AddXChars(buf, ARRAY_SIZE(buf), captionstring);
+			AddXChars(buf, sizeof buf, captionstring);
 			OutputMsg(0, "caption string is '%s'", buf);
 			return;
 		}
@@ -8900,7 +8888,7 @@ static void DoCommandSessionname(struct action *act)
 			OutputMsg(errno, "%s: failed to rename(%s, %s)", rc_name, SocketPath, buf);
 			return;
 		}
-		strncpy(SocketPath, buf, ARRAY_SIZE(SocketPath));
+		strncpy(SocketPath, buf, sizeof SocketPath);
 		MakeNewEnv();
 		WindowChanged(NULL, WINESC_SESS_NAME);
 	}
@@ -8988,7 +8976,7 @@ static void DoCommandVbell_msg(struct action *act)
 
 	if (*args == NULL) {
 		char buf[256];
-		AddXChars(buf, ARRAY_SIZE(buf), VisualBellString);
+		AddXChars(buf, sizeof buf, VisualBellString);
 		OutputMsg(0, "vbell_msg is '%s'", buf);
 		return;
 	}
@@ -9586,7 +9574,7 @@ static void DoCommandDefhstatus(struct action *act)
 	if (*args == NULL) {
 		char buf[256] = { 0 };
 		if (nwin_default.hstatus)
-			AddXChars(buf, ARRAY_SIZE(buf), nwin_default.hstatus);
+			AddXChars(buf, sizeof buf, nwin_default.hstatus);
 		OutputMsg(0, "default hstatus is '%s'", buf);
 		return;
 	}
@@ -9615,7 +9603,7 @@ static void DoCommandDefcharset(struct action *act)
 	if (*args == NULL) {
 		char buf[256] = { 0 };
 		if (nwin_default.charset)
-			AddXChars(buf, ARRAY_SIZE(buf), nwin_default.charset);
+			AddXChars(buf, sizeof buf, nwin_default.charset);
 		OutputMsg(0, "default charset is '%s'", buf);
 		return;
 	}
@@ -9642,7 +9630,7 @@ static void DoCommandCharset(struct action *act)
 	if (*args == NULL) {
 		char buf[256] = { 0 };
 		if (nwin_default.charset)
-			AddXChars(buf, ARRAY_SIZE(buf), nwin_default.charset);
+			AddXChars(buf, sizeof buf, nwin_default.charset);
 		OutputMsg(0, "default charset is '%s'", buf);
 		return;
 	}
@@ -9937,18 +9925,18 @@ static void DoCommandBlankerprg(struct action *act)
 	if (!args[0]) {
 		if (blankerprg) {
 			char path[MAXPATHLEN];
-			char *p = path, **pp;
-			for (pp = blankerprg; *pp; pp++)
-				p += snprintf(p, ARRAY_SIZE(path) - (p - path) - 1, "%s ", *pp);
-			*(p - 1) = '\0';
+			char *p = path;
+			for (char **pp = blankerprg; *pp; pp++)
+				p += snprintf(p, (&path)[1] - p, "%s ", *pp);
+			if (p > path)
+				p[-1] = '\0';
 			OutputMsg(0, "blankerprg: %s", path);
 		} else
 			OutputMsg(0, "No blankerprg set.");
 		return;
 	}
 	if (blankerprg) {
-		char **pp;
-		for (pp = blankerprg; *pp; pp++)
+		for (char **pp = blankerprg; *pp; pp++)
 			free(*pp);
 		free(blankerprg);
 		blankerprg = NULL;
