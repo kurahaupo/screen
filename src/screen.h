@@ -67,7 +67,6 @@ struct mode {
 #endif
 };
 
-
 #include "ansi.h"
 #include "image.h"
 #include "layer.h"
