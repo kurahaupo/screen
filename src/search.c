@@ -284,9 +284,14 @@ static void is_process(char *p, size_t len, void *data)
 	if (pos >= 0) {
 		x = pos % flayer->l_width;
 		y = pos / flayer->l_width;
-		LAY_CALL_UP(LayRedisplayLine(INPUTLINE, 0, flayer->l_width - 1, 0); revto(x, y);
-			    if (W2D(markdata->cy) == INPUTLINE)
-			    revto_line(markdata->cx, markdata->cy, INPUTLINE > 0 ? INPUTLINE - 1 : 1);) ;
+		LAY_CALL_UP_START();
+		{
+			LayRedisplayLine(INPUTLINE, 0, flayer->l_width - 1, 0);
+			revto(x, y);
+			if (W2D(markdata->cy) == INPUTLINE)
+				revto_line(markdata->cx, markdata->cy, INPUTLINE > 0 ? INPUTLINE - 1 : 1);
+		}
+		LAY_CALL_UP_END();
 	}
 	if (*p)
 		inp_setprompt(isprompts[markdata->isdir + (pos < 0) + 1], markdata->isstrl ? markdata->isstr : "");
