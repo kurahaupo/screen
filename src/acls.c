@@ -177,8 +177,7 @@ int UserAdd(char *name, struct acluser **up)
 /*
 		for (int j = 0; j < ACL_BITS_PER_CMD; j++)
 			if (GrowBitfield(&default_c_userbits[j], maxusercount, USER_CHUNK,
-			    default_c_bit[j]))
-			{
+			    default_c_bit[j])) {
 				free((char *)*up); *up = NULL; return -1;
 			}
 */
