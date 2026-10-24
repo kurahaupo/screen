@@ -103,7 +103,7 @@ void PutWindowCv(Canvas *);
   l->l_cvlist = cvlist;			\
   cv->c_lnext = cvlnext;		\
   display = olddisplay;			\
-} while (0)	/* obliging ';' */
+} while (0)			/* obliging ';' */
 
 #define CV_CALL(cv, simple_cmd)		\
   CV_CALL_START(cv);			\
