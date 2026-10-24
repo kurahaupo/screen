@@ -369,8 +369,8 @@ static void CopyrightAbort(void);
 static void copypage(void);
 
 struct copydata {
-	char   *cps, *savedcps;		/* position in the message */
-	char   *refcps, *refsavedcps;	/* backup for redisplaying */
+	char *cps, *savedcps;	/* position in the message */
+	char *refcps, *refsavedcps;	/* backup for redisplaying */
 };
 
 static struct LayFuncs CopyrightLf = {
@@ -783,7 +783,7 @@ static void PadStr(char *str, int n, int x, int y)
 		LPutStr(flayer, (char *)blank, n - l, &mchar_blank, x + l, y);
 }
 
-#if 0	/* FUTURE? */
+#if 0				/* FUTURE? */
 /*
 **
 **    here is all the displays stuff
@@ -900,24 +900,24 @@ static void displayspage(void)
 			if (l < 0)
 				l = 0;
 			sprintf(tbuf + strlen(tbuf), "%3d(%.10s)%*s%c%c%c%c", w->w_number, w->w_title, l, "",
-							/* w->w_dlist->next */ 0 ? '&' : ' ',
-							/*
-							 * The rwx triple:
-							 * -,r,R	no read, read, read only due to foreign wlock
-							 * -,.,w,W	no write, write suppressed by foreign wlock,
-							 *            write, own wlock
-							 * -,x	no execute, execute
-							 */
+				/* w->w_dlist->next */ 0 ? '&' : ' ',
+				/*
+				 * The rwx triple:
+				 * -,r,R        no read, read, read only due to foreign wlock
+				 * -,.,w,W      no write, write suppressed by foreign wlock,
+				 *            write, own wlock
+				 * -,x  no execute, execute
+				 */
 #ifdef MULTIUSER
-							(AclCheckPermWin(d->d_user, ACL_READ, w) ? '-' :
-							    ((w->w_wlock == WLOCK_OFF || d->d_user == w->w_wlockuser) ?
-								'r' : 'R')),
-							(AclCheckPermWin(d->d_user, ACL_READ, w) ? '-' :
-							    ((w->w_wlock == WLOCK_OFF) ? 'w' :
-								((d->d_user == w->w_wlockuser) ? 'W' : 'v'))),
-							(AclCheckPermWin(d->d_user, ACL_READ, w) ? '-' : 'x')
+				(AclCheckPermWin(d->d_user, ACL_READ, w) ? '-' :
+				 ((w->w_wlock == WLOCK_OFF || d->d_user == w->w_wlockuser) ?
+				  'r' : 'R')),
+				(AclCheckPermWin(d->d_user, ACL_READ, w) ? '-' :
+				 ((w->w_wlock == WLOCK_OFF) ? 'w' :
+				  ((d->d_user == w->w_wlockuser) ? 'W' : 'v'))),
+				(AclCheckPermWin(d->d_user, ACL_READ, w) ? '-' : 'x')
 #else
-							'r', 'w', 'x'
+				'r', 'w', 'x'
 #endif
 			    );
 		}
@@ -945,4 +945,4 @@ static void DisplaysRedisplayLine(int y, int xs, int xe, int isblank)
 	LClear(flayer, xs, y, xe, y, 0);
 	/* To be filled in... */
 }
-#endif  /* FUTURE? */
+#endif				/* FUTURE? */
