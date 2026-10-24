@@ -211,9 +211,8 @@ int InitTermcap(int width, int height)
 			D_CG0 = 1;
 		if (strstr(D_termname, "xterm")
 		 || strstr(D_termname, "rxvt")
-		 || (D_CKM &&
-		     (strstr(D_CKM, "\033[M")
-		      || strstr(D_CKM, "\033[<")))) {
+		 || (D_CKM && (strstr(D_CKM, "\033[M")
+			    || strstr(D_CKM, "\033[<")))) {
 			D_CXT = 1;
 			kmapdef[0] = D_CKM ? SaveStr(D_CKM) : NULL;
 		}
