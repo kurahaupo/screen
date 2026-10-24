@@ -2165,7 +2165,7 @@ static void MScrollV(Window *win, int n, int ys, int ye, int bce)
 			if (ml->colorfg != null)
 				free(ml->colorfg);
 			ml->colorfg = null;
-			memmove(ml->image, blank, (win->w_width + 1) * 4);
+			memcpy(ml->image, blank, (win->w_width + 1) * sizeof *ml->image);
 			if (bce)
 				MBceLine(win, i, 0, win->w_width, bce);
 		}
@@ -2198,7 +2198,7 @@ static void MScrollV(Window *win, int n, int ys, int ye, int bce)
 			if (ml->colorfg != null)
 				free(ml->colorfg);
 			ml->colorfg = null;
-			memmove(ml->image, blank, (win->w_width + 1) * 4);
+			memcpy(ml->image, blank, (win->w_width + 1) * sizeof *ml->image);
 			if (bce)
 				MBceLine(win, i, 0, win->w_width, bce);
 		}
@@ -2393,13 +2393,13 @@ int MFindUsedLine(Window *win, int ye, int ys)
 	struct mline *ml = win->w_mlines + ye;
 
 	for (y = ye; y >= ys; y--, ml--) {
-		if (memcmp(ml->image, blank, win->w_width * 4))
+		if (memcmp(ml->image, blank, win->w_width * sizeof *ml->image))
 			break;
-		if (ml->attr != null && memcmp(ml->attr, null, win->w_width * 4))
+		if (ml->attr != null && memcmp(ml->attr, null, win->w_width * sizeof *ml->attr))
 			break;
-		if (ml->colorbg != null && memcmp(ml->colorbg, null, win->w_width * 4))
+		if (ml->colorbg != null && memcmp(ml->colorbg, null, win->w_width * sizeof *ml->colorbg))
 			break;
-		if (ml->colorfg != null && memcmp(ml->colorfg, null, win->w_width * 4))
+		if (ml->colorfg != null && memcmp(ml->colorfg, null, win->w_width * sizeof *ml->colorfg))
 			break;
 		if (win->w_encoding == UTF8) {
 			if (ml->font != null && memcmp(ml->font, null, win->w_width))
