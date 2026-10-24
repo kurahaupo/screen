@@ -524,8 +524,7 @@ static void copypage()
 	}
 	while (*cps == '\n')
 		cps++;
-	sprintf(cbuf, "[Press Space %s Return to end.]",
-		*cps ? "for next page;" : "or");
+	sprintf(cbuf, "[Press Space %s Return to end.]", *cps ? "for next page;" : "or");
 	centerline(cbuf, flayer->l_height - 2);
 	copydata->cps = cps;
 	LaySetCursor();
@@ -893,17 +892,14 @@ static void displayspage(void)
 		if (y >= flayer->l_height - 3)
 			break;
 		sprintf(tbuf, "%-10.10s%4dx%-4d%10.10s@%-16.16s%s",
-						d->d_termname, d->d_width, d->d_height, d->d_user->u_name,
-						d->d_usertty,
-						d->d_nonblock ? ((( d->d_obufp - d->d_obuf) > d->d_obufmax) ?
-							"NB" : "nb") : "  ");
+			d->d_termname, d->d_width, d->d_height, d->d_user->u_name,
+			d->d_usertty, d->d_nonblock ? (((d->d_obufp - d->d_obuf) > d->d_obufmax) ? "NB" : "nb") : "  ");
 
 		if (w) {
 			l = 10 - strlen(w->w_title);
 			if (l < 0)
 				l = 0;
-			sprintf(tbuf + strlen(tbuf), "%3d(%.10s)%*s%c%c%c%c",
-							w->w_number, w->w_title, l, "",
+			sprintf(tbuf + strlen(tbuf), "%3d(%.10s)%*s%c%c%c%c", w->w_number, w->w_title, l, "",
 							/* w->w_dlist->next */ 0 ? '&' : ' ',
 							/*
 							 * The rwx triple:
@@ -928,8 +924,7 @@ static void displayspage(void)
 		leftline(tbuf, y);
 		y++;
 	}
-	sprintf(tbuf,"[Press Space %s Return to end.]",
-					1 ? "to refresh;" : "or");
+	sprintf(tbuf, "[Press Space %s Return to end.]", 1 ? "to refresh;" : "or");
 	centerline(tbuf, flayer->l_height - 2);
 	SetCursor();
 }
