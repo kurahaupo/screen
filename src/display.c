@@ -687,7 +687,7 @@ void GotoPos(int x2, int y2)
 	int m;
 	char *s;
 	int CMcost;
-	enum move_t xm = M_NONE, ym = M_NONE;
+	move_t xm = M_NONE, ym = M_NONE;
 
 	if (!display)
 		return;

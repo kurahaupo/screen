@@ -103,7 +103,7 @@ static char *state_t_string[] = {
 
 static void DoESC(Window *, int, int);
 static void DoControlSequence(Window *, int, int);
-static void StringStart(Window *, enum string_t);
+static void StringStart(Window *, string_t);
 static void StringChar(Window *, int);
 static int StringEnd(Window *);
 static void PrintStart(Window *);
@@ -1192,7 +1192,7 @@ static void DoControlSequence(Window *win, int c, int intermediate)
 	}
 }
 
-static void StringStart(Window *win, enum string_t type)
+static void StringStart(Window *win, string_t type)
 {
 	win->w_StringType = type;
 	win->w_stringp = win->w_string;
