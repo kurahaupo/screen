@@ -170,7 +170,7 @@ static int BlankResize(int wi, int he)
  *  The new display is placed in the displays list.
  */
 
-Display *MakeDisplay(char *uname, char *utty, char *term, int fd, pid_t pid, struct mode *Mode)
+Display *MakeDisplay(char *uname, char *utty, char *term, bool colorterm UNUSED, int fd, pid_t pid, struct mode *Mode)
 {
 	struct acluser **u;
 
@@ -230,6 +230,7 @@ Display *MakeDisplay(char *uname, char *utty, char *term, int fd, pid_t pid, str
 	strncpy(D_usertty, utty, ARRAY_SIZE(D_usertty) - 1);
 	D_usertty[ARRAY_SIZE(D_usertty) - 1] = 0;
 	strncpy(D_termname, term, MAXTERMLEN);
+     // D_colorterm = colorterm;
 	D_termname[MAXTERMLEN] = 0;
 	D_user = *u;
 	D_processinput = ProcessInput;

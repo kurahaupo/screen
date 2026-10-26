@@ -319,7 +319,7 @@ do				\
   }				\
 while (0)
 
-Display *MakeDisplay (char *, char *, char *, int, pid_t, struct mode *);
+Display *MakeDisplay (char *, char *, char *, bool, int, pid_t, struct mode *);
 void  FreeDisplay (void);
 void  DefProcess (char **, size_t *);
 void  DefRedisplayLine (int, int, int, int);
