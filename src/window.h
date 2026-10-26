@@ -191,8 +191,8 @@ struct Window {
 	AclBits w_lio_notify;		/* whom to tell when lastio+seconds < time() */
 	AclBits w_mon_notify;		/* whom to tell monitor status */
 
-	enum state_t w_state;		/* parser state */
-	enum string_t w_StringType;
+	state_t w_state;		/* parser state */
+	string_t w_StringType;
 	struct mline *w_mlines;
 	struct mchar w_rend;		/* current rendition */
 	char	 w_FontL;		/* character font GL */
