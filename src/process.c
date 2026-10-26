@@ -4559,7 +4559,6 @@ static void DoCommandLayout(struct action *act)
 		if (!display) {
 			if (layout_attach && layout_attach != &layout_last_marker)
 				layout_attach = layout_attach->lay_next ? layout_attach->lay_next : layouts;
-			;
 			return;
 		}
 		Layout *lay = D_layout;
