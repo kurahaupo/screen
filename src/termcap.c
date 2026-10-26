@@ -47,7 +47,8 @@
 #include "process.h"
 #include "resize.h"
 
-static void AddCap(char *);
+static bool AddCap(const char *);
+static bool AddCapSprintf(const char *, ...);
 static void MakeString(char *, char *, int, char *);
 static char *findcap(char *, char **, int);
 static int copyarg(char **, char *);
@@ -60,9 +61,10 @@ static void setseqoff(unsigned char *, int, int);
 static int addmapseq(char *, int, int);
 static int remmapseq(char *, int);
 
-char Termcap[TERMCAP_BUFSIZE + 8];	/* new termcap +8:"TERMCAP=" */
-static int Termcaplen;
-static int tcLineLen;
+static char Termcap[TERMCAP_BUFSIZE + 8] = "TERMCAP=";	/* new termcap +8:"TERMCAP=" */
+#define endTermcap  ((&Termcap)[1])
+
+static int Termcaplen = 0;
 char Term[MAXSTR + 5];			/* +5: "TERM=" */
 char screenterm[MAXTERMLEN + 1];	/* new $TERM, usually "screen" */
 
@@ -665,16 +667,37 @@ static int remmapseq(char *seq, int k)
 /*
  * Appends to the static variable Termcap
  */
-static void AddCap(char *s)
+static inline bool AddCapSprintf(const char *fmt, ...)
 {
-	size_t n;
+	if ( Termcaplen >= endTermcap - Termcap - 1 )
+		return false;
 
-	n = strlen(s);
-	if (Termcaplen + n + 1 < TERMCAP_BUFSIZE) {
-		strcpy(Termcap + Termcaplen, s);
-		Termcaplen += n;
-		tcLineLen += n;
-	}
+	char * const p = Termcap+Termcaplen;
+
+	va_list v;
+	va_start(v, fmt);
+	int n = vsnprintf(p, endTermcap - p, fmt, v);
+	va_end(v);
+
+	if (n < 0 || (unsigned) n >= endTermcap - p)
+		return false;
+
+	Termcaplen += n;
+	return true;
+}
+
+/*
+ * Appends to the static variable Termcap
+ */
+static inline bool AddCap(const char *s)
+{
+//	return AddCapSprintf("%s", s);
+	size_t n = strlen(s);
+	if (Termcaplen + n + 1 >= sizeof Termcap)
+		return false;
+	memcpy(Termcap + Termcaplen, s, n+1);
+	Termcaplen += n;
+	return true;
 }
 
 /*
@@ -684,8 +707,8 @@ static void AddCap(char *s)
 char *MakeTermcap(bool aflag)
 {
 	char buf[TERMCAP_BUFSIZE];
-	char *p, *cp, *s, ch, *tname;
-	int i, width, height;
+	char *s, *tname;
+	int width, height;
 
 	if (display) {
 		width = D_width;
@@ -706,68 +729,66 @@ char *MakeTermcap(bool aflag)
 		strncpy(screenterm, "screen", MAXTERMLEN);
 		screenterm[MAXTERMLEN] = '\0';
 	}
+
 	do {
-		strcpy(Term, "TERM=");
-		p = Term + 5;
-		if (!aflag && strlen(screenterm) + strlen(tname) < MAXSTR - 1) {
-			sprintf(p, "%s.%s", screenterm, tname);
-			if (e_tgetent(buf, p) == 1)
+		if (!aflag && tname
+		 && sizeof Term > (size_t) snprintf(Term, sizeof Term, "TERM=%s.%s", screenterm, tname)
+		 && e_tgetent(buf, Term + 5) == 1)
 				break;
-		}
-		if (nwin_default.bce) {
-			sprintf(p, "%s-bce", screenterm);
-			if (e_tgetent(buf, p) == 1)
-				break;
-		}
-		strcpy(p, screenterm);
-		if (e_tgetent(buf, p) == 1)
+
+		if (nwin_default.bce
+		 && sizeof Term > (size_t) snprintf(Term, sizeof Term, "TERM=%s-bce", screenterm)
+		 && e_tgetent(buf, Term + 5) == 1)
 			break;
-		strcpy(p, "vt100");
+
+		if (sizeof Term > (size_t) snprintf(Term, sizeof Term, "TERM=%s", screenterm)
+		 && e_tgetent(buf, Term + 5) == 1)
+			break;
+
+		if (tname
+		 && sizeof Term > (size_t) snprintf(Term, sizeof Term, "TERM=%s", tname)
+		 && e_tgetent(buf, Term + 5) == 1)
+			break;
+
+		strcpy(Term, "TERM=vt100");
 	} while (0);		/* Goto-free programming... */
 
-	tcLineLen = 100;	/* Force NL */
 	if (strlen(Term) > TERMCAP_BUFSIZE - 40)
-		strcpy(Term, "too_long");
-	sprintf(Termcap, "TERMCAP=SC|%s|VT 100/ANSI X3.64 virtual terminal:", Term + 5);
-	Termcaplen = strlen(Termcap);
+		strcpy(Term+5, "too_long");
+	Termcaplen = 0;
+	AddCapSprintf("TERMCAP=SC|%s|VT 300/ISO-6429 virtual terminal:", Term + 5);
 	if (extra_outcap && *extra_outcap) {
-		for (cp = extra_outcap; (p = strchr(cp, ':')); cp = p) {
-			ch = *++p;
-			*p = '\0';
-			AddCap(cp);
-			*p = ch;
-		}
-		tcLineLen = 100;	/* Force NL */
+		const char *cp, *p;
+		for (cp = extra_outcap; (p = strchr(cp, ':')); cp = p)
+			AddCapSprintf("%.*s:", p-cp, cp);
+		if (cp && *cp)
+			AddCapSprintf("%s:", cp);
 	}
 	if (Termcaplen + strlen(TermcapConst) < TERMCAP_BUFSIZE) {
 		strcpy(Termcap + Termcaplen, TermcapConst);
 		Termcaplen += strlen(TermcapConst);
 	}
-	sprintf(buf, "li#%d:"
-		     "co#%d:", height, width);
-	AddCap(buf);
+	AddCapSprintf("li#%d:"
+		      "co#%d:", height, width);
 	AddCap("am:");
-	if (aflag || (force_vt && !D_COP) || D_CLP || !D_AM) {
+	if (aflag || (force_vt && !D_COP) || D_CLP || !D_AM)
 		AddCap("xn:"
 		       "xv:"
 		       "LP:");
-	}
-	if (aflag || (D_CS && D_SR) || D_AL || D_CAL) {
+	if (aflag || (D_CS && D_SR) || D_AL || D_CAL)
 		AddCap("sr=\\EM:"
 		       "al=\\E[L:"
 		       "AL=\\E[%dL:");
-	} else if (D_SR)
+	else if (D_SR)
 		AddCap("sr=\\EM:");
 	if (aflag || D_CS)
 		AddCap("cs=\\E[%i%d;%dr:");
-	if (aflag || D_CS || D_DL || D_CDL) {
+	if (aflag || D_CS || D_DL || D_CDL)
 		AddCap("dl=\\E[M:"
 		       "DL=\\E[%dM:");
-	}
-	if (aflag || D_DC || D_CDC) {
+	if (aflag || D_DC || D_CDC)
 		AddCap("dc=\\E[P:"
 		       "DC=\\E[%dP:");
-	}
 	if (aflag || D_CIC || D_IC || D_IM)
 		AddCap("im=\\E[4h:"
 		       "ei=\\E[4l:"
@@ -780,16 +801,17 @@ char *MakeTermcap(bool aflag)
 	       "vs=\\E[34l:"
 	       "ti=\\E[?1049h:"
 	       "te=\\E[?1049l:");
+
 	if (display) {
 		if (D_US)
 			AddCap("us=\\E[4m:"
 			       "ue=\\E[24m:");
 		if (D_CZH)
-			AddCap("ZH=\\E[3\\0720m:"
-			       "ZR=\\E[23\\0720m:");
+			AddCap("ZH=\\E[3\\0720m:"	/* '\072' == ':' → \e[3:0m */
+			       "ZR=\\E[23\\0720m:");	/*		 → \e[23:0m */
 		if (D_SO)
-			AddCap("so=\\E[3\\0721m:"
-			       "se=\\E[23\\0721m:");
+			AddCap("so=\\E[3\\0721m:"	/* '\072' == ':' → \e[3:1m */
+			       "se=\\E[23\\0721m:");	/*		 → \e[23:1m */
 		if (D_MB)
 			AddCap("mb=\\E[5m:");
 		if (D_MD)
@@ -812,24 +834,22 @@ char *MakeTermcap(bool aflag)
 			AddCap("vb=\\Eg:");
 		if (D_CG0)
 			AddCap("G0:");
-		if (D_CC0 || (D_CS0 && *D_CS0)) {
-			AddCap("as=\\E(0:");
-			AddCap("ae=\\E(B:");
-			/* avoid `` because some shells dump core... */
-			AddCap("ac=\\140\\140aaffggjjkkllmmnnooppqqrrssttuuvvwwxxyyzz{{||}}~~..--++,,hhII00:");
-		}
-		if (D_PO) {
-			AddCap("po=\\E[5i:");
-			AddCap("pf=\\E[4i:");
-		}
-		if (D_CZ0) {
-			AddCap("Z0=\\E[?3h:");
-			AddCap("Z1=\\E[?3l:");
-		}
+		if (D_CC0 || (D_CS0 && *D_CS0))
+			AddCap("as=\\E(0:"
+			       "ae=\\E(B:"
+			       "ac=\\140\\140aaffggjjkkllmmnnooppqqrrssttuuvvwwxxyyzz{{||}}~~..--++,,hhII00:");
+			       /* '\140' == '`', which we avoid because some shells dump core... */
+		if (D_PO)
+			AddCap("po=\\E[5i:"
+			       "pf=\\E[4i:");
+		if (D_CZ0)
+			AddCap("Z0=\\E[?3h:"
+			       "Z1=\\E[?3l:");
 		if (D_CWS)
 			AddCap("WS=\\E[8;%d;%dt:");
 	}
-	for (i = T_CAPS; i < T_ECAPS; i++) {
+
+	for (size_t i = T_CAPS; i < T_ECAPS; i++) {
 		struct action *act;
 		if (i < T_OCAPS) {
 			if (i >= T_KEYPAD)	/* don't put keypad codes in TERMCAP */
@@ -875,8 +895,7 @@ char *MakeTermcap(bool aflag)
 		case T_FLG:
 			if (D_tcs[i].flg == 0)
 				break;
-			sprintf(buf, "%s:", term[i].tcname);
-			AddCap(buf);
+			AddCapSprintf("%s:", term[i].tcname);
 			break;
 		default:
 			break;
