@@ -1951,8 +1951,7 @@ static void DoCommandFlow(struct action *act)
 	}
 	SetFlow(fore->w_flow & FLOW_ON);
 	if (msgok)
-		OutputMsg(0,
-			  "%cflow%s",
+		OutputMsg(0, "%cflow%s",
 			  (fore->w_flow & FLOW_ON) ? '+' : '-',
 			  (fore->w_flow & FLOW_AUTOFLAG) ? "(auto)" : "");
 }
@@ -2225,7 +2224,11 @@ static void DoCommandHistory(struct action *act)
 	for (ss = s; (ch = *ss); ss++) {
 		struct plop *pp = (ch == '.' ? &user->u_plop : &plop_tab[(int)(unsigned char)ch]);
 		if (pp->enc != enc) {
-			l += RecodeBuf((unsigned char *)pp->buf, pp->len, pp->enc, enc, (unsigned char *)dbuf + l);
+			l += RecodeBuf((unsigned char *)pp->buf,
+				       pp->len,
+				       pp->enc,
+				       enc,
+				       (unsigned char *)dbuf + l);
 			continue;
 		}
 		memmove(dbuf + l, pp->buf, pp->len);
@@ -2410,7 +2413,10 @@ static void DoCommandWritebuf(struct action *act)
 				OutputMsg(0, "%s", strnomem);
 				return;
 			}
-			user->u_plop.len = RecodeBuf((unsigned char *)oldplop.buf, oldplop.len, oldplop.enc, enc,
+			user->u_plop.len = RecodeBuf((unsigned char *)oldplop.buf,
+						     oldplop.len,
+						     oldplop.enc,
+						     enc,
 						     (unsigned char *)newbuf);
 			user->u_plop.buf = newbuf;
 			user->u_plop.enc = enc;
@@ -3484,7 +3490,8 @@ static void DoCommandBindkey(struct action *act)
 			if (kme->str == NULL) {
 				if (args[1])
 					break;
-			} else if (*argl == (kme->fl & ~KMAP_NOTIMEOUT) && memcmp(kme->str, *args, *argl) == 0)
+			} else if (*argl == (kme->fl & ~KMAP_NOTIMEOUT)
+				&& memcmp(kme->str, *args, *argl) == 0)
 				break;
 		if (i == kmap_extn) {
 			if (!args[1]) {

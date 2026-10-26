@@ -449,7 +449,6 @@ void SendCreateMsg(char *sty, struct NewWindow *nwin)
 	Message m;
 	char *p;
 	size_t len, n, used;
-	char **av;
 
 	if (strlen(sty) > FILENAME_MAX)
 		sty[FILENAME_MAX] = 0;
@@ -470,7 +469,7 @@ void SendCreateMsg(char *sty, struct NewWindow *nwin)
 	p = m.m.create.line;
 	n = 0;
 	if (nwin->args != nwin_undef.args)
-		for (av = nwin->args; *av && n < MAXARGS - 1; ++av, ++n) {
+		for (char **av = nwin->args; *av && n < MAXARGS - 1; ++av, ++n) {
 			len = strlen(*av) + 1;
 			if (p + len >= m.m.create.line + ARRAY_SIZE(m.m.create.line) - 1)
 				break;
