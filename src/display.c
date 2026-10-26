@@ -229,10 +229,8 @@ Display *MakeDisplay(char *uname, char *utty, char *term, bool colorterm, int fd
 	D_obufp = D_obuf;
 	D_printfd = -1;
 	D_userpid = pid;
-	strncpy(D_usertty, utty, ARRAY_SIZE(D_usertty) - 1);
-	D_usertty[ARRAY_SIZE(D_usertty) - 1] = 0;
-	strncpy(D_termname, term, MAXTERMLEN);
-	D_termname[MAXTERMLEN] = 0;
+	snprintf(D_usertty, sizeof D_usertty, "%s", utty);
+	snprintf(D_termname, sizeof D_termname, "%s", term);
 	D_hastruecolor = colorterm;
 	D_user = *u;
 	D_processinput = ProcessInput;
@@ -3013,9 +3011,7 @@ void RunBlanker(char **cmdv)
 	char termname[MAXTERMLEN + 6];
 	char **np;
 
-	strncpy(termname, "TERM=", 6);
-	strncpy(termname + 5, D_termname, MAXTERMLEN);
-	termname[ARRAY_SIZE(termname) - 1] = 0;
+	snprintf(termname, sizeof termname, "TERM=%s", D_termname);
 	KillBlanker();
 	D_blankerpid = -1;
 	if ((D_blankerev.fd = OpenDevice(cmdv, 0, &ptype, &m)) == -1) {
