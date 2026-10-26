@@ -505,7 +505,6 @@ void InitKeytab(void)
 static struct action *FindKtab(char *class, int create)
 {
 	struct kclass *kp, **kpp;
-	int i;
 
 	if (class == NULL)
 		return ktab;
@@ -525,7 +524,7 @@ static struct action *FindKtab(char *class, int create)
 			return NULL;
 		}
 		kp->name = SaveStr(class);
-		for (i = 0; i < (int)(ARRAY_SIZE(kp->ktab)); i++) {
+		for (size_t i = 0; i < ARRAY_SIZE(kp->ktab); i++) {
 			kp->ktab[i].nr = RC_ILLEGAL;
 			kp->ktab[i].args = noargs;
 			kp->ktab[i].argl = NULL;
@@ -1642,7 +1641,7 @@ static void DoCommandBreaktype(struct action *act)
 
 	if (*args) {
 		if (ParseNum(act, &n))
-			for (n = 0; n < (int)(ARRAY_SIZE(types)); n++) {
+			for (n = 0; (size_t) n < ARRAY_SIZE(types); n++) {
 				int i;
 				for (i = 0; i < 4; i++) {
 					ch = args[0][i];
