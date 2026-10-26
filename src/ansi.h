@@ -82,7 +82,7 @@ typedef enum atyp_mask_e {
  *  Parser state
  */
 /* keep state_t and state_t_string in sync! */
-typedef enum state_t {
+typedef enum state_e {
 	LIT,				/* Literal input */
 	ESC,				/* Start of escape sequence */
 	ASTR,				/* Start of control string */
@@ -102,7 +102,7 @@ typedef enum state_t {
 					 * step with common usage. */
 
 /* keep string_t and string_t_string in sync! */
-typedef enum string_t {
+typedef enum string_e {
 	NONE,
 	DCS,				/* Device Control String */
 	OSC,				/* Operating System Command */
@@ -117,7 +117,7 @@ typedef enum string_t {
 /*
  *  Types of movement used by GotoPos()
  */
-typedef enum move_t {
+typedef enum move_e {
 	M_NONE,
 	M_UP,
 	M_CUP,
