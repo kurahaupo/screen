@@ -134,8 +134,8 @@ struct Display {
 	int   d_status_buflen;		/* last message buffer len */
 	int	d_status_lastx;		/* position of the cursor */
 	int	d_status_lasty;		/*   before status was displayed */
-	int   d_status_obuflen;		/* saved obuflen */ 
-	int   d_status_obuffree;	/* saved obuffree */ 
+	int   d_status_obuflen;		/* saved obuflen */
+	int   d_status_obuffree;	/* saved obuffree */
 	int	d_status_obufpos;	/* end of status position in obuf */
 	Event d_statusev;	/* timeout event */
 	Event d_hstatusev;	/* hstatus changed event */
@@ -170,7 +170,8 @@ struct Display {
 	union	tcu d_tcs[T_N];		/* terminal capabilities */
 	char *d_attrtab[NATTR];		/* attrib emulation table */
 	char  d_attrtyp[NATTR];		/* attrib group table */
-	int   d_hascolor;		/* do we support color */
+	bool	d_hascolor;		/* do we support color */
+	bool	d_hastruecolor;		/* do we support TrueColor (was $TRUECOLOR set with valid string?) */
 	char	d_c0_tab[256];		/* conversion for C0 */
 	char ***d_xtable;		/* char translation table */
 	int	d_UPcost, d_DOcost, d_LEcost, d_NDcost;
@@ -207,6 +208,7 @@ struct Display {
 #define D_other		DISPLAY(d_other)
 #define D_nonblock      DISPLAY(d_nonblock)
 #define D_termname	DISPLAY(d_termname)
+#define D_hastruecolor	DISPLAY(d_hastruecolor)
 #define D_tentry	DISPLAY(d_tentry)
 #define D_tcinited	DISPLAY(d_tcinited)
 #define D_width		DISPLAY(d_width)
