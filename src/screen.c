@@ -1696,11 +1696,8 @@ void PutWinMsg(char *s, int start, int max)
 	}
 }
 
-static void serv_read_fn(Event *event, void *data)
+static void serv_read_fn(Event *event UNUSED, void *data UNUSED)
 {
-	(void)event;		/* unused */
-	(void)data;		/* unused */
-
 	ReceiveMsg();
 }
 
