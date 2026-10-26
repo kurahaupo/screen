@@ -1653,7 +1653,7 @@ static void DoCommandBreaktype(struct action *act)
 				if (i == 4)
 					break;
 			}
-		if (n < 0 || n >= (int)(ARRAY_SIZE(types)))
+		if (n < 0 || (size_t) n >= ARRAY_SIZE(types))
 			OutputMsg(0, "%s invalid, chose one of %s, %s or %s", *args, types[0], types[1], types[2]);
 		else {
 			breaktype = n;
@@ -2561,7 +2561,7 @@ static void DoCommandLogfile(struct action *act)
 		if (ParseSaveStr(act, &screenlogfile))
 			return;
 		if (fore && fore->w_log)
-			if (DoStartLog(fore, buf, ARRAY_SIZE(buf)))
+			if (DoStartLog(fore, buf, sizeof buf))
 				OutputMsg(0, "Error opening logfile \"%s\"", buf);
 		if (!msgok)
 			return;
@@ -2667,7 +2667,7 @@ static void DoCommandBell(struct action *act)
 
 	if (*args == NULL) {
 		char buf[256];
-		AddXChars(buf, ARRAY_SIZE(buf), BellString);
+		AddXChars(buf, sizeof buf, BellString);
 		OutputMsg(0, "bell_msg is '%s'", buf);
 		return;
 	}
@@ -2698,7 +2698,7 @@ static void DoCommandPow_detach_msg(struct action *act)
 
 	if (*args == NULL) {
 		char buf[256];
-		AddXChars(buf, ARRAY_SIZE(buf), PowDetachString);
+		AddXChars(buf, sizeof buf, PowDetachString);
 		OutputMsg(0, "pow_detach_msg is '%s'", buf);
 		return;
 	}
@@ -2864,7 +2864,7 @@ static void DoCommandHardstatus(struct action *act)
 		else if (!strcmp(args[0], "string")) {
 			if (!args[1]) {
 				char buf[256];
-				AddXChars(buf, ARRAY_SIZE(buf), hstatusstring);
+				AddXChars(buf, sizeof buf, hstatusstring);
 				OutputMsg(0, "hardstatus string is '%s'", buf);
 				return;
 			}
@@ -2957,7 +2957,7 @@ static void DoCommandCaption(struct action *act)
 	} else if (strcmp(args[0], "string") == 0) {
 		if (!args[1]) {
 			char buf[256];
-			AddXChars(buf, ARRAY_SIZE(buf), captionstring);
+			AddXChars(buf, sizeof buf, captionstring);
 			OutputMsg(0, "caption string is '%s'", buf);
 			return;
 		}
@@ -3251,7 +3251,7 @@ static void DoCommandSessionname(struct action *act)
 			OutputMsg(errno, "%s: failed to rename(%s, %s)", rc_name, SocketPath, buf);
 			return;
 		}
-		strncpy(SocketPath, buf, ARRAY_SIZE(SocketPath));
+		strncpy(SocketPath, buf, sizeof SocketPath);
 		MakeNewEnv();
 		WindowChanged(NULL, WINESC_SESS_NAME);
 	}
@@ -3343,7 +3343,7 @@ static void DoCommandVbell_msg(struct action *act)
 
 	if (*args == NULL) {
 		char buf[256];
-		AddXChars(buf, ARRAY_SIZE(buf), VisualBellString);
+		AddXChars(buf, sizeof buf, VisualBellString);
 		OutputMsg(0, "vbell_msg is '%s'", buf);
 		return;
 	}
@@ -3933,7 +3933,7 @@ static void DoCommandDefhstatus(struct action *act)
 	if (*args == NULL) {
 		char buf[256] = { 0 };
 		if (nwin_default.hstatus)
-			AddXChars(buf, ARRAY_SIZE(buf), nwin_default.hstatus);
+			AddXChars(buf, sizeof buf, nwin_default.hstatus);
 		OutputMsg(0, "default hstatus is '%s'", buf);
 		return;
 	}
@@ -3967,7 +3967,7 @@ static void DoCommandDefcharset(struct action *act)
 	if (*args == NULL) {
 		char buf[256] = { 0 };
 		if (nwin_default.charset)
-			AddXChars(buf, ARRAY_SIZE(buf), nwin_default.charset);
+			AddXChars(buf, sizeof buf, nwin_default.charset);
 		OutputMsg(0, "default charset is '%s'", buf);
 		return;
 	}
@@ -3994,7 +3994,7 @@ static void DoCommandCharset(struct action *act)
 	if (*args == NULL) {
 		char buf[256] = { 0 };
 		if (nwin_default.charset)
-			AddXChars(buf, ARRAY_SIZE(buf), nwin_default.charset);
+			AddXChars(buf, sizeof buf, nwin_default.charset);
 		OutputMsg(0, "charset is '%s'", buf);
 		return;
 	}
