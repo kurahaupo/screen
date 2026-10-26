@@ -179,7 +179,7 @@ Display *MakeDisplay(char *uname, char *utty, char *term, bool colorterm, int fd
 	if (!*(u = FindUserPtr(uname)) && UserAdd(uname, u))
 		return NULL;	/* could not find or add user */
 
-	if ((display = calloc(1, sizeof(Display))) == NULL)
+	if ((display = calloc(1, sizeof *display)) == NULL)
 		return NULL;
 	display->d_next = displays;
 	displays = display;
