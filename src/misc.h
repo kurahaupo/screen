@@ -79,4 +79,9 @@ int AddXChars(char *, int, char *);
 # define FALLTHROUGH	((void)0) /*FALLTHROUGH*/
 #endif /*FALLTHROUGH*/
 
+#ifndef ARRAY_END
+# define ARRAY_END(x)	((x) + ARRAY_SIZE(x))
+#endif /*ARRAY_END*/
+
+
 #endif				/* SCREEN_MISC_H */
