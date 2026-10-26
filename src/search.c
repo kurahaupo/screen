@@ -242,7 +242,7 @@ static void is_process(char *p, size_t len, void *data)
 	case '\007':		/* CTRL-G */
 		pos = markdata->isstartpos;
 		FALLTHROUGH;
-	case '\033':	/* ESC */
+	case '\033':		/* ESC */
 		*p = 0;
 		break;
 	case '\013':		/* CTRL-K */
