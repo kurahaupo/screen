@@ -2798,12 +2798,12 @@ static void disp_readev_fn(Event *event, void *data)
 static void disp_processinput(Display *display, unsigned char *buf, size_t size)
 {
 	if (D_encoding != (D_forecv ? D_forecv->c_layer->l_encoding : 0)) {
-		int c, enc;
-		ptrdiff_t i, j;
 		char buf2[IOSIZE * 2 + 10];
-		enc = D_forecv ? D_forecv->c_layer->l_encoding : 0;
-		for (i = j = 0; i < (ptrdiff_t)size; i++) {
-			c = ((unsigned char *)buf)[i];
+		int const enc = D_forecv ? D_forecv->c_layer->l_encoding : 0;
+		size_t const MaxEncLen = 9U;
+		size_t j = 0;
+		for (size_t i = 0; i < size && j < ARRAY_SIZE(buf2) - MaxEncLen ; i++) {
+			int c = ((unsigned char *)buf)[i];
 			c = DecodeChar(c, D_encoding, &D_decodestate);
 			if (c == -2)
 				i--;	/* try char again */
@@ -2815,8 +2815,6 @@ static void disp_processinput(Display *display, unsigned char *buf, size_t size)
 				j += EncodeChar(buf2 + j, -1, enc, &font);
 			} else
 				j += EncodeChar(buf2 + j, c, enc, NULL);
-			if (j > (int)ARRAY_SIZE(buf2) - 10)	/* just in case... */
-				break;
 		}
 		D_processinput(buf2, j);
 		return;
