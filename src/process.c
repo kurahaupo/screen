@@ -4335,18 +4335,18 @@ static void DoCommandBlankerprg(struct action *act)
 	if (!args[0]) {
 		if (blankerprg) {
 			char path[MAXPATHLEN];
-			char *p = path, **pp;
-			for (pp = blankerprg; *pp; pp++)
-				p += snprintf(p, ARRAY_SIZE(path) - (p - path) - 1, "%s ", *pp);
-			*(p - 1) = '\0';
+			char *p = path;
+			for (char **pp = blankerprg; *pp; pp++)
+				p += snprintf(p, (&path)[1] - p, "%s ", *pp);
+			if (p > path)
+				p[-1] = '\0';
 			OutputMsg(0, "blankerprg: %s", path);
 		} else
 			OutputMsg(0, "No blankerprg set.");
 		return;
 	}
 	if (blankerprg) {
-		char **pp;
-		for (pp = blankerprg; *pp; pp++)
+		for (char **pp = blankerprg; *pp; pp++)
 			free(*pp);
 		free(blankerprg);
 		blankerprg = NULL;
