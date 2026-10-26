@@ -47,7 +47,7 @@ struct NewWindow {
 	char	**args;		/* argv vector */
 	char	*dir;		/* directory for chdir */
 	char	*term;		/* TERM to be set instead of "screen" */
-	bool	hastruecolor;	/* should we include TRUECOLOR=truecolor? */
+	bool	hastruecolor;	/* export COLORTERM=truecolor */
 	bool	aflag;
 	bool	dynamicaka;
 	int	flowflag;
@@ -253,7 +253,7 @@ struct Window {
 	char	*w_cmdargs[MAXARGS];	/* command line argument vector */
 	char	*w_dir;			/* directory for chdir */
 	char	*w_term;		/* TERM to be set instead of "screen" */
-	bool	 w_truecolor;		/* TERM to be set instead of "screen" */
+	bool	 w_truecolor;		/* set "COLORTERM=truecolor"? */
 
 #if defined (ENABLE_UTMP)
 	int	 w_lflag;		/* login flag */

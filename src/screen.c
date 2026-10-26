@@ -95,6 +95,7 @@ struct        passwd *ppp;
 char         *attach_tty;
 int           attach_fd = -1;
 char         *attach_term;
+bool          attach_colorterm;
 char         *LoginName;
 struct mode   attach_Mode;
 
@@ -790,6 +791,11 @@ int main(int argc, char **argv)
 			Panic(0, "Please set a terminal type.");
 		if (strlen(attach_term) > MAXTERMLEN)
 			Panic(0, "$TERM too long - sorry.");
+		{
+		char *s = getenv("COLORTERM");
+		attach_colorterm = s && (!strcmp(s, "8bit")
+				      || !strcmp(s, "truecolor"));
+		}
 		GetTTY(0, &attach_Mode);
 	}
 
@@ -1042,7 +1048,7 @@ int main(int argc, char **argv)
 	if (UserAdd(LoginName, NULL) < 0)
 		Panic(0, "Could not create user info");
 	if (!detached) {
-		if (MakeDisplay(LoginName, attach_tty, attach_term, n, getppid(), &attach_Mode) == NULL)
+		if (MakeDisplay(LoginName, attach_tty, attach_term, attach_colorterm, n, getppid(), &attach_Mode) == NULL)
 			Panic(0, "Could not alloc display");
 		PanicPid = 0;
 		D_encoding = nwin_options.encoding > 0 ? nwin_options.encoding : 0;
