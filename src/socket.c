@@ -700,7 +700,7 @@ static int CreateTempDisplay(Message *m, int recvfd, Window *win)
 
 	/* create new display */
 	GetTTY(i, &Mode);
-	if (MakeDisplay(user, m->m_tty, attach ? m->m.attach.envterm : "", i, pid, &Mode) == NULL) {
+	if (MakeDisplay(user, m->m_tty, attach ? m->m.attach.envterm : "", m->m.attach.env_colorterm, i, pid, &Mode) == NULL) {
 		int unused_result = write(i, "Could not make display.\n", 24);
 		(void)unused_result; /* unused */
 		close(i);
