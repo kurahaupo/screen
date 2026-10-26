@@ -371,8 +371,8 @@ int MakeServerSocket(void)
 	if ((s = socket(AF_UNIX, SOCK_STREAM, 0)) == -1)
 		Panic(errno, "socket");
 	a.sun_family = AF_UNIX;
-	strncpy(a.sun_path, SocketPath, ARRAY_SIZE(a.sun_path));
-	a.sun_path[ARRAY_SIZE(a.sun_path) - 1] = 0;
+	strncpy(a.sun_path, SocketPath, sizeof a.sun_path);
+	(&a.sun_path)[1][-1] = 0;
 	xseteuid(real_uid);
 	xsetegid(real_gid);
 	if (connect(s, (struct sockaddr *)&a, strlen(SocketPath) + 2) != -1) {
@@ -423,7 +423,7 @@ int MakeClientSocket(int err)
 		Panic(errno, "socket");
 	a.sun_family = AF_UNIX;
 	strncpy(a.sun_path, SocketPath, ARRAY_SIZE(a.sun_path));
-	a.sun_path[ARRAY_SIZE(a.sun_path) - 1] = 0;
+	(&a.sun_path)[1][-1] = 0;
 	xseteuid(real_uid);
 	xsetegid(real_gid);
 	if (connect(s, (struct sockaddr *)&a, strlen(SocketPath) + 2) == -1) {
@@ -465,7 +465,7 @@ void SendCreateMsg(char *sty, struct NewWindow *nwin)
 	memset((char *)&m, 0, sizeof(Message));
 	m.type = MSG_CREATE;
 	strncpy(m.m_tty, attach_tty, ARRAY_SIZE(m.m_tty) - 1);
-	m.m_tty[ARRAY_SIZE(m.m_tty) - 1] = 0;
+	(&m.m_tty)[1][-1] = 0;
 	p = m.m.create.line;
 	n = 0;
 	if (nwin->args != nwin_undef.args)
@@ -507,13 +507,13 @@ int SendErrorMsg(char *tty, char *buf)
 	Message m;
 
 	strncpy(m.m.message, buf, ARRAY_SIZE(m.m.message) - 1);
-	m.m.message[ARRAY_SIZE(m.m.message) - 1] = 0;
+	(&m.m.message)[1][-1] = 0;
 	s = MakeClientSocket(0);
 	if (s < 0)
 		return -1;
 	m.type = MSG_ERROR;
 	strncpy(m.m_tty, tty, ARRAY_SIZE(m.m_tty) - 1);
-	m.m_tty[ARRAY_SIZE(m.m_tty) - 1] = 0;
+	(&m.m_tty)[1][-1] = 0;
 	m.protocol_revision = MSG_REVISION;
 	if (write(s, (char *)&m, sizeof(Message)))
 		ret = -2;
@@ -750,7 +750,7 @@ void ReceiveMsg(void)
 	}
 
 	p = (char *)&m;
-	left = sizeof(Message);
+	left = sizeof m;
 	memset(&msg, 0, sizeof(struct msghdr));
 	iov.iov_base = &m;
 	iov.iov_len = left;
@@ -810,8 +810,8 @@ void ReceiveMsg(void)
 		return;
 	}
 	if (left > 0) {
-		if (left != sizeof(Message))
-			Msg(0, "Message %d of %d bytes too small", left, (int)sizeof(Message));
+		if (left != sizeof m)
+			Msg(0, "Message %d of %zu bytes too small", left, sizeof m);
 		return;
 	}
 	if (m.protocol_revision != MSG_REVISION) {
