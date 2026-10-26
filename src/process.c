@@ -2928,7 +2928,7 @@ static void DoCommandStatus(struct action *act)
 			} else if (strcmp(args[i], "right") == 0) {
 				statuspos.col = STATUS_RIGHT;
 			} else {
-				Msg(0, "%s: usage: status [top|up|down|bottom] [left|right]", rc_name);
+				Msg(0, "%s: usage: status [top | up | down | bottom] [left | right]", rc_name);
 				break;
 			}
 			i++;
@@ -2964,7 +2964,7 @@ static void DoCommandCaption(struct action *act)
 			return;
 		}
 	} else {
-		OutputMsg(0, "%s: usage: caption [ top | bottom ] always|splitonly|string <string>", rc_name);
+		OutputMsg(0, "%s: usage: caption [ top | bottom ] { always | splitonly | string <string> }", rc_name);
 		return;
 	}
 	if (!args[1])
