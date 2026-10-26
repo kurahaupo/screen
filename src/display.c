@@ -2818,10 +2818,10 @@ static void disp_processinput(Display *display, unsigned char *buf, size_t size)
 			if (j > (int)ARRAY_SIZE(buf2) - 10)	/* just in case... */
 				break;
 		}
-		(*D_processinput) (buf2, j);
+		D_processinput(buf2, j);
 		return;
 	}
-	(*D_processinput) ((char *)buf, size);
+	D_processinput((char *)buf, size);
 }
 
 static void disp_mousetimeout_fn(Event *event, void *data)
