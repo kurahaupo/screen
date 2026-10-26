@@ -791,11 +791,9 @@ int main(int argc, char **argv)
 			Panic(0, "Please set a terminal type.");
 		if (strlen(attach_term) > MAXTERMLEN)
 			Panic(0, "$TERM too long - sorry.");
-		{
-		char *s = getenv("COLORTERM");
-		attach_colorterm = s && (!strcmp(s, "8bit")
-				      || !strcmp(s, "truecolor"));
-		}
+		char *ts = getenv("COLORTERM");
+		attach_colorterm = ts && (! strcmp(ts, "truecolor")
+				       || ! strcmp(ts, "24bit"));
 		GetTTY(0, &attach_Mode);
 	}
 
@@ -1505,20 +1503,22 @@ void MakeNewEnv(void)
 	for (op = environ; *op; ++op) ;
 	if (NewEnv)
 		free((char *)NewEnv);
-	NewEnv = np = malloc((unsigned)(op - environ + 7 + 1) * sizeof(char *));
+	NewEnv = np = malloc((unsigned)(op - environ + 8 + 1) * sizeof(char *));
 	if (!NewEnv)
 		Panic(0, "%s", strnomem);
 	sprintf(stybuf, "STY=%s", strlen(SocketName) <= MAXSTR - 5 ? SocketName : "?");
 	*np++ = stybuf;		/* NewEnv[0] */
 	*np++ = Term;		/* NewEnv[1] */
-	np++;			/* room for SHELL */
-	np += 2;		/* room for TERMCAP and WINDOW */
+	np += 3;		/* room for SHELL, TERMCAP, and WINDOW */
+	if (hastruecolor)
+		*np++ = "COLORTERM=truecolor";
 
 	for (op = environ; *op; ++op) {
 		if (!IsSymbol(*op, "TERM") && !IsSymbol(*op, "TERMCAP")
 		    && !IsSymbol(*op, "STY") && !IsSymbol(*op, "WINDOW")
 		    && !IsSymbol(*op, "SCREENCAP") && !IsSymbol(*op, "SHELL")
 		    && !IsSymbol(*op, "LINES") && !IsSymbol(*op, "COLUMNS")
+		    && !IsSymbol(*op, "COLORTERM")
 		    )
 			*np++ = *op;
 	}
