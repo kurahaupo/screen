@@ -57,13 +57,17 @@ static void setseqoff(unsigned char *, int, int);
 static int addmapseq(char *, int, int);
 static int remmapseq(char *, int);
 
-static char Termcap[TERMCAP_BUFSIZE + 8] = "TERMCAP=";	/* new termcap +8:"TERMCAP=" */
-#define limTermcap  (Termcap + sizeof Termcap)
-static size_t Termcaplen = 0;
+char Term[MAXSTR + 5] = "TERM=";
+#define limTerm		(Term + sizeof Term)
+#define Termname	(Term + 5)
+#define limTermname	limTerm
+enum { sizeof_Termname = sizeof Term - 5 };
 
-char Term[MAXSTR + 5];			/* +5: "TERM=" */
-#define Termname (Term + 5)
-#define limTerm  (Term + sizeof Term)
+static char Termcap[TERMCAP_BUFSIZE + 8] = "TERMCAP=";
+#define limTermcap	(Termcap + sizeof Termcap)
+#define Termdef		(Termcap + 8)
+#define limTermdef	limTermcap
+static char *endTermcap = Termcap;
 
 char screenterm[MAXTERMLEN + 1];	/* new $TERM, usually "screen" */
 
@@ -672,16 +676,17 @@ static int remmapseq(char *seq, int k)
  */
 static inline bool AddCapSprintf(const char *fmt, ...)
 {
-	char *const endTermcap = Termcap + Termcaplen;
-	if (limTermcap - endTermcap <= 1)
+	if (endTermcap >= limTermcap - 1)
 		return false;
 	va_list v;
 	va_start(v, fmt);
 	int n = vsnprintf(endTermcap, limTermcap - endTermcap, fmt, v);
 	va_end(v);
-	if (n < 0 || n >= limTermcap - endTermcap)
+	if (n < 0 || n >= limTermcap - endTermcap) {
+		limTermcap[-1] = 0;
 		return false;
-	Termcaplen += n;
+	}
+	endTermcap += n;
 	return true;
 }
 
@@ -690,15 +695,21 @@ static inline bool AddCapSprintf(const char *fmt, ...)
  */
 static inline bool AddCap(const char *s)
 {
-	char *const endTermcap = Termcap + Termcaplen;
-	if (limTermcap - endTermcap <= 1)
+# if defined USE_SIMPLE_ADDCAP
+	return AddCapSprintf("%s", s);
+#else
+	if (endTermcap >= limTermcap - 1)
 		return false;
 	int n = strlen(s);
-	if (n < 0 || n >= limTermcap - endTermcap)
+	if (n < 0 || n >= limTermcap - endTermcap) {
+		limTermcap[-1] = 0;
 		return false;
+	}
 	memcpy(endTermcap, s, n + 1);
-	Termcaplen += n;
+	endTermcap += n;
+//	endTermcap = stpcpy(endTermcap, s);
 	return true;
+#endif
 }
 
 /*
@@ -722,7 +733,7 @@ char *MakeTermcap(bool aflag)
 	}
 	if ((s = getenv("SCREENCAP")) && strlen(s) < TERMCAP_BUFSIZE) {
 		sprintf(Termcap, "TERMCAP=%s", s);
-		strcpy(Term, "TERM=screen");
+		strcpy(Termname, "screen");
 		return Termcap;
 	}
 	if (*screenterm == '\0' || strlen(screenterm) > MAXSTR - 3) {
@@ -753,10 +764,11 @@ char *MakeTermcap(bool aflag)
 		strcpy(Termname, "vt100");
 	} while (0);		/* Goto-free programming... */
 
-	if (strlen(Termname) > TERMCAP_BUFSIZE - 35)
+	endTermcap = Termdef;
+
+	if (!AddCapSprintf("SC|%s|VT 300/ISO-6429 virtual terminal:", Termname))
 		strcpy(Termname, "too_long");
-	Termcaplen = 0;
-	AddCapSprintf("TERMCAP=SC|%s|VT 300/ISO-6429 virtual terminal:", Termname);
+
 	if (extra_outcap && *extra_outcap) {
 		const char *cp, *p;
 		for (cp = extra_outcap; (p = strchr(cp, ':')); cp = p)
@@ -854,9 +866,9 @@ char *MakeTermcap(bool aflag)
 			if (i >= T_KEYPAD)	/* don't put keypad codes in TERMCAP */
 				continue;	/* - makes it too big */
 #if (TERMCAP_BUFSIZE < 1024)
-			if (i >= T_FEXTRA && i < T_BACKTAB)	/* also skip extra vt220 keys */
-				continue;
-			if (i > T_BACKTAB && i < T_NAVIGATE)	/* more vt220 keys */
+			if (i >= T_FEXTRA
+			 && i < T_NAVIGATE
+			 && i != T_BACKTAB)	/* also skip extra vt220 keys */
 				continue;
 #endif
 			if (i >= T_CURSOR && i < T_OCAPS) {
