@@ -119,10 +119,8 @@ uninstall:
 	rm -f $(DESTDIR)$(ETCSCREENRC)
 	cd doc; $(MAKE) uninstall
 
-term.h: term.c term.sh
+kmapdef.c term.h: term.c term.sh
 	AWK=$(AWK) srcdir=$(srcdir) sh $(srcdir)/term.sh
-
-kmapdef.c: term.h
 
 comm.h: comm.c comm.sh config.h term.h
 	AWK=$(AWK) CC="$(CC) $(CFLAGS)" srcdir=${srcdir} sh $(srcdir)/comm.sh
