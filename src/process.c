@@ -6229,8 +6229,7 @@ int CompileKeys(char *s, int sl, unsigned char *array)
 			sl -= 2;
 			value = *(unsigned char *)s++;
 			array[value] = key;
-		}
-		while (*s == '=' && sl >= 2);
+		} while (*s == '=' && sl >= 2);
 		if (sl == 0)
 			break;
 		if (*s++ != ':')
