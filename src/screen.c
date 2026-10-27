@@ -459,7 +459,7 @@ int main(int argc, char **argv)
 						break;
 					case '\0':
 						ap--;
-						/* FALLTHROUGH */
+						FALLTHROUGH;
 					case 'y':
 					case '1':
 						nwin_options.flowflag = FLOW_OFF;
@@ -495,7 +495,7 @@ int main(int argc, char **argv)
 						break;
 					case '\0':
 						ap--;
-						/* FALLTHROUGH */
+						FALLTHROUGH;
 					case 'y':
 					case '1':
 						nwin_options.lflag = 1;
@@ -581,7 +581,7 @@ int main(int argc, char **argv)
 					break;
 				case 'd':
 					dflag = 1;
-					/* FALLTHROUGH */
+					FALLTHROUGH;
 				case 'D':
 					if (!dflag)
 						dflag = 2;
