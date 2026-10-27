@@ -120,12 +120,12 @@ void setbacktick(int num, int lifespan, int tick, char **cmdv)
 		return;
 	}
 	if (!bt) {
-		bt = malloc(sizeof(struct backtick));
+		bt = malloc(sizeof *bt);
 		if (!bt) {
 			Msg(0, "%s", strnomem);
 			return;
 		}
-		memset(bt, 0, sizeof(struct backtick));
+		memset(bt, 0, sizeof *bt);
 		bt->next = NULL;
 		*btp = bt;
 	}
@@ -168,12 +168,12 @@ char *runbacktick(Backtick *bt, int *tickp, time_t now)
 	if (f == -1)
 		return bt->result;
 	i = 0;
-	while ((l = read(f, bt->result + i, ARRAY_SIZE(bt->result) - i)) > 0) {
+	while ((l = read(f, bt->result + i, sizeof bt->result - i)) > 0) {
 		i += l;
 		for (j = 1; j < l; j++)
 			if (bt->result[i - j - 1] == '\n')
 				break;
-		if (j == l && i == ARRAY_SIZE(bt->result)) {
+		if (j == l && i == sizeof bt->result) {
 			j = ARRAY_SIZE(bt->result) / 2;
 			l = j + 1;
 		}
