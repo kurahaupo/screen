@@ -441,14 +441,14 @@ char *DoSu(struct acluser **up, char *name, char *pw1, char *pw2)
 			if (!PasswordMatches(pw2, pass)) {
 				sorry++;
 			}
-		} else /* no password provided */ if (*pass)	/* but need one */
+		} else if (*pass)	/* no password provided, but need one */
 			sorry++;
 #endif				/* CHECKLOGIN */
 		if (pw1 && *pw1 && *pw1 != '\377') {	/* provided a screen password */
 			if (!PasswordMatches(pw1, u->u_password)) {
 				sorry++;
 			}
-		} else /* no password provided */ if (*u->u_password)	/* but need one */
+		} else if (*u->u_password)	/* no password provided, but need one */
 			sorry++;
 	}
 
