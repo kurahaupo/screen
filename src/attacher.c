@@ -99,7 +99,6 @@ static inline size_t xstrlcpy(char *dst, const char *src, size_t size)
 
 # define XSCPY(a, x) xstrlcpy(a, x, IS_ARRAY(a) * sizeof a)
 
-
 /*
  *  Send message to a screen backend.
  *  returns 1 if we could attach one, or 0 if none.
