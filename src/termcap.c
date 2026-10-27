@@ -909,11 +909,11 @@ void DumpTermcap(int aflag, FILE *f)
 	const char *p, *pe;
 	int n, col = 0;
 
-	if ((p = index(MakeTermcap(aflag), '=')) == NULL)
+	if ((p = strchr(MakeTermcap(aflag), '=')) == NULL)
 		return;
 	p++;
 	/* write termcap entry with wrapping */
-	while ((pe = index(p, ':'))) {
+	while ((pe = strchr(p, ':'))) {
 		n = pe - p + 1;
 		if ((col > 8) && ((col + n) > TERMCAP_MAX_WIDTH)) {
 			fwrite("\\\n\t:", 1, 4, f);
