@@ -4187,13 +4187,11 @@ static void DoCommandFocus(struct action *act)
 	if (!*args || !strcmp(*args, "next"))
 		cv = D_forecv->c_next ? D_forecv->c_next : D_cvlist;
 	else if (!strcmp(*args, "prev")) {
-		for (cv = D_cvlist; cv->c_next && cv->c_next != D_forecv; cv = cv->c_next)
-			;
+		for (cv = D_cvlist; cv->c_next && cv->c_next != D_forecv; cv = cv->c_next) {}
 	} else if (!strcmp(*args, "top"))
 		cv = D_cvlist;
 	else if (!strcmp(*args, "bottom")) {
-		for (cv = D_cvlist; cv->c_next; cv = cv->c_next)
-			;
+		for (cv = D_cvlist; cv->c_next; cv = cv->c_next) {}
 	} else if (!strcmp(*args, "up"))
 		cv = FindCanvas(D_forecv->c_xs, D_forecv->c_ys - 1);
 	else if (!strcmp(*args, "down"))
@@ -4569,8 +4567,7 @@ static void DoCommandLayout(struct action *act)
 		Layout *lay = display ? D_layout : layout_attach;
 		Layout *target = lay;
 		if (lay) {
-			for (lay = layouts; lay->lay_next && lay->lay_next != target; lay = lay->lay_next)
-				;
+			for (lay = layouts; lay->lay_next && lay->lay_next != target; lay = lay->lay_next) {}
 		} else
 			lay = layouts;
 
