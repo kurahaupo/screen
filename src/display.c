@@ -2798,12 +2798,11 @@ static void disp_readev_fn(Event *event, void *data)
 static void disp_processinput(Display *display, unsigned char *buf, size_t size)
 {
 	if (D_encoding != (D_forecv ? D_forecv->c_layer->l_encoding : 0)) {
-		char buf2[IOSIZE * 2 + 10];
+		char buf2[IOSIZE * 2 + 10], *p = buf2;
 		int const enc = D_forecv ? D_forecv->c_layer->l_encoding : 0;
 		size_t const MaxEncLen = 9U;
-		size_t j = 0;
-		for (size_t i = 0; i < size && j < ARRAY_SIZE(buf2) - MaxEncLen ; i++) {
-			int c = ((unsigned char *)buf)[i];
+		for (size_t i = 0; i < size && p < ARRAY_END(buf2) - MaxEncLen ; i++) {
+			int c = buf[i];
 			c = DecodeChar(c, D_encoding, &D_decodestate);
 			if (c == -2)
 				i--;	/* try char again */
@@ -2811,15 +2810,15 @@ static void disp_processinput(Display *display, unsigned char *buf, size_t size)
 				continue;
 			if (pastefont) {
 				int font = FONT_LATIN1;
-				j += EncodeChar(buf2 + j, c, enc, &font);
-				j += EncodeChar(buf2 + j, -1, enc, &font);
+				p += EncodeChar(p, c, enc, &font);
+				p += EncodeChar(p, -1, enc, &font);
 			} else
-				j += EncodeChar(buf2 + j, c, enc, NULL);
+				p += EncodeChar(p, c, enc, NULL);
 		}
-		D_processinput(buf2, j);
+		D_processinput(buf2, p - buf2);
 		return;
 	}
-	D_processinput((char *)buf, size);
+	D_processinput((void *)buf, size);
 }
 
 static void disp_mousetimeout_fn(Event *event, void *data)
