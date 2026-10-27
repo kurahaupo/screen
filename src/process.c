@@ -3646,8 +3646,7 @@ static void DoCommandAclgrp(struct action *act)
 		g = u->u_group;
 		while (g) {
 			ngroups++;
-			sprintf(p, "%s ", g->u->u_name);
-			p += strlen(p);
+			p += sprintf(p, "%s ", g->u->u_name);
 			if (p > buf + 200)
 				break;
 			g = g->next;
@@ -5682,8 +5681,7 @@ char *AddWindows(WinMsgBufContext *wmbc, int len, int flags, int where)
 			rend = renditions[REND_SILENCE];
 		if (rend != 0)
 			AddWinMsgRend(wmbc->buf, s, rend);
-		sprintf(s, "%d", win->w_number);
-		s += strlen(s);
+		s += sprintf(s, "%d", win->w_number);
 		if (!(flags & 2)) {
 			s = AddWindowFlags(s, len, win);
 		}
@@ -5828,55 +5826,50 @@ static void ShowInfo(void)
 	p = buf;
 	if (buf < (p += GetAnsiStatus(wp, p)))
 		*p++ = ' ';
-	sprintf(p, "(%d,%d)/(%d,%d)", wp->w_x + 1, wp->w_y + 1, wp->w_width, wp->w_height);
-	sprintf(p += strlen(p), "+%d", wp->w_histheight);
-	sprintf(p += strlen(p),
+	p += sprintf(p, "(%d,%d)/(%d,%d)", wp->w_x + 1, wp->w_y + 1, wp->w_width, wp->w_height);
+	p += sprintf(p, "+%d", wp->w_histheight);
+	p += sprintf(p,
 		" %c%sflow",
 		(wp->w_flow & FLOW_ON) ? '+' : '-',
 		(wp->w_flow & FLOW_AUTOFLAG) ? "" : ((wp->w_flow & FLOW_AUTO) ? "(+)" : "(-)"));
 	if (!wp->w_wrap)
-		sprintf(p += strlen(p), " -wrap");
+		p = stpcpy(p, " -wrap");
 	if (wp->w_insert)
-		sprintf(p += strlen(p), " ins");
+		p = stpcpy(p, " ins");
 	if (wp->w_origin)
-		sprintf(p += strlen(p), " org");
+		p = stpcpy(p, " org");
 	if (wp->w_keypad)
-		sprintf(p += strlen(p), " app");
+		p = stpcpy(p, " app");
 	if (wp->w_log)
-		sprintf(p += strlen(p), " log");
+		p = stpcpy(p, " log");
 	if (wp->w_monitor != MON_OFF && (ACLBYTE(wp->w_mon_notify, D_user->u_id) & ACLBIT(D_user->u_id)))
-		sprintf(p += strlen(p), " mon");
+		p = stpcpy(p, " mon");
 	if (wp->w_mouse)
-		sprintf(p += strlen(p), " mouse");
+		p = stpcpy(p, " mouse");
 	if (!wp->w_c1)
-		sprintf(p += strlen(p), " -c1");
+		p = stpcpy(p, " -c1");
 	if (wp->w_norefresh)
-		sprintf(p += strlen(p), " nored");
+		p = stpcpy(p, " nored");
 
-	p += strlen(p);
 	if (wp->w_encoding && (display == NULL || D_encoding != wp->w_encoding || EncodingDefFont(wp->w_encoding) <= 0)) {
 		*p++ = ' ';
-		strcpy(p, EncodingName(wp->w_encoding));
-		p += strlen(p);
+		p = stpcpy(p, EncodingName(wp->w_encoding));
 	}
 	if (wp->w_encoding != UTF8)
 		if (display && (D_CC0 || (D_CS0 && *D_CS0))) {
 			if (wp->w_gr == 2) {
-				sprintf(p, " G%c", wp->w_Charset + '0');
+				p += sprintf(p, " G%c", wp->w_Charset + '0');
 				if (wp->w_FontE >= ' ')
-					p[3] = wp->w_FontE;
+					*p++ = wp->w_FontE;
 				else {
-					p[3] = '^';
-					p[4] = wp->w_FontE ^ 0x40;
-					p++;
+					*p++ = '^';
+					*p++ = wp->w_FontE ^ 0x40;
 				}
-				p[4] = '[';
-				p++;
+				*p++ = '[';
 			} else if (wp->w_gr)
-				sprintf(p++, " G%c%c[", wp->w_Charset + '0', wp->w_CharsetR + '0');
+				p += sprintf(p, " G%c%c[", wp->w_Charset + '0', wp->w_CharsetR + '0');
 			else
-				sprintf(p, " G%c[", wp->w_Charset + '0');
-			p += 4;
+				p += sprintf(p, " G%c[", wp->w_Charset + '0');
 			for (i = 0; i < 4; i++) {
 				if (wp->w_charsets[i] == ASCII)
 					*p++ = 'B';
@@ -5913,8 +5906,7 @@ static void ShowDInfo(void)
 		return;
 	p = buf;
 	l = 512;
-	sprintf(p, "(%d,%d)", D_width, D_height);
-	w = strlen(p);
+	w = sprintf(p, "(%d,%d)", D_width, D_height);
 	l -= w;
 	p += w;
 	if (D_encoding) {
