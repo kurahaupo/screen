@@ -242,7 +242,8 @@ int logfflush(Log *l)
 			r |= fflush(l->fp);
 			l->flushcount++;
 			changed_logfile(l);
-	} else {
+		}
+	else {
 		if (stolen_logfile(l) && lf_reopen_fn(l->name, fileno(l->fp), l))
 			return -1;
 		r = fflush(l->fp);
