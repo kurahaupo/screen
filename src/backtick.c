@@ -40,7 +40,7 @@
 /* TODO: get rid of global var */
 static Backtick *backticks;
 
-static void backtick_filter(struct backtick *bt)
+static void backtick_filter(Backtick *bt)
 {
 	char *p, *q;
 	int c;
@@ -56,10 +56,10 @@ static void backtick_filter(struct backtick *bt)
 
 static void backtick_fn(Event *ev, void *data)
 {
-	struct backtick *bt;
+	Backtick *bt;
 	int i, j, k, l;
 
-	bt = (struct backtick *)data;
+	bt = (Backtick *)data;
 	i = bt->bufi;
 	l = read(ev->fd, bt->buf + i, MAXSTR - i);
 	if (l <= 0) {
@@ -96,7 +96,7 @@ static void backtick_fn(Event *ev, void *data)
 
 void setbacktick(int num, int lifespan, int tick, char **cmdv)
 {
-	struct backtick **btp, *bt;
+	Backtick **btp, *bt;
 	char **v;
 
 	for (btp = &backticks; (bt = *btp) != NULL; btp = &bt->next)
