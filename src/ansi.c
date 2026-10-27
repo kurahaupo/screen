@@ -157,7 +157,7 @@ static void WChangeSize(Window *, int, int);
 	case '\a':    WBell(win, visual_bell); Action break; \
 	case '\b':    BackSpace(win);          Action break; \
 	case '\t':    ForwardTab(win);         Action break; \
-	case '\n':    if (win->w_autoaka) FindAKA(win); /*FALLTHROUGH*/ \
+	case '\n':    if (win->w_autoaka) FindAKA(win); FALLTHROUGH; \
 	case '\v':    LineFeed(win, 0);        Action break; \
 	case '\r':    Return(win);             Action break; \
 	case '\016':  MapCharset(win, G1);     Action break; \
@@ -326,7 +326,7 @@ void WriteString(Window *win, char *buf, size_t len)
 						break;
 					}
 				c = '\\';
-				/* FALLTHROUGH */
+				FALLTHROUGH;
 			case STRESC:
 				switch (c) {
 				case '\\':
@@ -427,7 +427,7 @@ void WriteString(Window *win, char *buf, size_t len)
 					break;
 				case ':':
 					cs->has_colons = true;
-					/*FALLTHRU*/
+					FALLTHROUGH;
 				case ';':
 					if (cs->num_params < MAX_CS_PARAMS) {
 						cs->seps[cs->num_params] = c;
@@ -1279,7 +1279,7 @@ static int StringEnd(Window *win)
 		if (win->w_stringp > win->w_string)
 			memmove(win->w_string, p, win->w_stringp - win->w_string);
 		*win->w_stringp = '\0';
-		/* FALLTHROUGH */
+		FALLTHROUGH;
 	case APC:
 		if (win->w_hstatus) {
 			if (strcmp(win->w_hstatus, win->w_string) == 0)
@@ -1786,13 +1786,13 @@ static void SelectRendition(Window *win)
 		switch (j / 10) {
 		case 9:
 			bright = 1;
-			/*FALLTHRU*/
+			FALLTHROUGH;
 		case 3:
 			target_color = &colorfg;
 			break;
 		case 10:
 			bright = 1;
-			/*FALLTHRU*/
+			FALLTHROUGH;
 		case 4:
 			target_color = &colorbg;
 			break;

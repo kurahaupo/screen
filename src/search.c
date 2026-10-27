@@ -241,13 +241,15 @@ static void is_process(char *p, size_t len, void *data)
 	switch (*p) {
 	case '\007':		/* CTRL-G */
 		pos = markdata->isstartpos;
-	 /*FALLTHROUGH*/ case '\033':	/* ESC */
+		FALLTHROUGH;
+	case '\033':	/* ESC */
 		*p = 0;
 		break;
 	case '\013':		/* CTRL-K */
 	case '\027':		/* CTRL-W */
 		markdata->isistrl = 1;
-	 /*FALLTHROUGH*/ case '\b':
+		FALLTHROUGH;
+	case '\b':
 	case '\177':
 		if (markdata->isistrl == 0)
 			return;
