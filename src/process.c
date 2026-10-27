@@ -5854,8 +5854,7 @@ static void ShowInfo(void)
 		sprintf(p += strlen(p), " nored");
 
 	p += strlen(p);
-	if (wp->w_encoding
-	    && (display == NULL || D_encoding != wp->w_encoding || EncodingDefFont(wp->w_encoding) <= 0)) {
+	if (wp->w_encoding && (display == NULL || D_encoding != wp->w_encoding || EncodingDefFont(wp->w_encoding) <= 0)) {
 		*p++ = ' ';
 		strcpy(p, EncodingName(wp->w_encoding));
 		p += strlen(p);
