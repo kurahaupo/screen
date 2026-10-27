@@ -3947,6 +3947,11 @@ static void DoCommandHstatus(struct action *act)
 	WindowChanged(fore, WINESC_HSTATUS);
 }
 
+static inline bool dot_or_0_3(char c)
+{
+	return c == '.' || c >= '0' && c <= '3';
+}
+
 static void DoCommandDefcharset(struct action *act)
 {
 	char **args = act->args;
@@ -3964,9 +3969,8 @@ static void DoCommandDefcharset(struct action *act)
 		OutputMsg(0, "%s: defcharset: string has illegal size.", rc_name);
 		return;
 	}
-	if (len > 4
-	    && (((args[0][4] < '0' || args[0][4] > '3') && args[0][4] != '.')
-		|| ((args[0][5] < '0' || args[0][5] > '3') && args[0][5] && args[0][5] != '.'))) {
+	if (len > 4 && ! dot_or_0_3(args[0][4])
+	 || len > 5 && ! dot_or_0_3(args[0][5])) {
 		OutputMsg(0, "%s: defcharset: illegal mapping number.", rc_name);
 		return;
 	}
@@ -3984,7 +3988,7 @@ static void DoCommandCharset(struct action *act)
 		char buf[256] = { 0 };
 		if (nwin_default.charset)
 			AddXChars(buf, ARRAY_SIZE(buf), nwin_default.charset);
-		OutputMsg(0, "default charset is '%s'", buf);
+		OutputMsg(0, "charset is '%s'", buf);
 		return;
 	}
 	len = strlen(*args);
@@ -3992,9 +3996,8 @@ static void DoCommandCharset(struct action *act)
 		OutputMsg(0, "%s: charset: string has illegal size.", rc_name);
 		return;
 	}
-	if (len > 4
-	    && (((args[0][4] < '0' || args[0][4] > '3') && args[0][4] != '.')
-		|| ((args[0][5] < '0' || args[0][5] > '3') && args[0][5] && args[0][5] != '.'))) {
+	if (len > 4 && ! dot_or_0_3(args[0][4])
+	 || len > 5 && ! dot_or_0_3(args[0][5])) {
 		OutputMsg(0, "%s: charset: illegal mapping number.", rc_name);
 		return;
 	}
