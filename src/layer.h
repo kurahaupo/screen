@@ -127,22 +127,27 @@ struct Layer {
 		simple_cmd;				\
 	LAY_CALL_UP_END()		/* obliging ';' */
 
-#define LAY_DISPLAYS(l, fn) do				\
-	{ 						\
-	  Display *olddisplay = display;		\
-	  Canvas *cv;				\
-	  for (display = displays; display; display = display->d_next) \
-	    {						\
-	      for (cv = D_cvlist; cv; cv = cv->c_next)	\
-		if (cv->c_layer == l)			\
-		  break;				\
-	      if (cv == NULL)				\
-		continue;				\
-	      fn;					\
-	    }						\
-	  display = olddisplay;				\
-	} while(0)
+#define LAY_DISPLAYS_START(l)				\
+	do {						\
+		Display *olddisplay = display;		\
+		Canvas *cv;				\
+		for (display = displays; display; display = display->d_next) { \
+			for (cv = D_cvlist; cv; cv = cv->c_next) \
+				if (cv->c_layer == l)	\
+					break;		\
+			if (cv == NULL)			\
+				continue;		\
+			(void)0		/* obliging ';' */
 
+#define LAY_DISPLAYS_END(l)				\
+		}					\
+		display = olddisplay;			\
+	} while (0)			/* obliging ';' */
+
+#define LAY_DISPLAYS(l, simple_cmd)			\
+	LAY_DISPLAYS_START(l);				\
+		simple_cmd;				\
+	LAY_DISPLAYS_END(l)		/* obliging ';' */
 
 /**
  * (Un)Pauses a layer.
