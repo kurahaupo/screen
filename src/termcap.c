@@ -28,16 +28,11 @@
 
 #include "config.h"
 
-#include "termcap.h"
-
 #include <sys/types.h>
-#include <stdint.h>
-#include <ctype.h>
 
-/* to get index() declaration on Solaris */
-#if defined(_sun_)
-# include <strings.h>
-#endif
+#include <ctype.h>
+#include <stdint.h>
+#include <string.h>
 
 #include "screen.h"
 
@@ -46,6 +41,7 @@
 #include "misc.h"
 #include "process.h"
 #include "resize.h"
+#include "termcap.h"
 
 static bool AddCap(const char *);
 static bool AddCapSprintf(const char *, ...);
