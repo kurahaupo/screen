@@ -5959,7 +5959,7 @@ static void ColonFin(char *buf, size_t len, void *data UNUSED)
 		int showmessage = 0;
 		char *s = buf;
 
-		while (*s && (uintptr_t) (s - buf) < len)
+		while (*s && (uintptr_t)(s - buf) < len)
 			if (*s++ == ' ')
 				return;
 
@@ -5981,7 +5981,7 @@ static void ColonFin(char *buf, size_t len, void *data UNUSED)
 				for (l = m - 1; l >= 0 && strncmp(buf, comms[l].name, len) == 0; l--) ;
 				for (m = ++l;
 				     m <= r && strncmp(buf, comms[m].name, len) == 0
-				     && (uintptr_t) (s - mbuf) < ARRAY_SIZE(mbuf); m++)
+				     && (uintptr_t)(s - mbuf) < ARRAY_SIZE(mbuf); m++)
 					s += snprintf(s, ARRAY_SIZE(mbuf) - (s - mbuf), " %s", comms[m].name);
 				if (l < m - 1) {
 					if (showmessage)
@@ -6972,12 +6972,12 @@ uint64_t ParseAttrColor(char *str, int msgok)
 		}
 	}
 
-	r = (((uint64_t) attr & 0x0FF) << 56);
+	r = (((uint64_t)attr & 0x0FF) << 56);
 
-	r |= (((uint64_t) bg & 0x0FFFFFF) << 24);
-	r |= ((uint64_t) fg & 0x0FFFFFF);
-	r |= ((uint64_t) fm << 48);
-	r |= ((uint64_t) bm << 52);
+	r |= (((uint64_t)bg & 0x0FFFFFF) << 24);
+	r |= ((uint64_t)fg & 0x0FFFFFF);
+	r |= ((uint64_t)fm << 48);
+	r |= ((uint64_t)bm << 52);
 
 	return r;
 }
