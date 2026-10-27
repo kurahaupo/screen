@@ -865,8 +865,7 @@ void ReceiveMsg(void)
 	case MSG_CONT:
 		if (display && D_userpid != 0 && kill(D_userpid, 0) == 0)
 			break;	/* Intruder Alert */
-		/* FALLTHROUGH */
-
+		FALLTHROUGH;
 	case MSG_ATTACH:
 		if (CreateTempDisplay(&m, recvfd, win))
 			break;

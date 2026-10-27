@@ -161,7 +161,7 @@ static void HelpProcess(char **ppbuf, size_t *plen)
 		case ' ':
 			if (helppage() == 0)
 				break;
-			/* FALLTHROUGH */
+			FALLTHROUGH;
 		case '\r':
 		case '\n':
 			done = true;
@@ -430,7 +430,7 @@ static void CopyrightProcess(char **ppbuf, size_t *plen)
 				copypage();
 				break;
 			}
-			/* FALLTHROUGH */
+			FALLTHROUGH;
 		case '\r':
 		case '\n':
 			CopyrightAbort();
@@ -701,7 +701,7 @@ static void BindkeyProcess(char **ppbuf, size_t *plen)
 				bindkeypage();
 				break;
 			}
-			/* FALLTHROUGH */
+			FALLTHROUGH;
 		case '\r':
 		case '\n':
 			done = 1;
@@ -820,7 +820,7 @@ static void DisplaysProcess(char **ppbuf, int *plen)
 		case ' ':
 			displayspage();
 			break;
-			/* FALLTHROUGH */
+			FALLTHROUGH;
 		case '\r':
 		case '\n':
 			HelpAbort();
@@ -923,7 +923,7 @@ static void displayspage(void)
 #else
 							'r', 'w', 'x'
 #endif
-			);
+			    );
 		}
 		leftline(tbuf, y);
 		y++;

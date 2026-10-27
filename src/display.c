@@ -813,7 +813,7 @@ void GotoPos(int x2, int y2)
 	case M_CR:
 		AddCStr(D_CR);
 		D_x = 0;
-		/* FALLTHROUGH */
+		FALLTHROUGH;
 	case M_RW:
 		break;
 	default:

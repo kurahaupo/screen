@@ -38,6 +38,7 @@ int AddXChars(char *, int, char *);
 				typeof(*(x)) (*)[]: UNSAFE_ARRAY_SIZE(x), \
 				default: sizeof(char[-1]) /* error: expression is not an array */ \
 			)
+# define FALLTHROUGH	[[fallthrough]]
 
 #else
 
@@ -45,6 +46,7 @@ int AddXChars(char *, int, char *);
 
 #  define UNUSED	__attribute__((__unused__))
 #  define IS_ARRAY(x)	!__builtin_types_compatible_p(__typeof__(x), __typeof__(*(x))*)
+#  define FALLTHROUGH	__attribute__((fallthrough))
 
 # else
 
@@ -67,9 +69,14 @@ int AddXChars(char *, int, char *);
 # else
 #  define MARK_UNUSED(x) (void)(x);
 # endif
-#endif
+#endif /*MARK_UNUSED*/
 
 #ifndef UNUSED
 # define UNUSED /*UNUSED*/
-#endif
+#endif /*UNUSED*/
+
+#ifndef FALLTHROUGH
+# define FALLTHROUGH	((void)0) /*FALLTHROUGH*/
+#endif /*FALLTHROUGH*/
+
 #endif				/* SCREEN_MISC_H */

@@ -1326,7 +1326,7 @@ static void DoCommandAt(struct action *act)
 		break;
 	case '#':		/* window */
 		n--;
-		/* FALLTHROUGH */
+		FALLTHROUGH;
 	default:
 		{
 			int ch;
