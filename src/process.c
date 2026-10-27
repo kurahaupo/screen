@@ -2206,7 +2206,8 @@ static void DoCommandHistory(struct action *act)
 		if (enc == (*s == '.' ? user->u_plop.enc : plop_tab[(int)(unsigned char)*s].enc)) {
 			MakePaster(&fore->w_paster,
 				   *s == '.' ? user->u_plop.buf : plop_tab[(int)(unsigned char)*s].buf,
-				   l, 0);
+				   l,
+				   0);
 			return;
 		}
 	/*
@@ -2298,7 +2299,8 @@ static void DoCommandPaste(struct action *act)
 				l += RecodeBuf((unsigned char *)user->u_plop.buf,
 					       user->u_plop.len,
 					       user->u_plop.enc,
-					       enc, NULL);
+					       enc,
+					       NULL);
 			else
 				l += user->u_plop.len;
 		} else {
@@ -2308,7 +2310,8 @@ static void DoCommandPaste(struct action *act)
 				l += RecodeBuf((unsigned char *)plop_tab[(int)(unsigned char)ch].buf,
 					       plop_tab[(int)(unsigned char)ch].len,
 					       plop_tab[(int)(unsigned char)ch].enc,
-					       enc, NULL);
+					       enc,
+					       NULL);
 			else
 				l += plop_tab[(int)(unsigned char)ch].len;
 		}
