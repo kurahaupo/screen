@@ -842,6 +842,42 @@ static size_t CountArgs(char **args)
 	return argc;
 }
 
+#ifdef FANCY_ERROR_REPORTING
+
+static char *nums[] = { "no", "one", "two", "three", "four", "five" };
+
+static inline int lo_bit(int i)         { return i & -i; }
+static inline int hi_bits(int i)        { return i ^ lo_bit(i); }
+static inline int range_end_bit(int i)  { return (i + lo_bit(i)) >> 1; }	// top of a consecutive range
+static inline bool is_single_bit(int i) { return ! hi_bits(i); }
+
+# if defined __GNUC__ || defined __clang__
+static inline int log_lo_bit(int x)
+{
+	x &= ARGS_MASK;
+	return __builtin_ffs(x) - 1;
+}
+# else
+static inline int log_lo_bit(int x)
+{
+	/* Make sure the following are kept in sync with ARGS_ANY */
+	/* lookup for base-2 logarithm */
+	static const int blog[2 << ARGS_ANY] = {
+		[1 << 0] = 1,
+		[1 << 1] = 2,
+		[1 << 2] = 3,
+		[1 << 3] = 4,
+		[1 << 4] = 5,
+		/* fill in more entries as necessary */
+		[1 << ARGS_ANY] = ARGS_ANY+1,
+	};
+	x &= ARGS_MASK;
+	return blog[x] - 1;
+}
+# endif
+
+#endif	/*FANCY_ERROR_REPORTING*/
+
 static bool CheckArgCount(struct comm *c, int argc)
 {
 	int allowed_counts_mask = c->flags & ARGS_MASK;
@@ -850,15 +886,63 @@ static bool CheckArgCount(struct comm *c, int argc)
 					 argc  : ARGS_ANY))
 		return true;
 
-	Msg(0, "%s: %s: wrong number of arguments", rc_name, c->name);
+	/* From here to the end of this function is just trying to be
+	 * very specific about the phrasing of the error message. */
+	char const *name = c->name;
+#ifdef FANCY_ERROR_REPORTING
+	switch (allowed_counts_mask) {
+	  case ARGS(0): Msg(0, "%s: %s: no arguments allowed", rc_name, name); return false;
+	  case ARGS(1): Msg(0, "%s: %s: exactly one argument required", rc_name, name); return false;
+	  case ARGS(1)
+	     | ARGS(2)
+	     | ARGS(4): Msg(0, "%s: %s: one, two, or four arguments required", rc_name, name); return false;
+	  case ARGS_ATLEAST(1):
+			Msg(0, "%s: %s: at least one argument required", rc_name, name); return false;
+	}
 
+	bool or_more = allowed_counts_mask & ARGS_MORE;
+	const int first = log_lo_bit(lo_bit(allowed_counts_mask));
+	if (is_single_bit(allowed_counts_mask) && !or_more) {
+		/* Exactly one allowed count, not including "or more" */
+		Msg(0, "%s: %s: exactly %s arguments required", rc_name, name, nums[first]);
+		return false;
+	}
+	if (is_single_bit(hi_bits(allowed_counts_mask)) && !or_more) {
+		/* Exactly two allowed counts, not including "or more" */
+		Msg(0, "%s: %s: %s or %s arguments required", rc_name, name,
+		    nums[first], nums[log_lo_bit(hi_bits(allowed_counts_mask))]);
+		return false;
+	}
+	if (is_single_bit(range_end_bit(allowed_counts_mask))) {
+		/* Contiguous range of allowed counts.
+		 * Use bitwise carry propagation to find the top of the range.
+		 * Since we've already checked is_single_bit(allowed_counts_mask),
+		 * we know that first ≠ range_top (except for first = hi = ARGS_MORE,
+		 * but we will still correctly render that as "five or more")
+		 */
+		const int range_top = log_lo_bit(range_end_bit(allowed_counts_mask));
+		if (first == 0)
+			Msg(0, "%s: %s: no more than %s arguments allowed",
+			    rc_name, name, nums[range_top]);
+		else if (range_top == ARGS_ANY)
+			Msg(0, "%s: %s: at least %s arguments required",
+			    rc_name, name, nums[first]);
+		else
+			Msg(0, "%s: %s: between %s and %s arguments required",
+			    rc_name, name, nums[first], nums[range_top]);
+		return false;
+	}
+#endif	/*FANCY_ERROR_REPORTING*/
+	Msg(0, "%s: %s: wrong number of arguments", rc_name, name);
 	return false;
 }
 
 static int CheckArgNum(int nr, char **args)
 {
 	int argc = CountArgs(args);
-	return CheckArgCount(&comms[nr], argc) ? argc : -1;
+	if (CheckArgCount(&comms[nr], argc))
+		return argc;
+	return -1;
 }
 
 static void StuffFin(char *buf, size_t len, void *data)
