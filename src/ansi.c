@@ -1130,6 +1130,21 @@ static void DoControlSequence(Window *win, int c, int intermediate)
 		     /*	case 42:       NRCM: 7bit NRC character mode */
 		     /*	case 44:             margin bell enable */
 			case 47:	/*       xterm-like alternate screen */
+		     /*	case 66:       NKM:  Numeric keypad appl mode */
+		     /*	case 68:       KBUM: Keyboard usage mode (data process) */
+			case 1000:	/* VT200 mouse tracking */
+			case 1001:	/* VT200 highlight mouse */
+			case 1002:	/* button event mouse */
+			case 1003:	/* any event mouse */
+				win->w_mouse = i ? a1 : 0;
+				LMouseMode(&win->w_layer, win->w_mouse);
+				break;
+		     /*	case 1005:     UTF-8 mouse mode rejected */
+			case 1006:	/* SGR mouse mode */
+				win->w_extmouse = i ? a1 : 0;
+				LExtMouseMode(&win->w_layer, win->w_extmouse);
+				break;
+		     /*	case 1015:     UXRVT mouse mode rejected */
 			case 1047:	/*       xterm-like alternate screen */
 			case 1049:	/*       xterm-like alternate screen */
 				if (use_altscreen) {
@@ -1156,21 +1171,6 @@ static void DoControlSequence(Window *win, int c, int intermediate)
 				else
 					RestoreCursor(win, &win->w_saved);
 				break;
-		     /*	case 66:       NKM:  Numeric keypad appl mode */
-		     /*	case 68:       KBUM: Keyboard usage mode (data process) */
-			case 1000:	/* VT200 mouse tracking */
-			case 1001:	/* VT200 highlight mouse */
-			case 1002:	/* button event mouse */
-			case 1003:	/* any event mouse */
-				win->w_mouse = i ? a1 : 0;
-				LMouseMode(&win->w_layer, win->w_mouse);
-				break;
-		     /*	case 1005:     UTF-8 mouse mode rejected */
-			case 1006:	/* SGR mouse mode */
-				win->w_extmouse = i ? a1 : 0;
-				LExtMouseMode(&win->w_layer, win->w_extmouse);
-				break;
-		     /*	case 1015:     UXRVT mouse mode rejected */
 			case 2004:	/* bracketed paste mode */
 				win->w_bracketed = i;
 				LBracketedPasteMode(&win->w_layer, win->w_bracketed);
