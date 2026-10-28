@@ -4122,18 +4122,18 @@ static bool ParseSGR3Mode(struct action *act, sgr3_mode_t *m)
 	char **args = act->args;
 	if (!args[0])
 		return true;
-	if (!strcmp(args[0], "legacy")) {
-		*m = SGR3_LEGACY;
+	if (!strcmp(args[0], "standout")) {
+		*m = SGR3_STANDOUT;
 		return true;
 	}
-	if (!strcmp(args[0], "strict") || !strcmp(args[0], "on")) {
-		*m = SGR3_STRICT;
+	if (!strcmp(args[0], "italic")) {
+		*m = SGR3_ITALIC;
 		return true;
 	}
 
 	bool msgok = display && !*rc_name;
 	if (msgok)
-		OutputMsg(0, "Invalid parameter; need 'legacy' or 'strict'");
+		OutputMsg(0, "Invalid parameter; need 'italic' or 'standout'");
 	return false;
 }
 
@@ -4158,12 +4158,12 @@ static void DoCommandSgr3mode(struct action *act)
 		return;
 	}
 
-	if (ParseSGR3Mode(act, &nwin_default.sgr3_mode)) {
+	if (ParseSGR3Mode(act, &D_fore->w_sgr3_mode)) {
 		if (msgok)
 			OutputMsg(0,
 				  "In window %u, SGR 3 (\\e[3m) will select %s",
 				  D_fore->w_number,
-				  sgr3_mode_desc(nwin_default.sgr3_mode));
+				  sgr3_mode_desc(D_fore->w_sgr3_mode));
 	}
 }
 
