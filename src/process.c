@@ -166,7 +166,6 @@ static struct digraph digraphs[MAX_DIGRAPH + 1] = {
 	{ { 'P',  'd'  }, 163 },	/* £ */
 	{ { 'o',  'x'  }, 164 },	/* ¤ */
 	{ { 'C',  'u'  }, 164 },	/* ¤ */
-	{ { 'C',  'u'  }, 164 },	/* ¤ */
 	{ { 'E',  'u'  }, 164 },	/* ¤ */
 	{ { 'Y',  '-'  }, 165 },	/* ¥ */
 	{ { 'Y',  'e'  }, 165 },	/* ¥ */
@@ -1382,7 +1381,7 @@ static void DoCommandAt(struct action *act)
 				OutputMsg(0, "%s: at [identifier][%%|*|#] command [args]", rc_name);
 		}
 	}
-      out:
+out:
 	free(s);
 	EffectiveAclUser = NULL;
 }
