@@ -1175,6 +1175,9 @@ static void DoControlSequence(Window *win, int c, int intermediate)
 				win->w_bracketed = i;
 				LBracketedPasteMode(&win->w_layer, win->w_bracketed);
 				break;
+			case 8803:
+				ConfigCode3Standout(i);
+				break;
 			}
 		}
 		break;
