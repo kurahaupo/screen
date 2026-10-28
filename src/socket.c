@@ -372,7 +372,7 @@ int MakeServerSocket(void)
 		Panic(errno, "socket");
 	a.sun_family = AF_UNIX;
 	strncpy(a.sun_path, SocketPath, sizeof a.sun_path);
-	(&a.sun_path)[1][-1] = 0;
+	a.sun_path[sizeof a.sun_path - 1] = 0;
 	xseteuid(real_uid);
 	xsetegid(real_gid);
 	if (connect(s, (struct sockaddr *)&a, strlen(SocketPath) + 2) != -1) {
@@ -422,8 +422,8 @@ int MakeClientSocket(int err)
 	if ((s = socket(AF_UNIX, SOCK_STREAM, 0)) == -1)
 		Panic(errno, "socket");
 	a.sun_family = AF_UNIX;
-	strncpy(a.sun_path, SocketPath, ARRAY_SIZE(a.sun_path));
-	(&a.sun_path)[1][-1] = 0;
+	strncpy(a.sun_path, SocketPath, sizeof a.sun_path);
+	a.sun_path[sizeof a.sun_path - 1] = 0;
 	xseteuid(real_uid);
 	xsetegid(real_gid);
 	if (connect(s, (struct sockaddr *)&a, strlen(SocketPath) + 2) == -1) {
@@ -464,8 +464,8 @@ void SendCreateMsg(char *sty, struct NewWindow *nwin)
 		exit(1);
 	memset((char *)&m, 0, sizeof(Message));
 	m.type = MSG_CREATE;
-	strncpy(m.m_tty, attach_tty, ARRAY_SIZE(m.m_tty) - 1);
-	(&m.m_tty)[1][-1] = 0;
+	strncpy(m.m_tty, attach_tty, sizeof m.m_tty);
+	m.m_tty[sizeof (m.m_tty) - 1] = 0;
 	p = m.m.create.line;
 	n = 0;
 	if (nwin->args != nwin_undef.args)
@@ -491,8 +491,8 @@ void SendCreateMsg(char *sty, struct NewWindow *nwin)
 		goto end;
 	}
 	if (nwin->term != nwin_undef.term)
-		strncpy(m.m.create.screenterm, nwin->term, MAXTERMLEN);
-	m.m.create.screenterm[MAXTERMLEN] = '\0';
+		strncpy(m.m.create.screenterm, nwin->term, sizeof m.m.create.screenterm);
+	m.m.create.screenterm[sizeof m.m.create.screenterm - 1] = '\0';
 	m.protocol_revision = MSG_REVISION;
 	if (write(s, (char *)&m, sizeof(Message)) != sizeof(Message))
 		Msg(errno, "write");
@@ -506,14 +506,14 @@ int SendErrorMsg(char *tty, char *buf)
 	int ret = 0;
 	Message m;
 
-	strncpy(m.m.message, buf, ARRAY_SIZE(m.m.message) - 1);
-	(&m.m.message)[1][-1] = 0;
+	strncpy(m.m.message, buf, sizeof m.m.message);
+	m.m.message[sizeof m.m.message - 1] = 0;
 	s = MakeClientSocket(0);
 	if (s < 0)
 		return -1;
 	m.type = MSG_ERROR;
-	strncpy(m.m_tty, tty, ARRAY_SIZE(m.m_tty) - 1);
-	(&m.m_tty)[1][-1] = 0;
+	strncpy(m.m_tty, tty, sizeof m.m_tty);
+	m.m_tty[ARRAY_SIZE(m.m_tty) - 1] = 0;
 	m.protocol_revision = MSG_REVISION;
 	if (write(s, (char *)&m, sizeof(Message)))
 		ret = -2;
@@ -655,8 +655,8 @@ static int CreateTempDisplay(Message *m, int recvfd, Window *win)
 			 * in this namespace we need to update m->m_tty to use
 			 * that symlink for all future operations.
 			 */
-			strncpy(m->m_tty, myttyname, ARRAY_SIZE(m->m_tty) - 1);
-			m->m_tty[ARRAY_SIZE(m->m_tty) - 1] = 0;
+			strncpy(m->m_tty, myttyname, sizeof m->m_tty);
+			m->m_tty[sizeof m->m_tty - 1] = 0;
 		} else if (myttyname == NULL || strcmp(myttyname, m->m_tty)) {
 			Msg(errno,
 			    "Attach: passed fd does not match tty: %s - %s!", m->m_tty, myttyname ? myttyname : "NULL");
@@ -750,7 +750,7 @@ void ReceiveMsg(void)
 	}
 
 	p = (char *)&m;
-	left = sizeof m;
+	left = sizeof(Message);
 	memset(&msg, 0, sizeof(struct msghdr));
 	iov.iov_base = &m;
 	iov.iov_len = left;
@@ -810,8 +810,8 @@ void ReceiveMsg(void)
 		return;
 	}
 	if (left > 0) {
-		if (left != sizeof m)
-			Msg(0, "Message %d of %zu bytes too small", left, sizeof m);
+		if (left != sizeof(Message))
+			Msg(0, "Message %d of %d bytes too small", left, (int)sizeof(Message));
 		return;
 	}
 	if (m.protocol_revision != MSG_REVISION) {
@@ -901,9 +901,9 @@ void ReceiveMsg(void)
 	case MSG_QUERY:
 		{
 			char *oldSocketPath = SaveStr(SocketPath);
-			strncpy(SocketPath, m.m.command.writeback, ARRAY_SIZE(SocketPath));
+			strncpy(SocketPath, m.m.command.writeback, sizeof SocketPath);
 			int s = MakeClientSocket(0);
-			strncpy(SocketPath, oldSocketPath, ARRAY_SIZE(SocketPath));
+			strncpy(SocketPath, oldSocketPath, sizeof SocketPath);
 			Free(oldSocketPath);
 			if (s >= 0) {
 				queryflag = s;
@@ -1385,7 +1385,7 @@ static void DoCommandMsg(Message *mp)
 	for (fc = fullcmd; n > 0; n--) {
 		size_t len = strlen(p);
 		*fc++ = '"';
-		if (!(fc = strncpy_escape_quote(fc, p, fullcmd + ARRAY_SIZE(fullcmd) - 2))) {	/* '"' ' ' */
+		if (!(fc = strncpy_escape_quote(fc, p, fullcmd + sizeof fullcmd - 2))) {	/* '"' ' ' */
 			Msg(0, "Remote command too long.");
 			queryflag = -1;
 			return;
