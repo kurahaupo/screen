@@ -1062,7 +1062,8 @@ static void DoCommandKill(struct action *act)
 
 	if (*args) {
 		if (!strcmp(*args, "--confirm")) {
-			Input(fore->w_pwin ? "Really kill this filter [y/n]" : "Really kill this window [y/n]",
+			Input(fore->w_pwin ? "Really kill this filter [y/n]"
+					   : "Really kill this window [y/n]",
 			      1, INP_RAW, confirm_fn, NULL, RC_KILL);
 			return;
 		} else {
@@ -1089,7 +1090,8 @@ static void DoCommandQuit(struct action *act)
 
 	if (*args) {
 		if (!strcmp(*args, "--confirm")) {
-			Input("Really quit and kill all your windows [y/n]", 1, INP_RAW, confirm_fn, NULL, RC_QUIT);
+			Input("Really quit and kill all your windows [y/n]",
+			      1, INP_RAW, confirm_fn, NULL, RC_QUIT);
 			return;
 		} else {
 			OutputMsg(0, "usage: quit [--confirm]");
@@ -1116,7 +1118,8 @@ static void DoCommandPow_detach(struct action *act)
 
 	if (*args) {
 		if (!strcmp(*args, "--confirm")) {
-			Input("Really detach and send HANGUP to parent process [y/n]", 1, INP_RAW, confirm_fn, NULL, RC_POW_DETACH);
+			Input("Really detach and send HANGUP to parent process [y/n]",
+			      1, INP_RAW, confirm_fn, NULL, RC_POW_DETACH);
 			return;
 		} else {
 			OutputMsg(0, "usage: pow_detach [--confirm]");

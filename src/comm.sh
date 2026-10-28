@@ -28,9 +28,9 @@ cat << EOF > comm.h
 
 struct comm
 {
-  char *name;
-  int flags;
-  AclBits userbits[ACL_BITS_PER_CMD];
+	char *name;
+	int flags;
+	AclBits userbits[ACL_BITS_PER_CMD];
 };
 
 extern struct comm comms[];
@@ -51,13 +51,13 @@ extern struct comm comms[];
 
 struct action
 {
-  int nr;
-  char **args;
-  int *argl;
-  int quiet;	/* Suppress (currently unused)
-		   0x01 - Error message
-		   0x02 - Normal message
-		*/
+	int nr;
+	char **args;
+	int *argl;
+	int quiet;	/* Suppress (currently unused)
+			 * 0x01 - Error message
+			 * 0x02 - Normal message
+			 */
 };
 
 #define RC_ILLEGAL -1
