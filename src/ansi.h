@@ -174,12 +174,11 @@ typedef enum move_e {
 typedef struct Window Window;
 
 typedef enum sgr3_mode_e {
-	SGR3_STRICT = 0,
-	SGR3_LEGACY = 1,
+	SGR3_ITALIC = 0,
+	SGR3_STANDOUT = 1,
 	SGR3_UNSET = 2,
+        SGR3_DEFAULT = SGR3_STANDOUT, /* legacy behaviour */
 } sgr3_mode_t;
-void ConfigSGR3Mode(sgr3_mode_t);
-void ConfigSGR3ModeDef(sgr3_mode_t);
 const char *sgr3_mode_desc(sgr3_mode_t);
 
 void ResetAnsiState(Window *);

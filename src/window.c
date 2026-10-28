@@ -140,7 +140,7 @@ struct NewWindow nwin_default = {
 	.encoding = 0,
 	.hstatus = NULL,
 	.charset = NULL,
-	.sgr3_mode = SGR3_LEGACY,
+	.sgr3_mode = SGR3_DEFAULT,
 };
 
 struct NewWindow nwin_options;
