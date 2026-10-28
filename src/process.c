@@ -568,7 +568,7 @@ static struct action *FindKtab(char *class, int create)
 			Msg(0, "Command class name too long.");
 			return NULL;
 		}
-		kp = malloc(sizeof(struct kclass));
+		kp = malloc(sizeof *kp);
 		if (kp == NULL) {
 			Msg(0, "%s", strnomem);
 			return NULL;
@@ -5325,9 +5325,9 @@ static void SaveAction(struct action *act, int nr, char **args, int *argl)
 		act->argl = NULL;
 		return;
 	}
-	if ((pp = malloc((unsigned)(argc + 1) * sizeof(char *))) == NULL)
+	if ((pp = malloc((unsigned)(argc + 1) * sizeof *pp)) == NULL)
 		Panic(0, "%s", strnomem);
-	if ((lp = malloc((unsigned)(argc) * sizeof(int))) == NULL)
+	if ((lp = malloc((unsigned)(argc) * sizeof *lp)) == NULL)
 		Panic(0, "%s", strnomem);
 	act->nr = nr;
 	act->args = pp;
@@ -5343,7 +5343,7 @@ static char **SaveArgs(char **args)
 {
 	char **ap, **pp;
 
-	if ((pp = ap = malloc((CountArgs(args) + 1) * sizeof(char *))) == NULL)
+	if ((pp = ap = malloc((CountArgs(args) + 1) * sizeof *ap)) == NULL)
 		Panic(0, "%s", strnomem);
 	while (*args)
 		*pp++ = SaveStr(*args++);
