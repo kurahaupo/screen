@@ -1172,7 +1172,7 @@ static void DoControlSequence(Window *win, int c, int intermediate)
 				LBracketedPasteMode(&win->w_layer, win->w_bracketed);
 				break;
 			case 8803:
-				win->w_sgr3_mode = i ? SGR3_LEGACY : SGR3_STRICT;
+				win->w_sgr3_mode = i ? SGR3_STANDOUT : SGR3_ITALIC;
 				break;
 			}
 		}
@@ -1706,7 +1706,7 @@ static void ASetMode(Window *win, bool on)
  */
 
 static enum attr_mask_e rendlist[][30] = {
-	[SGR3_STRICT] = {	/* strict mode */
+	[SGR3_ITALIC] = {	/* strict mode */
 			 [0] = ~A__MASK,
 			 [1] = A_BD,
 			 [2] = A_DI,
@@ -1726,7 +1726,7 @@ static enum attr_mask_e rendlist[][30] = {
 			 [28] = ~A_HI,
 			 [29] = ~A_ST,
 			  },
-	[SGR3_LEGACY] = {	/* legacy mode */
+	[SGR3_STANDOUT] = {	/* legacy mode */
 			 [0]  = ~A__MASK,
 			 [1]  = A_BD,
 			 [2]  = A_DI,
@@ -1751,21 +1751,13 @@ static enum attr_mask_e rendlist[][30] = {
 const char *sgr3_mode_desc(sgr3_mode_t m)
 {
 	static const char *const desc[] = {
-		[SGR3_STRICT] = "strict",
-		[SGR3_LEGACY] = "legacy",
-		[SGR3_UNSET] = "(unset)",
+		[SGR3_ITALIC]   = "italic",
+		[SGR3_STANDOUT] = "standout",
+		[SGR3_UNSET]    = "(unset)",
 	};
 	if (m >= 0 && m < ARRAY_SIZE(desc) && desc[m])
 		return desc[m];
 	return "(unknown mode)";
-}
-
-static sgr3_mode_t rend_mode = 1;
-
-void ConfigSGR3Mode(sgr3_mode_t v)
-{
-	if (v < ARRAY_SIZE(rendlist))
-		rend_mode = v;
 }
 
 static void SelectRendition(Window *win)
@@ -1888,7 +1880,7 @@ static void SelectRendition(Window *win)
 
 		if (j >= ARRAY_SIZE(rendlist[0]))
 			continue;
-		size_t m = rend_mode;
+		size_t m = win->w_sgr3_mode;
 
 		if (k >= i + 2) {
 			m = cs->params[i + 1];
