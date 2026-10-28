@@ -62,10 +62,13 @@ static int addmapseq(char *, int, int);
 static int remmapseq(char *, int);
 
 static char Termcap[TERMCAP_BUFSIZE + 8] = "TERMCAP=";	/* new termcap +8:"TERMCAP=" */
-#define endTermcap  ((&Termcap)[1])
+#define limTermcap  (Termcap + sizeof Termcap)
+static size_t Termcaplen = 0;
 
-static int Termcaplen = 0;
 char Term[MAXSTR + 5];			/* +5: "TERM=" */
+#define Termname (Term + 5)
+#define limTerm  (Term + sizeof Term)
+
 char screenterm[MAXTERMLEN + 1];	/* new $TERM, usually "screen" */
 
 char *extra_incap, *extra_outcap;
@@ -669,19 +672,15 @@ static int remmapseq(char *seq, int k)
  */
 static inline bool AddCapSprintf(const char *fmt, ...)
 {
-	if ( Termcaplen >= endTermcap - Termcap - 1 )
+	char *const endTermcap = Termcap + Termcaplen;
+	if (limTermcap - endTermcap <= 1)
 		return false;
-
-	char * const p = Termcap+Termcaplen;
-
 	va_list v;
 	va_start(v, fmt);
-	int n = vsnprintf(p, endTermcap - p, fmt, v);
+	int n = vsnprintf(endTermcap, limTermcap - endTermcap, fmt, v);
 	va_end(v);
-
-	if (n < 0 || (unsigned) n >= endTermcap - p)
+	if (n < 0 || n >= limTermcap - endTermcap)
 		return false;
-
 	Termcaplen += n;
 	return true;
 }
@@ -691,11 +690,13 @@ static inline bool AddCapSprintf(const char *fmt, ...)
  */
 static inline bool AddCap(const char *s)
 {
-//	return AddCapSprintf("%s", s);
-	size_t n = strlen(s);
-	if (Termcaplen + n + 1 >= sizeof Termcap)
+	char *const endTermcap = Termcap + Termcaplen;
+	if (limTermcap - endTermcap <= 1)
 		return false;
-	memcpy(Termcap + Termcaplen, s, n+1);
+	int n = strlen(s);
+	if (n < 0 || n >= limTermcap - endTermcap)
+		return false;
+	memcpy(endTermcap, s, n + 1);
 	Termcaplen += n;
 	return true;
 }
@@ -724,7 +725,6 @@ char *MakeTermcap(bool aflag)
 		strcpy(Term, "TERM=screen");
 		return Termcap;
 	}
-	Termcaplen = 0;
 	if (*screenterm == '\0' || strlen(screenterm) > MAXSTR - 3) {
 		strncpy(screenterm, "screen", MAXTERMLEN);
 		screenterm[MAXTERMLEN] = '\0';
@@ -733,43 +733,42 @@ char *MakeTermcap(bool aflag)
 	do {
 		if (!aflag && tname
 		 && sizeof Term > (size_t) snprintf(Term, sizeof Term, "TERM=%s.%s", screenterm, tname)
-		 && e_tgetent(buf, Term + 5) == 1)
+		 && e_tgetent(buf, Termname) == 1)
 				break;
 
 		if (nwin_default.bce
 		 && sizeof Term > (size_t) snprintf(Term, sizeof Term, "TERM=%s-bce", screenterm)
-		 && e_tgetent(buf, Term + 5) == 1)
+		 && e_tgetent(buf, Termname) == 1)
 			break;
 
 		if (sizeof Term > (size_t) snprintf(Term, sizeof Term, "TERM=%s", screenterm)
-		 && e_tgetent(buf, Term + 5) == 1)
+		 && e_tgetent(buf, Termname) == 1)
 			break;
 
 		if (tname
 		 && sizeof Term > (size_t) snprintf(Term, sizeof Term, "TERM=%s", tname)
-		 && e_tgetent(buf, Term + 5) == 1)
+		 && e_tgetent(buf, Termname) == 1)
 			break;
 
-		strcpy(Term, "TERM=vt100");
+		strcpy(Termname, "vt100");
 	} while (0);		/* Goto-free programming... */
 
-	if (strlen(Term) > TERMCAP_BUFSIZE - 40)
-		strcpy(Term+5, "too_long");
+	if (strlen(Termname) > TERMCAP_BUFSIZE - 35)
+		strcpy(Termname, "too_long");
 	Termcaplen = 0;
-	AddCapSprintf("TERMCAP=SC|%s|VT 300/ISO-6429 virtual terminal:", Term + 5);
+	AddCapSprintf("TERMCAP=SC|%s|VT 300/ISO-6429 virtual terminal:", Termname);
 	if (extra_outcap && *extra_outcap) {
 		const char *cp, *p;
 		for (cp = extra_outcap; (p = strchr(cp, ':')); cp = p)
-			AddCapSprintf("%.*s:", p-cp, cp);
+			AddCapSprintf("%.*s:", p - cp, cp);
 		if (cp && *cp)
 			AddCapSprintf("%s:", cp);
 	}
-	if (Termcaplen + strlen(TermcapConst) < TERMCAP_BUFSIZE) {
-		strcpy(Termcap + Termcaplen, TermcapConst);
-		Termcaplen += strlen(TermcapConst);
-	}
+	AddCap(TermcapConst);
 	AddCapSprintf("li#%d:"
-		      "co#%d:", height, width);
+		      "co#%d:",
+		      height,
+		      width);
 	AddCap("am:");
 	if (aflag || (force_vt && !D_COP) || D_CLP || !D_AM)
 		AddCap("xn:"
@@ -808,10 +807,10 @@ char *MakeTermcap(bool aflag)
 			       "ue=\\E[24m:");
 		if (D_CZH)
 			AddCap("ZH=\\E[3\\0720m:"	/* '\072' == ':' → \e[3:0m */
-			       "ZR=\\E[23\\0720m:");	/*		 → \e[23:0m */
+			       "ZR=\\E[23\\0720m:");	/*               → \e[23:0m */
 		if (D_SO)
 			AddCap("so=\\E[3\\0721m:"	/* '\072' == ':' → \e[3:1m */
-			       "se=\\E[23\\0721m:");	/*		 → \e[23:1m */
+			       "se=\\E[23\\0721m:");	/*               → \e[23:1m */
 		if (D_MB)
 			AddCap("mb=\\E[5m:");
 		if (D_MD)
