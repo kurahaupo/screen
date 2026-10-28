@@ -1127,7 +1127,7 @@ static void DoCommandPow_detach(struct action *act)
 static void DoCommandZmodem(struct action *act)
 {
 	char **args = act->args;
-	int msgok = display && !*rc_name;
+	bool const msgok = display && !*rc_name;
 
 	if (*args && !strcmp(*args, "sendcmd")) {
 		if (args[1]) {
