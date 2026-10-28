@@ -1735,8 +1735,8 @@ static void SelectRendition(Window *win)
 			}
 			continue;
 		}
-		/* truecolor (24bit) colour space; example escape \e[48;5;12;13;14m 
-		 * where 12;13;14 are rgb values */
+		/* truecolor (24bit) colour space; example escape \e[48:2:0:12:13:14m
+		 * where 0 is the "raw" color space and 12:13:14 are RGB values */
 		if ((j == 38 || j == 48) && i + 4 < win->w_NumArgs && win->w_args[i + 1] == 2) {
 			uint8_t r, g, b;
 
