@@ -1779,7 +1779,7 @@ static void SelectRendition(Window *win)
 		else
 			attr |= j;
 	} while (++i < win->w_NumArgs);
-	
+
 	win->w_rend.attr = attr;
 
 	win->w_rend.colorbg = colorbg;
