@@ -26,9 +26,12 @@
  ****************************************************************
  */
 
-#include "viewport.h"
+#include "config.h"
 
+#include "canvas.h"
+#include "display.h"
 #include "screen.h"
+#include "viewport.h"
 
 int RethinkDisplayViewports(void)
 {

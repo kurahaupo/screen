@@ -30,7 +30,7 @@
 #ifndef SCREEN_IMAGE_H
 #define SCREEN_IMAGE_H
 
-#include <stdint.h>
+#include <stdint.h>	//
 
 /* structure representing single cell of terminal */
 struct mchar {

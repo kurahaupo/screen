@@ -28,17 +28,18 @@
 
 #include "config.h"
 
-#include "layout.h"
-
 #include <stdbool.h>
 #include <stdint.h>
 
-#include "screen.h"
-
+#include "display.h"
 #include "fileio.h"
+#include "layout.h"
 #include "misc.h"
 #include "process.h"
 #include "resize.h"
+#include "screen.h"
+#include "viewport.h"
+#include "window.h"
 
 Layout *layouts;
 Layout *laytab[MAXLAY];

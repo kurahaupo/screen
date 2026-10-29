@@ -1,7 +1,11 @@
 #ifndef SCREEN_ENCODING_H
 #define SCREEN_ENCODING_H
 
-#include "window.h"
+#include <stdbool.h>	//
+#include <stddef.h>	// for size_t
+#include <stdint.h>	//
+
+struct Window;
 
 void InitBuiltinTabs(void);
 struct mchar *recode_mchar(struct mchar *, int, int);
@@ -16,11 +20,11 @@ void utf8_handle_comb(unsigned int, struct mchar *);
 int ContainsSpecialDeffont(struct mline *, int, int, int);
 int LoadFontTranslation(int, char *);
 void LoadFontTranslationsForEncoding(int);
-void WinSwitchEncoding(Window *, int);
+void WinSwitchEncoding(struct Window *, int);
 int FindEncoding(char *);
 char *EncodingName(int);
 int EncodingDefFont(int);
-void ResetEncoding(Window *);
+void ResetEncoding(struct Window *);
 int CanEncodeFont(int, int);
 int DecodeChar(int, int, int *);
 int RecodeBuf(unsigned char *, int, int, int, unsigned char *);

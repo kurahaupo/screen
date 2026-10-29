@@ -28,18 +28,23 @@
 
 #include "config.h"
 
-#include "resize.h"
-
 #include <sys/types.h>
+
 #include <signal.h>
 #include <stdint.h>
 #include <stdbool.h>
 #include <sys/ioctl.h>
 
-#include "screen.h"
-
+#include "canvas.h"
+#include "display.h"
+#include "image.h"
+#include "layer.h"
 #include "process.h"
+#include "resize.h"
+#include "screen.h"
 #include "telnet.h"
+#include "viewport.h"
+#include "window.h"
 
 /* maximum window width */
 #define MAXWIDTH 1000

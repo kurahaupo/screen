@@ -28,17 +28,16 @@
 
 #include "config.h"
 
-#include "tty.h"
-
-#include <sys/types.h>
-#include <signal.h>
-#include <fcntl.h>
-#include <limits.h>
-#include <stdint.h>
-#include <stdbool.h>
-#include <sys/stat.h>
 #include <sys/file.h>
 #include <sys/ioctl.h>
+#include <sys/stat.h>
+#include <sys/types.h>
+
+#include <fcntl.h>
+#include <limits.h>
+#include <signal.h>
+#include <stdbool.h>
+#include <stdint.h>
 #include <unistd.h>
 
 /* For SRIOCSREDIR on Solaris */
@@ -46,12 +45,15 @@
 # include <sys/strredir.h>
 #endif
 
-#include "screen.h"
+#include "canvas.h"
+#include "display.h"
 #include "fileio.h"
 #include "misc.h"
 #include "pty.h"
+#include "screen.h"
 #include "telnet.h"
 #include "tty.h"
+#include "window.h"
 
 static void consredir_readev_fn(Event *, void *);
 static struct baud_values *lookup_baud(int);

@@ -33,15 +33,15 @@
 
 #include "config.h"
 
-#include "list_generic.h"
-
 #include <stdbool.h>
 #include <stdint.h>
 
-#include "screen.h"
-
+#include "display.h"
 #include "help.h"
+#include "layer.h"
+#include "list_generic.h"
 #include "misc.h"
+#include "screen.h"
 
 static char ListID[] = "license";
 

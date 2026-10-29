@@ -30,12 +30,20 @@
 #ifndef SCREEN_DISPLAY_H
 #define SCREEN_DISPLAY_H
 
-#include "layout.h"
-#include "canvas.h"
-#include "viewport.h"
-#include "comm.h"
-#include "image.h"
-#include "screen.h"
+#include <sys/types.h>	// before display.h, for pid_t
+
+#include <stdint.h>	// before ansi.h & image.h
+
+#include "layer.h"	// before canvas.h, for struct Layer
+#include "sched.h"	// before canvas.h, for struct Event
+#include "os.h"		// before tty.h, for struct termios
+
+#include "ansi.h"	// before display.h, for NATTR
+#include "canvas.h"	// before display.h, needs layer.h & sched.h
+#include "comm.h"	// before display.h, for struct action
+#include "image.h"	// before display.h, for struct mchar
+#include "term.h"	// before display.h, for T_N
+#include "tty.h"	// before display.h, for struct mode
 
 #define KMAP_KEYS (T_OCAPS-T_CAPS)
 #define KMAP_AKEYS (T_OCAPS-T_CURSOR)
@@ -81,6 +89,8 @@ struct mouse_parse {
 	int params[3];		/* parsed params: button, x, y */
 };
 
+struct Layout;
+
 typedef struct Display Display;
 struct Display {
 	Display *d_next;	/* linked list */
@@ -88,7 +98,7 @@ struct Display {
 	Canvas d_canvas;	/* our canvas slice */
 	Canvas *d_cvlist;	/* the canvases of this display */
 	Canvas *d_forecv;	/* current input focus */
-	Layout *d_layout;	/* layout we're using */
+	struct Layout *d_layout;	/* layout we're using */
 	void (*d_processinput)(char *, size_t);
 	struct pwdata *d_processinputdata;	/* data for processinput */
 	int d_vpxmin, d_vpxmax;	/* min/max used position on display */

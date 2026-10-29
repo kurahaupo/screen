@@ -31,10 +31,13 @@
  ****************************************************************
  */
 
-#include "backtick.h"
+#include "config.h"
 
+#include "backtick.h"
 #include "fileio.h"
 #include "misc.h"
+#include "screen.h"
+#include "window.h"
 #include "winmsg.h"
 
 /* TODO: get rid of global var */

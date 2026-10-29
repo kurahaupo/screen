@@ -28,24 +28,25 @@
 
 #include "config.h"
 
-#include "fileio.h"
-
-#include <sys/types.h>
-#include <fcntl.h>
-#include <stdint.h>
-#include <stdbool.h>
 #include <sys/stat.h>
+#include <sys/types.h>
+
+#include <fcntl.h>
 #include <pwd.h>
-
 #include <signal.h>
+#include <stdbool.h>
+#include <stdint.h>
 
-#include "screen.h"
-
-#include "misc.h"
-#include "process.h"
-#include "termcap.h"
+#include "aalimits.h"
+#include "display.h"
 #include "dumptermcap.h"
 #include "encoding.h"
+#include "fileio.h"
+#include "misc.h"
+#include "process.h"
+#include "screen.h"
+#include "termcap.h"
+#include "window.h"
 
 static char *CatExtra(char *, char *);
 static char *findrcfile(char *);

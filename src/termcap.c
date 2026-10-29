@@ -34,14 +34,15 @@
 #include <stdint.h>
 #include <string.h>
 
-#include "screen.h"
-
+#include "display.h"
 #include "encoding.h"
 #include "kmapdef.h"
 #include "misc.h"
 #include "process.h"
 #include "resize.h"
+#include "screen.h"
 #include "termcap.h"
+#include "window.h"
 
 static bool AddCap(const char *);
 static bool AddCapSprintf(const char *, ...);

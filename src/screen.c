@@ -30,8 +30,6 @@
 
 #include "config.h"
 
-#include "screen.h"
-
 #include <ctype.h>
 #include <fcntl.h>
 #include <poll.h>
@@ -52,12 +50,17 @@
 #include <langinfo.h>
 #endif
 
-#include "logfile.h"		/* islogfile, logfflush, logfopen/logfclose */
+#include "layout.h"		// for AutosaveLayout
+#include "display.h"
 #include "fileio.h"
 #include "list_generic.h"
+#include "logfile.h"		/* islogfile, logfflush, logfopen/logfclose */
 #include "mark.h"
+#include "screen.h"
 #include "utmp.h"
+#include "window.h"
 #include "winmsg.h"
+#include "winmsgbuf.h"
 
 extern char **environ;
 
