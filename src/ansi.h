@@ -175,7 +175,7 @@ typedef enum sgr3_mode_e {
 	SGR3_UNSET = 0,
 	SGR3_ITALIC = 1,
 	SGR3_STANDOUT = 2,
-        SGR3_DEFAULT = SGR3_ITALIC, /* legacy compatibility? */
+	SGR3_DEFAULT = SGR3_ITALIC, /* legacy compatibility? */
 } sgr3_mode_t;
 
 const char *sgr3_mode_desc(sgr3_mode_t);

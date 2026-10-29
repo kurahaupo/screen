@@ -33,12 +33,12 @@
 #include "layer.h"	// before canvas.h, for struct Layer
 #include "sched.h"	// before canvas.h, for struct Event
 
-#define SLICE_UNKN 0
-#define SLICE_VERT (1 << 0)
-#define SLICE_HORI (1 << 1)
+#define SLICE_UNKN	0
+#define SLICE_VERT	(1 << 0)
+#define SLICE_HORI	(1 << 1)
 
-#define SLICE_THIS (1 << 2)	/* used in equal test */
-#define SLICE_GLOBAL (1 << 3)
+#define SLICE_THIS	(1 << 2)	/* used in equal test */
+#define SLICE_GLOBAL	(1 << 3)
 
 struct Viewport;
 struct Window;
@@ -101,7 +101,7 @@ void PutWindowCv(struct Canvas *);
   l->l_cvlist = cvlist;			\
   cv->c_lnext = cvlnext;		\
   display = olddisplay;			\
-} while (0)			/* obliging ';' */
+} while (0)		/* obliging ';' */
 
 #define CV_CALL(cv, simple_cmd)		\
   CV_CALL_START(cv);			\
