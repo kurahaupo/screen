@@ -54,7 +54,7 @@
 #include "window.h"
 #include "winmsg.h"
 
-/* CSI parsing status */
+/* CS parsing status */
 enum {
 	CSI_PB = 0, CSI_PX = 1, CSI_PY = 2, CSI_DONE = 3,
 	CSI_ESC_SEEN, CSI_BEGIN, CSI_INACTIVE, CSI_INVALID

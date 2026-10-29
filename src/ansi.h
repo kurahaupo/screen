@@ -87,7 +87,7 @@ typedef enum state_e {
 	ESC,				/* Start of escape sequence */
 	ASTR,				/* Start of control string */
 	STRESC,				/* ESC seen in control string */
-	CSI,				/* Reading arguments in "CSI Pn ;... */
+	CTL_SEQ,			/* Reading arguments in "CSI Pn ;... */
 	PRIN,				/* Printer mode */
 	PRINESC,			/* ESC seen in printer mode */
 	PRINCSI,			/* CSI seen in printer mode */
