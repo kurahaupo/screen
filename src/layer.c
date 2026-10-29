@@ -28,16 +28,18 @@
 
 #include "config.h"
 
-#include "layer.h"
-
+#include "display.h"
 #include "encoding.h"
-#include "inline.h"		/* must follow ansi.h and image.h */
+#include "image.h"
+#include "inline.h"
+#include "layer.h"
+#include "layout.h"
 #include "mark.h"
 #include "misc.h"
 #include "screen.h"
 #include "tty.h"
-
-#include "inline.h"		/* must follow ansi.h and image.h */
+#include "viewport.h"
+#include "window.h"
 
 /*
  * Layer subsystem.

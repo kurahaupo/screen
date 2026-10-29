@@ -30,11 +30,11 @@
 #ifndef SCREEN_SCREEN_H
 #define SCREEN_SCREEN_H
 
-#include "config.h"
+#include <stdbool.h>	//
+#include <stddef.h>	// for NULL
+#include <stdlib.h>	// for abort
 
-#include <stdbool.h>
-
-#include "os.h"
+#include "os.h"		// for MAXPATHLEN
 
 /* here comes my own Free: jw. */
 #define Free(a) {if ((a) == NULL) abort(); else free((void *)(a)); (a)=NULL;}
@@ -44,35 +44,6 @@
 #endif
 
 #define Ctrl(c) ((c)&037)
-
-#define MAXSTR		768
-#define MAXARGS 	64
-#define MSGWAIT 	5
-#define MSGMINWAIT 	1
-#define SILENCEWAIT	30
-
-/*
- * if a nasty user really wants to try a history of 3000 lines on all 10
- * windows, he will allocate 8 MegaBytes of memory, which is quite enough.
- */
-#define MAXHISTHEIGHT		3000
-#define DEFAULTHISTHEIGHT	100
-#define DEFAULT_BUFFERFILE	"/tmp/screen-exchange"
-
-struct mode {
-	struct termios tio;
-#if defined(TIOCKSET)
-	struct jtchars m_jtchars;
-	int m_knjmode;
-#endif
-};
-
-#include "ansi.h"
-#include "image.h"
-#include "layer.h"
-#include "sched.h"
-#include "term.h"
-#include "window.h"
 
 /*
  * Parameters for the Detach() routine
@@ -305,16 +276,16 @@ extern int ZombieKey_destroy;
 extern int ZombieKey_onerror;
 extern int ZombieKey_resurrect;
 
-extern Window *console_window;
-extern Window *fore;
-extern Window *mru_window;
-extern Window *first_window;
-extern Window *last_window;
+extern struct Window *console_window;
+extern struct Window *fore;
+extern struct Window *mru_window;
+extern struct Window *first_window;
+extern struct Window *last_window;
 
-extern Layer *flayer;
+extern struct Layer *flayer;
 
-extern Event logflushev;
-extern Event serv_read;
+extern struct Event logflushev;
+extern struct Event serv_read;
 
 extern struct mode attach_Mode;
 

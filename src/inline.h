@@ -30,7 +30,12 @@
 #ifndef SCREEN_ANSIINLINE_H
 #define SCREEN_ANSIINLINE_H
 
-/* This must included after ansi.h and image.h */
+#include <stdbool.h>	// before inline.h
+#include <stdint.h>	// before inline.h
+#include <string.h>	// before inline.h, for memmove & size_t
+
+#include "ansi.h"	// before inline.h, for UTF8
+#include "image.h"	// before inline.h, for struct mline
 
 /* Inline functions moved from image.h */
 

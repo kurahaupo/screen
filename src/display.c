@@ -28,33 +28,31 @@
 
 #include "config.h"
 
-#include "display.h"
-
-#include <sys/types.h>
+#include <sys/ioctl.h>
 #include <sys/stat.h>
-#include <signal.h>
+#include <sys/types.h>
+
 #include <fcntl.h>
 #include <poll.h>
-#include <sys/ioctl.h>
+#include <signal.h>
 #include <stdbool.h>
 #include <stdint.h>
 #include <unistd.h>
 
-#include "screen.h"
-
-#include "canvas.h"
+#include "display.h"
 #include "encoding.h"
+#include "inline.h"
 #include "mark.h"
-#include "inline.h"		/* must follow ansi.h and image.h */
 #include "misc.h"
 #include "process.h"
 #include "pty.h"
 #include "resize.h"
+#include "screen.h"
 #include "termcap.h"
 #include "tty.h"
+#include "viewport.h"
+#include "window.h"
 #include "winmsg.h"
-
-#include "inline.h"		/* must follow ansi.h and image.h */
 
 /* CSI parsing status */
 enum {

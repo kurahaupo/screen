@@ -28,14 +28,18 @@
 
 #include "config.h"
 
-#include "search.h"
-
-#include <stdint.h>
 #include <sys/types.h>
 
+#include <stdint.h>
+
+#include "canvas.h"
+#include "input.h"
+#include "layer.h"
 #include "mark.h"
 #include "misc.h"
-#include "input.h"
+#include "screen.h"
+#include "search.h"
+#include "window.h"
 
 #define INPUTLINE (flayer->l_height - 1)
 

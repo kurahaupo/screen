@@ -30,9 +30,9 @@
 #ifndef SCREEN_ANSI_H
 #define SCREEN_ANSI_H
 
-#include <stdbool.h>
-#include <stdint.h>
-#include <stdlib.h>
+#include <stdbool.h>	//
+#include <stddef.h>	// for size_t
+#include <stdint.h>	//
 
 typedef enum attr_e {
 		 // attribute           terminfo code   termcap code    ECMA-48 SGR     custom SGR
@@ -171,26 +171,27 @@ typedef enum move_e {
 #define UCS_REPL_DW	0xff1f	/* character for illegal codes */
 #define UCS_HIDDEN	0xffff
 
-typedef struct Window Window;
-
 typedef enum sgr3_mode_e {
-	SGR3_ITALIC = 0,
-	SGR3_STANDOUT = 1,
-	SGR3_UNSET = 2,
-        SGR3_DEFAULT = SGR3_STANDOUT, /* legacy behaviour */
+	SGR3_UNSET = 0,
+	SGR3_ITALIC = 1,
+	SGR3_STANDOUT = 2,
+        SGR3_DEFAULT = SGR3_ITALIC, /* legacy compatibility? */
 } sgr3_mode_t;
+
 const char *sgr3_mode_desc(sgr3_mode_t);
 
-void ResetAnsiState(Window *);
-void ResetCharsets(Window *);
-void WriteString(Window *, char *, size_t);
-void ChangeAKA(Window *, char *, size_t);
-void SetCharsets(Window *, char *);
-int GetAnsiStatus(Window *, char *);
-void WNewAutoFlow(Window *, int);
-void WBell(Window *, bool);
-void WMsg(Window *, int, char *);
-int MFindUsedLine(Window *, int, int);
+struct Window;
+
+void ResetAnsiState(struct Window *);
+void ResetCharsets(struct Window *);
+void WriteString(struct Window *, char *, size_t);
+void ChangeAKA(struct Window *, char *, size_t);
+void SetCharsets(struct Window *, char *);
+int GetAnsiStatus(struct Window *, char *);
+void WNewAutoFlow(struct Window *, int);
+void WBell(struct Window *, bool);
+void WMsg(struct Window *, int, char *);
+int MFindUsedLine(struct Window *, int, int);
 
 /* global variables */
 

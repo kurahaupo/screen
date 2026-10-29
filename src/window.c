@@ -31,8 +31,6 @@
 
 #include "config.h"
 
-#include "window.h"
-
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <signal.h>
@@ -42,18 +40,23 @@
 #include <sys/ioctl.h>
 #include <sys/wait.h>
 
+#include "canvas.h"
+#include "display.h"
 #include "fileio.h"
 #include "help.h"
 #include "input.h"
+#include "logfile.h"
 #include "mark.h"
 #include "misc.h"
 #include "process.h"
 #include "pty.h"
 #include "resize.h"
+#include "screen.h"
 #include "telnet.h"
 #include "termcap.h"
 #include "tty.h"
 #include "utmp.h"
+#include "window.h"
 #include "winmsg.h"
 
 static void WinProcess(char **, size_t *);

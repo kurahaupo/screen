@@ -35,16 +35,21 @@
 
 #include "config.h"
 
-#include "winmsg.h"
-
-#include "screen.h"
-
+#include "aalimits.h"
+#include "backtick.h"
+#include "canvas.h"
+#include "display.h"
 #include "fileio.h"
 #include "help.h"
 #include "logfile.h"
 #include "mark.h"
 #include "process.h"
 #include "sched.h"
+#include "screen.h"
+#include "window.h"
+#include "winmsg.h"
+#include "winmsgbuf.h"
+#include "winmsgcond.h"
 
 /* TODO: rid global variable (has been renamed to point this out; see commit
  * history) */

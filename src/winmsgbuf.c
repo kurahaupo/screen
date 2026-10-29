@@ -22,11 +22,14 @@
 
 #include "config.h"
 
-#include "winmsgbuf.h"
-
+#include <assert.h>
 #include <stdarg.h>
 #include <stdio.h>
-#include <assert.h>
+#include <stdlib.h>	// for malloc
+#include <string.h>	// for strlen, strncpy
+
+#include "aalimits.h"
+#include "winmsgbuf.h"
 
 
 /* Allocate and initialize to the empty string a new window message buffer. The

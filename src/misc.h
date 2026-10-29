@@ -1,11 +1,9 @@
 #ifndef SCREEN_MISC_H
 #define SCREEN_MISC_H
 
-#include "config.h"
+#include <stddef.h>	// for size_t
 
-#include <sys/types.h>
-
-#include "image.h"
+struct mchar;
 
 char *SaveStr(const char *);
 char *SaveStrn(const char *, size_t);
