@@ -94,7 +94,7 @@ static char *state_t_string[] = {
 	[ESC] = "ESC",		/* Start of escape sequence */
 	[ASTR] = "ASTR",	/* Start of control string */
 	[STRESC] = "STRESC",	/* ESC seen in control string */
-	[CSI] = "CSI",		/* Reading arguments in "CSI Pn ;... */
+	[CTL_SEQ] = "CS",	/* Reading arguments in "CSI Pn ;... */
 	[PRIN] = "PRIN",	/* Printer mode */
 	[PRINESC] = "PRINESC",	/* ESC seen in printer mode */
 	[PRINCSI] = "PRINCSI",	/* CSI seen in printer mode */
@@ -358,7 +358,7 @@ void WriteString(Window *win, char *buf, size_t len)
 				switch (c) {
 				case '[':
 					win->w_intermediate = 0;
-					win->w_state = CSI;
+					win->w_state = CTL_SEQ;
 					*cs = (struct cs_parser){ 0 };
 					break;
 				case ']':
@@ -403,7 +403,7 @@ void WriteString(Window *win, char *buf, size_t len)
 					}
 				}
 				break;
-			case CSI:
+			case CTL_SEQ:
 				switch (c) {
 				case '0':
 				case '1':
@@ -480,7 +480,7 @@ void WriteString(Window *win, char *buf, size_t len)
 							if (win->w_autoaka < 0)
 								win->w_autoaka = 0;
 							win->w_intermediate = 0;
-							win->w_state = CSI;
+							win->w_state = CTL_SEQ;
 							*cs = (struct cs_parser){ 0 };
 							break;
 						case 0xc0 ^ 'P':
