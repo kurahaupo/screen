@@ -373,7 +373,6 @@ void ExtMouseMode(int);
 void BracketedPasteMode(bool);
 void CursorStyle(int);
 void SetRendition(struct mchar *);
-void SetRenditionMline(struct mline *, int);
 void MakeStatus(char *);
 void RemoveStatus(void);
 int ResizeDisplay(int, int);

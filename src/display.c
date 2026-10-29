@@ -1431,7 +1431,7 @@ void SetRendition(struct mchar *mc)
 		SetFont(mc->font);
 }
 
-void SetRenditionMline(struct mline *ml, int x)
+static void SetRenditionMline(struct mline *ml, int x)
 {
 	if (!display)
 		return;
