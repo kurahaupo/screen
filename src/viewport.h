@@ -30,12 +30,10 @@
 #ifndef SCREEN_VIEWPORT_H
 #define SCREEN_VIEWPORT_H
 
-#include "canvas.h"
-
 typedef struct Viewport Viewport;
 struct Viewport {
-	Viewport *v_next;	/* next vp on canvas */
-	Canvas *v_canvas;	/* back pointer to canvas */
+	struct Viewport *v_next;	/* next vp on canvas */
+	struct Canvas *v_canvas;	/* back pointer to canvas */
 	int v_xoff;		/* layer x offset on display */
 	int v_yoff;		/* layer y offset on display */
 	int v_xs;		/* vp upper left */
@@ -45,6 +43,6 @@ struct Viewport {
 };
 
 int RethinkDisplayViewports(void);
-void RethinkViewportOffsets(Canvas *);
+void RethinkViewportOffsets(struct Canvas *);
 
 #endif				/* SCREEN_VIEWPORT_H */

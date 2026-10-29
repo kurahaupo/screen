@@ -23,9 +23,9 @@
 #ifndef SCREEN_LIST_GENERIC_H
 #define SCREEN_LIST_GENERIC_H
 
-#include <stdlib.h>
-
-#include "window.h"
+#include <stdbool.h>	//
+#include <stddef.h>	// for size_t
+#include <stdint.h>	//
 
 typedef struct ListData ListData;
 typedef struct ListRow ListRow;
@@ -61,6 +61,7 @@ struct ListData {
 	void *data;		/* List specific data */
 };
 
+struct Window;
 
 ListRow *glist_add_row(ListData *ldata, void *data, ListRow *after);
 
@@ -76,7 +77,7 @@ void display_displays(void);
 
 void display_license(void);
 
-void display_windows(int onblank, int order, Window *group);
+void display_windows(int onblank, int order, struct Window *group);
 
 /* global variables */
 

@@ -36,13 +36,8 @@
 #ifndef SCREEN_WINMSG_H
 #define SCREEN_WINMSG_H
 
-#include <stdint.h>
-#include <stdbool.h>
-
-#include "window.h"
-#include "winmsgbuf.h"
-#include "winmsgcond.h"
-#include "backtick.h"
+#include <stdbool.h>	//
+#include <stdint.h>	//
 
 #define RENDBUF_SIZE 128	/* max rendition byte count */
 
@@ -100,11 +95,15 @@ typedef struct {
 	} flags;
 } WinMsgEsc;
 
-char *MakeWinMsg(char *, Window *, int);
-char *MakeWinMsgEv(WinMsgBuf *, char *, Window *, int, int, Event *, int);
-int AddWinMsgRend(WinMsgBuf *, const char *, uint64_t);
-void WindowChanged(Window *, WinMsgEscapeChar);
+struct Event;
+struct WinMsgBuf;
+struct Window;
 
-extern WinMsgBuf *g_winmsg;
+char *MakeWinMsg(char *, struct Window *, int);
+char *MakeWinMsgEv(struct WinMsgBuf *, char *, struct Window *, int, int, struct Event *, int);
+int AddWinMsgRend(struct WinMsgBuf *, const char *, uint64_t);
+void WindowChanged(struct Window *, WinMsgEscapeChar);
+
+extern struct WinMsgBuf *g_winmsg;
 
 #endif

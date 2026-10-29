@@ -23,9 +23,9 @@
 #ifndef SCREEN_WINMSGBUF_H
 #define SCREEN_WINMSGBUF_H
 
-#include <stddef.h>
+#include <stdbool.h>
+#include <stddef.h>	// for size_t
 #include <stdint.h>
-#include "screen.h"
 
 /* Default window message buffer size */
 #define WINMSGBUF_SIZE MAXSTR
@@ -35,7 +35,7 @@
 /* TODO: complete truncation and rendition API */
 
 /* Represents a working buffer for window messages */
-typedef struct {
+typedef struct WinMsgBuf {
 	char *buf;
 	size_t size;
 	uint64_t rend[MAX_WINMSG_REND];
@@ -43,7 +43,7 @@ typedef struct {
 	int numrend;
 } WinMsgBuf;
 
-typedef struct {
+typedef struct WinMsgBufContext {
 	WinMsgBuf *buf;
 	char *p;		/* pointer within buffer */
 

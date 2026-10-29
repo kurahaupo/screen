@@ -33,7 +33,6 @@
 
 #include "config.h"
 
-#include "process.h"
 
 #include <fcntl.h>
 #include <signal.h>
@@ -44,8 +43,6 @@
 #include <stdbool.h>
 #include <sys/types.h>
 #include <time.h>
-
-#include "screen.h"
 
 #include "display.h"
 #include "encoding.h"
@@ -58,7 +55,9 @@
 #include "logfile.h"
 #include "mark.h"
 #include "misc.h"
+#include "process.h"
 #include "resize.h"
+#include "screen.h"
 #include "search.h"
 #include "socket.h"
 #include "telnet.h"
@@ -66,7 +65,9 @@
 #include "tty.h"
 #include "utmp.h"
 #include "viewport.h"
+#include "window.h"
 #include "winmsg.h"
+#include "winmsgbuf.h"
 
 static bool CheckArgCount(struct comm *, size_t);
 static int CheckArgNum(int, char **);

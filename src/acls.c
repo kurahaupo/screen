@@ -28,26 +28,27 @@
 
 #include "config.h"
 
-#include "acls.h"
+#include <sys/types.h>
 
 #include <stdbool.h>
 #include <stddef.h>
 #include <stdint.h>
-#include <sys/types.h>
 
-/* XXX: WHY IS THIS HERE?? :XXX */
-
-#ifdef CHECKLOGIN
-#include <pwd.h>
-#endif				/* CHECKLOGIN */
+#ifdef ENABLE_DOSU
+# ifdef CHECKLOGIN
+#  include <pwd.h>
+# endif				/* CHECKLOGIN */
+#endif
 
 #include <syslog.h>
 
-#include "screen.h"		/* includes acls.h */
-
+#include "acls.h"
+#include "display.h"
 #include "mark.h"
 #include "misc.h"
 #include "process.h"
+#include "screen.h"		/* includes acls.h */
+#include "window.h"
 
 /************************************************************************
  * user managing code, this does not really belong into the acl stuff   *

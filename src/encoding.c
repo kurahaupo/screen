@@ -23,16 +23,18 @@
 
 #include "config.h"
 
-#include "encoding.h"
-
 #include <sys/types.h>
 #include <stdint.h>
 #include <wchar.h>
 
-#include "screen.h"
+#include "ansi.h"
+#include "display.h"
+#include "encoding.h"
 #include "fileio.h"
-#include "misc.h"
 #include "inline.h"
+#include "misc.h"
+#include "screen.h"
+#include "window.h"
 
 static int encmatch(char *, char *);
 static int recode_char(int, int, int);

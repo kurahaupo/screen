@@ -29,7 +29,7 @@
 #ifndef SCREEN_ACLS_H
 #define SCREEN_ACLS_H
 
-#include "os.h"
+#include "os.h"		// for MAXLOGINLEN
 
 /* three known bits: */
 #define ACL_EXEC 0

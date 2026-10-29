@@ -31,17 +31,18 @@
 
 #include "config.h"
 
-#include "help.h"
+#include <sys/types.h>
 
 #include <stdint.h>
 #include <stdbool.h>
-#include <sys/types.h>
 
-#include "screen.h"
-
-#include "misc.h"
+#include "display.h"
+#include "help.h"
+#include "layer.h"
 #include "list_generic.h"
+#include "misc.h"
 #include "process.h"
+#include "screen.h"
 
 char version[60];		/* initialised by main() */
 

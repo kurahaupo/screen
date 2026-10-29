@@ -28,23 +28,23 @@
 
 #include "config.h"
 
-#include "ansi.h"
-
-#include <sys/types.h>
-#include <fcntl.h>
 #include <sys/ioctl.h>
+#include <sys/types.h>
 
-#include "screen.h"
+#include <fcntl.h>
 
+#include "display.h"
 #include "encoding.h"
 #include "fileio.h"
 #include "help.h"
-#include "inline.h"		/* must follow ansi.h and image.h */
+#include "inline.h"
 #include "logfile.h"
 #include "mark.h"
 #include "misc.h"
 #include "process.h"
 #include "resize.h"
+#include "screen.h"
+#include "window.h"
 #include "winmsg.h"
 
 /* widths for Z0/Z1 switching */

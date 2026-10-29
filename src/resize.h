@@ -1,18 +1,22 @@
 #ifndef SCREEN_RESIZE_H
 #define SCREEN_RESIZE_H
 
-#include "window.h"
+#include <stddef.h>	// for size_t
 
-int ChangeWindowSize(Window *, int, int, int);
+struct Display;
+struct Layer;
+struct Window;
+
+int ChangeWindowSize(struct Window *, int, int, int);
 void ChangeScreenSize(int, int, int);
 void CheckScreenSize(int);
 void *xrealloc(void *, size_t);
 void ResizeLayersToCanvases(void);
-void ResizeLayer(Layer *, int, int, Display *);
-int MayResizeLayer(Layer *);
-void FreeAltScreen(Window *);
-void EnterAltScreen(Window *);
-void LeaveAltScreen(Window *);
+void ResizeLayer(struct Layer *, int, int, struct Display *);
+int MayResizeLayer(struct Layer *);
+void FreeAltScreen(struct Window *);
+void EnterAltScreen(struct Window *);
+void LeaveAltScreen(struct Window *);
 
 /* global variables */
 

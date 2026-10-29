@@ -28,8 +28,6 @@
 
 #include "config.h"
 
-#include "attacher.h"
-
 #include <fcntl.h>
 #include <pwd.h>
 #include <signal.h>
@@ -39,15 +37,18 @@
 #include <stdint.h>
 #include <stdbool.h>
 
-#include "screen.h"
-
 #ifdef ENABLE_PAM
 #include <security/pam_appl.h>
 #endif
 
+#include "aalimits.h"
+#include "acls.h"
+#include "attacher.h"
 #include "misc.h"
+#include "screen.h"
 #include "socket.h"
 #include "tty.h"
+#include "window.h"
 
 static int WriteMessage(int, Message *);
 static void AttacherSigInt(int);

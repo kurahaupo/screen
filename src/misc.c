@@ -28,16 +28,19 @@
 
 #include "config.h"
 
-#include "misc.h"
+#include <sys/stat.h>		/* mkdir() declaration */
+#include <sys/types.h>
 
 #include <poll.h>
-#include <sys/types.h>
-#include <sys/stat.h>		/* mkdir() declaration */
 #include <signal.h>
 #include <stdint.h>
 #include <string.h>
 #include <stdbool.h>
 
+#include "ansi.h"
+#include "image.h"
+#include "layer.h"
+#include "misc.h"
 #include "screen.h"
 
 char *SaveStr(const char *str)

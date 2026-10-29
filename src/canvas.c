@@ -28,12 +28,14 @@
 
 #include "config.h"
 
-#include "canvas.h"
-
 #include "screen.h"
+#include "canvas.h"
+#include "display.h"
 #include "help.h"
 #include "list_generic.h"
 #include "resize.h"
+#include "viewport.h"
+#include "window.h"
 #include "winmsg.h"
 
 static void CanvasInitBlank(Canvas *cv)

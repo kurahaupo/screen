@@ -1,16 +1,16 @@
 #ifndef SCREEN_UTMP_H
 #define SCREEN_UTMP_H
 
-#include "config.h"
+#include <stdbool.h>
 
-#include "window.h"
+struct Window;
 
 #ifdef ENABLE_UTMP
 void InitUtmp(void);
 void RemoveLoginSlot(void);
 void RestoreLoginSlot(void);
-int SetUtmp(Window *);
-int RemoveUtmp(Window *);
+int SetUtmp(struct Window *);
+int RemoveUtmp(struct Window *);
 #endif				/* ENABLE_UTMP */
 void SlotToggle(bool);
 #ifdef CAREFULUTMP

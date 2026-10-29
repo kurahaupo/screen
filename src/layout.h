@@ -30,33 +30,36 @@
 #ifndef SCREEN_LAYOUT_H
 #define SCREEN_LAYOUT_H
 
-#include "canvas.h"
+#include "layer.h"	// before canvas.h, for struct Layer
+#include "sched.h"	// before canvas.h & here, for struct Event
+#include "canvas.h"	// for struct Canvas
 
 #define MAXLAY 10
 
-typedef struct Layout Layout;
-struct Layout {
-	Layout *lay_next;
+struct Window;
+
+typedef struct Layout {
+	struct Layout *lay_next;
 	char *lay_title;
 	int lay_number;
-	Canvas lay_canvas;
-	Canvas *lay_forecv;
-	Canvas *lay_cvlist;
+	struct Canvas lay_canvas;
+	struct Canvas *lay_forecv;
+	struct Canvas *lay_cvlist;
 	int lay_autosave;
-};
+} Layout;
 
-void FreeLayoutCv(Canvas *c);
+void FreeLayoutCv(struct Canvas *c);
 Layout *CreateLayout(char *, int);
 void AutosaveLayout(Layout *);
 void LoadLayout(Layout *);
 void NewLayout(char *, int);
-void SaveLayout(char *, Canvas *);
+void SaveLayout(char *, struct Canvas *);
 void ShowLayouts(int);
 Layout *FindLayout(char *);
-void UpdateLayoutCanvas(Canvas *, Window *);
+void UpdateLayoutCanvas(struct Canvas *, struct Window *);
 Layout *CreateLayout(char *, int);
 void RemoveLayout(Layout *);
-int LayoutDumpCanvas(Canvas *, char *);
+int LayoutDumpCanvas(struct Canvas *, char *);
 
 void RenameLayout(Layout *, const char *);
 int RenumberLayout(Layout *, int);

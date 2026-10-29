@@ -28,13 +28,14 @@
 
 #include "config.h"
 
-#include "input.h"
-
 #include <stddef.h>
 
-#include "screen.h"
-
+#include "aalimits.h"
+#include "display.h"
+#include "input.h"
+#include "layer.h"
 #include "misc.h"
+#include "screen.h"
 
 #define INPUTLINE (flayer->l_height - 1)
 

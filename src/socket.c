@@ -28,8 +28,6 @@
 
 #include "config.h"
 
-#include "socket.h"
-
 #include <pwd.h>
 #include <sys/types.h>
 #include <sys/stat.h>
@@ -56,8 +54,6 @@
 #endif				/* PWD_H */
 #endif
 
-#include "screen.h"
-
 #ifdef HAVE_DIRENT_H
 #include <dirent.h>
 #else
@@ -65,22 +61,28 @@
 #define dirent direct
 #endif
 
+#include "aalimits.h"
+#include "display.h"
+#include "encoding.h"
+#include "fileio.h"
+#include "layout.h"
+#include "list_generic.h"
+#include "misc.h"
+#include "process.h"
+#include "resize.h"
+#include "screen.h"
+#include "socket.h"
+#include "termcap.h"
+#include "tty.h"
+#include "utmp.h"
+#include "window.h"
+
 #ifndef CMSG_LEN
 #define CMSG_LEN(length) ((_CMSG_DATA_ALIGN(sizeof(struct cmsghdr))) + (length))
 #endif
 #ifndef CMSG_SPACE
 #define CMSG_SPACE(length) ((_CMSG_DATA_ALIGN(sizeof(struct cmsghdr))) + (_CMSG_DATA_ALIGN(length)))
 #endif
-
-#include "encoding.h"
-#include "fileio.h"
-#include "list_generic.h"
-#include "misc.h"
-#include "process.h"
-#include "resize.h"
-#include "termcap.h"
-#include "tty.h"
-#include "utmp.h"
 
 static int CheckPid(pid_t);
 static int ValidateDetachRequest(Message *);

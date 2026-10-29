@@ -29,23 +29,24 @@
 #include "config.h"
 
 #include <sys/types.h>
+
 #include <ctype.h>
 #include <stdbool.h>
 #include <stdint.h>
 #include <stdbool.h>
 
-#include "mark.h"
-
+#include "display.h"
 #include "encoding.h"
 #include "fileio.h"
-#include "inline.h"		/* must follow ansi.h and image.h */
+#include "inline.h"
+#include "layer.h"
+#include "mark.h"
 #include "misc.h"
 #include "process.h"
 #include "screen.h"
 #include "search.h"
+#include "window.h"
 #include "winmsg.h"
-
-#include "inline.h"		/* must follow ansi.h and image.h */
 
 /*
  * !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!

@@ -22,13 +22,16 @@
 
 #include "config.h"
 
-#include "list_generic.h"
-
 #include <stdbool.h>
 #include <stdint.h>
 
-#include "misc.h"
+#include "canvas.h"
+#include "display.h"
 #include "input.h"
+#include "layer.h"
+#include "list_generic.h"
+#include "misc.h"
+#include "screen.h"
 
 /* Deals with a generic list display */
 

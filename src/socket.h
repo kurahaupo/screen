@@ -1,7 +1,8 @@
 #ifndef SCREEN_SOCKET_H
 #define SCREEN_SOCKET_H
 
-#include "window.h"
+struct Message;
+struct NewWindow;
 
 int FindSocket(int *, int *, int *, char *);
 int MakeClientSocket(int);
@@ -11,7 +12,7 @@ int chsock(void);
 void ReceiveMsg(void);
 void SendCreateMsg(char *, struct NewWindow *);
 int SendErrorMsg(char *, char *);
-int SendAttachMsg(int, Message *, int);
+int SendAttachMsg(int, struct Message *, int);
 void ReceiveRaw(int);
 
 #endif				/* SCREEN_SOCKET_H */
