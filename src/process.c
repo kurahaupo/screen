@@ -5115,7 +5115,7 @@ int Parse(char *buf, int bufl, char **args, int *argl)
 					v = xbuf;
 					if (!strcmp(ps, "TERM"))
 						v = display ? D_termname : "unknown";
-					else if (!strcmp(ps, "TRUECOLOR"))
+					else if (!strcmp(ps, "COLORTERM"))
 						v = display ? D_hastruecolor ? "truecolor" : "" : "unknown";
 					else if (!strcmp(ps, "COLUMNS"))
 						sprintf(xbuf, "%d", display ? D_width : -1);
