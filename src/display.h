@@ -316,20 +316,10 @@ struct Display {
 #define D_blankerpid	DISPLAY(d_blankerpid)
 #define D_mousetimeoutev	DISPLAY(d_mousetimeoutev)
 
-
 #define GRAIN 4096		/* Allocation grain size for output buffer */
 #define OBUF_MAX 256		/* default for obuflimit */
 
 #define OUTPUT_BLOCK_SIZE 256	/* Block size of output to tty */
-
-#define AddChar(c)		\
-do				\
-  {				\
-    if (--D_obuffree <= 0)	\
-      Resize_obuf();		\
-    *D_obufp++ = (c);		\
-  }				\
-while (0)
 
 Display *MakeDisplay(char *, char *, char *, bool, int, pid_t, struct mode *);
 void FreeDisplay(void);
@@ -408,5 +398,12 @@ extern Display *display, *displays;
 extern const struct LayFuncs BlankLf;
 
 extern struct statusposstr statuspos;
+
+static inline void AddChar(char c)
+{
+	if (--D_obuffree <= 0)
+		Resize_obuf();
+	*D_obufp++ = c;
+}
 
 #endif				/* SCREEN_DISPLAY_H */
