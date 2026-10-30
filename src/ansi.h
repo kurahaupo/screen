@@ -38,12 +38,13 @@ typedef enum attr_e {
 		 // attribute           terminfo code   termcap code    ECMA-48 SGR     custom SGR
 		 //                     (on   / off)    (on / off)      (on / off)      (on / off)
 		 //
+
 	ATTR_BD, // bold mode           bold  / *        md / *           1 / 21
 	ATTR_DI, // dim mode            dim   / *        mh / *           2 / 22
-	ATTR_IT, // italicized          simt  / ritm     ZH / ZR          3 / 23        3:0 / 23:0
+	ATTR_IT, // italicized          sitm  / ritm     ZH / ZR          3 / 23        3:0 / 23:0
 	ATTR_US, // underscore mode     smul  / rmul     us / ue          4 / 24
-	ATTR_BL, // slow blink          blink / *        mb / *           5 / 25                        (> 0.4s; < 2.5hz; < 150/min)
-	ATTR_FB, // fast blink          -                -                6 / 26                        (≤ 0.4s; ≥ 2.5hz; ≥ 150/min; SGR only)
+	ATTR_BL, // slow blink          blink / *        mb / *           5 / 25                        (> 0.4s; < 2.5Hz; < 150/min)
+	ATTR_FB, // fast blink          -                -                6 / 26                        (≤ 0.4s; ≥ 2.5Hz; ≥ 150/min; SGR only)
 	ATTR_RV, // reverse video       rev   / *        mr / *           7 / 27
 	ATTR_HI, // hidden              invis / *        mk / *           8 / 28
 	ATTR_ST, // strikeThru          smxx  / rmxx     -                9 / 29                        (terminfo only)
@@ -72,9 +73,9 @@ typedef enum attr_mask_e {
 
 typedef enum atyp_mask_e {
 
-	ATYP_M = 1 << 0,
-	ATYP_S = 1 << 1,
-	ATYP_U = 1 << 2,
+	ATYP_M = 1 << 0,	/* generic me reset */
+	ATYP_S = 1 << 1,	/* so/se pair (standout) */
+	ATYP_U = 1 << 2,	/* us/ue pair (italic) */
 
 } atyp_mask_t;
 
