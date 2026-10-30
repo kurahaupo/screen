@@ -200,7 +200,7 @@ struct Display {
 	Event d_mousetimeoutev;	/* mouse sequence timeout event */
 };
 
-#define DISPLAY(x) display->x
+#define DISPLAY(x)	display->x
 
 #define D_user		DISPLAY(d_user)
 #define D_username	(DISPLAY(d_user) ? DISPLAY(d_user)->u_name : 0)

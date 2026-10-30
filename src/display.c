@@ -478,14 +478,14 @@ static void RAW_PUTCHAR(uint32_t c)
 	}
 	if (D_encoding)
 		c = PrepareEncodedChar(c);
-      kanjiloop:
+kanjiloop:
 	if (D_xtable && D_xtable[(int)(unsigned char)D_rend.font]
 	    && D_xtable[(int)(unsigned char)D_rend.font][(int)(unsigned char)c])
 		AddStr(D_xtable[(int)(unsigned char)D_rend.font][(int)(unsigned char)c]);
 	else
 		AddChar(D_rend.font != '0' ? c : (uint32_t) D_c0_tab[(int)(unsigned char)c]);
 
-      addedutf8:
+addedutf8:
 	if (++D_x >= D_width) {
 		if (D_AM == 0)
 			D_x = D_width - 1;
@@ -1150,9 +1150,9 @@ void ScrollV(int xs, int ys, int xe, int ye, int n, int bce)
 	if (D_lp_missing && missy != D_bot)
 		WriteLP(D_width - 1, missy);
 /* XXX
-  ChangeScrollRegion(oldtop, oldbot);
-  if (D_lp_missing && missy != D_bot)
-    WriteLP(D_width - 1, missy);
+	ChangeScrollRegion(oldtop, oldbot);
+	if (D_lp_missing && missy != D_bot)
+		WriteLP(D_width - 1, missy);
 */
 }
 
