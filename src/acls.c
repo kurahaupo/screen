@@ -396,7 +396,7 @@ int AclLinkUser(char *from, char *to)
  */
 char *DoSu(struct acluser **up, char *name, char *pw1, char *pw2)
 {
-#if 1
+#ifndef ENABLE_DOSU
 	(void)up;
 	(void)name;
 	(void)pw1;
