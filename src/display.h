@@ -181,7 +181,7 @@ struct Display {
 	char *d_attrtab[NATTR];	/* attrib emulation table */
 	char d_attrtyp[NATTR];	/* attrib group table */
 	bool d_hascolor;	/* do we support color */
-	bool d_hastruecolor;	/* do we support TrueColor (was $TRUECOLOR set with valid string?) */
+	bool d_hastruecolor;	/* do we support TrueColor (initially set from ‘COLORTERM’ in the environment) */
 	char d_c0_tab[256];	/* conversion for C0 */
 	char ***d_xtable;	/* char translation table */
 	int d_UPcost, d_DOcost, d_LEcost, d_NDcost;
