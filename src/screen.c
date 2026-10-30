@@ -747,15 +747,15 @@ int main(int argc, char **argv)
 	}
 #endif
 
-#define SET_GUID() do \
-  { \
-    if (setgid(real_gid)) \
-	  Panic(0, "setgid"); \
-    if (setuid(real_uid)) \
-	  Panic(0, "setuid"); \
-    eff_uid = real_uid; \
-    eff_gid = real_gid; \
-  } while (0)
+#define SET_GUID()				\
+	do {					\
+		if (setgid(real_gid))		\
+			Panic(0, "setgid");	\
+		if (setuid(real_uid))		\
+			Panic(0, "setuid");	\
+		eff_uid = real_uid;		\
+		eff_gid = real_gid;		\
+	} while (0)
 
 	if (home == NULL || *home == '\0')
 		home = ppp->pw_dir;
