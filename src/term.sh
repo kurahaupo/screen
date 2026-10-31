@@ -33,15 +33,15 @@ extern char *tparm(char *str, ...);
 
 struct term
 {
-  char *tcname;
-  int type;
+	char *tcname;
+	int type;
 };
 
 union tcu
 {
-  int flg;
-  int num;
-  char *str;
+	int  flg;
+	int  num;
+	char *str;
 };
 
 extern struct term term[];
@@ -59,16 +59,16 @@ sed < "$source_file" \
   -e '/"/y/abcdefghijklmnopqrstuvwxyz/ABCDEFGHIJKLMNOPQRSTUVWXYZ/' \
 | $AWK -v source_file="$source_file" '
 /^[[:space:]]+[{] ".*KMAPDEF[(].*$/{
-  if (min == 0) min = s
-  max = s;
+    if (min == 0) min = s
+    max = s;
 }
 /^[[:space:]]+[{] ".*KMAPADEF[(].*$/{
-  if (amin == 0) amin = s
-  amax = s;
+    if (amin == 0) amin = s
+    amax = s;
 }
 /^[[:space:]]+[{] ".*KMAPMDEF[(].*$/{
-  if (mmin == 0) mmin = s
-  mmax = s;
+    if (mmin == 0) mmin = s
+    mmax = s;
 }
 /^[[:space:]]+[{][[:space:]]*".*$/{
 a=substr($2,2,length($2)-3);
@@ -80,22 +80,22 @@ if (nolist == 0) {
 s++;
 }
 /[[:space:]]*\/[*/]+[[:space:]]+define/{
-printf "#define  %-15s %d\t\t/* line %u in %s */\n",$3,s,NR,source_file
+    printf "#define  %-14s %d\t\t/* line %u in %s */\n",$3,s,NR,source_file
 }
 /[[:space:]]*\/[/*]+[[:space:]]*nolist/{
-nolist = 1;
+    nolist = 1;
 }
 /[[:space:]]*\/[/*]+[[:space:]]*list/{
-nolist = 0;
+    nolist = 0;
 }
 END {
-  printf "\n"
-  printf "# define %-15s %d\n", "KMAPDEFSTART", min
-  printf "# define %-15s %d\n", "NKMAPDEF", max-min+1
-  printf "# define %-15s %d\n", "KMAPADEFSTART", amin
-  printf "# define %-15s %d\n", "NKMAPADEF", amax-amin+1
-  printf "# define %-15s %d\n", "KMAPMDEFSTART", mmin
-  printf "# define %-15s %d\n", "NKMAPMDEF", mmax-mmin+1
+    printf "\n"
+    printf "# define %-14s %d\n", "KMAPDEFSTART", min
+    printf "# define %-14s %d\n", "NKMAPDEF", max-min+1
+    printf "# define %-14s %d\n", "KMAPADEFSTART", amin
+    printf "# define %-14s %d\n", "NKMAPADEF", amax-amin+1
+    printf "# define %-14s %d\n", "KMAPMDEFSTART", mmin
+    printf "# define %-14s %d\n", "NKMAPMDEF", mmax-mmin+1
 }
 ' | sed -e s/NUM/num/ -e s/STR/str/ -e s/FLG/flg/ \
 >> term.h
