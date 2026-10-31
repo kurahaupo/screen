@@ -20,9 +20,12 @@ cat << EOF > term.h
 
 #include <stdbool.h>
 
-#define T_FLG 0
-#define T_NUM 1
-#define T_STR 2
+typedef enum tcap_type_e {
+	T_FLG,
+	T_NUM,
+	T_STR,
+	T_SKIP = 4  /* don't attempt to fetch termcap */
+} tcap_type_t;
 
 extern int tgetent(char *, const char *);
 extern int tgetflag(char *);
@@ -49,16 +52,7 @@ extern struct term term[];
 
 EOF
 
-#
-# SCO-Unix sufferers may need to use the following lines:
-# perl -p < "$source_file" \
-#  -e 's/"/"C/ if /"[A-Z]."/;' \
-#  -e 'y/[a-z]/[A-Z]/ if /"/;' \
-#
-sed < "$source_file" \
-  -e '/"[A-Z]."/s/"/"C/' \
-  -e '/"/y/abcdefghijklmnopqrstuvwxyz/ABCDEFGHIJKLMNOPQRSTUVWXYZ/' \
-| $AWK -v source_file="$source_file" '
+$AWK < "$source_file" -v source_file="$source_file" '
 /^[[:space:]]+[{] ".*KMAPDEF[(].*$/{
     if (min == 0) min = s
     max = s;
@@ -72,13 +66,17 @@ sed < "$source_file" \
     mmax = s;
 }
 /^[[:space:]]+[{][[:space:]]*".*$/{
-a=substr($2,2,length($2)-3);
-b=substr($3,3,3);
-if (nolist == 0) {
-    printf "# define d_%-13s d_tcs[%d].%s\n",a,s,b
-    printf "# define D_%-13s DISPLAY(d_%s)\n",a,a
-  }
-s++;
+    a=aa=substr($2,2,length($2)-3);
+    b=substr($3,3,3);
+    if (length(a)==2) {
+        a=toupper(aa);
+        if (substr(a,0,1) == substr(aa,0,1)) a="C"a;
+    }
+    if (nolist == 0) {
+        printf "# define d_%-12s d_tcs[%d].%s\n",a,s,b
+        printf "# define D_%-12s DISPLAY(d_%s)\n",a,a
+    }
+    s++;
 }
 /[[:space:]]*\/[*/]+[[:space:]]+define/{
     printf "#define  %-14s %d\t\t/* line %u in %s */\n",$3,s,NR,source_file

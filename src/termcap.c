@@ -146,6 +146,8 @@ int InitTermcap(int width, int height)
 	 */
 	tp = D_tentry;
 	for (i = 0; i < T_N; i++) {
+		if (term[i].type & T_SKIP)
+			continue;
 		switch (term[i].type) {
 		case T_FLG:
 			D_tcs[i].flg = e_tgetflag(term[i].tcname);
