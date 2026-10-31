@@ -18,6 +18,7 @@ cat << EOF > term.h
  * This file is automagically created from $source_file by $0 -- DO NOT EDIT
  */
 
+#include <stdbool.h>
 
 #define T_FLG 0
 #define T_NUM 1
@@ -39,7 +40,7 @@ struct term
 
 union tcu
 {
-	int  flg;
+	bool flg;
 	int  num;
 	char *str;
 };
