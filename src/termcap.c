@@ -309,6 +309,7 @@ int InitTermcap(int width, int height)
 			t = D_attrtyp[i];
 		}
 	}
+
 	if (D_CAF || D_CAB || D_CSF || D_CSB)
 		D_hascolor = 1;
 	if (D_UT)
