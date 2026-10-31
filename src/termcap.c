@@ -130,7 +130,7 @@ int InitTermcap(int width, int height)
 	char tbuf[TERMCAP_BUFSIZE], *tp;
 	int t, xue, xse, xme;
 
-	memset(tbuf, 0, ARRAY_SIZE(tbuf));
+	memset(tbuf, 0, sizeof tbuf);
 	if (*D_termname == 0 || e_tgetent(tbuf, D_termname) != 1) {
 		Msg(0, "Cannot find terminfo entry for '%s'.", D_termname);
 		return -1;
