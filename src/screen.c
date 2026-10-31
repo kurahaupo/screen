@@ -109,7 +109,8 @@ bool attach_tty_is_in_new_ns = false;
 char attach_tty_name_in_ns[MAXPATHLEN];
 
 char SocketPath[MAXPATHLEN + 2];
-char *SocketName;		/* SocketName is pointer in SocketPath */
+#define endSocketPath (SocketPath + sizeof SocketPath)
+char *SocketName;		/* SocketName points into SocketPath */
 char *SocketMatch = NULL;	/* session id command line argument */
 int ServerSocket = -1;
 Event serv_read;
@@ -310,12 +311,141 @@ static void exit_with_usage(char *myname, char *message, char *arg)
 	exit(0);
 }
 
+static void InitSocketDir(void)
+{
+	SocketDir = getenv("SCREENDIR");
+	if (SocketDir) {
+		if (strlen(SocketDir) >= MAXPATHLEN - 1)
+			Panic(0, "Ridiculously long $SCREENDIR - try again.");
+		if (multi)
+			Panic(0, "No $SCREENDIR with multi screens, please.");
+	}
+	if (multiattach) {
+#ifndef SOCKET_DIR
+		sprintf(SocketPath, "%s/.screen", multi_home);
+#else
+		SocketDir = SOCKET_DIR;
+		sprintf(SocketPath, "%s/S-%s", SocketDir, multi);
+#endif
+	} else {
+#ifndef SOCKET_DIR
+		if (SocketDir == NULL) {
+			if (strlen(home) > MAXPATHLEN - 8 - 1)
+				Panic(0, "$HOME too long - sorry.");
+			sprintf(SocketPath, "%s/.screen", home);
+			SocketDir = SocketPath;
+		}
+#endif
+		if (SocketDir) {
+			if (access(SocketDir, F_OK)) {
+				if (UserContext() > 0) {
+					if (mkdir(SocketDir, 0700))
+						UserReturn(0);
+					UserReturn(1);
+				}
+				if (UserStatus() <= 0)
+					Panic(0, "Cannot make directory '%s'.", SocketDir);
+			}
+			if (SocketDir != SocketPath)
+				strncpy(SocketPath, SocketDir, ARRAY_SIZE(SocketPath));
+		}
+#ifdef SOCKET_DIR
+		else {
+			SocketDir = SOCKET_DIR;
+			if (stat(SocketDir, &st)) {
+				n = (eff_uid == 0 && (real_uid || eff_gid == real_gid)) ? 0755 :
+				    (eff_gid != real_gid) ? 0775 :
+#ifdef S_ISVTX
+				    0777 | S_ISVTX;
+#else
+				    0777;
+#endif
+				if (mkdir(SocketDir, n) == -1)
+					Panic(errno, "Cannot make directory '%s'", SocketDir);
+			} else {
+				if (!S_ISDIR(st.st_mode))
+					Panic(0, "'%s' must be a directory.", SocketDir);
+				if (eff_uid == 0 && real_uid && st.st_uid != eff_uid)
+					Panic(0, "Directory '%s' must be owned by root.", SocketDir);
+				n = (eff_uid == 0 && (real_uid || (st.st_mode & 0775) != 0775)) ? 0755 :
+				    (eff_gid == st.st_gid && eff_gid != real_gid) ? 0775 : 0777;
+				if (((int)st.st_mode & 0777) != n)
+					Panic(0, "Directory '%s' must have mode %03o.", SocketDir, n);
+			}
+			sprintf(SocketPath, "%s/S-%s", SocketDir, LoginName);
+			if (mkdir(SocketPath, 0700) == 0) {
+				(void)lchown(SocketPath, real_uid, real_gid);
+			} else if (errno != EEXIST) {
+				Panic(errno, "Cannot make directory '%s'", SocketPath);
+			}
+		}
+#endif
+	}
+
+	if (stat(SocketPath, &st) == -1) {
+		if (eff_uid == real_uid) {
+			Panic(errno, "Cannot access %s", SocketPath);
+		} else {
+			Panic(0, "Error accessing %s", SocketPath);
+		}
+	} else if (!S_ISDIR(st.st_mode)) {
+		if (eff_uid == real_uid || st.st_uid == real_uid) {
+			Panic(0, "%s is not a directory.", SocketPath);
+		} else {
+			Panic(0, "Error accessing %s", SocketPath);
+		}
+	}
+	if (multi) {
+		if (st.st_uid != multi_uid) {
+			if (eff_uid == real_uid || st.st_uid == real_uid) {
+				Panic(0, "%s is not the owner of %s.", multi, SocketPath);
+			} else {
+				Panic(0, "Error accessing %s", SocketPath);
+			}
+		}
+	} else {
+#ifdef SOCKET_DIR		/* if SOCKETDIR is not defined, the socket is in $HOME.
+				   in that case it does not make sense to compare uids. */
+		if (st.st_uid != real_uid) {
+			if (eff_uid == real_uid) {
+				Panic(0, "You are not the owner of %s.", SocketPath);
+			} else {
+				Panic(0, "Error accessing %s", SocketPath);
+			}
+		}
+#endif
+	}
+	if ((st.st_mode & 0777) != 0700) {
+		if (eff_uid == real_uid || st.st_uid == real_uid) {
+			Panic(0, "Directory %s must have mode 700.", SocketPath);
+		} else {
+			Panic(0, "Error accessing %s", SocketPath);
+		}
+	}
+	if (SocketMatch && strchr(SocketMatch, '/'))
+		Panic(0, "Bad session name '%s'", SocketMatch);
+	SocketName = strchr(SocketPath, 0) + 1;
+	*SocketName = 0;
+	/* later we will set SocketName[-1] = '/'; */
+}
+
+static void InitSocketName(pid_t pid)
+{
+	char *p = SocketName - 1;
+	if (SocketMatch)
+		/* user started us with -S option */
+		snprintf(p, endSocketPath - p, "/%d.%s", (int)pid, SocketMatch);
+	else
+		snprintf(p, endSocketPath - p, "/%d.%s.%s", (int)pid, stripdev(attach_tty), HostName);
+	while ((p = strchr(p+1, '/')))
+		*p = '-';
+}
+
 int main(int argc, char **argv)
 {
 	int n;
 	char *ap;
 	char *av0;
-	char socknamebuf[FILENAME_MAX + 1];
 	int mflag = 0;
 	char *myname = (argc == 0) ? "screen" : argv[0];
 	char *SocketDir;
@@ -805,119 +935,7 @@ int main(int argc, char **argv)
 
 	oumask = umask(0);	/* well, unsigned never fails? jw. */
 
-	SocketDir = getenv("SCREENDIR");
-	if (SocketDir) {
-		if (strlen(SocketDir) >= MAXPATHLEN - 1)
-			Panic(0, "Ridiculously long $SCREENDIR - try again.");
-		if (multi)
-			Panic(0, "No $SCREENDIR with multi screens, please.");
-	}
-	if (multiattach) {
-#ifndef SOCKET_DIR
-		sprintf(SocketPath, "%s/.screen", multi_home);
-#else
-		SocketDir = SOCKET_DIR;
-		sprintf(SocketPath, "%s/S-%s", SocketDir, multi);
-#endif
-	} else {
-#ifndef SOCKET_DIR
-		if (SocketDir == NULL) {
-			if (strlen(home) > MAXPATHLEN - 8 - 1)
-				Panic(0, "$HOME too long - sorry.");
-			sprintf(SocketPath, "%s/.screen", home);
-			SocketDir = SocketPath;
-		}
-#endif
-		if (SocketDir) {
-			if (access(SocketDir, F_OK)) {
-				if (UserContext() > 0) {
-					if (mkdir(SocketDir, 0700))
-						UserReturn(0);
-					UserReturn(1);
-				}
-				if (UserStatus() <= 0)
-					Panic(0, "Cannot make directory '%s'.", SocketDir);
-			}
-			if (SocketDir != SocketPath)
-				strncpy(SocketPath, SocketDir, ARRAY_SIZE(SocketPath));
-		}
-#ifdef SOCKET_DIR
-		else {
-			SocketDir = SOCKET_DIR;
-			if (stat(SocketDir, &st)) {
-				n = (eff_uid == 0 && (real_uid || eff_gid == real_gid)) ? 0755 :
-				    (eff_gid != real_gid) ? 0775 :
-#ifdef S_ISVTX
-				    0777 | S_ISVTX;
-#else
-				    0777;
-#endif
-				if (mkdir(SocketDir, n) == -1)
-					Panic(errno, "Cannot make directory '%s'", SocketDir);
-			} else {
-				if (!S_ISDIR(st.st_mode))
-					Panic(0, "'%s' must be a directory.", SocketDir);
-				if (eff_uid == 0 && real_uid && st.st_uid != eff_uid)
-					Panic(0, "Directory '%s' must be owned by root.", SocketDir);
-				n = (eff_uid == 0 && (real_uid || (st.st_mode & 0775) != 0775)) ? 0755 :
-				    (eff_gid == st.st_gid && eff_gid != real_gid) ? 0775 : 0777;
-				if (((int)st.st_mode & 0777) != n)
-					Panic(0, "Directory '%s' must have mode %03o.", SocketDir, n);
-			}
-			sprintf(SocketPath, "%s/S-%s", SocketDir, LoginName);
-			if (mkdir(SocketPath, 0700) == 0) {
-				(void)lchown(SocketPath, real_uid, real_gid);
-			} else if (errno != EEXIST) {
-				Panic(errno, "Cannot make directory '%s'", SocketPath);
-			}
-		}
-#endif
-	}
-
-	if (stat(SocketPath, &st) == -1) {
-		if (eff_uid == real_uid) {
-			Panic(errno, "Cannot access %s", SocketPath);
-		} else {
-			Panic(0, "Error accessing %s", SocketPath);
-		}
-	} else if (!S_ISDIR(st.st_mode)) {
-		if (eff_uid == real_uid || st.st_uid == real_uid) {
-			Panic(0, "%s is not a directory.", SocketPath);
-		} else {
-			Panic(0, "Error accessing %s", SocketPath);
-		}
-	}
-	if (multi) {
-		if (st.st_uid != multi_uid) {
-			if (eff_uid == real_uid || st.st_uid == real_uid) {
-				Panic(0, "%s is not the owner of %s.", multi, SocketPath);
-			} else {
-				Panic(0, "Error accessing %s", SocketPath);
-			}
-		}
-	} else {
-#ifdef SOCKET_DIR		/* if SOCKETDIR is not defined, the socket is in $HOME.
-				   in that case it does not make sense to compare uids. */
-		if (st.st_uid != real_uid) {
-			if (eff_uid == real_uid) {
-				Panic(0, "You are not the owner of %s.", SocketPath);
-			} else {
-				Panic(0, "Error accessing %s", SocketPath);
-			}
-		}
-#endif
-	}
-	if ((st.st_mode & 0777) != 0700) {
-		if (eff_uid == real_uid || st.st_uid == real_uid) {
-			Panic(0, "Directory %s must have mode 700.", SocketPath);
-		} else {
-			Panic(0, "Error accessing %s", SocketPath);
-		}
-	}
-	if (SocketMatch && strchr(SocketMatch, '/'))
-		Panic(0, "Bad session name '%s'", SocketMatch);
-	SocketName = SocketPath + strlen(SocketPath) + 1;
-	*SocketName = 0;
+	InitSocketDir();
 	(void)umask(oumask);
 
 	(void)gethostname(HostName, MAXSTR);
@@ -1000,16 +1018,7 @@ int main(int argc, char **argv)
 	default:
 		if (detached)
 			exit(0);
-		if (SocketMatch)
-			sprintf(socknamebuf, "%d.%s", MasterPid, SocketMatch);
-		else
-			sprintf(socknamebuf, "%d.%s.%s", MasterPid, stripdev(attach_tty), HostName);
-		for (ap = socknamebuf; *ap; ap++)
-			if (*ap == '/')
-				*ap = '-';
-		if (strlen(socknamebuf) > FILENAME_MAX)
-			socknamebuf[FILENAME_MAX - 1] = 0;
-		snprintf(SocketPath + strlen(SocketPath), sizeof(SocketPath) - strlen(SocketPath), "/%s", socknamebuf);
+		InitSocketName(getpid());
 		SET_GUID();
 		Attacher();
 		/* NOTREACHED */
@@ -1061,19 +1070,7 @@ int main(int argc, char **argv)
 	    !freopen("/dev/null", "w", stdout) || !freopen("/dev/null", "w", stderr))
 		Panic(0, "Cannot reassociate std streams");
 
-	if (SocketMatch) {
-		/* user started us with -S option */
-		sprintf(socknamebuf, "%d.%s", (int)getpid(), SocketMatch);
-	} else {
-		sprintf(socknamebuf, "%d.%s.%s", (int)getpid(), stripdev(attach_tty), HostName);
-	}
-	for (ap = socknamebuf; *ap; ap++)
-		if (*ap == '/')
-			*ap = '-';
-	if (strlen(socknamebuf) > FILENAME_MAX) {
-		socknamebuf[FILENAME_MAX] = 0;
-	}
-	snprintf(SocketPath + strlen(SocketPath), sizeof(SocketPath) - strlen(SocketPath), "/%s", socknamebuf);
+	InitSocketName(MasterPid);
 
 	ServerSocket = MakeServerSocket();
 #ifdef SYSTEM_SCREENRC
