@@ -982,8 +982,12 @@ static void MakeString(char *cap, char *buf, int buflen, char *s)
 }
 
 #undef QUOTES
-#define QUOTES(p) \
-  (*p == '\\' && (p[1] == '\\' || p[1] == ',' || p[1] == '%'))
+static inline bool QUOTES(char const *p)
+{
+	return p[0] == '\\' && (p[1] == '\\'
+			     || p[1] == ','
+			     || p[1] == '%');
+}
 
 int CreateTransTable(char *s)
 {
