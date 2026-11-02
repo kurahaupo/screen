@@ -1882,17 +1882,17 @@ static void SelectRendition(Window *win)
 			continue;
 		size_t m = win->w_sgr3_mode;
 
-		if (k >= i + 2) {
-			m = cs->params[i + 1];
-			/* permitted subparam values */
-			if (m >= ARRAY_SIZE(rendlist))
+		/* Special SGR3 handling... */
+		if (j == 3 && k == i + 2) {
+			sgr3_mode_t mm = cs->params[i + 1];
+			/* ignore out-of-range subparam values */
+			if (mm >= ARRAY_SIZE(rendlist))
 				continue;
-			/* only allow subparams for params where they make a difference */
-			if (rendlist[0][j] == rendlist[1][j])
-				continue;
-			if (k > i + 2)
-				continue;
-		}
+			/* use current mode for 0=SGR3_UNSET */
+			if (mm)
+				m = mm;
+		} else if (k >= i + 2)
+			continue;
 
 		attr_mask_t l = rendlist[m][j];
 		if (!l)

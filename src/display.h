@@ -113,8 +113,6 @@ struct TermDef {
 		attr_mask_t tda_also_unset;
 	} td_attr[NATTR];	/* order here matches ECMA-48 SGR params 1 thru 9 */
 
-	char *td_attrtab[NATTR] __attribute__((deprecated));	/* attrib emulation table */
-	char td_attrtyp[NATTR] __attribute__((deprecated));	/* attrib group table */
 };
 
 typedef struct Display Display;
@@ -208,8 +206,6 @@ struct Display {
 	#define d_tcs		d_td.td_tcs
 	#define d_ignored	d_td.td_ignored
 	#define d_attr		d_td.td_attr
-	#define d_attrtab	d_td.td_attrtab
-	#define d_attrtyp	d_td.td_attrtyp
 
 	bool d_hascolor;	/* do we support color */
 	bool d_hastruecolor;	/* do we support TrueColor (initially set from ‘COLORTERM’ in the environment) */
