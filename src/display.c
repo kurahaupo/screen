@@ -1312,16 +1312,15 @@ int color256to88(int color)
  */
 void SetColor(uint32_t foreground, uint32_t background)
 {
-	uint32_t f, b, of, ob;
 	static unsigned char sftrans[8] = { 0, 4, 2, 6, 1, 5, 3, 7 };
 
 	if (!display)
 		return;
 
-	f = foreground;
-	b = background;
-	of = D_rend.colorfg;
-	ob = D_rend.colorbg;
+	uint32_t f = foreground;
+	uint32_t b = background;
+	uint32_t of = D_rend.colorfg;
+	uint32_t ob = D_rend.colorbg;
 	D_rend.colorfg = f;
 	D_rend.colorbg = b;
 
@@ -1374,12 +1373,9 @@ void SetColor(uint32_t foreground, uint32_t background)
 
 	}
 	if (f != of && (f & 0x04000000) && hastruecolor) {
-		uint8_t _r, _g, _b;
-
-		_r = (f & 0x00ff0000) >> 16;
-		_g = (f & 0x0000ff00) >> 8;
-		_b = (f & 0x000000ff);
-
+		uint8_t _r = f >> 16;
+		uint8_t _g = f >> 8;
+		uint8_t _b = f;
 		/* TODO - properly get escape code */
 		tputs(tparm("\033[38;2;%p1%d;%p2%d;%p3%dm", _r, _g, _b), 1, DoAddChar);
 	}
@@ -1411,12 +1407,9 @@ void SetColor(uint32_t foreground, uint32_t background)
 		}
 	}
 	if (b != ob && (b & 0x04000000) && hastruecolor) {
-		uint8_t _r, _g, _b;
-
-		_r = (b & 0x00ff0000) >> 16;
-		_g = (b & 0x0000ff00) >> 8;
-		_b = (b & 0x000000ff);
-
+		uint8_t _r = b >> 16;
+		uint8_t _g = b >> 8;
+		uint8_t _b = b;
 		/* TODO - properly get escape code */
 		tputs(tparm("\033[48;2;%p1%d;%p2%d;%p3%dm", _r, _g, _b), 1, DoAddChar);
 	}
