@@ -1880,7 +1880,7 @@ static void SelectRendition(Window *win)
 
 		if (j >= ARRAY_SIZE(rendlist[0]))
 			continue;
-		size_t m = win->w_sgr3_mode;
+		sgr3_mode_t m = win->w_sgr3_mode;
 
 		/* Special SGR3 handling... */
 		if (j == 3 && k == i + 2) {
