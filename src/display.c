@@ -1346,7 +1346,7 @@ void SetColor(uint32_t foreground, uint32_t background)
 	if (!D_hascolor)
 		return;
 
-/* FOREGROUND */
+	/* FOREGROUND */
 	if (f != of && f == 0) {
 		AddCStr("\033[39m");	/* works because AX is set */
 	}
