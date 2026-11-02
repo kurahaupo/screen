@@ -98,7 +98,7 @@ typedef struct TermDef TermDef;
 typedef struct TermDefAttr TermDefAttr;
 typedef struct TermDefMerge TermDefMerge;
 struct TermDef {
-	bool td_ansi;		/* syntheize ECMA-48, ignore other entries */
+	bool td_ansi;		/* syntheize ECMA-48, ignore other entries; TODO - not implemented yet */
 
 	union tcu td_tcs[T_N];	/* terminal capabilities */
 
