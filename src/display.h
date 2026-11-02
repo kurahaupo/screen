@@ -432,7 +432,7 @@ static inline void AddChar(char c)
 {
 	if (--D_obuffree <= 0)
 		Resize_obuf();
-	*D_obufp++ = (c);
+	*D_obufp++ = c;
 }
 
 #endif				/* SCREEN_DISPLAY_H */
