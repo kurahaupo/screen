@@ -35,11 +35,13 @@
 /* structure representing single cell of terminal */
 struct mchar {
 	uint32_t image;		/* actual letter like a, b, c ... as Unicode code point */
-	uint32_t attr;		/* attributes - bold, standout etc. */
-	uint32_t font;		/* font :) */
+	uint16_t attr;		/* attributes - bold, standout etc.  (should be attr_mask_t) */
+	uint16_t font;		/* font :) */
 	uint32_t colorbg;	/* background color */
 	uint32_t colorfg;	/* foreground color */
-	uint32_t mbcs;		/* used for multi byte character sets; TODO: possible to remove? use image now that it has 32 bits */
+	uint32_t mbcs;		/* used for multi byte character sets;
+				 * TODO: possible to remove? use image instead, since
+				 * it's now wide enough */
 };
 
 struct mline {

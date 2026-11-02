@@ -82,7 +82,6 @@ struct statusposstr {
 #define STATUS_LEFT		0
 #define STATUS_RIGHT		1
 
-
 struct mouse_parse {
 	char sgrmode;		/* non-zero if parsing an SGR sequence */
 	int state;		/* current state of parsing */
@@ -90,6 +89,33 @@ struct mouse_parse {
 };
 
 struct Layout;
+
+/* TermDef: what termcap/terminfo can tell us about a terminal type, plus
+ * general knowledge about ECMA-48 (ANSI) terminals that can't be described by
+ * termcap/terminfo.
+ */
+typedef struct TermDef TermDef;
+typedef struct TermDefAttr TermDefAttr;
+typedef struct TermDefMerge TermDefMerge;
+struct TermDef {
+	bool td_ansi;		/* syntheize ECMA-48, ignore other entries */
+
+	union tcu td_tcs[T_N];	/* terminal capabilities */
+
+	attr_mask_t td_ignored;	/* attributes we won't try to display */
+	struct TermDefMerge {
+		attr_mask_t from, to;
+	} td_merge[NATTR/2];	/* zero-terminated list */
+
+	struct TermDefAttr {
+		char *tda_set;
+		char *tda_unset;
+		attr_mask_t tda_also_unset;
+	} td_attr[NATTR];	/* order here matches ECMA-48 SGR params 1 thru 9 */
+
+	char *td_attrtab[NATTR] __attribute__((deprecated));	/* attrib emulation table */
+	char td_attrtyp[NATTR] __attribute__((deprecated));	/* attrib group table */
+};
 
 typedef struct Display Display;
 struct Display {
@@ -108,7 +134,7 @@ struct Display {
 	/* >0: block after nonblock secs */
 	char d_termname[MAXTERMLEN + 1];	/* $TERM */
 	char *d_tentry;		/* buffer for tgetstr */
-	char d_tcinited;	/* termcap inited flag */
+	bool d_tcinited;	/* termcap initialised yet? */
 	int d_width, d_height;	/* width/height of the screen */
 	int d_defwidth, d_defheight;	/* default width/height of windows */
 	int d_top, d_bot;	/* scrollregion start/end */
@@ -177,9 +203,14 @@ struct Display {
 	Event d_mapev;		/* timeout event */
 	int d_dontmap;		/* do not map next */
 	int d_mapdefault;	/* do map next to default */
-	union tcu d_tcs[T_N];	/* terminal capabilities */
-	char *d_attrtab[NATTR];	/* attrib emulation table */
-	char d_attrtyp[NATTR];	/* attrib group table */
+
+	TermDef d_td;
+	#define d_tcs		d_td.td_tcs
+	#define d_ignored	d_td.td_ignored
+	#define d_attr		d_td.td_attr
+	#define d_attrtab	d_td.td_attrtab
+	#define d_attrtyp	d_td.td_attrtyp
+
 	bool d_hascolor;	/* do we support color */
 	bool d_hastruecolor;	/* do we support TrueColor (initially set from ‘COLORTERM’ in the environment) */
 	char d_c0_tab[256];	/* conversion for C0 */
@@ -286,7 +317,9 @@ struct Display {
 #define D_dontmap	DISPLAY(d_dontmap)
 #define D_mapdefault	DISPLAY(d_mapdefault)
 #define D_kmaps		DISPLAY(d_kmaps)
+#define D_td		DISPLAY(d_td)
 #define D_tcs		DISPLAY(d_tcs)
+#define D_attr		DISPLAY(d_attr)
 #define D_attrtab	DISPLAY(d_attrtab)
 #define D_attrtyp	DISPLAY(d_attrtyp)
 #define D_hascolor	DISPLAY(d_hascolor)

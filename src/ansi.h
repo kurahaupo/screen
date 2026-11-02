@@ -55,20 +55,21 @@ typedef enum attr_e {
 
 typedef enum attr_mask_e {
 
-	A_BD = 1 << ATTR_BD,
-	A_DI = 1 << ATTR_DI,
-	A_IT = 1 << ATTR_IT,
-	A_US = 1 << ATTR_US,
-	A_BL = 1 << ATTR_BL,
-	A_FB = 1 << ATTR_FB,
-	A_RV = 1 << ATTR_RV,
-	A_HI = 1 << ATTR_HI,
-	A_ST = 1 << ATTR_ST,
-	A_SO = 1 << ATTR_SO,
+	A_BD = 1U << ATTR_BD,
+	A_DI = 1U << ATTR_DI,
+	A_IT = 1U << ATTR_IT,
+	A_US = 1U << ATTR_US,
+	A_BL = 1U << ATTR_BL,
+	A_FB = 1U << ATTR_FB,
+	A_RV = 1U << ATTR_RV,
+	A_HI = 1U << ATTR_HI,
+	A_ST = 1U << ATTR_ST,
+	A_SO = 1U << ATTR_SO,
 
-	A__UNSET = 1 << NATTR,
-	A__MASK = A__UNSET - 1,
+	A__UNSET = 1U << NATTR,
+	A__MASK = A__UNSET - 1U,
 
+	A_DFT_COLOR = 1U << NATTR+1,	/* what "\e[0m" does */
 } attr_mask_t;
 
 typedef enum atyp_mask_e {

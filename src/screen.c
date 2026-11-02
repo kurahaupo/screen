@@ -311,9 +311,9 @@ static void exit_with_usage(char *myname, char *message, char *arg)
 	exit(0);
 }
 
-static void InitSocketDir(void)
+static void InitSocketDir(struct stat *st, char *multi_home)
 {
-	SocketDir = getenv("SCREENDIR");
+	char *SocketDir = getenv("SCREENDIR");
 	if (SocketDir) {
 		if (strlen(SocketDir) >= MAXPATHLEN - 1)
 			Panic(0, "Ridiculously long $SCREENDIR - try again.");
@@ -352,7 +352,7 @@ static void InitSocketDir(void)
 #ifdef SOCKET_DIR
 		else {
 			SocketDir = SOCKET_DIR;
-			if (stat(SocketDir, &st)) {
+			if (stat(SocketDir, st)) {
 				n = (eff_uid == 0 && (real_uid || eff_gid == real_gid)) ? 0755 :
 				    (eff_gid != real_gid) ? 0775 :
 #ifdef S_ISVTX
@@ -363,13 +363,13 @@ static void InitSocketDir(void)
 				if (mkdir(SocketDir, n) == -1)
 					Panic(errno, "Cannot make directory '%s'", SocketDir);
 			} else {
-				if (!S_ISDIR(st.st_mode))
+				if (!S_ISDIR(st->st_mode))
 					Panic(0, "'%s' must be a directory.", SocketDir);
-				if (eff_uid == 0 && real_uid && st.st_uid != eff_uid)
+				if (eff_uid == 0 && real_uid && st->st_uid != eff_uid)
 					Panic(0, "Directory '%s' must be owned by root.", SocketDir);
-				n = (eff_uid == 0 && (real_uid || (st.st_mode & 0775) != 0775)) ? 0755 :
-				    (eff_gid == st.st_gid && eff_gid != real_gid) ? 0775 : 0777;
-				if (((int)st.st_mode & 0777) != n)
+				n = (eff_uid == 0 && (real_uid || (st->st_mode & 0775) != 0775)) ? 0755 :
+				    (eff_gid == st->st_gid && eff_gid != real_gid) ? 0775 : 0777;
+				if (((int)st->st_mode & 0777) != n)
 					Panic(0, "Directory '%s' must have mode %03o.", SocketDir, n);
 			}
 			sprintf(SocketPath, "%s/S-%s", SocketDir, LoginName);
@@ -382,22 +382,22 @@ static void InitSocketDir(void)
 #endif
 	}
 
-	if (stat(SocketPath, &st) == -1) {
+	if (stat(SocketPath, st) == -1) {
 		if (eff_uid == real_uid) {
 			Panic(errno, "Cannot access %s", SocketPath);
 		} else {
 			Panic(0, "Error accessing %s", SocketPath);
 		}
-	} else if (!S_ISDIR(st.st_mode)) {
-		if (eff_uid == real_uid || st.st_uid == real_uid) {
+	} else if (!S_ISDIR(st->st_mode)) {
+		if (eff_uid == real_uid || st->st_uid == real_uid) {
 			Panic(0, "%s is not a directory.", SocketPath);
 		} else {
 			Panic(0, "Error accessing %s", SocketPath);
 		}
 	}
 	if (multi) {
-		if (st.st_uid != multi_uid) {
-			if (eff_uid == real_uid || st.st_uid == real_uid) {
+		if (st->st_uid != multi_uid) {
+			if (eff_uid == real_uid || st->st_uid == real_uid) {
 				Panic(0, "%s is not the owner of %s.", multi, SocketPath);
 			} else {
 				Panic(0, "Error accessing %s", SocketPath);
@@ -406,7 +406,7 @@ static void InitSocketDir(void)
 	} else {
 #ifdef SOCKET_DIR		/* if SOCKETDIR is not defined, the socket is in $HOME.
 				   in that case it does not make sense to compare uids. */
-		if (st.st_uid != real_uid) {
+		if (st->st_uid != real_uid) {
 			if (eff_uid == real_uid) {
 				Panic(0, "You are not the owner of %s.", SocketPath);
 			} else {
@@ -415,8 +415,8 @@ static void InitSocketDir(void)
 		}
 #endif
 	}
-	if ((st.st_mode & 0777) != 0700) {
-		if (eff_uid == real_uid || st.st_uid == real_uid) {
+	if ((st->st_mode & 0777) != 0700) {
+		if (eff_uid == real_uid || st->st_uid == real_uid) {
 			Panic(0, "Directory %s must have mode 700.", SocketPath);
 		} else {
 			Panic(0, "Error accessing %s", SocketPath);
@@ -448,7 +448,6 @@ int main(int argc, char **argv)
 	char *av0;
 	int mflag = 0;
 	char *myname = (argc == 0) ? "screen" : argv[0];
-	char *SocketDir;
 	struct stat st;
 	mode_t oumask;
 	struct NewWindow nwin;
@@ -935,7 +934,7 @@ int main(int argc, char **argv)
 
 	oumask = umask(0);	/* well, unsigned never fails? jw. */
 
-	InitSocketDir();
+	InitSocketDir(&st, multi_home);
 	(void)umask(oumask);
 
 	(void)gethostname(HostName, MAXSTR);

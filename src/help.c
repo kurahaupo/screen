@@ -581,9 +581,6 @@ static const struct LayFuncs BindkeyLf = {
 
 void display_bindkey(char *title, struct action *tab)
 {
-	struct bindkeydata *bindkeydata;
-	int i, n;
-
 	if (flayer->l_height < 6) {
 		LMsg(0, "Window height too small for bindkey page");
 		return;
@@ -591,12 +588,12 @@ void display_bindkey(char *title, struct action *tab)
 	if (InitOverlayPage(sizeof(struct bindkeydata), &BindkeyLf, 0))
 		return;
 
-	bindkeydata = (struct bindkeydata *)flayer->l_data;
+	struct bindkeydata *bindkeydata = /*(struct bindkeydata *)*/flayer->l_data;
 	bindkeydata->title = title;
 	bindkeydata->tab = tab;
 
-	n = 0;
-	for (i = 0; i < KMAP_KEYS + KMAP_AKEYS + kmap_extn; i++) {
+	size_t n = 0;
+	for (size_t i = 0; i < KMAP_KEYS + KMAP_AKEYS + kmap_extn; i++) {
 		if (tab[i].nr != RC_ILLEGAL)
 			n++;
 	}
@@ -621,7 +618,8 @@ static void bindkeypage(void)
 	struct bindkeydata *bindkeydata;
 	struct kmap_ext *kme;
 	char tbuf[256];
-	int del, i, y, sl;
+	int del, y, sl;
+        size_t i;
 	struct action *act;
 	char *xch, *s, *p;
 

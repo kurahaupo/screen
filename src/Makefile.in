@@ -57,7 +57,7 @@ CFILES=	screen.c \
 	winmsgbuf.c winmsgcond.c
 OFILES=$(CFILES:c=o)
 
-TESTCFILES := $(wildcard tests/test-*.c)
+TESTCFILES := $(wildcard $(srcdir)/tests/test-*.c)
 TESTBIN := $(TESTCFILES:.c=)
 TESTSTANDALONE := tests/test-detach-cli
 
@@ -79,9 +79,9 @@ check: $(TESTBIN) $(TESTSTANDALONE)
 			exit $$rc; \
 		fi; \
 	done
-tests/test-%: tests/test-%.c %.o tests/mallocmock.o tests/macros.h tests/signature.h
+tests/test-%: $(srcdir)/tests/test-%.c %.o tests/mallocmock.o $(srcdir)/tests/macros.h $(srcdir)/tests/signature.h
 	$(CC) $(CPPFLAGS) $(CFLAGS) $< -o $@ $*.o tests/mallocmock.o
-tests/test-detach-cli: tests/integration-detach.c tests/macros.h screen
+tests/test-detach-cli: $(srcdir)/tests/integration-detach.c $(srcdir)/tests/macros.h screen
 	$(CC) $(CPPFLAGS) $(CFLAGS) $< -o $@
 
 install_bin: screen installdirs
@@ -269,7 +269,6 @@ canvas.o: $(srcdir)/winmsg.h
 canvas.o: comm.h
 canvas.o: config.h
 canvas.o: term.h
-checktc.o: $(srcdir)/terminfo/checktc.c
 comm.o: $(srcdir)/acls.h
 comm.o: $(srcdir)/comm.c
 comm.o: $(srcdir)/os.h
@@ -278,6 +277,7 @@ comm.o: config.h
 display.o: $(srcdir)/aalimits.h
 display.o: $(srcdir)/acls.h
 display.o: $(srcdir)/ansi.h
+display.o: $(srcdir)/bitmath.h
 display.o: $(srcdir)/canvas.h
 display.o: $(srcdir)/display.c
 display.o: $(srcdir)/display.h
@@ -380,8 +380,6 @@ input.o: $(srcdir)/tty.h
 input.o: comm.h
 input.o: config.h
 input.o: term.h
-integration-detach.o: $(srcdir)/tests/integration-detach.c
-integration-detach.o: $(srcdir)/tests/macros.h
 layer.o: $(srcdir)/aalimits.h
 layer.o: $(srcdir)/acls.h
 layer.o: $(srcdir)/ansi.h
@@ -505,8 +503,6 @@ logfile.o: $(srcdir)/misc.h
 logfile.o: $(srcdir)/os.h
 logfile.o: $(srcdir)/screen.h
 logfile.o: config.h
-mallocmock.o: $(srcdir)/tests/mallocmock.c
-mallocmock.o: config.h
 mark.o: $(srcdir)/aalimits.h
 mark.o: $(srcdir)/acls.h
 mark.o: $(srcdir)/ansi.h
@@ -542,6 +538,7 @@ misc.o: config.h
 process.o: $(srcdir)/aalimits.h
 process.o: $(srcdir)/acls.h
 process.o: $(srcdir)/ansi.h
+process.o: $(srcdir)/bitmath.h
 process.o: $(srcdir)/canvas.h
 process.o: $(srcdir)/display.h
 process.o: $(srcdir)/encoding.h
@@ -706,15 +703,6 @@ termcap.o: $(srcdir)/window.h
 termcap.o: comm.h
 termcap.o: config.h
 termcap.o: term.h
-test-winmsgbuf.o: $(srcdir)/tests/macros.h
-test-winmsgbuf.o: $(srcdir)/tests/signature.h
-test-winmsgbuf.o: $(srcdir)/tests/test-winmsgbuf.c
-test-winmsgbuf.o: $(srcdir)/winmsgbuf.h
-test-winmsgcond.o: $(srcdir)/tests/macros.h
-test-winmsgcond.o: $(srcdir)/tests/signature.h
-test-winmsgcond.o: $(srcdir)/tests/test-winmsgcond.c
-test-winmsgcond.o: $(srcdir)/winmsgcond.h
-tetris.o: $(srcdir)/terminfo/tetris.c
 tty.o: $(srcdir)/aalimits.h
 tty.o: $(srcdir)/acls.h
 tty.o: $(srcdir)/ansi.h
@@ -819,3 +807,19 @@ winmsgbuf.o: config.h
 winmsgcond.o: $(srcdir)/winmsgcond.c
 winmsgcond.o: $(srcdir)/winmsgcond.h
 winmsgcond.o: config.h
+
+terminfo/checktc.o: $(srcdir)/terminfo/checktc.c
+terminfo/tetris.o: $(srcdir)/terminfo/tetris.c
+
+tests/integration-detach.o: $(srcdir)/tests/integration-detach.c
+tests/integration-detach.o: $(srcdir)/tests/macros.h
+tests/mallocmock.o: $(srcdir)/tests/mallocmock.c
+tests/mallocmock.o: config.h
+tests/test-winmsgbuf.o: $(srcdir)/tests/macros.h
+tests/test-winmsgbuf.o: $(srcdir)/tests/signature.h
+tests/test-winmsgbuf.o: $(srcdir)/tests/test-winmsgbuf.c
+tests/test-winmsgbuf.o: $(srcdir)/winmsgbuf.h
+tests/test-winmsgcond.o: $(srcdir)/tests/macros.h
+tests/test-winmsgcond.o: $(srcdir)/tests/signature.h
+tests/test-winmsgcond.o: $(srcdir)/tests/test-winmsgcond.c
+tests/test-winmsgcond.o: $(srcdir)/winmsgcond.h
