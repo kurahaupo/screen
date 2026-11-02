@@ -44,6 +44,7 @@
 #include <sys/types.h>
 #include <time.h>
 
+#include "bitmath.h"
 #include "display.h"
 #include "encoding.h"
 #include "fileio.h"
@@ -142,7 +143,7 @@ struct action umtab[KMAP_KEYS + KMAP_AKEYS];
 struct action dmtab[KMAP_KEYS + KMAP_AKEYS];
 struct action mmtab[KMAP_KEYS + KMAP_AKEYS];
 struct kmap_ext *kmap_exts;
-int kmap_extn;
+size_t kmap_extn;
 int maptimeout = 300;
 
 #ifndef MAX_DIGRAPH
@@ -793,37 +794,6 @@ static inline size_t CountArgs(char **args)
 #ifdef FANCY_ERROR_REPORTING
 static char *nums[] = { "no", "one", "two", "three", "four", "five" };
 
-static inline int  lo_bit(int i)        { return i & -i; }
-static inline int  hi_bits(int i)       { return i ^ lo_bit(i); }
-static inline int  range_end_bit(int i) { return (i + lo_bit(i)) >> 1; }	// top of a consecutive range
-static inline bool is_single_bit(int i) { return ! hi_bits(i); }
-
-# if defined __GNUC__ || defined __clang__
-static inline int log_lo_bit(int x)
-{
-	x &= ARGS_MASK;
-	return __builtin_ffs(x) - 1;
-}
-# else
-static inline int log_lo_bit(int x)
-{
-	/* Make sure the following are kept in sync with ARGS_ANY */
-	/* lookup for base-2 logarithm */
-	static const int blog[2 << ARGS_ANY] = {
-		[1 << 0] = 1,
-		[1 << 1] = 2,
-		[1 << 2] = 3,
-		[1 << 3] = 4,
-		[1 << 4] = 5,
-		[1 << 5] = 6,
-		/* fill in more entries as necessary */
-		[1 << ARGS_ANY] = ARGS_ANY+1,
-	};
-	x &= ARGS_MASK;
-	return blog[x] - 1;
-}
-# endif
-
 #endif	/*FANCY_ERROR_REPORTING*/
 
 static bool CheckArgCount(struct comm *c, size_t argc)
@@ -856,7 +826,7 @@ static bool CheckArgCount(struct comm *c, size_t argc)
 	}
 
 	bool or_more = allowed_counts_mask & ARGS_MORE;
-	const int first = log_lo_bit(lo_bit(allowed_counts_mask));
+	const int first = log_lo_bit(lo_bit(allowed_counts_mask) & ARGS_MASK);
 	if (is_single_bit(allowed_counts_mask) && !or_more) {
 		/* Exactly one allowed count, not including "or more" */
 		Msg(0, "%s: %s: exactly %s arguments required", rc_name, name, nums[first]);
@@ -865,7 +835,7 @@ static bool CheckArgCount(struct comm *c, size_t argc)
 	if (is_single_bit(hi_bits(allowed_counts_mask)) && !or_more) {
 		/* Exactly two allowed counts, not including "or more" */
 		Msg(0, "%s: %s: %s or %s arguments required", rc_name, name,
-		    nums[first], nums[log_lo_bit(hi_bits(allowed_counts_mask))]);
+		    nums[first], nums[log_lo_bit(hi_bits(allowed_counts_mask) & ARGS_MASK)]);
 		return false;
 	}
 	if (is_single_bit(range_end_bit(allowed_counts_mask))) {
@@ -875,7 +845,7 @@ static bool CheckArgCount(struct comm *c, size_t argc)
 		 * we know that first ≠ range_top (except for first = hi = ARGS_MORE,
 		 * but we will still correctly render that as "five or more")
 		 */
-		const int range_top = log_lo_bit(range_end_bit(allowed_counts_mask));
+		const int range_top = log_lo_bit(range_end_bit(allowed_counts_mask) & ARGS_MASK);
 		if (first == 0)
 			Msg(0, "%s: %s: no more than %s arguments allowed", rc_name, name, nums[range_top]);
 		else if (range_top == ARGS_ANY)
@@ -3441,7 +3411,7 @@ static void DoCommandBindkey(struct action *act)
 	Display *olddisplay = display;
 	int used = 0;
 	struct kmap_ext *kme = NULL;
-	int i;
+	size_t i;
 
 	for (; *args && **args == '-'; args++, argl++) {
 		if (strcmp(*args, "-t") == 0)

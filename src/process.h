@@ -48,7 +48,7 @@ extern char *zmodem_recvcmd;
 extern char *zmodem_sendcmd;
 
 extern int idletimo;
-extern int kmap_extn;
+extern size_t kmap_extn;
 extern int zmodem_mode;
 extern int TtyMode;
 

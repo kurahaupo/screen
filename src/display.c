@@ -39,6 +39,7 @@
 #include <stdint.h>
 #include <unistd.h>
 
+#include "bitmath.h"
 #include "display.h"
 #include "encoding.h"
 #include "inline.h"
@@ -1158,45 +1159,54 @@ void ScrollV(int xs, int ys, int xe, int ye, int n, int bce)
 
 void SetAttr(int new)
 {
-	int i, j, old, typ;
-	old = D_rend.attr;
-
 	if (!display)
 		return;
-	if (old == new)
+
+	/* Ignore functionality not provided by this terminal */
+	new &= ~D_td.td_ignored & A__MASK;
+
+	/* Convert merged functionality to a single attribute */
+	for (size_t i = 0; i<ARRAY_SIZE(D_td.td_merge); ++i) {
+		TermDefMerge *tdm = &D_td.td_merge[i];
+		if (!tdm->from)
+			break;
+		if (new & tdm->from) {
+			new &=~ tdm->from;
+			new |= tdm->to;
+		}
+	}
+
+	if (D_rend.attr == new)
 		return;
-	D_rend.attr = new;
-	typ = D_atyp;
-	if ((new & old) != old) {
-		if ((typ & ATYP_U))
-			AddCStr(D_UE);
-		if ((typ & ATYP_S))
-			AddCStr(D_SE);
-		if ((typ & ATYP_M)) {
-			AddCStr(D_ME);
-			/* ansi attrib handling: \E[m resets color, too */
-			if (D_hascolor)
-				D_rend.colorbg = D_rend.colorfg = 0;
-			if (!D_CG0) {
-				/* D_ME may also reset the alternate charset */
-				D_rend.font = FONT_LATIN1;
-				D_realfont = FONT_LATIN1;
-			}
-		}
-		old = 0;
-		typ = 0;
+
+#if 0
+	@TODO@
+	if (D_td.td_ansi) {
+		return;
 	}
-	old ^= new;
-	for (i = 0, j = 1; old && i < NATTR; i++, j <<= 1) {
-		if ((old & j) == 0)
-			continue;
-		old ^= j;
-		if (D_attrtab[i]) {
-			AddCStr(D_attrtab[i]);
-			typ |= D_attrtyp[i];
-		}
+#endif
+
+	/* Remove unwanted attributes first, because sometimes doing so will
+	 * remove attributes that we want to keep, meaning that we will have to
+	 * add them back in again. */
+	for (attr_mask_t to_be_unset; to_be_unset = D_rend.attr & ~new ; ) {
+		attr_mask_t u = lo_bit(to_be_unset);
+		int ll = log_lo_bit(u);
+		TermDefAttr *tda = &D_td.td_attr[ll];
+		u |= tda->tda_also_unset;
+		D_rend.attr &= ~u;
+		AddCStr(tda->tda_unset);
+		if (u & A_DFT_COLOR)
+			D_rend.colorbg = D_rend.colorfg = 0;	/* "\e[m" resets color as well as attributes */
 	}
-	D_atyp = typ;
+
+	for (attr_mask_t to_be_set; to_be_set = ~D_rend.attr & new ; ) {
+		attr_mask_t u = lo_bit(to_be_set);
+		int ll = log_lo_bit(u);
+		TermDefAttr *tda = &D_td.td_attr[ll];
+		D_rend.attr |= u;
+		AddCStr(tda->tda_set);
+	}
 }
 
 void SetFont(int new)

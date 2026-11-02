@@ -62,6 +62,10 @@ AC_CHECK_FUNCS([execvpe])
 dnl
 AC_CHECK_FUNCS([seteuid setegid setreuid setresuid])
 
+dnl bit-counting; ffs SHOULD be strings.h, but some old systems it's in string.h
+AC_CHECK_HEADERS([string.h strings.h])
+AC_CHECK_FUNCS([ffs ffsll])
+
 dnl curses compatible lib, we do forward declaration ourselves, only need to link to proper library
 AC_SEARCH_LIBS([tgetent], [curses termcap termlib ncursesw tinfow ncurses tinfo], [], [
 	AC_MSG_ERROR([unable to find tgetent() function])
