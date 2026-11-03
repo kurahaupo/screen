@@ -205,7 +205,6 @@ struct Display {
 	TermDef d_td;
 	#define d_tcs		d_td.td_tcs
 	#define d_ignored	d_td.td_ignored
-	#define d_attr		d_td.td_attr
 
 	bool d_hascolor;	/* do we support color */
 	bool d_hastruecolor;	/* do we support TrueColor (initially set from ‘COLORTERM’ in the environment) */
@@ -315,7 +314,6 @@ struct Display {
 #define D_kmaps		DISPLAY(d_kmaps)
 #define D_td		DISPLAY(d_td)
 #define D_tcs		DISPLAY(d_tcs)
-#define D_attr		DISPLAY(d_attr)
 #define D_attrtab	DISPLAY(d_attrtab)
 #define D_attrtyp	DISPLAY(d_attrtyp)
 #define D_hascolor	DISPLAY(d_hascolor)

@@ -941,9 +941,9 @@ static inline bool IsSGR(char *s, int code)
 
 static inline bool SubstituteMissingAttr(attr_t to, attr_t from)
 {
-	if (D_attr[to].tda_set && D_attr[from].tda_set)
+	if (D_td.td_attr[to].tda_set && D_td.td_attr[from].tda_set)
 		return false;
-	D_attr[to] = D_attr[from];
+	D_td.td_attr[to] = D_td.td_attr[from];
 	return true;
 }
 
@@ -1118,13 +1118,13 @@ int InitTermcap(int width, int height)
 	 */
 
 	const attr_mask_t A_ME = A__UNSET | A_BD | A_DI | A_BL | A_RV;
-	if (D_MD)   D_attr[ATTR_BD] = (TermDefAttr){ D_MD,  D_ME, A_ME };	// 1 / 21	B	md	bold		Bold
-	if (D_MH)   D_attr[ATTR_DI] = (TermDefAttr){ D_MH,  D_ME, A_ME };	// 2 / 22	B	mh	dim		Dim
-	if (D_CZH)  D_attr[ATTR_IT] = (TermDefAttr){ D_CZH, D_CZR, 0 };	// 3 / 23	B/E	ZH/ZR	simt/rmit	Italicized ("Roman")
-	if (D_US)   D_attr[ATTR_US] = (TermDefAttr){ D_US,  D_UE, 0 };		// 4 / 24	B/E	us/ue	smul/rmul	Underscore
-	if (D_MB)   D_attr[ATTR_BL] = (TermDefAttr){ D_MB,  D_ME, A_ME };	// 5 / 25	B	mb	blink		Blinking
-	if (D_SO)   D_attr[ATTR_SO] = (TermDefAttr){ D_SO,  D_SE, 0 };		// - / -	B/E	so/se	smso/rmso	Standout
-	if (D_MR)   D_attr[ATTR_RV] = (TermDefAttr){ D_MR,  D_ME, A_ME };	// 7 / 27	B	mr	rev		begin	Reverse
+	if (D_MD)   D_td.td_attr[ATTR_BD] = (TermDefAttr){ D_MD,  D_ME, A_ME };	// 1 / 21	B	md	bold		Bold
+	if (D_MH)   D_td.td_attr[ATTR_DI] = (TermDefAttr){ D_MH,  D_ME, A_ME };	// 2 / 22	B	mh	dim		Dim
+	if (D_CZH)  D_td.td_attr[ATTR_IT] = (TermDefAttr){ D_CZH, D_CZR, 0 };	// 3 / 23	B/E	ZH/ZR	simt/rmit	Italicized ("Roman")
+	if (D_US)   D_td.td_attr[ATTR_US] = (TermDefAttr){ D_US,  D_UE, 0 };	// 4 / 24	B/E	us/ue	smul/rmul	Underscore
+	if (D_MB)   D_td.td_attr[ATTR_BL] = (TermDefAttr){ D_MB,  D_ME, A_ME };	// 5 / 25	B	mb	blink		Blinking
+	if (D_SO)   D_td.td_attr[ATTR_SO] = (TermDefAttr){ D_SO,  D_SE, 0 };	// - / -	B/E	so/se	smso/rmso	Standout
+	if (D_MR)   D_td.td_attr[ATTR_RV] = (TermDefAttr){ D_MR,  D_ME, A_ME };	// 7 / 27	B	mr	rev		begin	Reverse
 
 	/* Set up missing entries (attributes are priority ordered) */
 
@@ -1142,10 +1142,10 @@ int InitTermcap(int width, int height)
 
 	/* Disable any functions that are missing either (or both) ‘set’ or ‘unset’ */
 	for (size_t i = 0; i<NATTR; ++i)
-		if (!D_attr[i].tda_set
-		 || !D_attr[i].tda_unset) {
+		if (!D_td.td_attr[i].tda_set
+		 || !D_td.td_attr[i].tda_unset) {
 			D_td.td_ignored |= 1U << i;
-			D_attr[i] = (TermDefAttr){0,0,0};
+			D_td.td_attr[i] = (TermDefAttr){0,0,0};
 		}
 
 	/*
@@ -1154,13 +1154,13 @@ int InitTermcap(int width, int height)
 	 *  - delete all but one of the functions
 	 */
 	for (size_t i = 0, k = 0; i<NATTR; ++i)
-		if (D_attr[i].tda_set) {
+		if (D_td.td_attr[i].tda_set) {
 			attr_mask_t from = 0;
 			for (size_t j = i+1; j<NATTR; ++j)
-				if (D_attr[j].tda_set
-				 && !strcmp(D_attr[i].tda_set, D_attr[j].tda_set)) {
+				if (D_td.td_attr[j].tda_set
+				 && !strcmp(D_td.td_attr[i].tda_set, D_td.td_attr[j].tda_set)) {
 					from |= 1U << j;
-					D_attr[j] = (TermDefAttr){0,0,0};
+					D_td.td_attr[j] = (TermDefAttr){0,0,0};
 				}
 			if (from) {
 				const attr_mask_t to = 1U << i;
@@ -1175,17 +1175,17 @@ int InitTermcap(int width, int height)
 	 * work correctly for other attributes when me="\E[0m".
 	 */
 	for (size_t i = 0; i<NATTR; ++i)
-		if (D_attr[i].tda_set)
-			D_attr[i].tda_also_unset = 1U << i;
+		if (D_td.td_attr[i].tda_set)
+			D_td.td_attr[i].tda_also_unset = 1U << i;
 	for (size_t i = 0; i<NATTR; ++i)
-		if (D_attr[i].tda_set)
+		if (D_td.td_attr[i].tda_set)
 			for (size_t j = 0; j<NATTR; ++j)
 				if (i != j
-				 && D_attr[j].tda_set
-				 && !strcmp(D_attr[i].tda_unset, D_attr[j].tda_unset))
-					D_attr[i].tda_also_unset =
-					D_attr[j].tda_also_unset |=
-					D_attr[i].tda_also_unset;
+				 && D_td.td_attr[j].tda_set
+				 && !strcmp(D_td.td_attr[i].tda_unset, D_td.td_attr[j].tda_unset))
+					D_td.td_attr[i].tda_also_unset =
+					D_td.td_attr[j].tda_also_unset |=
+					D_td.td_attr[i].tda_also_unset;
 
 	if (D_CAF || D_CAB || D_CSF || D_CSB)
 		D_hascolor = 1;
