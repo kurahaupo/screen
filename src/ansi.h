@@ -34,6 +34,8 @@
 #include <stddef.h>	// for size_t
 #include <stdint.h>	//
 
+#define ANSI_LIKELY_THRESHOLD 5	/* 5 out of 7 standard attributes match */
+
 typedef enum attr_e {
 		 // attribute           terminfo code   termcap code    ECMA-48 SGR     custom SGR
 		 //                     (on   / off)    (on / off)      (on / off)      (on / off)

@@ -1126,6 +1126,22 @@ int InitTermcap(int width, int height)
 	if (D_SO)   D_td.td_attr[ATTR_SO] = (TermDefAttr){ D_SO,  D_SE, 0 };	// - / -	B/E	so/se	smso/rmso	Standout
 	if (D_MR)   D_td.td_attr[ATTR_RV] = (TermDefAttr){ D_MR,  D_ME, A_ME };	// 7 / 27	B	mr	rev		begin	Reverse
 
+	/* Guess some stuff about ECMA-48 terminals */
+	int ansi_likely = 7;
+	for (int i=1; i<=7; ++i) {
+		TermDefAttr *a = &D_td.td_attr[i-1+ATTR_BD];
+		if (a->tda_set   && !IsSGR(a->tda_set, i))             { ansi_likely = 0; break; }
+		if (a->tda_unset && !IsSGR(a->tda_unset, i+20+(i==1))) { ansi_likely = 0; break; }
+		if (!a->tda_set || !a->tda_unset) --ansi_likely;
+	}
+	D_td.td_ansi = ansi_likely >= ANSI_LIKELY_THRESHOLD;
+	if (ansi_likely >= ANSI_LIKELY_THRESHOLD - 1) {
+		D_td.td_attr[ATTR_HI] = (TermDefAttr){ "\033[8m", "\033[28m", 0 };
+		D_td.td_attr[ATTR_ST] = (TermDefAttr){ "\033[9m", "\033[29m", 0 };
+	}
+	if (ansi_likely >= ANSI_LIKELY_THRESHOLD - 1 - IsSGR(D_td.td_attr[ATTR_BL].tda_set, 5))
+		D_td.td_attr[ATTR_FB] = (TermDefAttr){ "\033[6m", "\033[26m", 0 };
+
 	/* Set up missing entries (attributes are priority ordered) */
 
 	/* Pick something to use as "standout" */
