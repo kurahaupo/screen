@@ -105,7 +105,7 @@ char *gettermcapstring(char *s)
 		if (term[i].type != T_STR)
 			continue;
 		if (strcmp(term[i].tcname, s) == 0)
-			return D_tcs[i].str;
+			return D_td.td_tcs[i].str;
 	}
 	return NULL;
 }
@@ -133,7 +133,7 @@ int remap(int n, int map)
 			a1 = &tab[n];
 			if (n >= KMAP_KEYS)
 				n -= T_OCAPS - T_CURSOR;
-			s = D_tcs[n + T_CAPS].str;
+			s = D_td.td_tcs[n + T_CAPS].str;
 			l = s ? strlen(s) : 0;
 			if (n >= T_CURSOR - T_CAPS)
 				a2 = &tab[n + (T_OCAPS - T_CURSOR)];
@@ -581,13 +581,13 @@ char *MakeTermcap(bool aflag)
 			continue;
 		switch (term[i].type) {
 		case T_STR:
-			if (D_tcs[i].str == NULL)
+			if (D_td.td_tcs[i].str == NULL)
 				break;
-			MakeString(term[i].tcname, buf, ARRAY_SIZE(buf), D_tcs[i].str);
+			MakeString(term[i].tcname, buf, ARRAY_SIZE(buf), D_td.td_tcs[i].str);
 			AddCap(buf);
 			break;
 		case T_FLG:
-			if (D_tcs[i].flg == 0)
+			if (D_td.td_tcs[i].flg == 0)
 				break;
 			AddCapSprintf("%s:", term[i].tcname);
 			break;
@@ -988,16 +988,16 @@ int InitTermcap(int width, int height)
 			continue;
 		switch (term[i].type) {
 		case T_FLG:
-			D_tcs[i].flg = e_tgetflag(term[i].tcname);
+			D_td.td_tcs[i].flg = e_tgetflag(term[i].tcname);
 			break;
 		case T_NUM:
-			D_tcs[i].num = e_tgetnum(term[i].tcname);
+			D_td.td_tcs[i].num = e_tgetnum(term[i].tcname);
 			break;
 		case T_STR:
-			D_tcs[i].str = e_tgetstr(term[i].tcname, &tp);
+			D_td.td_tcs[i].str = e_tgetstr(term[i].tcname, &tp);
 			/* no empty strings, please */
-			if (D_tcs[i].str && *D_tcs[i].str == 0)
-				D_tcs[i].str = NULL;
+			if (D_td.td_tcs[i].str && D_td.td_tcs[i].str[0] == 0)
+				D_td.td_tcs[i].str = NULL;
 			break;
 		default:
 			Panic(0, "Illegal tc type in entry #%zu", i);
@@ -1284,10 +1284,10 @@ int InitTermcap(int width, int height)
 		if (enc != -1)
 			D_encoding = enc;
 	}
-	if (!D_tcs[T_NAVIGATE].str && D_tcs[T_NAVIGATE + 1].str)
-		D_tcs[T_NAVIGATE].str = D_tcs[T_NAVIGATE + 1].str;	/* kh = @1 */
-	if (!D_tcs[T_NAVIGATE + 2].str && D_tcs[T_NAVIGATE + 3].str)
-		D_tcs[T_NAVIGATE + 2].str = D_tcs[T_NAVIGATE + 3].str;	/* kH = @7 */
+	if (!D_td.td_tcs[T_NAVIGATE].str && D_td.td_tcs[T_NAVIGATE + 1].str)
+		D_td.td_tcs[T_NAVIGATE].str = D_td.td_tcs[T_NAVIGATE + 1].str;	/* kh = @1 */
+	if (!D_td.td_tcs[T_NAVIGATE + 2].str && D_td.td_tcs[T_NAVIGATE + 3].str)
+		D_td.td_tcs[T_NAVIGATE + 2].str = D_td.td_tcs[T_NAVIGATE + 3].str;	/* kH = @7 */
 
 	D_UPcost = CalcCost(D_UP);
 	D_DOcost = CalcCost(D_DO);
@@ -1307,14 +1307,14 @@ int InitTermcap(int width, int height)
 	}
 
 	/* Some xterm entries set F0 and F10 to the same string. Nuke F0. */
-	if (D_tcs[T_CAPS].str && D_tcs[T_CAPS + 10].str && !strcmp(D_tcs[T_CAPS].str, D_tcs[T_CAPS + 10].str))
-		D_tcs[T_CAPS].str = NULL;
+	if (D_td.td_tcs[T_CAPS].str && D_td.td_tcs[T_CAPS + 10].str && !strcmp(D_td.td_tcs[T_CAPS].str, D_td.td_tcs[T_CAPS + 10].str))
+		D_td.td_tcs[T_CAPS].str = NULL;
 	/* Some xterm entries set kD to ^?. Nuke it. */
-	if (D_tcs[T_NAVIGATE_DELETE].str && !strcmp(D_tcs[T_NAVIGATE_DELETE].str, "\0177"))
-		D_tcs[T_NAVIGATE_DELETE].str = NULL;
+	if (D_td.td_tcs[T_NAVIGATE_DELETE].str && !strcmp(D_td.td_tcs[T_NAVIGATE_DELETE].str, "\0177"))
+		D_td.td_tcs[T_NAVIGATE_DELETE].str = NULL;
 	/* wyse52 entries have kcub1 == kb == ^H. Nuke... */
-	if (D_tcs[T_CURSOR + 3].str && !strcmp(D_tcs[T_CURSOR + 3].str, "\008"))
-		D_tcs[T_CURSOR + 3].str = NULL;
+	if (D_td.td_tcs[T_CURSOR + 3].str && !strcmp(D_td.td_tcs[T_CURSOR + 3].str, "\008"))
+		D_td.td_tcs[T_CURSOR + 3].str = NULL;
 
 	D_nseqs = 0;
 	for (size_t i = 0; i < T_OCAPS - T_CAPS; i++)
