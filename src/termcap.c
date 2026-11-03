@@ -31,6 +31,7 @@
 #include <sys/types.h>
 
 #include <ctype.h>
+#include <stdarg.h>
 #include <stdint.h>
 #include <string.h>
 
@@ -933,7 +934,7 @@ static inline bool IsSGR(char *s, int code)
 	if (s[0] != '\033' || s[1] != '[')
 		return false;
 	char *e;
-	unsigned long int x = strtoul(s, &e, 10);
+	unsigned long int x = strtoul(s+2, &e, 10);
 	if (e[0] != 'm' || e[1] != 0)
 		return false;
 	return (unsigned)code == x;
@@ -1127,20 +1128,27 @@ int InitTermcap(int width, int height)
 	if (D_MR)   D_td.td_attr[ATTR_RV] = (TermDefAttr){ D_MR,  D_ME, A_ME };	// 7 / 27	B	mr	rev		begin	Reverse
 
 	/* Guess some stuff about ECMA-48 terminals */
-	int ansi_likely = 7;
-	for (int i=1; i<=7; ++i) {
-		TermDefAttr *a = &D_td.td_attr[i-1+ATTR_BD];
-		if (a->tda_set   && !IsSGR(a->tda_set, i))             { ansi_likely = 0; break; }
-		if (a->tda_unset && !IsSGR(a->tda_unset, i+20+(i==1))) { ansi_likely = 0; break; }
-		if (!a->tda_set || !a->tda_unset) --ansi_likely;
+	int const num_verify = ATTR_RV + 1 - ATTR_BD;
+	int ansi_probe_failures = 0;
+	for (int i=ATTR_BD; i<=ATTR_RV ; ++i) {
+		TermDefAttr *a = &D_td.td_attr[i];
+		int const j = i-ATTR_BD+1;
+		int const p = j == 1 ? 22 :	/* intensity change, but note that some terminals treat 1 as "heavy strike", not just "bright", so that \e[1;2m results in heavy-strike+dim */
+			      j == 6 ? 25 :	/* blink rate change */
+				       j+20;
+		if (a->tda_set   && !IsSGR(a->tda_set,   j)) { ansi_probe_failures = num_verify; break; }
+		if (a->tda_unset && !IsSGR(a->tda_unset, p)
+				 && !IsSGR(a->tda_unset, 0)) { ansi_probe_failures = num_verify; break; }
+		if (!a->tda_set || !a->tda_unset) ++ansi_probe_failures;
 	}
-	D_td.td_ansi = ansi_likely >= ANSI_LIKELY_THRESHOLD;
-	if (ansi_likely >= ANSI_LIKELY_THRESHOLD - 1) {
+	D_td.td_ansi = ansi_probe_failures <= ANSI_PROBE_FAILURE_LIMIT;
+
+	if (ansi_probe_failures <= ANSI_PROBE_FAILURE_LIMIT+1) {
 		D_td.td_attr[ATTR_HI] = (TermDefAttr){ "\033[8m", "\033[28m", 0 };
 		D_td.td_attr[ATTR_ST] = (TermDefAttr){ "\033[9m", "\033[29m", 0 };
 	}
-	if (ansi_likely >= ANSI_LIKELY_THRESHOLD - 1 - IsSGR(D_td.td_attr[ATTR_BL].tda_set, 5))
-		D_td.td_attr[ATTR_FB] = (TermDefAttr){ "\033[6m", "\033[26m", 0 };
+	if (ansi_probe_failures <= ANSI_PROBE_FAILURE_LIMIT+2 && IsSGR(D_td.td_attr[ATTR_BL].tda_set, 5)) 
+		D_td.td_attr[ATTR_FB] = (TermDefAttr){ "\033[6m", "\033[25m", 0 };
 
 	/* Set up missing entries (attributes are priority ordered) */
 
@@ -1169,7 +1177,7 @@ int InitTermcap(int width, int height)
 	 *  - create a merger/redirection map
 	 *  - delete all but one of the functions
 	 */
-	for (size_t i = 0, k = 0; i<NATTR; ++i)
+	for (size_t i = 0, k = 0; i<NATTR-1; ++i)
 		if (D_td.td_attr[i].tda_set) {
 			attr_mask_t from = 0;
 			for (size_t j = i+1; j<NATTR; ++j)
@@ -1180,15 +1188,15 @@ int InitTermcap(int width, int height)
 				}
 			if (from) {
 				const attr_mask_t to = 1U << i;
-				from |= A__UNSET | to;
+				from |= to;
 				D_td.td_merge[k++] = (TermDefMerge){ .from = from, .to = to };
 			}
 		}
 
 	/*
-	 * Identify any functions that share "unset" strings.
-	 * (This primarily covers me(sgr0) for bd, di, bl & rv, but will
-	 * work correctly for other attributes when me="\E[0m".
+         * Identify any functions that share "unset" strings. (This handles
+         * ‘me’ (sgr0) being the reset code for ‘bd’, ‘di’, ‘bl’ & ‘rv’, but
+         * will correctly reset other attributes when me="\E[0m".)
 	 */
 	for (size_t i = 0; i<NATTR; ++i)
 		if (D_td.td_attr[i].tda_set)

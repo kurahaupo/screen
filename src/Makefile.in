@@ -675,6 +675,9 @@ socket.o: $(srcdir)/window.h
 socket.o: comm.h
 socket.o: config.h
 socket.o: term.h
+stringbuf.o: $(srcdir)/stringbuf.c
+stringbuf.o: $(srcdir)/stringbuf.h
+stringbuf.o: config.h
 telnet.o: $(srcdir)/misc.h
 telnet.o: $(srcdir)/telnet.c
 telnet.o: config.h
@@ -696,6 +699,7 @@ termcap.o: $(srcdir)/process.h
 termcap.o: $(srcdir)/resize.h
 termcap.o: $(srcdir)/sched.h
 termcap.o: $(srcdir)/screen.h
+termcap.o: $(srcdir)/stringbuf.h
 termcap.o: $(srcdir)/termcap.c
 termcap.o: $(srcdir)/termcap.h
 termcap.o: $(srcdir)/tty.h
