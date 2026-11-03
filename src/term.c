@@ -39,7 +39,8 @@
  *  The script "term.sh" reads this file, looking for lines that start with
  *  whitepace and a ‘{’. These are then split into fields on whitespace: the
  *  second field must be the quoted symbol name and the third field must be one
- *  of ‘T_FLG’, ‘T_NUM’, or ‘T_STR’ (other flags should follow these).
+ *  of ‘T_FLG’, ‘T_NUM’, or ‘T_STR’, which are the upper-case versions of the
+ *  union members ‘flg’, ‘num’, and ‘str’. Other flags may follow these.
  *  It also looks for comments starting with ‘define’, ‘list’, or ‘nolist’.
  */
 struct term term[T_N] = {

@@ -3,8 +3,7 @@ AC_PREREQ([2.71])
 
 AC_CONFIG_HEADERS([config.h])
 
-
-AC_DEFINE_UNQUOTED([VERSION_MAJOR], 
+AC_DEFINE_UNQUOTED([VERSION_MAJOR],
 	[`echo $PACKAGE_VERSION | cut -d . -f 1`],
 	[Major version of GNU screen])
 AC_DEFINE_UNQUOTED([VERSION_MINOR],
@@ -13,7 +12,6 @@ AC_DEFINE_UNQUOTED([VERSION_MINOR],
 AC_DEFINE_UNQUOTED([VERSION_REVISION],
 	[`echo $PACKAGE_VERSION | cut -d . -f 3 | cut -d - -f 1`],
 	[Micro revision of GNU screen])
-
 
 AH_TEMPLATE([HAVE_EXECVPE], [system has execvpe() defined])
 AH_TEMPLATE([HAVE_OPENPTY], [system has openpty() defined])
@@ -41,7 +39,6 @@ AH_TEMPLATE([PTY_MODE], [Default mode for pty devices])
 AH_TEMPLATE([PTY_GROUP], [Default group for pty devices])
 AH_TEMPLATE([PTY_ROFS], [pty devices are on read only filesystem])
 
-
 dnl
 dnl Check for sane compiler
 dnl
@@ -63,8 +60,39 @@ dnl
 AC_CHECK_FUNCS([seteuid setegid setreuid setresuid])
 
 dnl bit-counting; ffs SHOULD be strings.h, but some old systems it's in string.h
-AC_CHECK_HEADERS([string.h strings.h])
+AC_CHECK_HEADERS([string.h strings.h stdbit.h])
 AC_CHECK_FUNCS([ffs ffsll])
+
+AC_CHECK_DECLS([stdc_count_trailing_zeros, stdc_count_ones, stdc_count_zeros], [], [], [[
+#ifdef HAVE_STDBIT_H
+# include <stdbit.h>
+#endif
+]])
+
+AC_MSG_CHECKING([for __builtin_ctz])
+AC_COMPILE_IFELSE([AC_LANG_PROGRAM([], [
+  unsigned int val = 42;
+  if (val == 0) return 0;
+  int res = __builtin_ctz(val);
+  (void)res;
+])], [
+  AC_MSG_RESULT([yes])
+  AC_DEFINE([HAVE_BUILTIN_CTZ], [1], [Define to 1 if __builtin_ctz is available])
+], [
+  AC_MSG_RESULT([no])
+])
+
+AC_MSG_CHECKING([for __builtin_popcount])
+AC_COMPILE_IFELSE([AC_LANG_PROGRAM([], [
+  unsigned int val = 42;
+  int res = __builtin_popcount(val);
+  (void)res;
+])], [
+  AC_MSG_RESULT([yes])
+  AC_DEFINE([HAVE_BUILTIN_POPCOUNT], [1], [Define to 1 if __builtin_popcount is available])
+], [
+  AC_MSG_RESULT([no])
+])
 
 dnl curses compatible lib, we do forward declaration ourselves, only need to link to proper library
 AC_SEARCH_LIBS([tgetent], [curses termcap termlib ncursesw tinfow ncurses tinfo], [], [

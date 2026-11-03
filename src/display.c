@@ -867,7 +867,11 @@ void ClearArea(int x1, int y1, int xs, int xe, int x2, int y2, int bce, int usel
 		if (y2 > D_bot || (y2 == D_bot && x2 >= D_width - 1))
 			D_lp_missing = 0;
 	}
-	if (x2 == D_width - 1 && (xs == 0 || y1 == y2) && xe == D_width - 1 && y2 == D_height - 1 && (!bce || D_BE)) {
+	if (x2 == D_width - 1
+	 && (xs == 0 || y1 == y2)
+	 && xe == D_width - 1
+	 && y2 == D_height - 1
+	 && (!bce || D_BE)) {
 		if (x1 == 0 && y1 == 0 && D_auto_nuke)
 			NukePending();
 		if (x1 == 0 && y1 == 0 && D_CL) {
@@ -1179,32 +1183,94 @@ void SetAttr(int new)
 	if (D_rend.attr == new)
 		return;
 
-#if 0
-	@TODO@
 	if (D_td.td_ansi) {
+		AddCStr("\033[");
+		int not_first = 0;
+
+		/* If it's more efficient to do so, reset all attribute, and
+		 * then set any remaining.
+		 */
+		if (count_one_bits(D_rend.attr & ~new & A__MASK)*3 >=
+		    count_one_bits(new)*2
+		      # if 0
+		      /*
+		       * (Commented out because we can't see newcolorfg &
+		       * newcolorbg; this means we're effectively assuming
+		       * they're both 0.)
+		       */
+
+		      /*
+		       * Sending ‘\e[0m’ will also reset the colors, so
+		       * estimate the output sizes required to restore them.
+		       *
+		       *	 0 = no additional output will be required (or refrained)
+		       *	 5 = will have to send \e[XNm (or \e[9Nm or \e[10Nm)
+		       *	11 = will have to send \e[XN:5:NNNm
+		       *	20 = will have to send \e[XN:2::NNN:NNN:NNNm
+		       *	-5 = will refrain from sending "\e[X0m"
+		       *
+		       * (Where X=3 for foreground or X=4 for background.
+		       */
+
+		      /*
+		       * More precise estimates would need to use decimal
+		       * logarithms of the actual color values.)
+		       */
+		      + ( newcolorfg == D_rend.colorfg
+			  ? newcolorfg & 0x01000000 ? 5 :
+			    newcolorfg & 0x02000000 ? 11 :
+			    newcolorfg & 0x04000000 ? 20
+						    : 0
+			  : newcolorfg & 0x07000000 ? 0
+						    : -5
+			)
+		      + ( newcolorbg == D_rend.colorbg
+			  ? newcolorbg & 0x01000000 ? 5 :
+			    newcolorbg & 0x02000000 ? 11 :
+			    newcolorbg & 0x04000000 ? 20
+						    : 0
+			  : newcolorbg & 0x07000000 ? 0
+						    : -5
+			)
+		      # endif
+		) {
+			AddChar('0');
+			not_first++;
+			D_rend.colorbg = D_rend.colorfg = 0;	/* "\e[0;...m" resets color as well as attributes */
+		}
+
+		for (attr_mask_t to_be_unset; to_be_unset = lo_bit(D_rend.attr & ~new) ;) {
+			int ll = log_lo_bit(to_be_unset)+21;
+			tputs(tparm(";%d"+!not_first++, ll), 1, DoAddChar);
+			D_rend.attr &=~ to_be_unset;
+		}
+		for (attr_mask_t to_be_set; to_be_set = lo_bit(~D_rend.attr & new) ;) {
+			int ll = log_lo_bit(to_be_set)+1;
+			tputs(tparm(";%d"+!not_first++, ll), 1, DoAddChar);
+			D_rend.attr |= 1U << to_be_set;
+		}
+		AddCStr("m");
+		D_rend.attr = new;
 		return;
 	}
-#endif
 
 	/* Remove unwanted attributes first, because sometimes doing so will
 	 * remove attributes that we want to keep, meaning that we will have to
 	 * add them back in again. */
-	for (attr_mask_t to_be_unset; to_be_unset = D_rend.attr & ~new ; ) {
-		attr_mask_t u = lo_bit(to_be_unset);
-		int ll = log_lo_bit(u);
+	for (attr_mask_t to_be_unset; to_be_unset = lo_bit(D_rend.attr & ~new) ;) {
+		int ll = log_lo_bit(to_be_unset);
 		TermDefAttr *tda = &D_td.td_attr[ll];
-		u |= tda->tda_also_unset;
-		D_rend.attr &= ~u;
+		to_be_unset |= tda->tda_also_unset;
+		D_rend.attr &= ~to_be_unset;
 		AddCStr(tda->tda_unset);
-		if (u & A_DFT_COLOR)
+		if (to_be_unset & A_DFT_COLOR)
 			D_rend.colorbg = D_rend.colorfg = 0;	/* "\e[m" resets color as well as attributes */
 	}
 
-	for (attr_mask_t to_be_set; to_be_set = ~D_rend.attr & new ; ) {
-		attr_mask_t u = lo_bit(to_be_set);
-		int ll = log_lo_bit(u);
+	for (attr_mask_t to_be_set; to_be_set = lo_bit(~D_rend.attr & new) ;) {
+		int ll = log_lo_bit(to_be_set);
 		TermDefAttr *tda = &D_td.td_attr[ll];
-		D_rend.attr |= u;
+		D_rend.attr |= to_be_set;
 		AddCStr(tda->tda_set);
 	}
 }
@@ -1367,17 +1433,16 @@ void SetColor(uint32_t foreground, uint32_t background)
 			f = D_CCO == 88 && D_CAF ? color256to88(f) : color256to16(f);
 		}
 		if (D_CAF) {
-			//AddCStr2(D_CAF, f); //FIXME
-			tputs(tparm("\033[38;5;%dm", f), 1, DoAddChar);
+			// AddCStr2(D_CAF, f); // FIXME
+			tputs(tparm("\033[38:5:%dm", f), 1, DoAddChar);
 		}
-
 	}
 	if (f != of && (f & 0x04000000) && hastruecolor) {
 		uint8_t _r = f >> 16;
 		uint8_t _g = f >> 8;
 		uint8_t _b = f;
 		/* TODO - properly get escape code */
-		tputs(tparm("\033[38;2;%p1%d;%p2%d;%p3%dm", _r, _g, _b), 1, DoAddChar);
+		tputs(tparm("\033[38:2::%p1%d:%p2%d:%p3%dm", _r, _g, _b), 1, DoAddChar);
 	}
 
 	/* BACKGROUND */
@@ -1402,8 +1467,8 @@ void SetColor(uint32_t foreground, uint32_t background)
 			b = D_CCO == 88 && D_CAB ? color256to88(b) : color256to16(b);
 		}
 		if (D_CAB) {
-			//      AddCStr2(D_CAB, b); // FIXME
-			tputs(tparm("\033[48;5;%dm", b), 1, DoAddChar);
+			// AddCStr2(D_CAB, b); // FIXME
+			tputs(tparm("\033[48:5:%dm", b), 1, DoAddChar);
 		}
 	}
 	if (b != ob && (b & 0x04000000) && hastruecolor) {
@@ -1411,7 +1476,7 @@ void SetColor(uint32_t foreground, uint32_t background)
 		uint8_t _g = b >> 8;
 		uint8_t _b = b;
 		/* TODO - properly get escape code */
-		tputs(tparm("\033[48;2;%p1%d;%p2%d;%p3%dm", _r, _g, _b), 1, DoAddChar);
+		tputs(tparm("\033[48:2::%p1%d:%p2%d:%p3%dm", _r, _g, _b), 1, DoAddChar);
 	}
 }
 
