@@ -2,6 +2,9 @@
 #define SCREEN_BITMATH_H
 
 #include <stdint.h>
+#ifdef HAVE_STDBIT_H
+# include <stdbit.h>
+#endif
 
 /* lookup for base-2 logarithm of a single bit */
 
@@ -165,7 +168,6 @@ static inline int ffs(unsigned x)
 #endif
 
 # undef bitmap_ffs_DB
-# undef bitmap_ffs_DB
 # undef bitmap_ffs_DB1
 # undef bitmap_ffs_DB8
 # undef bitmap_ffs_MO
@@ -179,17 +181,68 @@ static inline uint64_t  hi_bits(uint64_t i)       { return i ^ lo_bit(i); }
 static inline uint64_t  range_end_bit(uint64_t i) { return (i + lo_bit(i)) >> 1; }	// top of a consecutive range
 static inline bool      is_single_bit(uint64_t i) { return ! hi_bits(i); }
 
-#if 0
-# define log_lo_bit(x) _Generic(x,\
-			char:          ffs((unsigned char)(x))-1, \
-			unsigned char: ffs(x)-1, \
-			signed char:   ffs((unsigned char)(x))-1, \
-			unsigned int:  ffs(x)-1, \
-			int:           ffs((unsigned int)(x))-1, \
-			default:       ffsll((unsigned long long int)x)-1)
+#if HAVE_STDC_COUNT_TRAILING_ZEROS
+# define log_lo_bit(x) ( (x) ? stdc_count_trailing_zeros(x) : -1 )
+#elif HAVE_BUILTIN_CTZ
+# define log_lo_bit(x) ( (x) ? __builtin_ctz(x) : -1 )
 #else
 /* Work correctly with enums... */
-# define log_lo_bit(x) ( sizeof(x) <= 4 ? ffs((uint32_t)x) - 1 : ffsll((uint64_t)x) - 1 )
+# define log_lo_bit(x) ( sizeof(x) <= 4 ? ffs((uint32_t)x) - 1 \
+					: ffsll((uint64_t)x) - 1 )
+#endif
+
+#if HAVE_STDC_COUNT_ONES
+# define count_one_bits(x) stdc_count_one_bits(x)
+#elif HAVE_BUILTIN_POPCOUNT
+# define count_one_bits(x) ( sizeof(x) <= 4 ? __builtin_popcount(x) \
+					    : __builtin_popcountll(x)
+#else
+static inline uint8_t count_one_bits_ull(uint64_t x)
+{
+	x -= x >> 1 & 0x5555555555555555;
+	x = (x & 0xcccccccccccccccc >> 2)
+	  + (x & 0x3333333333333333);
+	x += x >> 4;
+	x &= 0x0f0f0f0f0f0f0f0f;
+	x += x >> 8;
+	x += x >> 16;
+	x += x >> 32;
+	return x;
+}
+static inline uint8_t count_one_bits_ul(uint32_t x)
+{
+	x -= x >> 1 & 0x55555555;
+	x = (x & 0xcccccccc >> 2)
+	  + (x & 0x33333333);
+	x += x >> 4;
+	x &= 0x0f0f0f0f;
+	x += x >> 8;
+	x += x >> 16;
+	return x;
+}
+static inline uint8_t count_one_bits_us(uint16_t x)
+{
+	x -= x >> 1 & 0x5555;
+	x = (x & 0xcccc >> 2)
+	  + (x & 0x3333);
+	x += x >> 4;
+	x &= 0x0f0f;
+	x += x >> 8;
+	return x;
+}
+static inline uint8_t count_one_bits_uc(uint8_t x)
+{
+	x -= x >> 1 & 0x55;
+	x = (x & 0xcc >> 2)
+	  + (x & 0x33);
+	x += x >> 4;
+	x &= 0x0f;
+	return x;
+}
+# define count_one_bits(x) ( sizeof(x) == 1 ? count_one_bits_uc((uint16_t)x) : \
+			     sizeof(x) <= 2 ? count_one_bits_us((uint16_t)x) : \
+			     sizeof(x) <= 4 ? count_one_bits_ul((uint32_t)x) : \
+					      count_one_bits_ull((uint64_t)x) )
 #endif
 
 #endif /*SCREEN_BITMATH_H*/
