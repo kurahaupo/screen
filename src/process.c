@@ -1502,7 +1502,7 @@ static void DoCommandStuff(struct action *act)
 		}
 		if (StuffKey(i - T_CAPS) == 0)
 			return;
-		s = display ? D_tcs[i].str : NULL;
+		s = display ? D_td.td_tcs[i].str : NULL;
 		if (s == NULL)
 			return;
 		len = strlen(s);
@@ -6463,7 +6463,7 @@ int StuffKey(int i)
 
 	if (discard && (!act || act->nr != RC_COMMAND)) {
 		/* if the input was just a single byte we let it through */
-		if (D_tcs[keyno + T_CAPS].str && strlen(D_tcs[keyno + T_CAPS].str) == 1)
+		if (D_td.td_tcs[keyno + T_CAPS].str && strlen(D_td.td_tcs[keyno + T_CAPS].str) == 1)
 			return -1;
 		if (D_ESCseen) {
 			D_ESCseen = NULL;
