@@ -1240,14 +1240,22 @@ void SetAttr(int new)
 		}
 
 		for (attr_mask_t to_be_unset; to_be_unset = lo_bit(D_rend.attr & ~new) ;) {
-			int ll = log_lo_bit(to_be_unset)+21;
+			int ll = log_lo_bit(to_be_unset)+1;
+			if (ll == 1) {
+				ll = 22;
+				to_be_unset = A_BD | A_DI;
+			} else if (ll == 6) {
+				ll = 25;
+				to_be_unset = A_BL | A_FB;
+			} else
+				ll += 20;
 			tputs(tparm(";%d"+!not_first++, ll), 1, DoAddChar);
 			D_rend.attr &=~ to_be_unset;
 		}
 		for (attr_mask_t to_be_set; to_be_set = lo_bit(~D_rend.attr & new) ;) {
 			int ll = log_lo_bit(to_be_set)+1;
 			tputs(tparm(";%d"+!not_first++, ll), 1, DoAddChar);
-			D_rend.attr |= 1U << to_be_set;
+			D_rend.attr |= to_be_set;
 		}
 		AddCStr("m");
 		D_rend.attr = new;
