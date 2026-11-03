@@ -67,7 +67,7 @@ $AWK < "$source_file" -v source_file="$source_file" '
 }
 /^[[:space:]]+[{][[:space:]]*".*$/{ #}
     a=aa=substr($2,2,length($2)-3);
-    b=substr($3,3,3);
+    b=tolower(substr($3,3,3));
     if (length(a)==2) {
         a=toupper(aa);
         if (substr(a,0,1) == substr(aa,0,1)) a="C"a;
@@ -96,7 +96,7 @@ END {
     printf "# define %-14s %d\n", "KMAPMDEFSTART", mmin
     printf "# define %-14s %d\n", "NKMAPMDEF", mmax-mmin+1
 }
-' | sed -e s/NUM/num/ -e s/STR/str/ -e s/FLG/flg/ \
+' \
 >> term.h
 
 rm -f kmapdef.c
