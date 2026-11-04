@@ -40,8 +40,7 @@ cat << EOF
 
 #include "acls.h"
 
-struct comm
-{
+struct comm {
 	char *name;
 	int flags;
 	AclBits userbits[ACL_BITS_PER_CMD];
@@ -49,29 +48,28 @@ struct comm
 
 extern struct comm comms[];
 
-#define ARGS_ANY		5		/* interpreted as "more than 4" */
+#define ARGS_ANY		5	/* interpreted as "more than 4" */
 
 #define ARGS(n)			(1U << (n))
 #define XXARG(n)		(1U << ARGS_ANY+(n))
-#define NEED_FORE		0x1000U		/* command needs a fore window */
-#define NEED_DISPLAY		0x2000U		/* command needs a display */
-#define NEED_LAYER		0x4000U		/* command needs a layer */
-#define CAN_QUERY		0x8000U		/* command can be queried using ‘-Q’ to print a result to stdout */
+#define NEED_FORE		0x1000U	/* command needs a fore window */
+#define NEED_DISPLAY		0x2000U	/* command needs a display */
+#define NEED_LAYER		0x4000U	/* command needs a layer */
+#define CAN_QUERY		0x8000U	/* command can be queried using ‘-Q’ to print a result to stdout */
 
 #define ARGS_RANGE(lo,hi)	(ARGS(hi+1) - ARGS(lo))
 #define ARGS_ATLEAST(lo)	ARGS_RANGE(lo, ARGS_ANY)
 #define ARGS_MASK		ARGS_ATLEAST(0)
 #define ARGS_MORE		ARGS(ARGS_ANY)
 
-struct action
-{
+struct action {
 	int nr;
 	char **args;
 	int *argl;
-	int quiet;	/* Suppress (currently unused)
-			 * 0x01 - Error message
-			 * 0x02 - Normal message
-			 */
+	int quiet;		/* Suppress (currently unused)
+				 * 0x01 - Error message
+				 * 0x02 - Normal message
+				 */
 };
 
 #define RC_ILLEGAL -1
