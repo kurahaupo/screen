@@ -68,7 +68,7 @@ sed < ${srcdir}/term.c \
   if (mmin == 0) mmin = s
   mmax = s;
 }
-/^  [{] ".*$/{
+/^[[:space:]]+[{][[:space:]]+".*$/{
 a=substr($2,2,length($2)-3);
 b=substr($3,3,3);
 if (nolist == 0) {
@@ -109,7 +109,7 @@ cat << EOF > kmapdef.c
 EOF
 
 $AWK < ${srcdir}/term.c '
-/^  [{] ".*KMAP.*$/{
+/^[[:space:]]+[{][[:space:]]+".*KMAP.*$/{
   for (i = 0; i < 3; i++) {
     q = $(5+i)
     if (substr(q, 1, 5) == "KMAPD") {
@@ -129,7 +129,7 @@ $AWK < ${srcdir}/term.c '
     }
   }
 }
-/^  [{] ".*$/{
+/^[[:space:]]+[{][[:space:]]+".*$/{
   s++;
 }
 END {
