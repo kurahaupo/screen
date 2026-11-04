@@ -66,12 +66,13 @@ struct action
 
 EOF
 $AWK < $source_file >> comm.h '
-/^  [{] ".*/	{   if (old > $2) {
-		printf("***ERROR: %s <= %s !!!\n\n", $2, old);
-		exit 1;
-	    }
-	old = $2;
-	}
+/^  [{] "/ {
+    if (old > $2) {
+        printf("***ERROR: %s <= %s !!!\n\n", $2, old);
+        exit 1;
+    }
+    old = $2;
+}
 '
 
 $CC -E -I. "-I$srcdir" "$source_file" > comm.cpp || exit $?
