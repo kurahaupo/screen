@@ -51,19 +51,19 @@ extern struct term term[];
 EOF
 
 $AWK < "$source_file" -v source_file="$source_file" '
-/^[[:space:]]+[{] ".*KMAPDEF[(].*$/{ #}
+/^[[:space:]]+[{] ".*KMAPDEF[(]/{ #}
     if (min == 0) min = s
     max = s;
 }
-/^[[:space:]]+[{] ".*KMAPADEF[(].*$/{ #}
+/^[[:space:]]+[{] ".*KMAPADEF[(]/{ #}
     if (amin == 0) amin = s
     amax = s;
 }
-/^[[:space:]]+[{] ".*KMAPMDEF[(].*$/{ #}
+/^[[:space:]]+[{] ".*KMAPMDEF[(]/{ #}
     if (mmin == 0) mmin = s
     mmax = s;
 }
-/^[[:space:]]+[{][[:space:]]*".*$/{ #}
+/^[[:space:]]+[{][[:space:]]*"/{ #}
     a=aa=substr($2,2,length($2)-3);
     b=tolower(substr($3,3,3));
     if (length(a)==2) {
@@ -108,53 +108,50 @@ cat << EOF &&
 
 #include "kmapdef.h"
 
-
 EOF
 
 $AWK -v"source_file=$source_file" < "$source_file" '
-/^[[:space:]]+[{] ".*KMAP.*$/{  #}
-  xline[s] = NR
-  for (i = 0; i < 3; i++) {
-    q = $(5+i)
-    if (substr(q, 1, 5) == "KMAPD") {
-      if (min == 0) min = s
-      max = s
-      arr[s] = substr(q, 9, length(q)-9)
+/^[[:space:]]+[{][[:space:]]+".*KMAP/{  #}
+    xline[s] = NR
+    for (i = 4; i <= NF; i++) {
+        q = $(i)
+        if (substr(q, 1, 8) == "KMAPDEF(") {
+            if (min == 0) min = s
+            max = s
+            arr[s] = substr(q, 9, length(q)-9)
+        } else if (substr(q, 1, 9) == "KMAPADEF(") {
+            if (amin == 0) amin = s
+            amax = s
+            anarr[s] = substr(q, 10, length(q)-10)
+        } else if (substr(q, 1, 9) == "KMAPMDEF(") {
+            if (mmin == 0) mmin = s
+            mmax = s
+            mnarr[s] = substr(q, 10, length(q)-10)
+        }
     }
-    if (substr(q, 1, 5) == "KMAPA") {
-      if (amin == 0) amin = s
-      amax = s
-      anarr[s] = substr(q, 10, length(q)-10)
-    }
-    if (substr(q, 1, 5) == "KMAPM") {
-      if (mmin == 0) mmin = s
-      mmax = s
-      mnarr[s] = substr(q, 10, length(q)-10)
-    }
-  }
 }
-/^[[:space:]]+[{] ".*$/{    #}
-  s++;
+/^[[:space:]]+[{][[:space:]]+"/{    #}
+    s++;
 }
 END {
-  printf "char *kmapdef[] = {\n"
-  for (s = min; s <= max; s++) {
-    if (arr[s])
-      printf "\t[%u] = %s,\t\t/* line %u in %s */\n", s-min, arr[s], xline[s], source_file;
-  }
-  printf "};\n\n"
-  printf "char *kmapadef[] = {\n"
-  for (s = amin; s <= amax; s++) {
-    if (anarr[s])
-      printf "\t[%u] = %s,\t\t/* line %u in %s */\n", s-amin, anarr[s], xline[s], source_file;
-  }
-  printf "};\n\n"
-  printf "char *kmapmdef[] = {\n"
-  for (s = mmin; s <= mmax; s++) {
-    if (mnarr[s])
-      printf "\t[%u] = %s,\t\t/* line %u in %s */\n", s-mmin, mnarr[s], xline[s], source_file;
-  }
-  printf "};\n"
+    printf "char *kmapdef[] = {\n"
+    for (s = min; s <= max; s++) {
+        if (arr[s])
+            printf "\t[%u] = %s,\t\t/* line %u in %s */\n", s-min, arr[s], xline[s], source_file;
+    }
+    printf "};\n\n"
+    printf "char *kmapadef[] = {\n"
+    for (s = amin; s <= amax; s++) {
+        if (anarr[s])
+            printf "\t[%u] = %s,\t\t/* line %u in %s */\n", s-amin, anarr[s], xline[s], source_file;
+    }
+    printf "};\n\n"
+    printf "char *kmapmdef[] = {\n"
+    for (s = mmin; s <= mmax; s++) {
+        if (mnarr[s])
+            printf "\t[%u] = %s,\t\t/* line %u in %s */\n", s-mmin, mnarr[s], xline[s], source_file;
+    }
+    printf "};\n"
 }
 '
 } > kmapdef.c.$$ || { ex=$? ; rm -f *.$$ ; exit $ex ; }
