@@ -42,6 +42,7 @@
 #include "process.h"
 #include "resize.h"
 #include "screen.h"
+#include "stringbuf.h"
 #include "termcap.h"
 #include "window.h"
 
@@ -1128,6 +1129,7 @@ int InitTermcap(int width, int height)
 	if (D_MR)   D_td.td_attr[ATTR_RV] = (TermDefAttr){ D_MR,  D_ME, A_ME };	// 7 / 27	B	mr	rev		begin	Reverse
 
 	/* Guess some stuff about ECMA-48 terminals */
+        char mbuf[MAXSTR] = "ANSI PROBES", *cmb = mbuf+11, *const emb = mbuf + sizeof mbuf;
 	int const num_verify = ATTR_RV + 1 - ATTR_BD;
 	int ansi_probe_failures = 0;
 	for (int i=ATTR_BD; i<=ATTR_RV ; ++i) {
@@ -1136,19 +1138,27 @@ int InitTermcap(int width, int height)
 		int const p = j == 1 ? 22 :	/* intensity change, but note that some terminals treat 1 as "heavy strike", not just "bright", so that \e[1;2m results in heavy-strike+dim */
 			      j == 6 ? 25 :	/* blink rate change */
 				       j+20;
-		if (a->tda_set   && !IsSGR(a->tda_set,   j)) { ansi_probe_failures = num_verify; break; }
+		if (a->tda_set   && !IsSGR(a->tda_set,   j)) { ansi_probe_failures = num_verify; seprintf(&cmb, emb, "; SGR#%u.set = ", j); seputsq(&cmb, emb, a->tda_set); break; }
 		if (a->tda_unset && !IsSGR(a->tda_unset, p)
-				 && !IsSGR(a->tda_unset, 0)) { ansi_probe_failures = num_verify; break; }
-		if (!a->tda_set || !a->tda_unset) ++ansi_probe_failures;
+				 && !IsSGR(a->tda_unset, 0)) { ansi_probe_failures = num_verify; seprintf(&cmb, emb, "; SGR#%u.unset = ", j); seputsq(&cmb, emb, a->tda_unset); break; }
+		if (!a->tda_set || !a->tda_unset) { ++ansi_probe_failures; seprintf(&cmb, emb, "; SGR#%u missing", j); }
 	}
 	D_td.td_ansi = ansi_probe_failures <= ANSI_PROBE_FAILURE_LIMIT;
-
+	seprintf(&cmb, emb, "; probes=%u failures=%u limit=%u td_ansi=%s",
+		 num_verify,
+		 ansi_probe_failures,
+		 ANSI_PROBE_FAILURE_LIMIT,
+		 D_td.td_ansi ? "true" : "false");
 	if (ansi_probe_failures <= ANSI_PROBE_FAILURE_LIMIT+1) {
 		D_td.td_attr[ATTR_HI] = (TermDefAttr){ "\033[8m", "\033[28m", 0 };
+		seprintf(&cmb, emb, " +hidden");
 		D_td.td_attr[ATTR_ST] = (TermDefAttr){ "\033[9m", "\033[29m", 0 };
+		seprintf(&cmb, emb, " +strikethrough");
 	}
-	if (ansi_probe_failures <= ANSI_PROBE_FAILURE_LIMIT+2 && IsSGR(D_td.td_attr[ATTR_BL].tda_set, 5)) 
+	if (ansi_probe_failures <= ANSI_PROBE_FAILURE_LIMIT+2 && IsSGR(D_td.td_attr[ATTR_BL].tda_set, 5)) {
 		D_td.td_attr[ATTR_FB] = (TermDefAttr){ "\033[6m", "\033[25m", 0 };
+		seprintf(&cmb, emb, " +fast-blink");
+	}
 
 	/* Set up missing entries (attributes are priority ordered) */
 
@@ -1338,5 +1348,12 @@ int InitTermcap(int width, int height)
 	/* Make sure libterm uses external term properties for our tputs() calls.  */
 	e_tgetent(tbuf, D_termname);
 	CheckEscape();
+	if (cmb != mbuf) {
+		FILE *f = fopen("screentrace.txt", "w");
+		fprintf(f, "%s\n", mbuf);
+		fclose(f);
+	}
+	else
+		unlink("screentrace.txt");
 	return 0;
 }
