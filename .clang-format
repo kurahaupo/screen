@@ -1,0 +1,40 @@
+Language: Cpp
+BasedOnStyle: LLVM
+
+# Insertion & removal of line breaks
+BinPackArguments: false
+BreakBeforeBinaryOperators: NonAssignment
+BreakBeforeBraces: Custom   # see BraceWrapping below
+
+#UseTab: ForContinuationAndIndentation
+UseTab: Always
+TabWidth: 8
+
+# Indentation of statements, # constructors, & initializer lists, respectively
+IndentWidth: 8
+ContinuationIndentWidth: 8
+ConstructorInitializerIndentWidth: 8
+Cpp11BracedListStyle: false
+
+SortIncludes: false
+
+ColumnLimit: 120
+
+# in-line whitespace removal
+SpaceAfterCStyleCast: false
+SpaceBeforeCpp11BracedList: false
+
+BraceWrapping:
+  # Put function opening braces on a new line
+  AfterFunction: true
+
+  # Keep everything else attached (K&R style defaults)
+  AfterClass: false
+  AfterControlStatement: false
+  AfterEnum: false
+  AfterNamespace: false
+  AfterStruct: false
+  AfterUnion: false
+  BeforeCatch: false
+  BeforeElse: false
+  IndentBraces: false
