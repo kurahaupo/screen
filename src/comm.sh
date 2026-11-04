@@ -1,14 +1,8 @@
 #! /bin/sh
 
-if test -z "$AWK"; then
-  AWK=awk
-fi
-if test -z "$CC"; then
-  CC=cc
-fi
-if test -z "$srcdir"; then
-  srcdir=.
-fi
+_=${AWK:=awk}
+_=${CC:=cc}
+_=${srcdir:=.}
 
 LC_ALL=C
 export LC_ALL
