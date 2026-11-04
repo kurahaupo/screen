@@ -226,7 +226,8 @@ const char *wmbc_strcpy(WinMsgBufContext *wmbc, const char *s)
 int wmbc_printf(WinMsgBufContext *wmbc, const char *fmt, ...)
 {
 	va_list ap;
-	size_t  n, max;
+	size_t n,
+	       max;
 
 	/* to prevent buffer overflows, cap the number of bytes to the remaining
 	 * buffer size */
@@ -247,7 +248,7 @@ int wmbc_printf(WinMsgBufContext *wmbc, const char *fmt, ...)
 
 		va_start(ap, fmt);
 		size_t m = vsnprintf(wmbc->p, n + 1, fmt, ap);
-		assert(m == n); /* this should never fail */
+		assert(m == n);	/* this should never fail */
 		va_end(ap);
 	}
 

@@ -151,7 +151,7 @@ void sched(void)
 				pfd[i].fd = ev->fd;
 				pfd[i].events = POLLOUT;
 			}
-skip:
+ skip:
 			if (ev->type == EV_READ || ev->type == EV_WRITE)
 				i++;
 		}
@@ -193,7 +193,7 @@ skip:
 				n--;
 				/* advance pollfd pointer */
 				i++;
-				__attribute__ ((fallthrough));
+				__attribute__((fallthrough));
 			default:
 				if (ev->condpos && *ev->condpos <= (ev->condneg ? *ev->condneg : 0))
 					continue;

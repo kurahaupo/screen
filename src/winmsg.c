@@ -202,7 +202,7 @@ winmsg_esc_ex(PadOrTrunc, int *numpad, int *lastpad, int padlen)
 	uint64_t r;
 
 	wmbc_putchar(wmbc, ' ');
-	wmbc->p--; /* TODO: temporary to work with old code */
+	wmbc->p--;		/* TODO: temporary to work with old code */
 
 	if (esc->num || esc->flags.zero || esc->flags.plus || esc->flags.lng || (**src != WINESC_PAD)) {
 		/* expand all pads */
@@ -314,14 +314,14 @@ winmsg_esc_ex(PadOrTrunc, int *numpad, int *lastpad, int padlen)
 			*lastpad = wmbc->p - winmsg->buf;
 			wmbc->trunc.pos = -1;
 			wmbc->trunc.ellip = false;
-			return; /* wmbc->p already correctly positioned by wmbc_putchar */
+			return;	/* wmbc->p already correctly positioned by wmbc_putchar */
 		}
 	} else if (padlen) {
 		*wmbc->p = CHRPAD;	/* internal pad representation */
 		(*numpad)++;
 	}
 
-	wmbc->p++; /* TODO: temporary; see above */
+	wmbc->p++;		/* TODO: temporary; see above */
 }
 
 /**
@@ -382,12 +382,13 @@ winmsg_esc_ex(WinNames, const bool hide_cur, Window *win)
 	}
 
 	/* TODO: no need to enforce a limit here */
-	AddWindows(wmbc, max - 1,
-		hide_cur
-			| (esc->flags.lng ? 0 : 2)
-			| (esc->flags.plus ? 4 : 0)
-			| (esc->flags.minus ? 8 : 0),
-		win ? win->w_number : -1);
+	AddWindows(wmbc,
+		   max - 1,
+		   hide_cur
+		   | (esc->flags.lng ? 0 : 2)
+		   | (esc->flags.plus ? 4 : 0)
+		   | (esc->flags.minus ? 8 : 0),
+		   win ? win->w_number : -1);
 
 	if (display)
 		D_fore = oldfore;
@@ -414,73 +415,63 @@ winmsg_esc_ex(WinArgv, Window *win)
 	}
 }
 
-static void
-__WinMsgEscEsc_YEAR(WinMsgBufContext *wmbc, struct tm *tm)
+static void __WinMsgEscEsc_YEAR(WinMsgBufContext *wmbc, struct tm *tm)
 {
 	wmbc_printf(wmbc, "%04d", tm->tm_year + 1900);
 }
 
-static void
-__WinMsgEscEsc_year(WinMsgBufContext *wmbc, struct tm *tm)
+static void __WinMsgEscEsc_year(WinMsgBufContext *wmbc, struct tm *tm)
 {
-            wmbc_printf(wmbc, "%02d", tm->tm_year % 100);
+	wmbc_printf(wmbc, "%02d", tm->tm_year % 100);
 }
 
-static void
-__WinMsgEscEsc_MONTH(WinMsgBufContext *wmbc, struct tm *tm)
+static void __WinMsgEscEsc_MONTH(WinMsgBufContext *wmbc, struct tm *tm)
 {
 #ifdef USE_LOCALE
-            strftime(wmbc, l, (longflg ? "%B" : "%b"), tm);
+	strftime(wmbc, l, (longflg ? "%B" : "%b"), tm);
 #else
-            wmbc_printf(wmbc, "%3.3s", months + 3 * tm->tm_mon);
+	wmbc_printf(wmbc, "%3.3s", months + 3 * tm->tm_mon);
 #endif
 }
 
-static void
-__WinMsgEscEsc_month(WinMsgBufContext *wmbc, struct tm *tm)
+static void __WinMsgEscEsc_month(WinMsgBufContext *wmbc, struct tm *tm)
 {
-            wmbc_printf(wmbc, "%02d", tm->tm_mon + 1);
+	wmbc_printf(wmbc, "%02d", tm->tm_mon + 1);
 }
 
-static void
-__WinMsgEscEsc_DAY(WinMsgBufContext *wmbc, struct tm *tm)
+static void __WinMsgEscEsc_DAY(WinMsgBufContext *wmbc, struct tm *tm)
 {
 #ifdef USE_LOCALE
-            strftime(wmbc, l, (longflg ? "%A" : "%a"), tm);
+	strftime(wmbc, l, (longflg ? "%A" : "%a"), tm);
 #else
-            wmbc_printf(wmbc, "%3.3s", days + 3 * tm->tm_wday);
+	wmbc_printf(wmbc, "%3.3s", days + 3 * tm->tm_wday);
 #endif
 }
 
-static void
-__WinMsgEscEsc_day(WinMsgBufContext *wmbc, struct tm *tm)
+static void __WinMsgEscEsc_day(WinMsgBufContext *wmbc, struct tm *tm)
 {
-            wmbc_printf(wmbc, "%02d", tm->tm_mday % 100);
+	wmbc_printf(wmbc, "%02d", tm->tm_mday % 100);
 }
 
-static void
-__WinMsgEscEsc_HOUR(WinMsgBufContext *wmbc, struct tm *tm)
+static void __WinMsgEscEsc_HOUR(WinMsgBufContext *wmbc, struct tm *tm)
 {
-            wmbc_printf(wmbc, tm->tm_hour >= 12 ? "PM" : "AM");
+	wmbc_printf(wmbc, tm->tm_hour >= 12 ? "PM" : "AM");
 }
 
-static void
-__WinMsgEscEsc_hour(WinMsgBufContext *wmbc, struct tm *tm)
+static void __WinMsgEscEsc_hour(WinMsgBufContext *wmbc, struct tm *tm)
 {
-            wmbc_printf(wmbc, tm->tm_hour >= 12 ? "pm" : "am");
+	wmbc_printf(wmbc, tm->tm_hour >= 12 ? "pm" : "am");
 }
 
 
-static void
-__WinMsgEscEsc_TIME(WinMsgBufContext *wmbc, struct tm *tm, WinMsgEsc esc)
+static void __WinMsgEscEsc_TIME(WinMsgBufContext *wmbc, struct tm *tm, WinMsgEsc esc)
 {
-            wmbc_printf(wmbc, esc.flags.zero ? "%02d:%02d" : "%2d:%02d", (tm->tm_hour + 11) % 12 + 1, tm->tm_min);
+	wmbc_printf(wmbc, esc.flags.zero ? "%02d:%02d" : "%2d:%02d", (tm->tm_hour + 11) % 12 + 1, tm->tm_min);
 }
 
-static void
-__WinMsgEscEsc_time(WinMsgBufContext *wmbc, struct tm *tm, WinMsgEsc esc)
+static void __WinMsgEscEsc_time(WinMsgBufContext *wmbc, struct tm *tm, WinMsgEsc esc)
 {
-            wmbc_printf(wmbc, esc.flags.zero ? "%02d:%02d" : "%2d:%02d", tm->tm_hour, tm->tm_min);
+	wmbc_printf(wmbc, esc.flags.zero ? "%02d:%02d" : "%2d:%02d", tm->tm_hour, tm->tm_min);
 }
 
 winmsg_esc_ex(WinNum, Window *win)
@@ -605,8 +596,7 @@ winmsg_esc_ex(CondElse, int *condrend)
 
 /* TODO: this is temporary until refactoring is complete and this code need not
  * be abstracted */
-static void _MakeWinMsgEvRec(WinMsgBufContext *wmbc, WinMsgCond *cond, char *str,
-                             Window *win, int *tick, int rec)
+static void _MakeWinMsgEvRec(WinMsgBufContext *wmbc, WinMsgCond *cond, char *str, Window *win, int *tick, int rec)
 {
 	int oldtick = *tick;
 	WinMsgBuf *tmp = wmb_create();
@@ -627,8 +617,7 @@ static void _MakeWinMsgEvRec(WinMsgBufContext *wmbc, WinMsgCond *cond, char *str
 }
 
 /* TODO: const char *str for safety and reassurance */
-char *MakeWinMsgEv(WinMsgBuf *winmsg, char *str, Window *win,
-                   int chesc, int padlen, Event *ev, int rec)
+char *MakeWinMsgEv(WinMsgBuf *winmsg, char *str, Window *win, int chesc, int padlen, Event *ev, int rec)
 {
 	static int tick;
 	int qmnumrend = 0;
@@ -704,8 +693,8 @@ char *MakeWinMsgEv(WinMsgBuf *winmsg, char *str, Window *win,
 		if ((esc.flags.lng = (*s == 'L')) != 0)
 			s++;
 
-	        if (!tick || tick > 3600)
-		        tick = 3600;
+		if (!tick || tick > 3600)
+			tick = 3600;
 
 		switch (*s) {
 		case WINESC_TIME:
@@ -793,9 +782,7 @@ char *MakeWinMsgEv(WinMsgBuf *winmsg, char *str, Window *win,
 			WinMsgDoEsc(EscSeen);
 			break;
 		case WINESC_TRUNC_POS:
-			WinMsgDoEscEx(TruncPos,
-				((esc.num > 100) ? 100 : esc.num),
-				esc.flags.lng);
+			WinMsgDoEscEx(TruncPos, ((esc.num > 100) ? 100 : esc.num), esc.flags.lng);
 			break;
 		case WINESC_PAD:
 		case WINESC_TRUNC:
@@ -823,8 +810,8 @@ char *MakeWinMsgEv(WinMsgBuf *winmsg, char *str, Window *win,
 	}
 	if (wmc_is_active(cond) && !wmc_is_set(cond))
 		wmbc->p = wmbc->buf->buf + wmc_end(cond, wmbc_offset(wmbc), NULL) + 1;
-	wmbc_putchar(wmbc, '\0' );
-	wmbc->p--; /* TODO: temporary to work with old code */
+	wmbc_putchar(wmbc, '\0');
+	wmbc->p--;		/* TODO: temporary to work with old code */
 	if (numpad) {
 		if (padlen > MAXSTR - 1)
 			padlen = MAXSTR - 1;
@@ -918,7 +905,7 @@ void WindowChanged(Window *win, WinMsgEscapeChar what)
 					&& WindowChangedCheck(win->w_hstatus, what, NULL))) {
 					if (captiontop) {
 						if (cv->c_ys - 1 >= 0)
-							RefreshLine(cv->c_ys - 1, 0, D_width -1 , 0);
+							RefreshLine(cv->c_ys - 1, 0, D_width - 1, 0);
 					} else {
 						if (cv->c_ye + 1 < D_height)
 							RefreshLine(cv->c_ye + 1, 0, D_width - 1, 0);
@@ -957,7 +944,7 @@ void WindowChanged(Window *win, WinMsgEscapeChar what)
 			got = 1;
 			if (inwstr) {
 				if (captiontop) {
-					if (cv->c_ys -1 >= 0)
+					if (cv->c_ys - 1 >= 0)
 						RefreshLine(cv->c_ys - 1, 0, D_width - 1, 0);
 				} else {
 					if (cv->c_ye + 1 < D_height)

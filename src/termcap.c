@@ -179,8 +179,9 @@ int InitTermcap(int width, int height)
 		/* ISO2022 */
 		if ((D_EA && strstr(D_EA, "\033(B")) || (D_AS && strstr(D_AS, "\033(0")))
 			D_CG0 = 1;
-		if (strstr(D_termname, "xterm") || strstr(D_termname, "rxvt") || (D_CKM &&
-					(strstr(D_CKM, "\033[M") || strstr(D_CKM, "\033[<")))) {
+		if (strstr(D_termname, "xterm")
+		    || strstr(D_termname, "rxvt")
+		    || (D_CKM && (strstr(D_CKM, "\033[M") || strstr(D_CKM, "\033[<")))) {
 			D_CXT = 1;
 			kmapdef[0] = D_CKM ? SaveStr(D_CKM) : NULL;
 		}
@@ -809,9 +810,9 @@ char *MakeTermcap(bool aflag)
 			if (i >= T_KEYPAD)	/* don't put keypad codes in TERMCAP */
 				continue;	/* - makes it too big */
 #if (TERMCAP_BUFSIZE < 1024)
-			if (i >= T_FEXTRA && i < T_BACKTAB) /* also skip extra vt220 keys */
+			if (i >= T_FEXTRA && i < T_BACKTAB)	/* also skip extra vt220 keys */
 				continue;
-			if (i > T_BACKTAB && i < T_NAVIGATE) /* more vt220 keys */
+			if (i > T_BACKTAB && i < T_NAVIGATE)	/* more vt220 keys */
 				continue;
 #endif
 			if (i >= T_CURSOR && i < T_OCAPS) {
@@ -869,11 +870,9 @@ void DumpTermcap(int aflag, FILE *f)
 		return;
 	p++;
 	/* write termcap entry with wrapping */
-	while ((pe = index(p, ':')))
-	{
+	while ((pe = index(p, ':'))) {
 		n = pe - p + 1;
-		if ((col > 8) && ((col + n) > TERMCAP_MAX_WIDTH))
-		{
+		if ((col > 8) && ((col + n) > TERMCAP_MAX_WIDTH)) {
 			fwrite("\\\n\t:", 1, 4, f);
 			col = 8;
 		}
@@ -881,7 +880,7 @@ void DumpTermcap(int aflag, FILE *f)
 		col += n;
 		p = ++pe;
 	}
-	if(*p)
+	if (*p)
 		fwrite(p, 1, strlen(p), f);
 	fputc('\n', f);
 }

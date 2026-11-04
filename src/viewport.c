@@ -30,7 +30,8 @@
 
 #include "screen.h"
 
-int RethinkDisplayViewports(void) {
+int RethinkDisplayViewports(void)
+{
 	Viewport *viewport, *viewport_next;
 
 	/* free old viewports */
@@ -69,7 +70,8 @@ int RethinkDisplayViewports(void) {
 	return 0;
 }
 
-void RethinkViewportOffsets(Canvas *canvas) {
+void RethinkViewportOffsets(Canvas *canvas)
+{
 	for (Viewport *viewport = canvas->c_vplist; viewport; viewport = viewport->v_next) {
 		viewport->v_xoff = canvas->c_xoff;
 		viewport->v_yoff = canvas->c_yoff;

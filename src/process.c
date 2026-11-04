@@ -158,177 +158,177 @@ struct digraph {
 
 /* digraph table taken from old vim and rfc1345 */
 static struct digraph digraphs[MAX_DIGRAPH + 1] = {
-	{{' ', ' '}, 160},	/*   */
-	{{'N', 'S'}, 160},	/*   */
-	{{'~', '!'}, 161},	/* ¡ */
-	{{'!', '!'}, 161},	/* ¡ */
-	{{'!', 'I'}, 161},	/* ¡ */
-	{{'c', '|'}, 162},	/* ¢ */
-	{{'c', 't'}, 162},	/* ¢ */
-	{{'$', '$'}, 163},	/* £ */
-	{{'P', 'd'}, 163},	/* £ */
-	{{'o', 'x'}, 164},	/* ¤ */
-	{{'C', 'u'}, 164},	/* ¤ */
-	{{'C', 'u'}, 164},	/* ¤ */
-	{{'E', 'u'}, 164},	/* ¤ */
-	{{'Y', '-'}, 165},	/* ¥ */
-	{{'Y', 'e'}, 165},	/* ¥ */
-	{{'|', '|'}, 166},	/* ¦ */
-	{{'B', 'B'}, 166},	/* ¦ */
-	{{'p', 'a'}, 167},	/* § */
-	{{'S', 'E'}, 167},	/* § */
-	{{'"', '"'}, 168},	/* ¨ */
-	{{'\'', ':'}, 168},	/* ¨ */
-	{{'c', 'O'}, 169},	/* © */
-	{{'C', 'o'}, 169},	/* © */
-	{{'a', '-'}, 170},	/* ª */
-	{{'<', '<'}, 171},	/* « */
-	{{'-', ','}, 172},	/* ¬ */
-	{{'N', 'O'}, 172},	/* ¬ */
-	{{'-', '-'}, 173},	/* ­ */
-	{{'r', 'O'}, 174},	/* ® */
-	{{'R', 'g'}, 174},	/* ® */
-	{{'-', '='}, 175},	/* ¯ */
-	{{'\'', 'm'}, 175},	/* ¯ */
-	{{'~', 'o'}, 176},	/* ° */
-	{{'D', 'G'}, 176},	/* ° */
-	{{'+', '-'}, 177},	/* ± */
-	{{'2', '2'}, 178},	/* ² */
-	{{'2', 'S'}, 178},	/* ² */
-	{{'3', '3'}, 179},	/* ³ */
-	{{'3', 'S'}, 179},	/* ³ */
-	{{'\'', '\''}, 180},	/* ´ */
-	{{'j', 'u'}, 181},	/* µ */
-	{{'M', 'y'}, 181},	/* µ */
-	{{'p', 'p'}, 182},	/* ¶ */
-	{{'P', 'I'}, 182},	/* ¶ */
-	{{'~', '.'}, 183},	/* · */
-	{{'.', 'M'}, 183},	/* · */
-	{{',', ','}, 184},	/* ¸ */
-	{{'\'', ','}, 184},	/* ¸ */
-	{{'1', '1'}, 185},	/* ¹ */
-	{{'1', 'S'}, 185},	/* ¹ */
-	{{'o', '-'}, 186},	/* º */
-	{{'>', '>'}, 187},	/* » */
-	{{'1', '4'}, 188},	/* ¼ */
-	{{'1', '2'}, 189},	/* ½ */
-	{{'3', '4'}, 190},	/* ¾ */
-	{{'~', '?'}, 191},	/* ¿ */
-	{{'?', '?'}, 191},	/* ¿ */
-	{{'?', 'I'}, 191},	/* ¿ */
-	{{'A', '`'}, 192},	/* À */
-	{{'A', '!'}, 192},	/* À */
-	{{'A', '\''}, 193},	/* Á */
-	{{'A', '^'}, 194},	/* Â */
-	{{'A', '>'}, 194},	/* Â */
-	{{'A', '~'}, 195},	/* Ã */
-	{{'A', '?'}, 195},	/* Ã */
-	{{'A', '"'}, 196},	/* Ä */
-	{{'A', ':'}, 196},	/* Ä */
-	{{'A', '@'}, 197},	/* Å */
-	{{'A', 'A'}, 197},	/* Å */
-	{{'A', 'E'}, 198},	/* Æ */
-	{{'C', ','}, 199},	/* Ç */
-	{{'E', '`'}, 200},	/* È */
-	{{'E', '!'}, 200},	/* È */
-	{{'E', '\''}, 201},	/* É */
-	{{'E', '^'}, 202},	/* Ê */
-	{{'E', '>'}, 202},	/* Ê */
-	{{'E', '"'}, 203},	/* Ë */
-	{{'E', ':'}, 203},	/* Ë */
-	{{'I', '`'}, 204},	/* Ì */
-	{{'I', '!'}, 204},	/* Ì */
-	{{'I', '\''}, 205},	/* Í */
-	{{'I', '^'}, 206},	/* Î */
-	{{'I', '>'}, 206},	/* Î */
-	{{'I', '"'}, 207},	/* Ï */
-	{{'I', ':'}, 207},	/* Ï */
-	{{'D', '-'}, 208},	/* Ð */
-	{{'N', '~'}, 209},	/* Ñ */
-	{{'N', '?'}, 209},	/* Ñ */
-	{{'O', '`'}, 210},	/* Ò */
-	{{'O', '!'}, 210},	/* Ò */
-	{{'O', '\''}, 211},	/* Ó */
-	{{'O', '^'}, 212},	/* Ô */
-	{{'O', '>'}, 212},	/* Ô */
-	{{'O', '~'}, 213},	/* Õ */
-	{{'O', '?'}, 213},	/* Õ */
-	{{'O', '"'}, 214},	/* Ö */
-	{{'O', ':'}, 214},	/* Ö */
-	{{'/', '\\'}, 215},	/* × */
-	{{'*', 'x'}, 215},	/* × */
-	{{'O', '/'}, 216},	/* Ø */
-	{{'U', '`'}, 217},	/* Ù */
-	{{'U', '!'}, 217},	/* Ù */
-	{{'U', '\''}, 218},	/* Ú */
-	{{'U', '^'}, 219},	/* Û */
-	{{'U', '>'}, 219},	/* Û */
-	{{'U', '"'}, 220},	/* Ü */
-	{{'U', ':'}, 220},	/* Ü */
-	{{'Y', '\''}, 221},	/* Ý */
-	{{'I', 'p'}, 222},	/* Þ */
-	{{'T', 'H'}, 222},	/* Þ */
-	{{'s', 's'}, 223},	/* ß */
-	{{'s', '"'}, 223},	/* ß */
-	{{'a', '`'}, 224},	/* à */
-	{{'a', '!'}, 224},	/* à */
-	{{'a', '\''}, 225},	/* á */
-	{{'a', '^'}, 226},	/* â */
-	{{'a', '>'}, 226},	/* â */
-	{{'a', '~'}, 227},	/* ã */
-	{{'a', '?'}, 227},	/* ã */
-	{{'a', '"'}, 228},	/* ä */
-	{{'a', ':'}, 228},	/* ä */
-	{{'a', 'a'}, 229},	/* å */
-	{{'a', 'e'}, 230},	/* æ */
-	{{'c', ','}, 231},	/* ç */
-	{{'e', '`'}, 232},	/* è */
-	{{'e', '!'}, 232},	/* è */
-	{{'e', '\''}, 233},	/* é */
-	{{'e', '^'}, 234},	/* ê */
-	{{'e', '>'}, 234},	/* ê */
-	{{'e', '"'}, 235},	/* ë */
-	{{'e', ':'}, 235},	/* ë */
-	{{'i', '`'}, 236},	/* ì */
-	{{'i', '!'}, 236},	/* ì */
-	{{'i', '\''}, 237},	/* í */
-	{{'i', '^'}, 238},	/* î */
-	{{'i', '>'}, 238},	/* î */
-	{{'i', '"'}, 239},	/* ï */
-	{{'i', ':'}, 239},	/* ï */
-	{{'d', '-'}, 240},	/* ð */
-	{{'n', '~'}, 241},	/* ñ */
-	{{'n', '?'}, 241},	/* ñ */
-	{{'o', '`'}, 242},	/* ò */
-	{{'o', '!'}, 242},	/* ò */
-	{{'o', '\''}, 243},	/* ó */
-	{{'o', '^'}, 244},	/* ô */
-	{{'o', '>'}, 244},	/* ô */
-	{{'o', '~'}, 245},	/* õ */
-	{{'o', '?'}, 245},	/* õ */
-	{{'o', '"'}, 246},	/* ö */
-	{{'o', ':'}, 246},	/* ö */
-	{{':', '-'}, 247},	/* ÷ */
-	{{'o', '/'}, 248},	/* ø */
-	{{'u', '`'}, 249},	/* ù */
-	{{'u', '!'}, 249},	/* ù */
-	{{'u', '\''}, 250},	/* ú */
-	{{'u', '^'}, 251},	/* û */
-	{{'u', '>'}, 251},	/* û */
-	{{'u', '"'}, 252},	/* ü */
-	{{'u', ':'}, 252},	/* ü */
-	{{'y', '\''}, 253},	/* ý */
-	{{'i', 'p'}, 254},	/* þ */
-	{{'t', 'h'}, 254},	/* þ */
-	{{'y', '"'}, 255},	/* ÿ */
-	{{'y', ':'}, 255},	/* ÿ */
-	{{'"', '['}, 196},	/* Ä */
-	{{'"', '\\'}, 214},	/* Ö */
-	{{'"', ']'}, 220},	/* Ü */
-	{{'"', '{'}, 228},	/* ä */
-	{{'"', '|'}, 246},	/* ö */
-	{{'"', '}'}, 252},	/* ü */
-	{{'"', '~'}, 223}	/* ß */
+	{ { ' ',  ' '  }, 160 },	/*   */
+	{ { 'N',  'S'  }, 160 },	/*   */
+	{ { '~',  '!'  }, 161 },	/* ¡ */
+	{ { '!',  '!'  }, 161 },	/* ¡ */
+	{ { '!',  'I'  }, 161 },	/* ¡ */
+	{ { 'c',  '|'  }, 162 },	/* ¢ */
+	{ { 'c',  't'  }, 162 },	/* ¢ */
+	{ { '$',  '$'  }, 163 },	/* £ */
+	{ { 'P',  'd'  }, 163 },	/* £ */
+	{ { 'o',  'x'  }, 164 },	/* ¤ */
+	{ { 'C',  'u'  }, 164 },	/* ¤ */
+	{ { 'C',  'u'  }, 164 },	/* ¤ */
+	{ { 'E',  'u'  }, 164 },	/* ¤ */
+	{ { 'Y',  '-'  }, 165 },	/* ¥ */
+	{ { 'Y',  'e'  }, 165 },	/* ¥ */
+	{ { '|',  '|'  }, 166 },	/* ¦ */
+	{ { 'B',  'B'  }, 166 },	/* ¦ */
+	{ { 'p',  'a'  }, 167 },	/* § */
+	{ { 'S',  'E'  }, 167 },	/* § */
+	{ { '"',  '"'  }, 168 },	/* ¨ */
+	{ { '\'',  ':'  }, 168 },	/* ¨ */
+	{ { 'c',  'O'  }, 169 },	/* © */
+	{ { 'C',  'o'  }, 169 },	/* © */
+	{ { 'a',  '-'  }, 170 },	/* ª */
+	{ { '<',  '<'  }, 171 },	/* « */
+	{ { '-',  ','  }, 172 },	/* ¬ */
+	{ { 'N',  'O'  }, 172 },	/* ¬ */
+	{ { '-',  '-'  }, 173 },	/* ­ */
+	{ { 'r',  'O'  }, 174 },	/* ® */
+	{ { 'R',  'g'  }, 174 },	/* ® */
+	{ { '-',  '='  }, 175 },	/* ¯ */
+	{ { '\'',  'm'  }, 175 },	/* ¯ */
+	{ { '~',  'o'  }, 176 },	/* ° */
+	{ { 'D',  'G'  }, 176 },	/* ° */
+	{ { '+',  '-'  }, 177 },	/* ± */
+	{ { '2',  '2'  }, 178 },	/* ² */
+	{ { '2',  'S'  }, 178 },	/* ² */
+	{ { '3',  '3'  }, 179 },	/* ³ */
+	{ { '3',  'S'  }, 179 },	/* ³ */
+	{ { '\'',  '\''  }, 180 },	/* ´ */
+	{ { 'j',  'u'  }, 181 },	/* µ */
+	{ { 'M',  'y'  }, 181 },	/* µ */
+	{ { 'p',  'p'  }, 182 },	/* ¶ */
+	{ { 'P',  'I'  }, 182 },	/* ¶ */
+	{ { '~',  '.'  }, 183 },	/* · */
+	{ { '.',  'M'  }, 183 },	/* · */
+	{ { ',  ', ','  }, 184 },	/* ¸ */
+	{ { '\'',  ','  }, 184 },	/* ¸ */
+	{ { '1',  '1'  }, 185 },	/* ¹ */
+	{ { '1',  'S'  }, 185 },	/* ¹ */
+	{ { 'o',  '-'  }, 186 },	/* º */
+	{ { '>',  '>'  }, 187 },	/* » */
+	{ { '1',  '4'  }, 188 },	/* ¼ */
+	{ { '1',  '2'  }, 189 },	/* ½ */
+	{ { '3',  '4'  }, 190 },	/* ¾ */
+	{ { '~',  '?'  }, 191 },	/* ¿ */
+	{ { '?',  '?'  }, 191 },	/* ¿ */
+	{ { '?',  'I'  }, 191 },	/* ¿ */
+	{ { 'A',  '`'  }, 192 },	/* À */
+	{ { 'A',  '!'  }, 192 },	/* À */
+	{ { 'A',  '\''  }, 193 },	/* Á */
+	{ { 'A',  '^'  }, 194 },	/* Â */
+	{ { 'A',  '>'  }, 194 },	/* Â */
+	{ { 'A',  '~'  }, 195 },	/* Ã */
+	{ { 'A',  '?'  }, 195 },	/* Ã */
+	{ { 'A',  '"'  }, 196 },	/* Ä */
+	{ { 'A',  ':'  }, 196 },	/* Ä */
+	{ { 'A',  '@'  }, 197 },	/* Å */
+	{ { 'A',  'A'  }, 197 },	/* Å */
+	{ { 'A',  'E'  }, 198 },	/* Æ */
+	{ { 'C',  ','  }, 199 },	/* Ç */
+	{ { 'E',  '`'  }, 200 },	/* È */
+	{ { 'E',  '!'  }, 200 },	/* È */
+	{ { 'E',  '\''  }, 201 },	/* É */
+	{ { 'E',  '^'  }, 202 },	/* Ê */
+	{ { 'E',  '>'  }, 202 },	/* Ê */
+	{ { 'E',  '"'  }, 203 },	/* Ë */
+	{ { 'E',  ':'  }, 203 },	/* Ë */
+	{ { 'I',  '`'  }, 204 },	/* Ì */
+	{ { 'I',  '!'  }, 204 },	/* Ì */
+	{ { 'I',  '\''  }, 205 },	/* Í */
+	{ { 'I',  '^'  }, 206 },	/* Î */
+	{ { 'I',  '>'  }, 206 },	/* Î */
+	{ { 'I',  '"'  }, 207 },	/* Ï */
+	{ { 'I',  ':'  }, 207 },	/* Ï */
+	{ { 'D',  '-'  }, 208 },	/* Ð */
+	{ { 'N',  '~'  }, 209 },	/* Ñ */
+	{ { 'N',  '?'  }, 209 },	/* Ñ */
+	{ { 'O',  '`'  }, 210 },	/* Ò */
+	{ { 'O',  '!'  }, 210 },	/* Ò */
+	{ { 'O',  '\''  }, 211 },	/* Ó */
+	{ { 'O',  '^'  }, 212 },	/* Ô */
+	{ { 'O',  '>'  }, 212 },	/* Ô */
+	{ { 'O',  '~'  }, 213 },	/* Õ */
+	{ { 'O',  '?'  }, 213 },	/* Õ */
+	{ { 'O',  '"'  }, 214 },	/* Ö */
+	{ { 'O',  ':'  }, 214 },	/* Ö */
+	{ { '/',  '\\'  }, 215 },	/* × */
+	{ { '*',  'x'  }, 215 },	/* × */
+	{ { 'O',  '/'  }, 216 },	/* Ø */
+	{ { 'U',  '`'  }, 217 },	/* Ù */
+	{ { 'U',  '!'  }, 217 },	/* Ù */
+	{ { 'U',  '\''  }, 218 },	/* Ú */
+	{ { 'U',  '^'  }, 219 },	/* Û */
+	{ { 'U',  '>'  }, 219 },	/* Û */
+	{ { 'U',  '"'  }, 220 },	/* Ü */
+	{ { 'U',  ':'  }, 220 },	/* Ü */
+	{ { 'Y',  '\''  }, 221 },	/* Ý */
+	{ { 'I',  'p'  }, 222 },	/* Þ */
+	{ { 'T',  'H'  }, 222 },	/* Þ */
+	{ { 's',  's'  }, 223 },	/* ß */
+	{ { 's',  '"'  }, 223 },	/* ß */
+	{ { 'a',  '`'  }, 224 },	/* à */
+	{ { 'a',  '!'  }, 224 },	/* à */
+	{ { 'a',  '\''  }, 225 },	/* á */
+	{ { 'a',  '^'  }, 226 },	/* â */
+	{ { 'a',  '>'  }, 226 },	/* â */
+	{ { 'a',  '~'  }, 227 },	/* ã */
+	{ { 'a',  '?'  }, 227 },	/* ã */
+	{ { 'a',  '"'  }, 228 },	/* ä */
+	{ { 'a',  ':'  }, 228 },	/* ä */
+	{ { 'a',  'a'  }, 229 },	/* å */
+	{ { 'a',  'e'  }, 230 },	/* æ */
+	{ { 'c',  ','  }, 231 },	/* ç */
+	{ { 'e',  '`'  }, 232 },	/* è */
+	{ { 'e',  '!'  }, 232 },	/* è */
+	{ { 'e',  '\''  }, 233 },	/* é */
+	{ { 'e',  '^'  }, 234 },	/* ê */
+	{ { 'e',  '>'  }, 234 },	/* ê */
+	{ { 'e',  '"'  }, 235 },	/* ë */
+	{ { 'e',  ':'  }, 235 },	/* ë */
+	{ { 'i',  '`'  }, 236 },	/* ì */
+	{ { 'i',  '!'  }, 236 },	/* ì */
+	{ { 'i',  '\''  }, 237 },	/* í */
+	{ { 'i',  '^'  }, 238 },	/* î */
+	{ { 'i',  '>'  }, 238 },	/* î */
+	{ { 'i',  '"'  }, 239 },	/* ï */
+	{ { 'i',  ':'  }, 239 },	/* ï */
+	{ { 'd',  '-'  }, 240 },	/* ð */
+	{ { 'n',  '~'  }, 241 },	/* ñ */
+	{ { 'n',  '?'  }, 241 },	/* ñ */
+	{ { 'o',  '`'  }, 242 },	/* ò */
+	{ { 'o',  '!'  }, 242 },	/* ò */
+	{ { 'o',  '\''  }, 243 },	/* ó */
+	{ { 'o',  '^'  }, 244 },	/* ô */
+	{ { 'o',  '>'  }, 244 },	/* ô */
+	{ { 'o',  '~'  }, 245 },	/* õ */
+	{ { 'o',  '?'  }, 245 },	/* õ */
+	{ { 'o',  '"'  }, 246 },	/* ö */
+	{ { 'o',  ':'  }, 246 },	/* ö */
+	{ { ':',  '-'  }, 247 },	/* ÷ */
+	{ { 'o',  '/'  }, 248 },	/* ø */
+	{ { 'u',  '`'  }, 249 },	/* ù */
+	{ { 'u',  '!'  }, 249 },	/* ù */
+	{ { 'u',  '\''  }, 250 },	/* ú */
+	{ { 'u',  '^'  }, 251 },	/* û */
+	{ { 'u',  '>'  }, 251 },	/* û */
+	{ { 'u',  '"'  }, 252 },	/* ü */
+	{ { 'u',  ':'  }, 252 },	/* ü */
+	{ { 'y',  '\''  }, 253 },	/* ý */
+	{ { 'i',  'p'  }, 254 },	/* þ */
+	{ { 't',  'h'  }, 254 },	/* þ */
+	{ { 'y',  '"'  }, 255 },	/* ÿ */
+	{ { 'y',  ':'  }, 255 },	/* ÿ */
+	{ { '"',  '['  }, 196 },	/* Ä */
+	{ { '"',  '\\'  }, 214 },	/* Ö */
+	{ { '"',  ']'  }, 220 },	/* Ü */
+	{ { '"',  '{'  }, 228 },	/* ä */
+	{ { '"',  '|'  }, 246 },	/* ö */
+	{ { '"',  '}'  }, 252 },	/* ü */
+	{ { '"',  '~'  }, 223 }	/* ß */
 };
 
 #define RESIZE_FLAG_H 1
@@ -898,7 +898,7 @@ static int CheckArgNum(int nr, char **args)
 
 static void StuffFin(char *buf, size_t len, void *data)
 {
-	(void)data; /* unused */
+	(void)data;		/* unused */
 
 	if (!flayer)
 		return;
@@ -1008,7 +1008,7 @@ static void DoCommandObuflimit(struct action *act)
 
 static void DoCommandDumptermcap(struct action *act)
 {
-	(void)act; /* unused */
+	(void)act;		/* unused */
 
 	struct acluser *user = display ? D_user : users;
 
@@ -1056,14 +1056,14 @@ static void DoCommandLog(struct action *act)
 
 static void DoCommandSuspend(struct action *act)
 {
-	(void)act; /* unused */
+	(void)act;		/* unused */
 
 	Detach(D_STOP);
 }
 
 static void DoCommandNext(struct action *act)
 {
-	(void)act; /* unused */
+	(void)act;		/* unused */
 
 	if (MoreWindows())
 		SwitchWindow(NextWindow());
@@ -1071,7 +1071,7 @@ static void DoCommandNext(struct action *act)
 
 static void DoCommandPrev(struct action *act)
 {
-	(void)act; /* unused */
+	(void)act;		/* unused */
 
 	if (MoreWindows())
 		SwitchWindow(PreviousWindow());
@@ -1079,7 +1079,7 @@ static void DoCommandPrev(struct action *act)
 
 static void DoCommandParent(struct action *act)
 {
-	(void)act; /* unused */
+	(void)act;		/* unused */
 
 	if (MoreWindows()) {
 		Window *w = ParentWindow();
@@ -1152,7 +1152,8 @@ static void DoCommandPow_detach(struct action *act)
 
 	if (*args) {
 		if (!strcmp(*args, "--confirm")) {
-			Input("Really detach and send HANGUP to parent process [y/n]", 1, INP_RAW, confirm_fn, NULL, RC_POW_DETACH);
+			Input("Really detach and send HANGUP to parent process [y/n]", 1, INP_RAW, confirm_fn, NULL,
+			      RC_POW_DETACH);
 			return;
 		} else {
 			OutputMsg(0, "usage: pow_detach [--confirm]");
@@ -1205,7 +1206,7 @@ static void DoCommandZmodem(struct action *act)
 
 static void DoCommandUnbindall(struct action *act)
 {
-	(void)act; /* unused */
+	(void)act;		/* unused */
 
 	for (size_t i = 0; i < ARRAY_SIZE(ktab); i++)
 		ClearAction(&ktab[i]);
@@ -1270,7 +1271,7 @@ static void DoCommandAt(struct action *act)
 	 * we are walking along.
 	 */
 	switch (args[0][n]) {
-	case '*':	/* user */
+	case '*':		/* user */
 		{
 			Display *nd;
 			struct acluser *u;
@@ -1298,15 +1299,14 @@ static void DoCommandAt(struct action *act)
 					continue;
 				DoCommand(args + 1, argl + 1);
 				if (display)
-					OutputMsg(0, "command from %s: %s %s",
-						  s, args[1], args[2] ? args[2] : "");
+					OutputMsg(0, "command from %s: %s %s", s, args[1], args[2] ? args[2] : "");
 				display = NULL;
 				flayer = NULL;
 				fore = NULL;
 			}
 		}
 		break;
-	case '%':	/* display */
+	case '%':		/* display */
 		{
 			Display *nd;
 
@@ -1323,15 +1323,14 @@ static void DoCommandAt(struct action *act)
 					continue;
 				DoCommand(args + 1, argl + 1);
 				if (display)
-					OutputMsg(0, "command from %s: %s %s",
-						  s, args[1], args[2] ? args[2] : "");
+					OutputMsg(0, "command from %s: %s %s", s, args[1], args[2] ? args[2] : "");
 				display = NULL;
 				fore = NULL;
 				flayer = NULL;
 			}
 		}
 		break;
-	case '#':	/* window */
+	case '#':		/* window */
 		n--;
 		/* FALLTHROUGH */
 	default:
@@ -1380,8 +1379,7 @@ static void DoCommandAt(struct action *act)
 				DoCommand(args + 1, argl + 1);
 				if (fore && fore->w_layer.l_cvlist) {
 					display = fore->w_layer.l_cvlist->c_display;
-					OutputMsg(0, "command from %s: %s %s",
-						  s, args[1], args[2] ? args[2] : "");
+					OutputMsg(0, "command from %s: %s %s", s, args[1], args[2] ? args[2] : "");
 				}
 				display = NULL;
 				fore = NULL;
@@ -1389,7 +1387,7 @@ static void DoCommandAt(struct action *act)
 				OutputMsg(0, "%s: at [identifier][%%|*|#] command [args]", rc_name);
 		}
 	}
-out:
+ out:
 	free(s);
 	EffectiveAclUser = NULL;
 }
@@ -1558,7 +1556,7 @@ static void DoCommandStuff(struct action *act)
 
 static void DoCommandRedisplay(struct action *act)
 {
-	(void)act; /* unused */
+	(void)act;		/* unused */
 
 	Activate(-1);
 }
@@ -1575,21 +1573,21 @@ static void DoCommandWindows(struct action *act)
 
 static void DoCommandVersion(struct action *act)
 {
-	(void)act; /* unused */
+	(void)act;		/* unused */
 
 	OutputMsg(0, "screen %s", version);
 }
 
 static void DoCommandInfo(struct action *act)
 {
-	(void)act; /* unused */
+	(void)act;		/* unused */
 
 	ShowInfo();
 }
 
 static void DoCommandDinfo(struct action *act)
 {
-	(void)act; /* unused */
+	(void)act;		/* unused */
 
 	ShowDInfo();
 }
@@ -1623,7 +1621,7 @@ static void DoCommandCommand(struct action *act)
 
 static void DoCommandOther(struct action *act)
 {
-	(void)act; /* unused */
+	(void)act;		/* unused */
 
 	if (MoreWindows())
 		SwitchWindow(display && D_other ? D_other : NextWindow());
@@ -1637,7 +1635,7 @@ static void DoCommandMeta(struct action *act)
 	char *s = &ch;
 	size_t len = 1;
 
-	(void)act; /* unused */
+	(void)act;		/* unused */
 
 	if (ch != -1)
 		LayProcess(&s, &len);
@@ -1649,7 +1647,7 @@ static void DoCommandXon(struct action *act)
 	char *s = &ch;
 	size_t len = 1;
 
-	(void)act; /* unused */
+	(void)act;		/* unused */
 
 	LayProcess(&s, &len);
 }
@@ -1660,7 +1658,7 @@ static void DoCommandXoff(struct action *act)
 	char *s = &ch;
 	size_t len = 1;
 
-	(void)act; /* unused */
+	(void)act;		/* unused */
 
 	LayProcess(&s, &len);
 }
@@ -1687,8 +1685,7 @@ static void DoCommandBreaktype(struct action *act)
 					break;
 			}
 		if (n < 0 || n >= (int)(ARRAY_SIZE(types)))
-			OutputMsg(0, "%s invalid, chose one of %s, %s or %s", *args, types[0], types[1],
-				  types[2]);
+			OutputMsg(0, "%s invalid, chose one of %s, %s or %s", *args, types[0], types[1], types[2]);
 		else {
 			breaktype = n;
 			OutputMsg(0, "breaktype set to (%d) %s", n, types[n]);
@@ -1719,7 +1716,7 @@ static void DoCommandBreak(struct action *act)
 
 static void DoCommandLockscreen(struct action *act)
 {
-	(void)act; /* unused */
+	(void)act;		/* unused */
 
 	Detach(D_LOCK);
 }
@@ -1802,13 +1799,9 @@ static void DoCommandWidth(struct action *act)
 			return;
 		}
 		if (h == D_height)
-			OutputMsg(0,
-				  "Your termcap does not specify how to change the terminal's width to %d.",
-				  w);
+			OutputMsg(0, "Your termcap does not specify how to change the terminal's width to %d.", w);
 		else if (w == D_width)
-			OutputMsg(0,
-				  "Your termcap does not specify how to change the terminal's height to %d.",
-				  h);
+			OutputMsg(0, "Your termcap does not specify how to change the terminal's height to %d.", h);
 		else
 			OutputMsg(0,
 				  "Your termcap does not specify how to change the terminal's resolution to %dx%d.",
@@ -1896,13 +1889,9 @@ static void DoCommandHeight(struct action *act)
 			return;
 		}
 		if (h == D_height)
-			OutputMsg(0,
-				  "Your termcap does not specify how to change the terminal's width to %d.",
-				  w);
+			OutputMsg(0, "Your termcap does not specify how to change the terminal's width to %d.", w);
 		else if (w == D_width)
-			OutputMsg(0,
-				  "Your termcap does not specify how to change the terminal's height to %d.",
-				  h);
+			OutputMsg(0, "Your termcap does not specify how to change the terminal's height to %d.", h);
 		else
 			OutputMsg(0,
 				  "Your termcap does not specify how to change the terminal's resolution to %dx%d.",
@@ -1913,14 +1902,14 @@ static void DoCommandHeight(struct action *act)
 
 static void DoCommandDefdynamictitle(struct action *act)
 {
-	(void)act; /* unused */
+	(void)act;		/* unused */
 
 	(void)ParseOnOff(act, &nwin_default.dynamicaka);
 }
 
 static void DoCommandDynamictitle(struct action *act)
 {
-	(void)act; /* unused */
+	(void)act;		/* unused */
 
 	(void)ParseOnOff(act, &fore->w_dynamicaka);
 }
@@ -1956,7 +1945,7 @@ static void DoCommandColon(struct action *act)
 
 static void DoCommandLastmsg(struct action *act)
 {
-	(void)act; /* unused */
+	(void)act;		/* unused */
 
 	if (D_status_lastmsg)
 		OutputMsg(0, "%s", D_status_lastmsg);
@@ -1986,9 +1975,8 @@ static void DoCommandFlow(struct action *act)
 
 	if (*args) {
 		if (args[0][0] == 'a') {
-			fore->w_flow =
-			    (fore->w_flow & FLOW_AUTO) ? FLOW_AUTOFLAG | FLOW_AUTO | FLOW_ON : FLOW_AUTOFLAG;
-		} else 	if (ParseOnOff(act, &b) == 0)
+			fore->w_flow = (fore->w_flow & FLOW_AUTO) ? FLOW_AUTOFLAG | FLOW_AUTO | FLOW_ON : FLOW_AUTOFLAG;
+		} else if (ParseOnOff(act, &b) == 0)
 			fore->w_flow = (fore->w_flow & FLOW_AUTO) | b ? FLOW_ON : FLOW_OFF;
 	} else {
 		if (fore->w_flow & FLOW_AUTOFLAG)
@@ -2028,8 +2016,8 @@ static void DoCommandWritelock(struct action *act)
 				return;
 			fore->w_wlock = b ? WLOCK_ON : WLOCK_OFF;
 		}
-		/* 
-		 * user may have permission to change the writelock setting, 
+		/*
+		 * user may have permission to change the writelock setting,
 		 * but he may never aquire the lock himself without write permission
 		 */
 		if (!AclCheckPermWin(D_user, ACL_WRITE, fore))
@@ -2041,7 +2029,7 @@ static void DoCommandWritelock(struct action *act)
 
 static void DoCommandClear(struct action *act)
 {
-	(void)act; /* unused */
+	(void)act;		/* unused */
 
 	ResetAnsiState(fore);
 	WriteString(fore, "\033[H\033[J", 6);
@@ -2049,7 +2037,7 @@ static void DoCommandClear(struct action *act)
 
 static void DoCommandReset(struct action *act)
 {
-	(void)act; /* unused */
+	(void)act;		/* unused */
 
 	ResetAnsiState(fore);
 	if (fore->w_zdisplay)
@@ -2074,8 +2062,7 @@ static void DoCommandMonitor(struct action *act)
 				ACLBYTE(fore->w_mon_notify, i) |= ACLBIT(i);
 		if (fore->w_monitor == MON_OFF)
 			fore->w_monitor = MON_ON;
-		OutputMsg(0, "Window %d (%s) is now being monitored for all activity.", fore->w_number,
-			  fore->w_title);
+		OutputMsg(0, "Window %d (%s) is now being monitored for all activity.", fore->w_number, fore->w_title);
 	} else {
 		if (display)	/* we remove only this user */
 			ACLBYTE(fore->w_mon_notify, D_user->u_id)
@@ -2095,7 +2082,7 @@ static void DoCommandMonitor(struct action *act)
 
 static void DoCommandDisplays(struct action *act)
 {
-	(void)act; /* unused */
+	(void)act;		/* unused */
 
 	display_displays();
 }
@@ -2138,8 +2125,7 @@ static void DoCommandWindowlist(struct action *act)
 			else if (!strcmp(args[i], "-g"))
 				flag |= WLIST_NESTED;
 			else {
-				OutputMsg(0,
-					  "usage: windowlist [-b] [-g] [-m] [string [string] | title [title]]");
+				OutputMsg(0, "usage: windowlist [-b] [-g] [-m] [string [string] | title [title]]");
 				return;
 			}
 		if (i == argc)
@@ -2165,7 +2151,7 @@ static void DoCommandHelp(struct action *act)
 
 static void DoCommandLicense(struct action *act)
 {
-	(void)act; /* unused */
+	(void)act;		/* unused */
 
 	display_license();
 }
@@ -2173,7 +2159,7 @@ static void DoCommandLicense(struct action *act)
 
 static void DoCommandCopy(struct action *act)
 {
-	(void)act; /* unused */
+	(void)act;		/* unused */
 
 	if (flayer->l_layfn != &WinLf) {
 		OutputMsg(0, "Must be on a window layer");
@@ -2221,8 +2207,7 @@ static void DoCommandHistory(struct action *act)
 	 * (no window needed here).
 	 */
 	if (args[1] && argl[1] != 1) {
-		OutputMsg(0, "%s: paste destination: character, ^x, or (octal) \\032 expected.",
-			  rc_name);
+		OutputMsg(0, "%s: paste destination: character, ^x, or (octal) \\032 expected.", rc_name);
 		return;
 	} else if (fore)
 		enc = fore->w_encoding;
@@ -2245,8 +2230,8 @@ static void DoCommandHistory(struct action *act)
 			if (enc != plop_tab[(int)(unsigned char)ch].enc)
 				l += RecodeBuf((unsigned char *)plop_tab[(int)(unsigned char)ch].buf,
 					       plop_tab[(int)(unsigned char)ch].len,
-					       plop_tab[(int)(unsigned char)ch].enc, enc,
-					       NULL);
+					       plop_tab[(int)(unsigned char)ch].enc,
+					       enc, NULL);
 			else
 				l += plop_tab[(int)(unsigned char)ch].len;
 		}
@@ -2341,8 +2326,7 @@ static void DoCommandPaste(struct action *act)
 	 * (no window needed here).
 	 */
 	if (args[1] && argl[1] != 1) {
-		OutputMsg(0, "%s: paste destination: character, ^x, or (octal) \\032 expected.",
-			  rc_name);
+		OutputMsg(0, "%s: paste destination: character, ^x, or (octal) \\032 expected.", rc_name);
 		return;
 	} else if (fore)
 		enc = fore->w_encoding;
@@ -2365,8 +2349,8 @@ static void DoCommandPaste(struct action *act)
 			if (enc != plop_tab[(int)(unsigned char)ch].enc)
 				l += RecodeBuf((unsigned char *)plop_tab[(int)(unsigned char)ch].buf,
 					       plop_tab[(int)(unsigned char)ch].len,
-					       plop_tab[(int)(unsigned char)ch].enc, enc,
-					       NULL);
+					       plop_tab[(int)(unsigned char)ch].enc,
+					       enc, NULL);
 			else
 				l += plop_tab[(int)(unsigned char)ch].len;
 		}
@@ -2459,8 +2443,7 @@ static void DoCommandWritebuf(struct action *act)
 			return;
 		}
 		if (enc != oldplop.enc) {
-			l = RecodeBuf((unsigned char *)oldplop.buf, oldplop.len, oldplop.enc, enc,
-				      NULL);
+			l = RecodeBuf((unsigned char *)oldplop.buf, oldplop.len, oldplop.enc, enc, NULL);
 			newbuf = malloc(l + 1);
 			if (!newbuf) {
 				OutputMsg(0, "%s", strnomem);
@@ -2511,13 +2494,13 @@ static void DoCommandReadbuf(struct action *act)
 		user->u_plop.buf = s;
 		user->u_plop.enc = i;
 		OutputMsg(0, "Read contents of %s into copybuffer",
-                          args[0] ? args[0] : BufferFile);
+			  args[0] ? args[0] : BufferFile);
 	}
 }
 
 static void DoCommandRemovebuf(struct action *act)
 {
-	(void)act; /* unused */
+	(void)act;		/* unused */
 
 	KillBuffers();
 }
@@ -2658,7 +2641,7 @@ static void DoCommandShelltitle(struct action *act)
 
 static void DoCommandTerminfo(struct action *act)
 {
-	(void)act; /* unused */
+	(void)act;		/* unused */
 
 	if (!rc_name || !*rc_name)
 		OutputMsg(0, "Sorry, too late now. Place that in your .screenrc file.");
@@ -2666,7 +2649,7 @@ static void DoCommandTerminfo(struct action *act)
 
 static void DoCommandSleep(struct action *act)
 {
-	(void)act; /* unused */
+	(void)act;		/* unused */
 }
 
 static void DoCommandTerm(struct action *act)
@@ -2928,8 +2911,7 @@ static void DoCommandHardstatus(struct action *act)
 				return;
 			}
 		} else {
-			OutputMsg(0, "%s: usage: hardstatus [always]lastline|ignore|message|string [string]",
-				  rc_name);
+			OutputMsg(0, "%s: usage: hardstatus [always]lastline|ignore|message|string [string]", rc_name);
 			return;
 		}
 		if (new_use != -1) {
@@ -3003,7 +2985,7 @@ static void DoCommandCaption(struct action *act)
 	if (strcmp(args[0], "top") == 0) {
 		captiontop = 1;
 		args++;
-	} else if(strcmp(args[0], "bottom") == 0) {
+	} else if (strcmp(args[0], "bottom") == 0) {
 		captiontop = 0;
 		args++;
 	}
@@ -3126,7 +3108,7 @@ static void DoCommandBumpright(struct action *act)
 {
 	Window *win = NextWindow();
 
-	(void)act; /* unused */
+	(void)act;		/* unused */
 
 	if (fore->w_number < win->w_number)
 		SwapWindows(fore->w_number, win->w_number);
@@ -3136,7 +3118,7 @@ static void DoCommandBumpleft(struct action *act)
 {
 	Window *win = PreviousWindow();
 
-	(void)act; /* unused */
+	(void)act;		/* unused */
 
 	if (fore->w_number > win->w_number)
 		SwapWindows(fore->w_number, win->w_number);
@@ -3144,7 +3126,7 @@ static void DoCommandBumpleft(struct action *act)
 
 static void DoCommandCollapse(struct action *act)
 {
-	(void)act; /* unused */
+	(void)act;		/* unused */
 
 	CollapseWindowlist();
 }
@@ -3154,8 +3136,7 @@ static void DoCommandNumber(struct action *act)
 	char **args = act->args;
 
 	if (*args == NULL)
-		OutputMsg(0, queryflag >= 0 ? "%d (%s)" : "This is window %d (%s).", fore->w_number,
-			  fore->w_title);
+		OutputMsg(0, queryflag >= 0 ? "%d (%s)" : "This is window %d (%s).", fore->w_number, fore->w_title);
 	else {
 		int old = fore->w_number;
 		int rel = 0, parse;
@@ -3200,7 +3181,7 @@ static void DoCommandZombie_timeout(struct action *act)
 
 static void DoCommandSort(struct action *act)
 {
-	(void)act; /* unused */
+	(void)act;		/* unused */
 
 	if (first_window == last_window) {
 		Msg(0, "Less than two windows, sorting makes no sense.\n");
@@ -3551,9 +3532,8 @@ static void DoCommandBindkey(struct action *act)
 			if (kme->str == NULL) {
 				if (args[1])
 					break;
-			} else
-			    if (*argl == (kme->fl & ~KMAP_NOTIMEOUT)
-				&& memcmp(kme->str, *args, *argl) == 0)
+			} else if (*argl == (kme->fl & ~KMAP_NOTIMEOUT)
+				   && memcmp(kme->str, *args, *argl) == 0)
 				break;
 		if (i == kmap_extn) {
 			if (!args[1]) {
@@ -3645,14 +3625,14 @@ static void DoCommandMaptimeout(struct action *act)
 
 static void DoCommandMapnotnext(struct action *act)
 {
-	(void)act; /* unused */
+	(void)act;		/* unused */
 
 	D_dontmap = 1;
 }
 
 static void DoCommandMapdefault(struct action *act)
 {
-	(void)act; /* unused */
+	(void)act;		/* unused */
 
 	D_mapdefault = 1;
 }
@@ -3704,7 +3684,7 @@ static void DoCommandAclgrp(struct action *act)
 				free((char *)g);
 			}
 		}
-	} else {	/* show all groups of user */
+	} else {		/* show all groups of user */
 
 		char buf[256], *p = buf;
 		int ngroups = 0;
@@ -3727,8 +3707,7 @@ static void DoCommandAclgrp(struct action *act)
 		}
 		if (ngroups)
 			*(--p) = '\0';
-		OutputMsg(0, "%s's group%s: %s.", args[0], (ngroups == 1) ? "" : "s",
-			  (ngroups == 0) ? "none" : buf);
+		OutputMsg(0, "%s's group%s: %s.", args[0], (ngroups == 1) ? "" : "s", (ngroups == 0) ? "none" : buf);
 	}
 }
 
@@ -3840,8 +3819,7 @@ static void DoCommandEncoding(struct action *act)
 
 	if (*args && !strcmp(args[0], "-d")) {
 		if (!args[1])
-			OutputMsg(0, "encodings directory is %s",
-				  screenencodings ? screenencodings : "<unset>");
+			OutputMsg(0, "encodings directory is %s", screenencodings ? screenencodings : "<unset>");
 		else {
 			free(screenencodings);
 			screenencodings = SaveStr(args[1]);
@@ -4043,7 +4021,7 @@ static void DoCommandDefcharset(struct action *act)
 		return;
 	}
 	if (len > 4 && (((args[0][4] < '0' || args[0][4] > '3') && args[0][4] != '.') ||
-		        ((args[0][5] < '0' || args[0][5] > '3') && args[0][5] && args[0][5] != '.'))) {
+			((args[0][5] < '0' || args[0][5] > '3') && args[0][5] && args[0][5] != '.'))) {
 		OutputMsg(0, "%s: defcharset: illegal mapping number.", rc_name);
 		return;
 	}
@@ -4070,7 +4048,7 @@ static void DoCommandCharset(struct action *act)
 		return;
 	}
 	if (len > 4 && (((args[0][4] < '0' || args[0][4] > '3') && args[0][4] != '.') ||
-		        ((args[0][5] < '0' || args[0][5] > '3') && args[0][5] && args[0][5] != '.'))) {
+			((args[0][5] < '0' || args[0][5] > '3') && args[0][5] && args[0][5] != '.'))) {
 		OutputMsg(0, "%s: charset: illegal mapping number.", rc_name);
 		return;
 	}
@@ -4180,7 +4158,7 @@ static void DoCommandSplit(struct action *act)
 
 static void DoCommandRemove(struct action *act)
 {
-	(void)act; /* unused */
+	(void)act;		/* unused */
 
 	RemCanvas();
 	Activate(-1);
@@ -4188,7 +4166,7 @@ static void DoCommandRemove(struct action *act)
 
 static void DoCommandOnly(struct action *act)
 {
-	(void)act; /* unused */
+	(void)act;		/* unused */
 
 	OneCanvas();
 	Activate(-1);
@@ -4196,13 +4174,12 @@ static void DoCommandOnly(struct action *act)
 
 static void DoCommandFit(struct action *act)
 {
-	(void)act; /* unused */
+	(void)act;		/* unused */
 
 	D_forecv->c_xoff = D_forecv->c_xs;
 	D_forecv->c_yoff = D_forecv->c_ys;
 	RethinkViewportOffsets(D_forecv);
-	ResizeLayer(D_forecv->c_layer, D_forecv->c_xe - D_forecv->c_xs + 1, D_forecv->c_ye - D_forecv->c_ys + 1,
-		    NULL);
+	ResizeLayer(D_forecv->c_layer, D_forecv->c_xe - D_forecv->c_xs + 1, D_forecv->c_ye - D_forecv->c_ys + 1, NULL);
 	flayer = D_forecv->c_layer;
 	LaySetCursor();
 }
@@ -4305,11 +4282,11 @@ static void DoCommandAltscreen(struct action *act)
 
 static void DoCommandAuth(struct action *act)
 {
-        int msgok = display && !*rc_name;
+	int msgok = display && !*rc_name;
 
-        (void)ParseSwitch(act, &do_auth);
-        if (msgok)
-                OutputMsg(0, "Authentication: %s" , do_auth ? "enabled" : "disabled");
+	(void)ParseSwitch(act, &do_auth);
+	if (msgok)
+		OutputMsg(0, "Authentication: %s", do_auth ? "enabled" : "disabled");
 }
 
 
@@ -4340,7 +4317,7 @@ static void DoCommandBacktick(struct action *act)
 
 static void DoCommandBlanker(struct action *act)
 {
-	(void)act; /* unused */
+	(void)act;		/* unused */
 
 	if (blankerprg) {
 		RunBlanker(blankerprg);
@@ -4461,8 +4438,7 @@ static void DoCommandGroup(struct action *act)
 	}
 	if (msgok) {
 		if (fore->w_group)
-			OutputMsg(0, "window group is %d (%s)\n", fore->w_group->w_number,
-				  fore->w_group->w_title);
+			OutputMsg(0, "window group is %d (%s)\n", fore->w_group->w_number, fore->w_group->w_title);
 		else
 			OutputMsg(0, "window belongs to no group");
 	}
@@ -4671,8 +4647,7 @@ static void DoCommandCjkwidth(struct action *act)
 
 	if (ParseSwitch(act, &cjkwidth) == 0) {
 		if (msgok)
-			OutputMsg(0, "Treat ambiguous width characters as %s width",
-				  cjkwidth ? "full" : "half");
+			OutputMsg(0, "Treat ambiguous width characters as %s width", cjkwidth ? "full" : "half");
 	}
 }
 
@@ -5413,9 +5388,8 @@ int Parse(char *buf, int bufl, char **args, int *argl)
 				delim = 0;
 			else if (delim != '\'' && *p == '\\'
 				 && (p[1] == 'n' || p[1] == 'r' || p[1] == 't' || p[1] == '\'' || p[1] == '"'
-				     || p[1] == '\\' || p[1] == '$' || p[1] == '#' || p[1] == '^' || (p[1] >= '0'
-												      && p[1] <=
-												      '7'))) {
+				     || p[1] == '\\' || p[1] == '$' || p[1] == '#' || p[1] == '^'
+				     || (p[1] >= '0' && p[1] <= '7'))) {
 				p++;
 				if (*p >= '0' && *p <= '7') {
 					*pp = *p - '0';
@@ -5447,8 +5421,7 @@ int Parse(char *buf, int bufl, char **args, int *argl)
 				}
 			} else if (delim != '\'' && *p == '$'
 				   && (p[1] == '{' || p[1] == ':' || (p[1] >= 'a' && p[1] <= 'z')
-				       || (p[1] >= 'A' && p[1] <= 'Z') || (p[1] >= '0' && p[1] <= '9') || p[1] == '_'))
-			{
+				       || (p[1] >= 'A' && p[1] <= 'Z') || (p[1] >= '0' && p[1] <= '9') || p[1] == '_')) {
 				char *ps, *pe, op, *v, xbuf[11], path[MAXPATHLEN];
 				int vl;
 
@@ -6083,7 +6056,7 @@ char *AddWindowFlags(char *buf, int len, Window *p)
 	if (p->w_bell == BELL_DONE)
 		*s++ = '!';
 #ifdef ENABLE_UTMP
-	if (p->w_slot != (slot_t) 0 && p->w_slot != (slot_t) - 1)
+	if (p->w_slot != (slot_t)0 && p->w_slot != (slot_t)-1)
 		*s++ = '$';
 #endif
 	if (p->w_log != NULL) {
@@ -6166,9 +6139,9 @@ void ShowWindows(struct action *act, int where)
 	} else
 		ss = buf;
 	if (!act || !act->quiet)
-	    Msg(0, "%s", ss);
+		Msg(0, "%s", ss);
 	else if (queryflag >= 0)
-	    QueryMsg(0, "%s", ss);
+		QueryMsg(0, "%s", ss);
 
 	wmbc_free(wmbc);
 	wmb_free(wmb);
@@ -6314,7 +6287,7 @@ static void ShowDInfo(void)
 
 static void AKAFin(char *buf, size_t len, void *data)
 {
-	(void)data; /* unused */
+	(void)data;		/* unused */
 
 	if (len && fore)
 		ChangeAKA(fore, buf, strlen(buf));
@@ -6349,7 +6322,7 @@ static void ColonFin(char *buf, size_t len, void *data)
 {
 	char mbuf[256];
 
-	(void)data; /* unused */
+	(void)data;		/* unused */
 
 	RemoveStatus();
 	if (buf[len] == '\t') {
@@ -6379,7 +6352,8 @@ static void ColonFin(char *buf, size_t len, void *data)
 				s = mbuf;
 				for (l = m - 1; l >= 0 && strncmp(buf, comms[l].name, len) == 0; l--) ;
 				for (m = ++l;
-				     m <= r && strncmp(buf, comms[m].name, len) == 0 && (uintptr_t)(s - mbuf) < ARRAY_SIZE(mbuf); m++)
+				     m <= r && strncmp(buf, comms[m].name, len) == 0 && (uintptr_t)(s - mbuf) < ARRAY_SIZE(mbuf);
+				     m++)
 					s += snprintf(s, ARRAY_SIZE(mbuf) - (s - mbuf), " %s", comms[m].name);
 				if (l < m - 1) {
 					if (showmessage)
@@ -6414,7 +6388,7 @@ static void SelectFin(char *buf, size_t len, void *data)
 {
 	int n;
 
-	(void)data; /* unused */
+	(void)data;		/* unused */
 
 	if (!len || !display)
 		return;
@@ -6432,7 +6406,7 @@ static void SelectLayoutFin(char *buf, size_t len, void *data)
 {
 	Layout *lay;
 
-	(void)data; /* unused */
+	(void)data;		/* unused */
 
 	if (!len || !display)
 		return;
@@ -6461,7 +6435,7 @@ static char setenv_var[31];
 
 static void SetenvFin1(char *buf, size_t len, void *data)
 {
-	(void)data; /* unused */
+	(void)data;		/* unused */
 
 	if (!len || !display)
 		return;
@@ -6470,7 +6444,7 @@ static void SetenvFin1(char *buf, size_t len, void *data)
 
 static void SetenvFin2(char *buf, size_t len, void *data)
 {
-	(void)data; /* unused */
+	(void)data;		/* unused */
 
 	if (!len || !display)
 		return;
@@ -6652,7 +6626,7 @@ int CompileKeys(char *s, int sl, unsigned char *array)
 
 static void copy_reg_fn(char *buf, size_t len, void *data)
 {
-	(void)data; /* unused */
+	(void)data;		/* unused */
 
 	struct plop *pp = plop_tab + (int)(unsigned char)*buf;
 
@@ -6678,7 +6652,7 @@ static void copy_reg_fn(char *buf, size_t len, void *data)
 
 static void ins_reg_fn(char *buf, size_t len, void *data)
 {
-	(void)data; /* unused */
+	(void)data;		/* unused */
 
 	struct plop *pp = plop_tab + (int)(unsigned char)*buf;
 
@@ -6701,7 +6675,7 @@ static void process_fn(char *buf, size_t len, void *data)
 {
 	struct plop *pp = plop_tab + (int)(unsigned char)*buf;
 
-	(void)data; /* unused */
+	(void)data;		/* unused */
 
 	if (len) {
 		memset(buf, 0, len);
@@ -6796,7 +6770,7 @@ static void digraph_fn(char *buf, size_t len, void *data)
 	int ch, i, x;
 	size_t l;
 
-	(void)data; /* unused */
+	(void)data;		/* unused */
 
 	ch = buf[len];
 	if (ch) {
@@ -7207,8 +7181,7 @@ void SetForeCanvas(Display *d, Canvas *cv)
 		RefreshHStatus();
 		RefreshXtermOSC();
 		flayer = D_forecv->c_layer;
-		CV_CALL(D_forecv, LayRestore();
-			LaySetCursor());
+		CV_CALL(D_forecv, LayRestore(); LaySetCursor());
 		WindowChanged(NULL, WINESC_FOCUS);
 	}
 
@@ -7293,7 +7266,8 @@ uint64_t ParseAttrColor(char *str, int msgok)
 			case '7':
 			case '8':
 			case '9':
-				if (!*cm) *cm = 1;
+				if (!*cm)
+					*cm = 1;
 				*cl = *cl * 10 + (*str - '0');
 				break;
 			case ';':
@@ -7320,7 +7294,7 @@ uint64_t ParseAttrColor(char *str, int msgok)
 			case '7':
 			case '8':
 			case '9':
-				*cl = ((*cl & 0x0F000000)+0x01000000) + ((*cl << 4) | (*str - '0'));
+				*cl = ((*cl & 0x0F000000) + 0x01000000) + ((*cl << 4) | (*str - '0'));
 				break;
 			case 'a':
 			case 'b':
@@ -7328,7 +7302,7 @@ uint64_t ParseAttrColor(char *str, int msgok)
 			case 'd':
 			case 'e':
 			case 'f':
-				*cl = ((*cl & 0x0F000000)+0x01000000) + ((*cl << 4) | (*str - ('a' - 10)));
+				*cl = ((*cl & 0x0F000000) + 0x01000000) + ((*cl << 4) | (*str - ('a' - 10)));
 				break;
 			case 'A':
 			case 'B':
@@ -7336,7 +7310,7 @@ uint64_t ParseAttrColor(char *str, int msgok)
 			case 'D':
 			case 'E':
 			case 'F':
-				*cl = ((*cl & 0x0F000000)+0x01000000) + ((*cl << 4) | (*str - ('A' - 10)));
+				*cl = ((*cl & 0x0F000000) + 0x01000000) + ((*cl << 4) | (*str - ('A' - 10)));
 				break;
 			case ';':
 				cl = &bg;
@@ -7358,8 +7332,7 @@ uint64_t ParseAttrColor(char *str, int msgok)
 	 *       about upper boundaries.
 	 */
 	if (fm == 4) {
-		if (fg <= 0x03000000)
-		{
+		if (fg <= 0x03000000) {
 			fg &= 0x0FFF;
 			fg = ((fg & 0x0F00) << 8) | ((fg & 0x0F0) << 4) | (fg & 0x0F);
 			fg = fg | (fg << 4);
@@ -7373,8 +7346,7 @@ uint64_t ParseAttrColor(char *str, int msgok)
 		}
 	}
 	if (bm == 4) {
-		if (bg <= 0x03000000)
-		{
+		if (bg <= 0x03000000) {
 			bg &= 0x0FFF;
 			bg = ((bg & 0x0F00) << 8) | ((bg & 0x0F0) << 4) | (bg & 0x0F);
 			bg = bg | (bg << 4);
@@ -7426,7 +7398,7 @@ void ApplyAttrColor(uint64_t i, struct mchar *mc)
 	if (h & 0x04) f |= 0x04000000;
 	if (h & 0x02) f |= 0x02000000;
 	if (h & 0x01) f |= 0x01000000;
-	
+
 	mc->attr	= a;
 	mc->colorbg	= b;
 	mc->colorfg	= f;

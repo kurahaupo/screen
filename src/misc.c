@@ -111,7 +111,7 @@ char *stripdev(char *name)
  *    Signal handling
  */
 
-void (*xsignal(int sig, void (*func) (int))) (int) {
+void (*xsignal(int sig, void (*func)(int)))(int) {
 	struct sigaction osa, sa;
 	sa.sa_handler = func;
 	(void)sigemptyset(&sa.sa_mask);
@@ -155,7 +155,7 @@ void closeallfiles(int except)
 	struct pollfd pfd[1024];
 	int maxfd, i, fd, ret, z;
 
-	i = 3; /* skip stdin, stdout and stderr */
+	i = 3;			/* skip stdin, stdout and stderr */
 	maxfd = getdtablesize();
 
 	while (i < maxfd) {

@@ -29,21 +29,18 @@ extern char *tgoto(const char *, int, int);
 extern int tputs(const char *, int, int (*)(int));
 extern char *tparm(char *str, ...);
 
-struct term
-{
-  char *tcname;
-  int type;
+struct term {
+	char *tcname;
+	int type;
 };
 
-union tcu
-{
-  int flg;
-  int num;
-  char *str;
+union tcu {
+	int flg;
+	int num;
+	char *str;
 };
 
 extern struct term term[];
-
 EOF
 
 #
@@ -53,46 +50,46 @@ EOF
 #  -e 'y/[a-z]/[A-Z]/ if /"/;' \
 #
 sed < ${srcdir}/term.c \
-  -e '/"[A-Z]."/s/"/"C/' \
-  -e '/"/y/abcdefghijklmnopqrstuvwxyz/ABCDEFGHIJKLMNOPQRSTUVWXYZ/' \
+    -e '/"[A-Z]."/s/"/"C/' \
+    -e '/"/y/abcdefghijklmnopqrstuvwxyz/ABCDEFGHIJKLMNOPQRSTUVWXYZ/' \
 | $AWK '
-/^  [{] ".*KMAPDEF[(].*$/{
-  if (min == 0) min = s
-  max = s;
+/^[[:space:]]+[{] ".*KMAPDEF[(].*$/{    #}
+    if (min == 0) min = s
+    max = s;
 }
-/^  [{] ".*KMAPADEF[(].*$/{
-  if (amin == 0) amin = s
-  amax = s;
+/^[[:space:]]+[{] ".*KMAPADEF[(].*$/{  #}
+    if (amin == 0) amin = s
+    amax = s;
 }
-/^  [{] ".*KMAPMDEF[(].*$/{
-  if (mmin == 0) mmin = s
-  mmax = s;
+/^[[:space:]]+[{] ".*KMAPMDEF[(].*$/{  #}
+    if (mmin == 0) mmin = s
+    mmax = s;
 }
-/^  [{] ".*$/{
-a=substr($2,2,length($2)-3);
-b=substr($3,3,3);
-if (nolist == 0) {
-    printf "#define d_%s  d_tcs[%d].%s\n",a,s,b
-    printf "#define D_%s (D_tcs[%d].%s)\n",a,s,b
-  }
-s++;
+/^[[:space:]]+[{] "/{
+    a=substr($2,2,length($2)-3);
+    b=substr($3,3,3);
+    if (nolist == 0) {
+            printf "#define d_%s  d_tcs[%d].%s\n",a,s,b
+            printf "#define D_%s (D_tcs[%d].%s)\n",a,s,b
+        }
+    s++;
 }
-/\/* define/{
-printf "#define %s %d\n",$3,s
+/\/*[[:space:]]*define/{
+    printf "#define %s %d\n",$3,s
 }
-/\/* nolist/{
-nolist = 1;
+/\/*[[:space:]]*nolist/{
+    nolist = 1;
 }
-/\/* list/{
-nolist = 0;
+/\/*[[:space:]]*list/{
+    nolist = 0;
 }
 END {
-  printf "#  define KMAPDEFSTART %d\n", min
-  printf "#  define NKMAPDEF %d\n", max-min+1
-  printf "#  define KMAPADEFSTART %d\n", amin
-  printf "#  define NKMAPADEF %d\n", amax-amin+1
-  printf "#  define KMAPMDEFSTART %d\n", mmin
-  printf "#  define NKMAPMDEF %d\n", mmax-mmin+1
+    printf "#  define KMAPDEFSTART %d\n", min
+    printf "#  define NKMAPDEF %d\n", max-min+1
+    printf "#  define KMAPADEFSTART %d\n", amin
+    printf "#  define NKMAPADEF %d\n", amax-amin+1
+    printf "#  define KMAPMDEFSTART %d\n", mmin
+    printf "#  define NKMAPMDEF %d\n", mmax-mmin+1
 }
 ' | sed -e s/NUM/num/ -e s/STR/str/ -e s/FLG/flg/ \
 >> term.h
@@ -109,7 +106,7 @@ cat << EOF > kmapdef.c
 EOF
 
 $AWK < ${srcdir}/term.c '
-/^  [{] ".*KMAP.*$/{
+/^[[:space:]]+[{] ".*KMAP.*$/{  #}
   for (i = 0; i < 3; i++) {
     q = $(5+i)
     if (substr(q, 1, 5) == "KMAPD") {
@@ -129,7 +126,7 @@ $AWK < ${srcdir}/term.c '
     }
   }
 }
-/^  [{] ".*$/{
+/^[[:space:]]+[{] ".*$/{    #}
   s++;
 }
 END {

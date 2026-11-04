@@ -107,7 +107,8 @@ void ChangeScreenSize(int wi, int he, int change_fore)
 
 	cv = &D_canvas;
 	cv->c_xe = wi - 1;
-	cv->c_ys = ((cv->c_slperp && cv->c_slperp->c_slnext) || captionalways) * captiontop + (D_has_hstatus == HSTATUS_FIRSTLINE);
+	cv->c_ys = ((cv->c_slperp && cv->c_slperp->c_slnext)
+		    || captionalways) * captiontop + (D_has_hstatus == HSTATUS_FIRSTLINE);
 	cv->c_ye = he - 1 - ((cv->c_slperp && cv->c_slperp->c_slnext)
 			     || captionalways) * !captiontop - (D_has_hstatus == HSTATUS_LASTLINE);
 	cv->c_blank.l_height = cv->c_ye - cv->c_ys + 1;
@@ -383,7 +384,8 @@ static void CheckMaxSize(int wi)
 	mline_old.font = xrealloc(mline_old.font, maxwidth * 4);
 	mline_old.colorbg = xrealloc(mline_old.colorbg, maxwidth * 4);
 	mline_old.colorfg = xrealloc(mline_old.colorfg, maxwidth * 4);
-	if (!(blank && null && mline_old.image && mline_old.attr && mline_old.font && mline_old.colorbg && mline_old.colorfg))
+	if (!(blank && null && mline_old.image && mline_old.attr && mline_old.font
+	      && mline_old.colorbg && mline_old.colorfg))
 		Panic(0, "%s", strnomem);
 
 	MakeBlankLine(blank, maxwidth);
@@ -722,7 +724,7 @@ int ChangeWindowSize(Window *p, int wi, int he, int hi)
 	/* store new size */
 	p->w_width = wi;
 	p->w_height = he;
-	if(p->w_scrollback_height > hi)
+	if (p->w_scrollback_height > hi)
 		p->w_scrollback_height = hi;
 	p->w_histidx = 0;
 	p->w_histheight = hi;
@@ -734,7 +736,7 @@ int ChangeWindowSize(Window *p, int wi, int he, int hi)
 
 	return 0;
 
-nomem:
+ nomem:
 	if (nmlines) {
 		for (ty = he + hi - 1; ty >= 0; ty--) {
 			mlt = NEWWIN(ty);

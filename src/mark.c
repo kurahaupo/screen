@@ -91,8 +91,7 @@ static struct markdata *markdata;
  */
 static int is_letter(int c)
 {
-	if (isalnum(c) ||
-	    c == '_' || c == '.' || c == '@' || c == ':' || c == '%' || c == '!' || c == '-' || c == '+')
+	if (isalnum(c) || c == '_' || c == '.' || c == '@' || c == ':' || c == '%' || c == '!' || c == '-' || c == '+')
 		/* thus we can catch email-addresses as a word :-) */
 		return 1;
 	else if (c != ' ')
@@ -686,7 +685,7 @@ static void MarkProcess(char **inbufp, size_t *inlenp)
 				rep_cnt = 100;
 			revto_line(markdata->left_mar,
 				   fore->w_histheight - fore->w_scrollback_height +
-					   (int)(rep_cnt * (fore->w_scrollback_height + fore->w_height) / 100.0),
+				   (int)(rep_cnt * (fore->w_scrollback_height + fore->w_height) / 100.0),
 				   (fore->w_height - 1) / 2);
 			break;
 		case 0201:

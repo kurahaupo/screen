@@ -57,11 +57,11 @@ static struct inpline inphist;
 
 struct inpdata {
 	struct inpline inp;
-	size_t inpmaxlen;		/* MAXSTR, or less, if caller has shorter buffer */
+	size_t inpmaxlen;	/* MAXSTR, or less, if caller has shorter buffer */
 	char *inpstring;	/* the prompt */
 	size_t inpstringlen;	/* length of the prompt */
 	int inpmode;		/* INP_NOECHO, INP_RAW, INP_EVERY */
-	void (*inpfinfunc) (char *buf, size_t len, void *priv);
+	void (*inpfinfunc)(char *buf, size_t len, void *priv);
 	char *priv;		/* private data for finfunc */
 	int privdata;		/* private data space */
 	char *search;		/* the search string */
@@ -112,7 +112,7 @@ void inp_setprompt(char *p, char *s)
  * INP_RAW    == raw mode. call finfunc after each character typed.
  * INP_EVERY  == digraph mode.
  */
-void Input(char *istr, size_t len, int mode, void (*finfunc) (char *buf, size_t len, void *priv), char *priv, int data)
+void Input(char *istr, size_t len, int mode, void (*finfunc)(char *buf, size_t len, void *priv), char *priv, int data)
 {
 	size_t maxlen;
 	struct inpdata *inpdata;

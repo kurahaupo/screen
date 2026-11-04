@@ -61,119 +61,119 @@
 
 extern char **environ;
 
-int           force_vt = 1;
-int           VBellWait;
-int           MsgWait;
-int           MsgMinWait;
-int           SilenceWait;
+int force_vt = 1;
+int VBellWait;
+int MsgWait;
+int MsgMinWait;
+int SilenceWait;
 
-char         *ShellProg;
-char         *ShellArgs[2];
+char *ShellProg;
+char *ShellArgs[2];
 
-struct        backtick;
+struct backtick;
 
 static struct passwd *getpwbyname(char *, struct passwd *);
-static void   SigChldHandler(void);
-static void   SigChld(int);
-static void   SigInt(int);
-static void   CoreDump(int);
-static void   FinitHandler(int);
-static void   DoWait(void);
-static void   serv_read_fn(Event *, void *);
-static void   serv_select_fn(Event *, void *);
-static void   logflush_fn(Event *, void *);
-static int    IsSymbol(char *, char *);
-static char  *ParseChar(char *, char *);
-static int    ParseEscape(char *);
-static void   SetTtyname(bool fatal, struct stat *st);
+static void SigChldHandler(void);
+static void SigChld(int);
+static void SigInt(int);
+static void CoreDump(int);
+static void FinitHandler(int);
+static void DoWait(void);
+static void serv_read_fn(Event *, void *);
+static void serv_select_fn(Event *, void *);
+static void logflush_fn(Event *, void *);
+static int IsSymbol(char *, char *);
+static char *ParseChar(char *, char *);
+static int ParseEscape(char *);
+static void SetTtyname(bool fatal, struct stat *st);
 
 int nversion;			/* numerical version, used for secondary DA */
 
 /* the attacher */
-bool          do_auth = false;
-struct        passwd *ppp;
-char         *attach_tty;
-int           attach_fd = -1;
-char         *attach_term;
-char         *LoginName;
-struct mode   attach_Mode;
+bool do_auth = false;
+struct passwd *ppp;
+char *attach_tty;
+int attach_fd = -1;
+char *attach_term;
+char *LoginName;
+struct mode attach_Mode;
 
 /* Indicator whether the current tty exists in another namespace. */
-bool      attach_tty_is_in_new_ns = false;
+bool attach_tty_is_in_new_ns = false;
 
 /* Content of the tty symlink when attach_tty_is_in_new_ns == true. */
-char      attach_tty_name_in_ns[MAXPATHLEN];
+char attach_tty_name_in_ns[MAXPATHLEN];
 
-char      SocketPath[MAXPATHLEN + 2];
-char     *SocketName;               /* SocketName is pointer in SocketPath */
-char     *SocketMatch = NULL;       /* session id command line argument */
-int       ServerSocket = -1;
-Event     serv_read;
-Event     serv_select;
-Event     logflushev;
+char SocketPath[MAXPATHLEN + 2];
+char *SocketName;		/* SocketName is pointer in SocketPath */
+char *SocketMatch = NULL;	/* session id command line argument */
+int ServerSocket = -1;
+Event serv_read;
+Event serv_select;
+Event logflushev;
 
-char    **NewEnv = NULL;
-char     *RcFileName = NULL;
-char     *home;
+char **NewEnv = NULL;
+char *RcFileName = NULL;
+char *home;
 
-char     *screenlogfile;            /* filename layout */
-int       log_flush = 10;           /* flush interval in seconds */
-bool      logtstamp_on = false;     /* tstamp disabled */
-char     *logtstamp_string;         /* stamp layout */
-int       logtstamp_after = 120;    /* first tstamp after 120s */
-char     *hardcopydir = NULL;
-char     *BellString;
-char     *VisualBellString;
-char     *ActivityString;
-char     *BufferFile;
-char     *PowDetachString;
-char     *hstatusstring;
-char     *captionstring;
-char     *wliststr;
-char     *wlisttit;
-bool      auto_detach = true;
-bool      adaptflag;
-bool      iflag;
-bool      lsflag;
-bool      quietflag;
-bool      wipeflag;
-bool      xflag;
-int       rflag;
-int       dflag;
-int       queryflag = -1;
-bool      hastruecolor = false;
+char *screenlogfile;		/* filename layout */
+int log_flush = 10;		/* flush interval in seconds */
+bool logtstamp_on = false;	/* tstamp disabled */
+char *logtstamp_string;		/* stamp layout */
+int logtstamp_after = 120;	/* first tstamp after 120s */
+char *hardcopydir = NULL;
+char *BellString;
+char *VisualBellString;
+char *ActivityString;
+char *BufferFile;
+char *PowDetachString;
+char *hstatusstring;
+char *captionstring;
+char *wliststr;
+char *wlisttit;
+bool auto_detach = true;
+bool adaptflag;
+bool iflag;
+bool lsflag;
+bool quietflag;
+bool wipeflag;
+bool xflag;
+int rflag;
+int dflag;
+int queryflag = -1;
+bool hastruecolor = false;
 
-char     *multi;
-int       multiattach;
+char *multi;
+int multiattach;
 
-char      HostName[MAXSTR];
-pid_t     MasterPid;
-pid_t     PanicPid;
-uid_t     real_uid;
-uid_t     eff_uid;
-uid_t     multi_uid;
-uid_t     own_uid;
-gid_t     real_gid;
-gid_t     eff_gid;
-bool      default_startup;
-int       ZombieKey_destroy;
-int       ZombieKey_resurrect;
-int       ZombieKey_onerror;
-char     *preselect = NULL;         /* only used in Attach() */
+char HostName[MAXSTR];
+pid_t MasterPid;
+pid_t PanicPid;
+uid_t real_uid;
+uid_t eff_uid;
+uid_t multi_uid;
+uid_t own_uid;
+gid_t real_gid;
+gid_t eff_gid;
+bool default_startup;
+int ZombieKey_destroy;
+int ZombieKey_resurrect;
+int ZombieKey_onerror;
+char *preselect = NULL;		/* only used in Attach() */
 
-char     *screenencodings;
+char *screenencodings;
 
-bool      cjkwidth;
+bool cjkwidth;
 
-Layer    *flayer;
-Window   *fore;
-Window   *mru_window;
-Window   *first_window;
-Window   *last_window;
-Window   *console_window;
+Layer *flayer;
+Window *fore;
+Window *mru_window;
+Window *first_window;
+Window *last_window;
+Window *console_window;
 
 #ifdef ENABLE_TELNET
-int       af;
+int af;
 #endif
 
 /*
@@ -305,21 +305,21 @@ static void exit_with_usage(char *myname, char *message, char *arg)
 
 int main(int argc, char **argv)
 {
-	int       n;
-	char     *ap;
-	char     *av0;
-	char      socknamebuf[FILENAME_MAX + 1];
-	int       mflag = 0;
-	char     *myname = (argc == 0) ? "screen" : argv[0];
-	char     *SocketDir;
-	struct    stat st;
-	mode_t    oumask;
-	struct    NewWindow nwin;
-	bool      detached = false;	/* start up detached */
-	char     *sockp;
-	char     *sty = NULL;
-	char     *multi_home = NULL;
-	bool      cmdflag = 0;
+	int n;
+	char *ap;
+	char *av0;
+	char socknamebuf[FILENAME_MAX + 1];
+	int mflag = 0;
+	char *myname = (argc == 0) ? "screen" : argv[0];
+	char *SocketDir;
+	struct stat st;
+	mode_t oumask;
+	struct NewWindow nwin;
+	bool detached = false;	/* start up detached */
+	char *sockp;
+	char *sty = NULL;
+	char *multi_home = NULL;
+	bool cmdflag = 0;
 
 	/*
 	 *  First, close all unused descriptors
@@ -359,17 +359,17 @@ int main(int argc, char **argv)
 	strncpy(screenterm, "screen", MAXTERMLEN);
 	screenterm[MAXTERMLEN] = '\0';
 #ifdef ENABLE_TELNET
-	af                = AF_UNSPEC;
+	af = AF_UNSPEC;
 #endif
-        /* lf_secreopen() is vital for the secure operation in setuid-root context.
+	/* lf_secreopen() is vital for the secure operation in setuid-root context.
 	 * Do not remove it
 	 */
 	logreopen_register(lf_secreopen);
 
-	real_uid          = getuid();
-	real_gid          = getgid();
-	eff_uid           = geteuid();
-	eff_gid           = getegid();
+	real_uid = getuid();
+	real_gid = getgid();
+	eff_uid = geteuid();
+	eff_gid = getegid();
 
 	av0 = *argv;
 	/* if this is a login screen, assume -RR */
@@ -525,12 +525,13 @@ int main(int argc, char **argv)
 				case 'L':
 					if (!strcmp(ap + 1, "ogfile")) {
 						if (--argc == 0)
-							exit_with_usage(myname, "Specify logfile path with -Logfile", NULL);
+							exit_with_usage(myname, "Specify logfile path with -Logfile",
+									NULL);
 
 						if (strlen(*++argv) > PATH_MAX)
 							Panic(1, "-Logfile name too long. (max. %d char)", PATH_MAX);
 
-						free(screenlogfile); /* we already set it up while starting */
+						free(screenlogfile);	/* we already set it up while starting */
 						screenlogfile = SaveStr(*argv);
 
 						ap = NULL;
@@ -603,7 +604,9 @@ int main(int argc, char **argv)
 					if (!*SocketMatch)
 						exit_with_usage(myname, "Empty session-name?", NULL);
 					if (strlen(SocketMatch) > 80)
-						exit_with_usage(myname, "Session-name is too long (max length is 80 symbols)", NULL);
+						exit_with_usage(myname,
+								"Session-name is too long (max length is 80 symbols)",
+								NULL);
 					break;
 				case 'X':
 					cmdflag = true;
@@ -867,8 +870,7 @@ int main(int argc, char **argv)
 		} else {
 			Panic(0, "Error accessing %s", SocketPath);
 		}
-	}
-	else if (!S_ISDIR(st.st_mode)) {
+	} else if (!S_ISDIR(st.st_mode)) {
 		if (eff_uid == real_uid || st.st_uid == real_uid) {
 			Panic(0, "%s is not a directory.", SocketPath);
 		} else {
@@ -884,8 +886,8 @@ int main(int argc, char **argv)
 			}
 		}
 	} else {
-#ifdef SOCKET_DIR	/* if SOCKETDIR is not defined, the socket is in $HOME.
-			   in that case it does not make sense to compare uids. */
+#ifdef SOCKET_DIR		/* if SOCKETDIR is not defined, the socket is in $HOME.
+				   in that case it does not make sense to compare uids. */
 		if (st.st_uid != real_uid) {
 			if (eff_uid == real_uid) {
 				Panic(0, "You are not the owner of %s.", SocketPath);
@@ -1045,9 +1047,9 @@ int main(int argc, char **argv)
 		D_encoding = nwin_options.encoding > 0 ? nwin_options.encoding : 0;
 	}
 
-	if (!freopen("/dev/null", "r", stdin) ||
-	    !freopen("/dev/null", "w", stdout) ||
-	    !freopen("/dev/null", "w", stderr))
+	if (!freopen("/dev/null", "r", stdin)
+	 || !freopen("/dev/null", "w", stdout)
+	 || !freopen("/dev/null", "w", stderr))
 		Panic(0, "Cannot reassociate std streams");
 
 	if (SocketMatch) {
@@ -1170,13 +1172,13 @@ static void SigChldHandler(void)
 
 static void SigChld(int sigsig)
 {
-	(void)sigsig; /* unused */
+	(void)sigsig;		/* unused */
 	GotSigChld = 1;
 }
 
 void SigHup(int sigsig)
 {
-	(void)sigsig; /* unused */
+	(void)sigsig;		/* unused */
 	/* Hangup all displays */
 	while ((display = displays))
 		Hangup();
@@ -1189,7 +1191,7 @@ void SigHup(int sigsig)
  */
 static void SigInt(int sigsig)
 {
-	(void)sigsig; /* unused */
+	(void)sigsig;		/* unused */
 
 	xsignal(SIGINT, SigInt);
 
@@ -1205,7 +1207,7 @@ static void CoreDump(int sigsig)
 	Display *disp;
 	char buf[80];
 
-	(void)sigsig; /* unused */
+	(void)sigsig;		/* unused */
 
 	if (setgid(getgid()))
 		Panic(0, "setgid");
@@ -1233,8 +1235,7 @@ static void DoWait(void)
 	Window *win;
 	int wstat;
 
-	while ((pid = waitpid(-1, &wstat, WNOHANG | WUNTRACED)) > 0)
-	{
+	while ((pid = waitpid(-1, &wstat, WNOHANG | WUNTRACED)) > 0) {
 		for (win = mru_window; win; win = win->w_prev_mru) {
 			if ((win->w_pid && pid == win->w_pid) || (win->w_deadpid && pid == win->w_deadpid)) {
 				/* child has ceased to exist */
@@ -1281,7 +1282,7 @@ static void DoWait(void)
 
 static void FinitHandler(int sigsig)
 {
-	(void)sigsig; /* unused */
+	(void)sigsig;		/* unused */
 
 	Finit(1);
 }
@@ -1432,13 +1433,13 @@ void Detach(int mode)
 #ifdef ENABLE_UTMP
 	if (displays->d_next == NULL) {
 		for (p = mru_window; p; p = p->w_prev_mru) {
-			if (p->w_slot != (slot_t) - 1 && !(p->w_lflag & 2)) {
+			if (p->w_slot != (slot_t)-1 && !(p->w_lflag & 2)) {
 				RemoveUtmp(p);
 				/*
 				 * Set the slot to 0 to get the window
 				 * logged in again.
 				 */
-				p->w_slot = (slot_t) 0;
+				p->w_slot = (slot_t)0;
 			}
 		}
 	}
@@ -1612,8 +1613,8 @@ void QueryMsg(int err, const char *fmt, ...)
 
 void Dummy(int err, const char *fmt, ...)
 {
-	(void)err; /* unused */
-	(void)fmt; /* unused */
+	(void)err;		/* unused */
+	(void)fmt;		/* unused */
 }
 
 #undef PROCESS_MESSAGE
@@ -1689,8 +1690,8 @@ void PutWinMsg(char *s, int start, int max)
 
 static void serv_read_fn(Event *event, void *data)
 {
-	(void)event; /* unused */
-	(void)data; /* unused */
+	(void)event;		/* unused */
+	(void)data;		/* unused */
 
 	ReceiveMsg();
 }
@@ -1699,8 +1700,8 @@ static void serv_select_fn(Event *event, void *data)
 {
 	Window *p;
 
-	(void)event; /* unused */
-	(void)data; /* unused */
+	(void)event;		/* unused */
+	(void)data;		/* unused */
 
 	/* XXX: messages?? */
 	if (GotSigChld) {
@@ -1787,10 +1788,12 @@ static void serv_select_fn(Event *event, void *data)
 					n = cv->c_layer->l_height;
 				CV_CALL(cv,
 					LScrollV(flayer, -n, 0, flayer->l_height - 1, 0);
-					LayRedisplayLine(-1, -1, -1, 1); for (i = 0; i < n; i++)
-					LayRedisplayLine(i, 0, flayer->l_width - 1, 1);
-					if (cv == cv->c_display->d_forecv)
-					LaySetCursor();) ;
+					LayRedisplayLine(-1, -1, -1, 1);
+					for (i = 0; i < n; i++)
+						LayRedisplayLine(i, 0, flayer->l_width - 1, 1);
+						if (cv == cv->c_display->d_forecv)
+							LaySetCursor();
+				);
 			} else if (ly + cv->c_yoff > cv->c_ye) {
 				int i, n = ly + cv->c_yoff - cv->c_ye;
 				cv->c_yoff = cv->c_ye - ly;
@@ -1799,10 +1802,12 @@ static void serv_select_fn(Event *event, void *data)
 					n = cv->c_layer->l_height;
 				CV_CALL(cv,
 					LScrollV(flayer, n, 0, cv->c_layer->l_height - 1, 0);
-					LayRedisplayLine(-1, -1, -1, 1); for (i = 0; i < n; i++)
-					LayRedisplayLine(i + flayer->l_height - n, 0, flayer->l_width - 1, 1);
-					if (cv == cv->c_display->d_forecv)
-					LaySetCursor();) ;
+					LayRedisplayLine(-1, -1, -1, 1);
+					for (i = 0; i < n; i++)
+						LayRedisplayLine(i + flayer->l_height - n, 0, flayer->l_width - 1, 1);
+						if (cv == cv->c_display->d_forecv)
+							LaySetCursor();
+				);
 			}
 			if (lx + cv->c_xoff < cv->c_xs) {
 				int i, n = cv->c_xs - (lx + cv->c_xoff);
@@ -1814,11 +1819,14 @@ static void serv_select_fn(Event *event, void *data)
 				RethinkViewportOffsets(cv);
 				if (n > cv->c_layer->l_width)
 					n = cv->c_layer->l_width;
-				CV_CALL(cv, LayRedisplayLine(-1, -1, -1, 1); for (i = 0; i < flayer->l_height; i++) {
-					LScrollH(flayer, -n, i, 0, flayer->l_width - 1, 0, NULL);
-					LayRedisplayLine(i, 0, n - 1, 1);}
-					if (cv == cv->c_display->d_forecv)
-					LaySetCursor();) ;
+				CV_CALL(cv,
+					LayRedisplayLine(-1, -1, -1, 1);
+					for (i = 0; i < flayer->l_height; i++) {
+						LScrollH(flayer, -n, i, 0, flayer->l_width - 1, 0, NULL);
+						LayRedisplayLine(i, 0, n - 1, 1);}
+						if (cv == cv->c_display->d_forecv)
+						LaySetCursor();
+				);
 			} else if (lx + cv->c_xoff > cv->c_xe) {
 				int i, n = lx + cv->c_xoff - cv->c_xe;
 				if (n < (cv->c_xe - cv->c_xs + 1) / 2)
@@ -1829,11 +1837,13 @@ static void serv_select_fn(Event *event, void *data)
 				RethinkViewportOffsets(cv);
 				if (n > cv->c_layer->l_width)
 					n = cv->c_layer->l_width;
-				CV_CALL(cv, LayRedisplayLine(-1, -1, -1, 1); for (i = 0; i < flayer->l_height; i++) {
-					LScrollH(flayer, n, i, 0, flayer->l_width - 1, 0, NULL);
-					LayRedisplayLine(i, flayer->l_width - n, flayer->l_width - 1, 1);}
-					if (cv == cv->c_display->d_forecv)
-					LaySetCursor();) ;
+				CV_CALL(cv, LayRedisplayLine(-1, -1, -1, 1);
+					for (i = 0; i < flayer->l_height; i++) {
+						LScrollH(flayer, n, i, 0, flayer->l_width - 1, 0, NULL);
+						LayRedisplayLine(i, flayer->l_width - n, flayer->l_width - 1, 1);}
+						if (cv == cv->c_display->d_forecv)
+							LaySetCursor();
+				);
 			}
 		}
 	}
@@ -1841,8 +1851,10 @@ static void serv_select_fn(Event *event, void *data)
 	for (display = displays; display; display = display->d_next) {
 		if (D_status == STATUS_ON_WIN || D_cvlist == NULL || D_cvlist->c_next == NULL)
 			continue;
-		CV_CALL(D_forecv, LayRestore();
-			LaySetCursor());
+		CV_CALL(D_forecv,
+			LayRestore();
+			LaySetCursor()
+		);
 	}
 }
 
@@ -1852,7 +1864,7 @@ static void logflush_fn(Event *event, void *data)
 	char *buf;
 	int n;
 
-	(void)data; /* unused */
+	(void)data;		/* unused */
 
 	if (!islogfile(NULL))
 		return;		/* no more logfiles */

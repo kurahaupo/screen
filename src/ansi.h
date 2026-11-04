@@ -36,14 +36,14 @@
 
 #define NATTR		7
 
-				/*			Capname	TCapCode */
-#define ATTR_DI		0	/* Dim mode		dim	mh	*/
-#define ATTR_US		1	/* Underscore mode	smul	us	*/
-#define ATTR_BD		2	/* Bold mode		bold	md	*/
-#define ATTR_RV		3	/* Reverse mode		rev	mr	*/
-#define ATTR_SO		4	/* Standout mode	smso	so	*/
-#define ATTR_BL		5	/* Blinking		blink	mb	*/
-#define ATTR_IT		6	/* Italicized		simt	ZH	*/
+				/*                      Capname TCapCode */
+#define ATTR_DI		0	/* Dim mode             dim     mh       */
+#define ATTR_US		1	/* Underscore mode      smul    us       */
+#define ATTR_BD		2	/* Bold mode            bold    md       */
+#define ATTR_RV		3	/* Reverse mode         rev     mr       */
+#define ATTR_SO		4	/* Standout mode        smso    so       */
+#define ATTR_BL		5	/* Blinking             blink   mb       */
+#define ATTR_IT		6	/* Italicized           simt    ZH       */
 
 #define A_DI	(1<<ATTR_DI)
 #define A_US	(1<<ATTR_US)
@@ -62,28 +62,28 @@
  */
 /* keep state_t and state_t_string in sync! */
 enum state_t {
-	LIT,				/* Literal input */
-	ESC,				/* Start of escape sequence */
-	ASTR,				/* Start of control string */
+	LIT,			/* Literal input */
+	ESC,			/* Start of escape sequence */
+	ASTR,			/* Start of control string */
 	STRESC,			/* ESC seen in control string */
-	CSI,				/* Reading arguments in "CSI Pn ;...*/
-	PRIN,				/* Printer mode */
-	PRINESC,			/* ESC seen in printer mode */
-	PRINCSI,			/* CSI seen in printer mode */
-	PRIN4				/* CSI 4 seen in printer mode */
+	CSI,			/* Reading arguments in "CSI Pn ;... */
+	PRIN,			/* Printer mode */
+	PRINESC,		/* ESC seen in printer mode */
+	PRINCSI,		/* CSI seen in printer mode */
+	PRIN4			/* CSI 4 seen in printer mode */
 };
 
 /* keep string_t and string_t_string in sync! */
 enum string_t {
 	NONE,
-	DCS,				/* Device control string */
-	OSC,				/* Operating system command */
-	APC,				/* Application program command */
-					/*  - used for status change */
-	PM,				/* Privacy message */
-	AKA,				/* title for current screen */
-	GM,				/* Global message to every display */
-	STATUS				/* User hardstatus line */
+	DCS,			/* Device control string */
+	OSC,			/* Operating system command */
+	APC,			/* Application program command */
+				/*  - used for status change */
+	PM,			/* Privacy message */
+	AKA,			/* title for current screen */
+	GM,			/* Global message to every display */
+	STATUS			/* User hardstatus line */
 };
 
 /*
@@ -100,7 +100,7 @@ enum move_t {
 	M_RI,
 	M_CRI,
 	M_RW,
-	M_CR	/* CR and rewrite */
+	M_CR			/* CR and rewrite */
 };
 
 #define EXPENSIVE	 1000
@@ -134,8 +134,8 @@ enum move_t {
 
 #define UTF8	8
 
-#define UCS_REPL    0xfffd  /* character for illegal codes */
-#define UCS_REPL_DW 0xff1f  /* character for illegal codes */
+#define UCS_REPL    0xfffd	/* character for illegal codes */
+#define UCS_REPL_DW 0xff1f	/* character for illegal codes */
 #define UCS_HIDDEN  0xffff
 
 #define is_dw_font(f) ((f) && ((f) & 0x60) == 0)
@@ -151,16 +151,16 @@ enum move_t {
 
 typedef struct Window Window;
 
-void  ResetAnsiState (Window *);
-void  ResetCharsets (Window *);
-void  WriteString (Window *, char *, size_t);
-void  ChangeAKA (Window *, char *, size_t);
-void  SetCharsets (Window *, char *);
-int   GetAnsiStatus (Window *, char *);
-void  WNewAutoFlow (Window *, int);
-void  WBell (Window *, bool);
-void  WMsg (Window *, int, char *);
-int   MFindUsedLine (Window *, int, int);
+void ResetAnsiState(Window *);
+void ResetCharsets(Window *);
+void WriteString(Window *, char *, size_t);
+void ChangeAKA(Window *, char *, size_t);
+void SetCharsets(Window *, char *);
+int GetAnsiStatus(Window *, char *);
+void WNewAutoFlow(Window *, int);
+void WBell(Window *, bool);
+void WMsg(Window *, int, char *);
+int MFindUsedLine(Window *, int, int);
 
 /* global variables */
 
@@ -186,4 +186,4 @@ extern struct mchar mchar_so;
 extern struct mchar mchar_blank;
 extern struct mchar mchar_null;
 
-#endif /* SCREEN_ANSI_H */
+#endif				/* SCREEN_ANSI_H */

@@ -65,13 +65,13 @@ struct mline mline_null;
 
 struct mchar mchar_null;
 struct mchar mchar_blank = { ' ', 0, 0, 0, 0, 0 };
-struct mchar mchar_so = { ' ', A_RV, 0, 0, 0, 0};
+struct mchar mchar_so = { ' ', A_RV, 0, 0, 0, 0 };
 
 /* Default bell/monitor/silence renditions in ParseAttrColor() encoding. */
 uint64_t renditions[NUM_RENDS] = {
 	((uint64_t)(A_US | A_BD) << 56),	/* bell: ub */
-	((uint64_t)A_BD << 56),		/* monitor: b */
-	((uint64_t)A_US << 56)		/* silence: u */
+	((uint64_t)A_BD << 56),	/* monitor: b */
+	((uint64_t)A_US << 56)	/* silence: u */
 };
 
 /* keep string_t and string_t_string in sync! */
@@ -100,7 +100,7 @@ static char *state_t_string[] = {
 	"PRIN4"			/* CSI 4 seen in printer mode */
 };
 
-static int Special(Window *,int);
+static int Special(Window *, int);
 static void DoESC(Window *, int, int);
 static void DoCSI(Window *, int, int);
 static void StringStart(Window *, enum string_t);
@@ -618,8 +618,7 @@ void WriteString(Window *win, char *buf, size_t len)
 					if (win->w_insert) {
 						save_mline(&win->w_mlines[win->w_y], win->w_width);
 						MInsChar(win, &win->w_rend, win->w_x, win->w_y);
-						LInsChar(&win->w_layer, &win->w_rend, win->w_x, win->w_y,
-							 &mline_old);
+						LInsChar(&win->w_layer, &win->w_rend, win->w_x, win->w_y, &mline_old);
 						win->w_x++;
 					} else {
 						MPutChar(win, &win->w_rend, win->w_x, win->w_y);
@@ -632,8 +631,7 @@ void WriteString(Window *win, char *buf, size_t len)
 					if (win->w_wrap)
 						win->w_x++;
 				} else {
-					MWrapChar(win, &win->w_rend, win->w_y, win->w_top, win->w_bot,
-						  win->w_insert);
+					MWrapChar(win, &win->w_rend, win->w_y, win->w_top, win->w_bot, win->w_insert);
 					LWrapChar(&win->w_layer, &win->w_rend, win->w_y, win->w_top, win->w_bot,
 						  win->w_insert);
 					if (win->w_y != win->w_bot && win->w_y != win->w_height - 1)
@@ -1182,12 +1180,12 @@ static void DoCSI(Window *win, int c, int intermediate)
 				win->w_mouse = i ? a1 : 0;
 				LMouseMode(&win->w_layer, win->w_mouse);
 				break;
-			/* case 1005:     UTF-8 mouse mode rejected */
+		     /* case 1005:     UTF-8 mouse mode rejected */
 			case 1006:	/* SGR mouse mode */
 				win->w_extmouse = i ? a1 : 0;
 				LExtMouseMode(&win->w_layer, win->w_extmouse);
 				break;
-			/* case 1015:     UXRVT mouse mode rejected */
+		     /* case 1015:     UXRVT mouse mode rejected */
 			case 2004:	/* bracketed paste mode */
 				win->w_bracketed = i ? true : false;
 				LBracketedPasteMode(&win->w_layer, win->w_bracketed);
@@ -1342,9 +1340,9 @@ static void PrintStart(Window *win)
 
 	/* find us a nice display to print on, fore preferred */
 	display = win->w_lastdisp;
-	if (!(display && win== D_fore && (printcmd || D_PO)))
+	if (!(display && win == D_fore && (printcmd || D_PO)))
 		for (display = displays; display; display = display->d_next)
-			if (win== D_fore && (printcmd || D_PO))
+			if (win == D_fore && (printcmd || D_PO))
 				break;
 	if (!display) {
 		Canvas *cv;
@@ -1779,9 +1777,9 @@ static void SelectRendition(Window *win)
 		else
 			attr |= j;
 	} while (++i < win->w_NumArgs);
-	
+
 	win->w_rend.attr = attr;
-	
+
 	win->w_rend.colorbg = colorbg;
 	win->w_rend.colorfg = colorfg;
 	LSetRendition(&win->w_layer, &win->w_rend);
@@ -2047,7 +2045,7 @@ static void MScrollV(Window *win, int n, int ys, int ye, int bce)
 		if (ye - ys + 1 < n)
 			n = ye - ys + 1;
 		if (n > 256) {
-			MScrollV(win, - (n - 256), ys, ye, bce);
+			MScrollV(win, -(n - 256), ys, ye, bce);
 			n = 256;
 		}
 
@@ -2375,4 +2373,3 @@ static void WChangeSize(Window *win, int w, int h)
 			Redisplay(0);
 	}
 }
-

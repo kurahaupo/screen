@@ -88,11 +88,11 @@ static int AclSetPermWin(struct acluser *, struct acluser *, char *, Window *);
 static int UserAcl(struct acluser *, struct acluser **, int, char **);
 static int UserAclCopy(struct acluser **, struct acluser **);
 
-static int GrowBitfield(AclBits * bfp, int len, int delta, int defaultbit)
+static int GrowBitfield(AclBits *bfp, int len, int delta, int defaultbit)
 {
 	AclBits n, o = *bfp;
 
-	if (!(n = (AclBits) calloc(1, (unsigned long)(&ACLBYTE((char *)NULL, len + delta) + 1))))
+	if (!(n = (AclBits)calloc(1, (unsigned long)(&ACLBYTE((char *)NULL, len + delta) + 1))))
 		return -1;
 	for (int i = 0; i < (len + delta); i++) {
 		if (((i < len) && (ACLBIT(i) & ACLBYTE(o, i))) || ((i >= len) && (defaultbit)))
@@ -396,10 +396,10 @@ int AclLinkUser(char *from, char *to)
  */
 char *DoSu(struct acluser **up, char *name, char *pw1, char *pw2)
 {
-	(void) up;
-	(void) name;
-	(void) pw1;
-	(void) pw2;
+	(void)up;
+	(void)name;
+	(void)pw1;
+	(void)pw2;
 
 #if 0
 	struct acluser *u;
@@ -452,7 +452,11 @@ char *DoSu(struct acluser **up, char *name, char *pw1, char *pw2)
 	}
 
 	openlog("screen", LOG_PID, LOG_AUTHPRIV);
-	syslog(LOG_NOTICE, "%s: \"su %s\" %s for \"%s\"", SocketPath, name, sorry ? "failed" : "succeeded", (*up)->u_name);
+	syslog(LOG_NOTICE, "%s: \"su %s\" %s for \"%s\"",
+	       SocketPath,
+	       name,
+	       sorry ? "failed" : "succeeded",
+	       (*up)->u_name);
 	closelog();
 
 	if (sorry)

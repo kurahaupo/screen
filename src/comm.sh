@@ -24,11 +24,10 @@ cat << EOF > comm.h
 
 #include "acls.h"
 
-struct comm
-{
-  char *name;
-  int flags;
-  AclBits userbits[ACL_BITS_PER_CMD];
+struct comm {
+	char *name;
+	int flags;
+	AclBits userbits[ACL_BITS_PER_CMD];
 };
 
 extern struct comm comms[];
@@ -48,7 +47,7 @@ extern struct comm comms[];
 #define NEED_FORE	(1<<6)	/* this command needs a fore window */
 #define NEED_DISPLAY	(1<<7)	/* this command needs a display */
 #define NEED_LAYER	(1<<8)	/* this command needs a layer */
-#define CAN_QUERY	(1<<9)  /* this command can be queried, i.e. used with -Q to
+#define CAN_QUERY	(1<<9)	/* this command can be queried, i.e. used with -Q to
 				   get back a result to stdout */
 
 #define ARGS_01		(ARGS_0 | ARGS_PLUS1)
@@ -63,29 +62,28 @@ extern struct comm comms[];
 #define ARGS_124	(ARGS_1 | ARGS_PLUS1 | ARGS_PLUS3)
 #define ARGS_1234	(ARGS_1 | ARGS_PLUS1 | ARGS_PLUS2 | ARGS_PLUS3)
 
-struct action
-{
-  int nr;
-  char **args;
-  int *argl;
-  int quiet;	/* Suppress (currently unused)
-		   0x01 - Error message
-		   0x02 - Normal message
-		*/
+struct action {
+	int nr;
+	char **args;
+	int *argl;
+	int quiet;		/* Suppress (currently unused)
+				   0x01 - Error message
+				   0x02 - Normal message
+				 */
 };
 
 #define RC_ILLEGAL -1
 
-#endif /* SCREEN_COMM_H */
-
+#endif				/* SCREEN_COMM_H */
 EOF
 $AWK < ${srcdir}/comm.c >> comm.h '
-/^  [{] ".*/	{   if (old > $2) {
-		printf("***ERROR: %s <= %s !!!\n\n", $2, old);
-		exit 1;
-	    }
-	old = $2;
-	}
+/^[[:space:]]+[{][[:space:]]*".*/ {
+    if (old > $2) {
+        printf("***ERROR: %s <= %s !!!\n\n", $2, old);
+        exit 1;
+    }
+    old = $2;
+}
 '
 
 $CC -E -I. -I${srcdir} ${srcdir}/comm.c > comm.cpp || exit $?

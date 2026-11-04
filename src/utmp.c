@@ -91,7 +91,7 @@ static int utmpfd = -1;
 #ifndef ENABLE_UTMP
 void SlotToggle(bool how)
 {
-	(void)how; /* unused */
+	(void)how;		/* unused */
 #ifdef UTMPXFILE
 	Msg(0, "Unable to modify %s.\n", UTMPXFILE);
 #else
@@ -109,7 +109,7 @@ void SlotToggle(bool how)
 		return;
 	}
 	if (how) {
-		if ((fore->w_slot == (slot_t) - 1) || (fore->w_slot == (slot_t) 0)) {
+		if ((fore->w_slot == (slot_t)-1) || (fore->w_slot == (slot_t)0)) {
 			if (SetUtmp(fore) == 0)
 				Msg(0, "This window is now logged in.");
 			else
@@ -118,14 +118,14 @@ void SlotToggle(bool how)
 		} else
 			Msg(0, "This window is already logged in.");
 	} else {
-		if (fore->w_slot == (slot_t) - 1)
+		if (fore->w_slot == (slot_t)-1)
 			Msg(0, "This window is already logged out\n");
-		else if (fore->w_slot == (slot_t) 0) {
+		else if (fore->w_slot == (slot_t)0) {
 			Msg(0, "This window is not logged in.");
-			fore->w_slot = (slot_t) - 1;
+			fore->w_slot = (slot_t)-1;
 		} else {
 			RemoveUtmp(fore);
-			if (fore->w_slot != (slot_t) - 1)
+			if (fore->w_slot != (slot_t)-1)
 				Msg(0, "What? Cannot remove Utmp slot?");
 			else
 				Msg(0, "This window is no longer logged in.");
@@ -146,7 +146,7 @@ void CarefulUtmp()
 {
 	Window *p;
 
-	if (!mru_window)		/* hopeless */
+	if (!mru_window)	/* hopeless */
 		return;
 	for (p = mru_window; p; p = p->w_prev_mru)
 		if (p->w_ptyfd >= 0 && p->w_slot != (slot_t)-1)
@@ -186,7 +186,7 @@ void RemoveLoginSlot(void)
 	struct utmpx u, *uu;
 
 	D_loginslot = TtyNameSlot(D_usertty);
-	if (D_loginslot == (slot_t) 0 || D_loginslot == (slot_t) - 1)
+	if (D_loginslot == (slot_t)0 || D_loginslot == (slot_t)-1)
 		return;
 #ifdef UTMP_HELPER
 	if (eff_uid)		/* helpers can't do login slots. sigh. */
@@ -206,12 +206,15 @@ void RemoveLoginSlot(void)
 				D_loginslot = NULL;
 		}
 	}
-	if (D_loginslot == (slot_t) 0) {
+	if (D_loginslot == (slot_t)0) {
 		/* couldn't remove slot, do a 'mesg n' at least. */
 		struct stat stb;
 		char *tty;
 		D_loginttymode = 0;
-		if ((tty = GetPtsPathOrSymlink(D_userfd)) && stat(tty, &stb) == 0 && stb.st_uid == real_uid && !CheckTtyname(tty)
+		if ((tty = GetPtsPathOrSymlink(D_userfd))
+		    && stat(tty, &stb) == 0
+		    && stb.st_uid == real_uid
+		    && !CheckTtyname(tty)
 		    && ((int)stb.st_mode & 0777) != 0666) {
 			D_loginttymode = (int)stb.st_mode & 0777;
 			chmod(D_usertty, stb.st_mode & 0600);
@@ -226,11 +229,11 @@ void RestoreLoginSlot(void)
 {
 	char *tty;
 
-	if (utmpok && D_loginslot != (slot_t) 0 && D_loginslot != (slot_t) - 1) {
+	if (utmpok && D_loginslot != (slot_t)0 && D_loginslot != (slot_t)-1) {
 		if (pututslot(D_loginslot, &D_utmp_logintty, D_loginhost, NULL) == 0)
 			Msg(errno, "Could not write %s", UtmpName);
 	}
-	D_loginslot = (slot_t) 0;
+	D_loginslot = (slot_t)0;
 	if (D_loginttymode && (tty = GetPtsPathOrSymlink(D_userfd)) && !CheckTtyname(tty))
 		fchmod(D_userfd, D_loginttymode);
 }
@@ -255,10 +258,10 @@ int SetUtmp(Window *win)
 	char *host = NULL;
 #endif
 
-	win->w_slot = (slot_t) 0;
+	win->w_slot = (slot_t)0;
 	if (!utmpok || win->w_type != W_TYPE_PTY)
 		return -1;
-	if ((slot = TtyNameSlot(win->w_tty)) == (slot_t) 0) {
+	if ((slot = TtyNameSlot(win->w_tty)) == (slot_t)0) {
 		return -1;
 	}
 
@@ -341,7 +344,7 @@ static struct utmpx *getutslot(slot_t slot)
 
 static int pututslot(slot_t slot, struct utmpx *u, char *host, Window *win)
 {
-	(void)slot; /* unused */
+	(void)slot;		/* unused */
 #ifdef HAVE_UTEMPTER
 	if (eff_uid && win && win->w_ptyfd != -1) {
 		/* sigh, linux hackers made the helper functions void */
@@ -362,8 +365,8 @@ static int pututslot(slot_t slot, struct utmpx *u, char *host, Window *win)
 		return 1;	/* pray for success */
 	}
 #else
-	(void)host; /* unused */
-	(void)win; /* unused */
+	(void)host;		/* unused */
+	(void)win;		/* unused */
 #endif
 
 	setutxent();
@@ -401,4 +404,3 @@ static slot_t TtyNameSlot(char *name)
 }
 
 #endif				/* ENABLE_UTMP */
-

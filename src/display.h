@@ -62,7 +62,7 @@ typedef enum {
 	HSTATUS_MESSAGE		= 2,
 	HSTATUS_HS		= 3,
 	HSTATUS_FIRSTLINE	= 4,
-	HSTATUS_ALWAYS		= (1<<3)
+	HSTATUS_ALWAYS		= (1 << 3)
 } HardStatus;
 
 struct statusposstr {
@@ -76,117 +76,117 @@ struct statusposstr {
 
 
 struct mouse_parse {
-	char sgrmode;			/* non-zero if parsing an SGR sequence */
-	int state;			/* current state of parsing */
-	int params[3];			/* parsed params: button, x, y */
+	char sgrmode;		/* non-zero if parsing an SGR sequence */
+	int state;		/* current state of parsing */
+	int params[3];		/* parsed params: button, x, y */
 };
 
 typedef struct Display Display;
 struct Display {
-	Display *d_next;		/* linked list */
-	struct acluser *d_user;		/* user who owns that display */
-	Canvas d_canvas;		/* our canvas slice */
-	Canvas *d_cvlist;		/* the canvases of this display */
-	Canvas *d_forecv;		/* current input focus */
+	Display *d_next;	/* linked list */
+	struct acluser *d_user;	/* user who owns that display */
+	Canvas d_canvas;	/* our canvas slice */
+	Canvas *d_cvlist;	/* the canvases of this display */
+	Canvas *d_forecv;	/* current input focus */
 	Layout *d_layout;	/* layout we're using */
-	void (*d_processinput) (char *, size_t);
+	void (*d_processinput)(char *, size_t);
 	struct pwdata *d_processinputdata;	/* data for processinput */
-	int d_vpxmin, d_vpxmax;		/* min/max used position on display */
+	int d_vpxmin, d_vpxmax;	/* min/max used position on display */
 	Window *d_fore;		/* pointer to fore window */
-	Window *d_other;		/* pointer to other window */
-	int   d_nonblock;		/* -1 don't block if obufmax reached */
-					/* >0: block after nonblock secs */
-	char  d_termname[MAXTERMLEN + 1]; /* $TERM */
-	char	*d_tentry;		/* buffer for tgetstr */
-	char	d_tcinited;		/* termcap inited flag */
-	int	d_width, d_height;	/* width/height of the screen */
-	int	d_defwidth, d_defheight;	/* default width/height of windows */
-	int	d_top, d_bot;		/* scrollregion start/end */
-	int	d_x, d_y;		/* cursor position */
-	struct mchar d_rend;		/* current rendition */
-	char	d_atyp;			/* current attribute types */
-	int   d_mbcs;			/* saved char for multibytes charset */
-	int   d_encoding;		/* what encoding type the display is */
-	int   d_decodestate;		/* state of our decoder */
-	int   d_realfont;		/* real font of terminal */
-	bool	d_insert;		/* insert mode flag */
-	int	d_keypad;		/* application keypad flag */
-	int	d_cursorkeys;		/* application cursorkeys flag */
-	bool	d_revvid;		/* reverse video */
-	int	d_curvis;		/* cursor visibility */
-	HardStatus	d_has_hstatus;		/* display has hardstatus line */
+	Window *d_other;	/* pointer to other window */
+	int d_nonblock;		/* -1 don't block if obufmax reached */
+				/* >0: block after nonblock secs */
+	char d_termname[MAXTERMLEN + 1];	/* $TERM */
+	char *d_tentry;		/* buffer for tgetstr */
+	char d_tcinited;	/* termcap inited flag */
+	int d_width, d_height;	/* width/height of the screen */
+	int d_defwidth, d_defheight;	/* default width/height of windows */
+	int d_top, d_bot;	/* scrollregion start/end */
+	int d_x, d_y;		/* cursor position */
+	struct mchar d_rend;	/* current rendition */
+	char d_atyp;		/* current attribute types */
+	int d_mbcs;		/* saved char for multibytes charset */
+	int d_encoding;		/* what encoding type the display is */
+	int d_decodestate;	/* state of our decoder */
+	int d_realfont;		/* real font of terminal */
+	bool d_insert;		/* insert mode flag */
+	int d_keypad;		/* application keypad flag */
+	int d_cursorkeys;	/* application cursorkeys flag */
+	bool d_revvid;		/* reverse video */
+	int d_curvis;		/* cursor visibility */
+	HardStatus d_has_hstatus;	/* display has hardstatus line */
 	bool d_hstatus;		/* hardstatus used */
-	int	d_lp_missing;		/* last character on bot line missing */
-	int	d_mouse;			/* mouse mode */
-	int	d_extmouse;		/* extended mouse mode */
+	int d_lp_missing;	/* last character on bot line missing */
+	int d_mouse;		/* mouse mode */
+	int d_extmouse;		/* extended mouse mode */
 	struct mouse_parse d_mouse_parse;	/* state of mouse code parsing */
-	int	d_mousetrack;		/* set when user wants to use mouse even when the window
-					   does not */
-	int   d_bracketed;		/* bracketed paste mode */
-	int   d_cursorstyle;		/* cursor style */
-	int   d_xtermosc[5];		/* osc used */
-	struct mchar d_lpchar;		/* missing char */
+	int d_mousetrack;	/* set when user wants to use mouse even when the window
+				   does not */
+	int d_bracketed;	/* bracketed paste mode */
+	int d_cursorstyle;	/* cursor style */
+	int d_xtermosc[5];	/* osc used */
+	struct mchar d_lpchar;	/* missing char */
 	struct timeval d_status_time;	/* time of status display */
-	DisplayStatus   d_status;			/* is status displayed? */
-	char	d_status_bell;		/* is it only a vbell? */
-	int	d_status_len;		/* length of status line */
-	char *d_status_lastmsg;		/* last displayed message */
-	int   d_status_buflen;		/* last message buffer len */
-	int	d_status_lastx;		/* position of the cursor */
-	int	d_status_lasty;		/*   before status was displayed */
-	int   d_status_obuflen;		/* saved obuflen */ 
-	int   d_status_obuffree;	/* saved obuffree */ 
-	int	d_status_obufpos;	/* end of status position in obuf */
+	DisplayStatus d_status;	/* is status displayed? */
+	char d_status_bell;	/* is it only a vbell? */
+	int d_status_len;	/* length of status line */
+	char *d_status_lastmsg;	/* last displayed message */
+	int d_status_buflen;	/* last message buffer len */
+	int d_status_lastx;	/* position of the cursor */
+	int d_status_lasty;	/*   before status was displayed */
+	int d_status_obuflen;	/* saved obuflen */
+	int d_status_obuffree;	/* saved obuffree */
+	int d_status_obufpos;	/* end of status position in obuf */
 	Event d_statusev;	/* timeout event */
 	Event d_hstatusev;	/* hstatus changed event */
-	int	d_kaablamm;		/* display kaablamm msg */
+	int d_kaablamm;		/* display kaablamm msg */
 	struct action *d_ESCseen;	/* Was the last char an ESC (^a) */
-	pid_t	d_userpid;		/* pid of attacher */
-	char	d_usertty[MAXPATHLEN];	/* tty we are attached to */
-	int	d_userfd;		/* fd of the tty */
+	pid_t d_userpid;	/* pid of attacher */
+	char d_usertty[MAXPATHLEN];	/* tty we are attached to */
+	int d_userfd;		/* fd of the tty */
 	Event d_readev;		/* userfd read event */
-	Event d_writeev;		/* userfd write event */
+	Event d_writeev;	/* userfd write event */
 	Event d_blockedev;	/* blocked timeout */
-	struct mode d_OldMode;		/* tty mode when screen was started */
-	struct mode d_NewMode;		/* New tty mode */
-	int	d_flow;			/* tty's flow control on/off flag*/
-	int   d_intrc;			/* current intr when flow is on */
-	char *d_obuf;			/* output buffer */
-	int   d_obuflen;		/* len of buffer */
-	int	d_obufmax;		/* len where we are blocking the pty */
-	int	d_obuflenmax;		/* len - max */
-	char *d_obufp;			/* pointer in buffer */
-	int   d_obuffree;		/* free bytes in buffer */
-	bool	d_auto_nuke;		/* autonuke flag */
-	int	d_nseqs;		/* number of valid mappings */
-	int	d_aseqs;		/* number of allocated mappings */
-	unsigned char  *d_kmaps;	/* keymaps */
-	unsigned char *d_seqp;		/* pointer into keymap array */
-	int	d_seql;			/* number of parsed chars */
-	unsigned char *d_seqh;		/* last hit */
+	struct mode d_OldMode;	/* tty mode when screen was started */
+	struct mode d_NewMode;	/* New tty mode */
+	int d_flow;		/* tty's flow control on/off flag */
+	int d_intrc;		/* current intr when flow is on */
+	char *d_obuf;		/* output buffer */
+	int d_obuflen;		/* len of buffer */
+	int d_obufmax;		/* len where we are blocking the pty */
+	int d_obuflenmax;	/* len - max */
+	char *d_obufp;		/* pointer in buffer */
+	int d_obuffree;		/* free bytes in buffer */
+	bool d_auto_nuke;	/* autonuke flag */
+	int d_nseqs;		/* number of valid mappings */
+	int d_aseqs;		/* number of allocated mappings */
+	unsigned char *d_kmaps;	/* keymaps */
+	unsigned char *d_seqp;	/* pointer into keymap array */
+	int d_seql;		/* number of parsed chars */
+	unsigned char *d_seqh;	/* last hit */
 	Event d_mapev;		/* timeout event */
-	int	d_dontmap;		/* do not map next */
-	int	d_mapdefault;		/* do map next to default */
-	union	tcu d_tcs[T_N];		/* terminal capabilities */
-	char *d_attrtab[NATTR];		/* attrib emulation table */
-	char  d_attrtyp[NATTR];		/* attrib group table */
-	int   d_hascolor;		/* do we support color */
-	char	d_c0_tab[256];		/* conversion for C0 */
-	char ***d_xtable;		/* char translation table */
-	int	d_UPcost, d_DOcost, d_LEcost, d_NDcost;
-	int	d_CRcost, d_IMcost, d_EIcost, d_NLcost;
-	int   d_printfd;		/* fd for vt100 print sequence */
+	int d_dontmap;		/* do not map next */
+	int d_mapdefault;	/* do map next to default */
+	union tcu d_tcs[T_N];	/* terminal capabilities */
+	char *d_attrtab[NATTR];	/* attrib emulation table */
+	char d_attrtyp[NATTR];	/* attrib group table */
+	int d_hascolor;		/* do we support color */
+	char d_c0_tab[256];	/* conversion for C0 */
+	char ***d_xtable;	/* char translation table */
+	int d_UPcost, d_DOcost, d_LEcost, d_NDcost;
+	int d_CRcost, d_IMcost, d_EIcost, d_NLcost;
+	int d_printfd;		/* fd for vt100 print sequence */
 #ifdef ENABLE_UTMP
-	slot_t d_loginslot;		/* offset, where utmp_logintty belongs */
+	slot_t d_loginslot;	/* offset, where utmp_logintty belongs */
 	struct utmpx d_utmp_logintty;	/* here the original utmp structure is stored */
-	int   d_loginttymode;
+	int d_loginttymode;
 #endif
-	int   d_blocked;
-	int   d_blocked_fuzz;
+	int d_blocked;
+	int d_blocked_fuzz;
 	Event d_idleev;		/* screen blanker */
-	pid_t   d_blankerpid;
+	pid_t d_blankerpid;
 	Event d_blankerev;
-	Event d_mousetimeoutev;		/* mouse sequence timeout event */
+	Event d_mousetimeoutev;	/* mouse sequence timeout event */
 };
 
 #define DISPLAY(x) display->x
@@ -305,10 +305,10 @@ struct Display {
 #define D_mousetimeoutev	DISPLAY(d_mousetimeoutev)
 
 
-#define GRAIN 4096	/* Allocation grain size for output buffer */
-#define OBUF_MAX 256	/* default for obuflimit */
+#define GRAIN 4096		/* Allocation grain size for output buffer */
+#define OBUF_MAX 256		/* default for obuflimit */
 
-#define OUTPUT_BLOCK_SIZE 256  /* Block size of output to tty */
+#define OUTPUT_BLOCK_SIZE 256	/* Block size of output to tty */
 
 #define AddChar(c)		\
 do				\
@@ -319,65 +319,65 @@ do				\
   }				\
 while (0)
 
-Display *MakeDisplay (char *, char *, char *, int, pid_t, struct mode *);
-void  FreeDisplay (void);
-void  DefProcess (char **, size_t *);
-void  DefRedisplayLine (int, int, int, int);
-void  DefClearLine (int, int, int, int);
-int   DefResize (int, int);
-void  DefRestore (void);
-void  AddCStr (char *);
-void  AddCStr2 (char *, int);
-void  InitTerm (int);
-void  FinitTerm (void);
-void  PUTCHAR (uint32_t);
-void  PUTCHARLP (uint32_t);
-void  ClearAll (void);
-void  ClearArea (int, int, int, int, int, int, int, int);
-void  ClearLine (struct mline *, int, int, int, int);
-void  RefreshAll (int);
-void  RefreshArea (int, int, int, int, int);
-void  RefreshLine (int, int, int, int);
-void  Redisplay (int);
-void  RedisplayDisplays (int);
-void  ShowHStatus (char *);
-void  RefreshHStatus (void);
-void  DisplayLine (struct mline *, struct mline *, int, int, int);
-void  GotoPos (int, int);
-int   CalcCost (char *);
-void  ScrollH (int, int, int, int, int, struct mline *);
-void  ScrollV (int, int, int, int, int, int);
-void  PutChar (struct mchar *, int, int);
-void  InsChar (struct mchar *, int, int, int, struct mline *);
-void  WrapChar (struct mchar *, int, int, int, int, int, int, bool);
-void  ChangeScrollRegion (int, int);
-void  InsertMode (bool);
-void  KeypadMode (int);
-void  CursorkeysMode (int);
-void  ReverseVideo (bool);
-void  CursorVisibility (int);
-void  MouseMode (int);
-void  ExtMouseMode (int);
-void  BracketedPasteMode (bool);
-void  CursorStyle (int);
-void  SetRendition (struct mchar *);
-void  SetRenditionMline (struct mline *, int);
-void  MakeStatus (char *);
-void  RemoveStatus (void);
-int   ResizeDisplay (int, int);
-void  AddStr (char *);
-void  AddStrn (char *, int);
-void  Flush (int);
-void  freetty (void);
-void  Resize_obuf (void);
-void  NukePending (void);
-void  ClearAllXtermOSC (void);
-void  SetXtermOSC (int, char *, char *);
-void  ResetIdle (void);
-void  RunBlanker (char **);
-void  KillBlanker (void);
-void  DisplaySleep1000 (int, int);
-void  ClearScrollbackBuffer (void);
+Display *MakeDisplay(char *, char *, char *, int, pid_t, struct mode *);
+void FreeDisplay(void);
+void DefProcess(char **, size_t *);
+void DefRedisplayLine(int, int, int, int);
+void DefClearLine(int, int, int, int);
+int DefResize(int, int);
+void DefRestore(void);
+void AddCStr(char *);
+void AddCStr2(char *, int);
+void InitTerm(int);
+void FinitTerm(void);
+void PUTCHAR(uint32_t);
+void PUTCHARLP(uint32_t);
+void ClearAll(void);
+void ClearArea(int, int, int, int, int, int, int, int);
+void ClearLine(struct mline *, int, int, int, int);
+void RefreshAll(int);
+void RefreshArea(int, int, int, int, int);
+void RefreshLine(int, int, int, int);
+void Redisplay(int);
+void RedisplayDisplays(int);
+void ShowHStatus(char *);
+void RefreshHStatus(void);
+void DisplayLine(struct mline *, struct mline *, int, int, int);
+void GotoPos(int, int);
+int CalcCost(char *);
+void ScrollH(int, int, int, int, int, struct mline *);
+void ScrollV(int, int, int, int, int, int);
+void PutChar(struct mchar *, int, int);
+void InsChar(struct mchar *, int, int, int, struct mline *);
+void WrapChar(struct mchar *, int, int, int, int, int, int, bool);
+void ChangeScrollRegion(int, int);
+void InsertMode(bool);
+void KeypadMode(int);
+void CursorkeysMode(int);
+void ReverseVideo(bool);
+void CursorVisibility(int);
+void MouseMode(int);
+void ExtMouseMode(int);
+void BracketedPasteMode(bool);
+void CursorStyle(int);
+void SetRendition(struct mchar *);
+void SetRenditionMline(struct mline *, int);
+void MakeStatus(char *);
+void RemoveStatus(void);
+int ResizeDisplay(int, int);
+void AddStr(char *);
+void AddStrn(char *, int);
+void Flush(int);
+void freetty(void);
+void Resize_obuf(void);
+void NukePending(void);
+void ClearAllXtermOSC(void);
+void SetXtermOSC(int, char *, char *);
+void ResetIdle(void);
+void RunBlanker(char **);
+void KillBlanker(void);
+void DisplaySleep1000(int, int);
+void ClearScrollbackBuffer(void);
 
 /* global variables */
 
@@ -398,4 +398,4 @@ extern const struct LayFuncs BlankLf;
 
 extern struct statusposstr statuspos;
 
-#endif /* SCREEN_DISPLAY_H */
+#endif				/* SCREEN_DISPLAY_H */

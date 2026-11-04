@@ -73,8 +73,8 @@
 #  define VDISABLE _POSIX_VDISABLE
 # else
 #  define VDISABLE 0377
-# endif /* _POSIX_VDISABLE */
-#endif /* !VDISABLE */
+# endif				/* _POSIX_VDISABLE */
+#endif				/* !VDISABLE */
 
 /*****************************************************************
  *   utmp handling
@@ -83,7 +83,7 @@
 #if defined(ENABLE_UTMP)
 # include <utmpx.h>
 
-typedef char* slot_t;	/* used internally in utmp.c */
+typedef char *slot_t;		/* used internally in utmp.c */
 
 # ifndef UTMPFILE
 #  ifdef UTMPX_FILE
@@ -93,11 +93,11 @@ typedef char* slot_t;	/* used internally in utmp.c */
 #    define UTMPXFILE	_PATH_UTMPX
 #   else
 #    define UTMPXFILE	"/etc/utmpx"
-#   endif /* _PATH_UTMPX */
+#   endif			/* _PATH_UTMPX */
 #  endif
 # endif
 
-#endif /* ENABLE_UTMP */
+#endif				/* ENABLE_UTMP */
 
 /*****************************************************************
  *    signal stuff
@@ -163,4 +163,3 @@ typedef char* slot_t;	/* used internally in utmp.c */
  * MSG_VERSION */
 #define MAXTERMLEN	32
 #define MAXLOGINLEN	256
-

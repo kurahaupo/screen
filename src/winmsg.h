@@ -44,7 +44,7 @@
 #include "winmsgcond.h"
 #include "backtick.h"
 
-#define RENDBUF_SIZE 128 /* max rendition byte count */
+#define RENDBUF_SIZE 128	/* max rendition byte count */
 
 /* escape characters (alphabetical order) */
 typedef enum {
@@ -66,7 +66,7 @@ typedef enum {
 	WINESC_WIN_NUM         = 'n',
 	WINESC_WIN_COUNT       = 'O',
 	WINESC_PID             = 'p',
-	WINESC_COPY_MODE       = 'P',  /* copy/_P_aste mode */
+	WINESC_COPY_MODE       = 'P',	/* copy/_P_aste mode */
 	WINESC_SESS_NAME       = 'S',
 	WINESC_WIN_SIZE        = 's',
 	WINESC_WIN_TTY         = 'T',
@@ -80,7 +80,7 @@ typedef enum {
 	WINESC_REND_START      = '{',
 	WINESC_REND_END        = '}',
 	WINESC_REND_POP        = '-',
-	WINESC_COND            = '?',  /* start and end delimiter */
+	WINESC_COND            = '?',	/* start and end delimiter */
 	WINESC_COND_ELSE       = ':',
 	WINESC_BACKTICK        = '`',
 	WINESC_PAD             = '=',
@@ -93,17 +93,17 @@ typedef enum {
 typedef struct {
 	int num;
 	struct {
-		bool zero  : 1;
-		bool lng   : 1;
-		bool minus : 1;
-		bool plus  : 1;
+		bool zero:1;
+		bool lng:1;
+		bool minus:1;
+		bool plus:1;
 	} flags;
 } WinMsgEsc;
 
 char *MakeWinMsg(char *, Window *, int);
 char *MakeWinMsgEv(WinMsgBuf *, char *, Window *, int, int, Event *, int);
-int   AddWinMsgRend(WinMsgBuf *, const char *, uint64_t);
-void  WindowChanged (Window *, WinMsgEscapeChar);
+int AddWinMsgRend(WinMsgBuf *, const char *, uint64_t);
+void WindowChanged(Window *, WinMsgEscapeChar);
 
 extern WinMsgBuf *g_winmsg;
 
