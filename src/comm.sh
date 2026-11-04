@@ -88,14 +88,16 @@ $AWK < ${srcdir}/comm.c >> comm.h '
 
 $CC -E -I. -I${srcdir} ${srcdir}/comm.c > comm.cpp || exit $?
 sed < comm.cpp \
-  -n \
-  -e '/^ *{ "/y/abcdefghijklmnopqrstuvwxyz/ABCDEFGHIJKLMNOPQRSTUVWXYZ/' \
-  -e '/^ *{ "/s/^ *{ "\([^"]*\)".*/\1/p' \
+    -n \
+    -e '/^ *{ "/y/abcdefghijklmnopqrstuvwxyz/ABCDEFGHIJKLMNOPQRSTUVWXYZ/' \
+    -e '/^ *{ "/s/^ *{ "\([^"]*\)".*/\1/p' \
 | $AWK '
-/.*/ {	printf "#define RC_%s %d\n",$0,i++;
-     }
-END  {	printf "\n#define RC_LAST %d\n",i-1;
-     }
+/.*/ {
+    printf "#define RC_%s %d\n",$0,i++;
+}
+END {
+    printf "\n#define RC_LAST %d\n",i-1;
+}
 ' >> comm.h
 chmod a-w comm.h
 rm -f comm.cpp
