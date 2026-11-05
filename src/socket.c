@@ -732,17 +732,17 @@ void ReceiveMsg(void)
 	int left, len;
 	static Message m;
 	char *p;
-	int ns = ServerSocket;
 	Window *win = NULL;
 	int recvfd = -1;
 
-	struct sockaddr_un a;
 	struct msghdr msg;
 	struct iovec iov;
 	char control[1024];
 
-	len = sizeof(a);
-	if ((ns = accept(ns, (struct sockaddr *)&a, (socklen_t *) &len)) < 0) {
+	struct sockaddr_un a;
+	socklen_t alen = sizeof a;
+	int ns = accept(ServerSocket, (struct sockaddr *)&a, &alen);
+	if (ns < 0) {
 		Msg(errno, "accept");
 		return;
 	}
@@ -929,19 +929,20 @@ void ReceiveMsg(void)
 
 void ReceiveRaw(int s)
 {
-	char rd[256];
-	ssize_t len = 0;
 	struct sockaddr_un a;
-	len = sizeof(a);
-	if ((s = accept(s, (struct sockaddr *)&a, (socklen_t *)&len)) < 0) {
+	socklen_t alen = sizeof a;
+	int s2 = accept(s, (struct sockaddr *)&a, &alen);
+	if (s2 < 0) {
 		Msg(errno, "accept");
 		return;
 	}
-	while ((len = read(s, rd, 255)) > 0) {
+	char rd[256];
+	ssize_t len;
+	while ((len = read(s2, rd, sizeof rd - 1)) > 0) {
 		rd[len] = 0;
 		printf("%s", rd);
 	}
-	close(s);
+	close(s2);
 }
 
 /*
