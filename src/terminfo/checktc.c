@@ -3,10 +3,20 @@
 char *CL, *CM, *CS, *SR;
 int CO, LI, AM, XN;
 
-char *tgetstr(), *getenv();
-void PutStr(), CPutStr(), CCPutStr(), GotoPos(), RETURN();
+extern char *getenv(char const *);
 
-main()
+extern int tgetent(char *tcbuf, char const *term);
+extern char *tgetstr(const char *, char **);
+extern void tputs(char const *s, int x, void (*putfn)(char ch));
+
+static void
+	PutStr(char const *s),
+	CPutStr(char const *s, int c),
+	CCPutStr(char const *s, int x, int y),
+	GotoPos(int x, int y),
+	RETURN(void);
+
+int main(int argc, char **argv)
 {
 	char *term, *s;
 	char tcbuf[1024];
@@ -151,43 +161,36 @@ main()
 	}
 }
 
-void putcha(c)
-char c;
+static void putcha(char c)
 {
 	putchar(c);
 }
 
-void PutStr(s)
-char *s;
+static void PutStr(char const *s)
 {
 	tputs(s, 1, putcha);
 	fflush(stdout);
 }
 
-void CPutStr(s, c)
-char *s;
-int c;
+static void CPutStr(char const *s, int c)
 {
 	tputs(tgoto(s, 0, c), 1, putcha);
 	fflush(stdout);
 }
 
-void CCPutStr(s, x, y)
-char *s;
-int x, y;
+static void CCPutStr(char const *s, int x, int y)
 {
 	tputs(tgoto(s, y, x), 1, putcha);
 	fflush(stdout);
 }
 
-void GotoPos(x, y)
-int x, y;
+static void GotoPos(int x, int y)
 {
 	tputs(tgoto(CM, x, y), 1, putcha);
 	fflush(stdout);
 }
 
-void RETURN()
+static void RETURN(void)
 {
 	printf("Press <RETURN> to continue");
 	fflush(stdout);
