@@ -1406,12 +1406,6 @@ static void DoCommandMsg(Message *mp)
 		queryflag = -1;
 		return;
 	}
-	/*if (user->u_password && *user->u_password) {
-		Msg(0, "User %s has a password, cannot use remote commands (using -Q or -X option).",
-		    mp->m.attach.auser);
-		queryflag = -1;
-		return;
-	}*/
 	if (!display)
 		for (display = displays; display; display = display->d_next)
 			if (D_user == user)
