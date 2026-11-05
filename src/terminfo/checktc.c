@@ -194,6 +194,6 @@ static void RETURN(void)
 {
 	printf("Press <RETURN> to continue");
 	fflush(stdout);
-	while (getchar() != '\n') ;
+	while (getchar() != '\n') {}
 	PutStr(CL);
 }
