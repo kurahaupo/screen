@@ -44,8 +44,6 @@
 #include "search.h"
 #include "winmsg.h"
 
-#include "inline.h" /* must follow ansi.h and image.h */
-
 /*
  * !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
  *
