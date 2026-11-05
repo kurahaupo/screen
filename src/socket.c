@@ -635,15 +635,13 @@ static int CreateTempDisplay(Message *m, int recvfd, Window *win)
 			ssize_t ret = readlink(myttyname, ttyname_in_ns,
 				       ARRAY_SIZE(ttyname_in_ns));
 			if (ret < 0 || (size_t)ret >= ARRAY_SIZE(ttyname_in_ns)) {
-				Msg(errno, "Could not perform necessary sanity "
-					   "checks on pts device.");
+				Msg(errno, "Could not perform necessary sanity checks on pts device.");
 				close(i);
 				KillUnpriv(pid, SIG_BYE);
 				return -1;
 			}
 			if (strcmp(ttyname_in_ns, m->m_tty)) {
-				Msg(errno, "Attach: passed fd does not match "
-					   "tty: %s - %s!",
+				Msg(errno, "Attach: passed fd does not match tty: %s - %s!",
 				    ttyname_in_ns,
 				    m->m_tty[0] != '\0' ? m->m_tty : "(null)");
 				close(i);
