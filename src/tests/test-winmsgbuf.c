@@ -65,7 +65,7 @@ int main(void)
 		size_t new = wmb_size(wmb);
 		ASSERT_NOALLOC(ASSERT(wmb_expand(wmb, want) == new));
 		ASSERT_NOALLOC(ASSERT(wmb_expand(wmb, want - 1) == new));
-		ASSERT_NOALLOC(ASSERT(wmb_expand(wmb, 0) == new););
+		ASSERT_NOALLOC(ASSERT(wmb_expand(wmb, 0) == new));
 
 		/* if buffer expansion fails, the original size shall be retained */
 		ASSERT_GCC(FAILLOC(wmb_expand(wmb, new + 5)) == new);
