@@ -835,8 +835,8 @@ char *MakeTermcap(bool aflag)
 		if (D_CC0 || (D_CS0 && *D_CS0))
 			AddCap("as=\\E(0:"
 			       "ae=\\E(B:"
-			       "ac=\\140\\140aaffggjjkkllmmnnooppqqrrssttuuvvwwxxyyzz{{||}}~~..--++,,hhII00:");
-			       /* '\140' == '`', which we avoid because some shells dump core... */
+			       "ac=\\140\\140aaffggjjkkllmmnnooppqqrrssttuuvvwwxxyyzz{{||}}~~..--++,,hhII00:"
+			       /* '\140' == '`', which we avoid because some shells dump core... */ );
 		if (D_PO)
 			AddCap("po=\\E[5i:"
 			       "pf=\\E[4i:");
