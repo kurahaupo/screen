@@ -36,7 +36,7 @@
 #include <fcntl.h>
 #include <sys/socket.h>
 #ifdef _OpenBSD_
-#include <sys/uio.h>
+# include <sys/uio.h>
 #endif
 #include <sys/un.h>
 #include <utime.h>
@@ -47,29 +47,29 @@
 #include <signal.h>
 
 #if ENABLE_PAM
-  #include <security/pam_appl.h>
+# include <security/pam_appl.h>
 #else
-  #ifdef _PWD_H_
-    #include <pwd.h>
-  #else
-    #include <shadow.h>
-  #endif /* PWD_H */
+# ifdef _PWD_H_
+#  include <pwd.h>
+# else
+#  include <shadow.h>
+# endif				/* PWD_H */
 #endif
 
 #include "screen.h"
 
 #ifdef HAVE_DIRENT_H
-#include <dirent.h>
+# include <dirent.h>
 #else
-#include <sys/dir.h>
-#define dirent direct
+# include <sys/dir.h>
+# define dirent direct
 #endif
 
 #ifndef CMSG_LEN
-#define CMSG_LEN(length) ((_CMSG_DATA_ALIGN(sizeof(struct cmsghdr))) + (length))
+# define CMSG_LEN(length) ((_CMSG_DATA_ALIGN(sizeof(struct cmsghdr))) + (length))
 #endif
 #ifndef CMSG_SPACE
-#define CMSG_SPACE(length) ((_CMSG_DATA_ALIGN(sizeof(struct cmsghdr))) + (_CMSG_DATA_ALIGN(length)))
+# define CMSG_SPACE(length) ((_CMSG_DATA_ALIGN(sizeof(struct cmsghdr))) + (_CMSG_DATA_ALIGN(length)))
 #endif
 
 #include "encoding.h"
@@ -92,9 +92,10 @@ static void AskPassword(Message *);
 static bool CheckPassword(const char *password);
 static void PasswordProcessInput(char *, size_t);
 
-static void KillUnpriv(pid_t pid, int sig) {
-       UserContext();
-       UserReturn(kill(pid, sig));
+static void KillUnpriv(pid_t pid, int sig)
+{
+	UserContext();
+	UserReturn(kill(pid, sig));
 }
 
 #define SOCKMODE (S_IWRITE | S_IREAD | (displays ? S_IEXEC : 0) | (multi ? 1 : 0))
@@ -194,17 +195,17 @@ int FindSocket(int *fdp, int *nfoundp, int *notherp, char *match)
 			} else
 				cmatch = (*(n + matchlen) == 0);
 		}
-        if (sdirlen + 1 + strlen(name) >= sizeof(SocketPath))
-            continue;   /* skip entry — path would be too long */
-        snprintf(SocketPath + sdirlen, sizeof(SocketPath) - sdirlen, "/%s", name);
+		if (sdirlen + 1 + strlen(name) >= sizeof(SocketPath))
+			continue;	/* skip entry — path would be too long */
+		snprintf(SocketPath + sdirlen, sizeof(SocketPath) - sdirlen, "/%s", name);
 
 		errno = 0;
 		if (stat(SocketPath, &st)) {
 			continue;
 		}
 
-#ifdef SOCKET_DIR	/* if SOCKET_DIR is not defined, the socket is in $HOME.
-			   in that case it does not make sense to compare uids. */
+#ifdef SOCKET_DIR		/* if SOCKET_DIR is not defined, the socket is in $HOME.
+				   in that case it does not make sense to compare uids. */
 		if (st.st_uid != real_uid)
 			continue;
 #endif
@@ -386,8 +387,8 @@ int MakeServerSocket(void)
 		Msg(0, "There is already a screen running on %s.", Filename(SocketPath));
 		if (stat(SocketPath, &st) == -1)
 			Panic(errno, "stat");
-#ifdef SOCKET_DIR	/* if SOCKET_DIR is not defined, the socket is in $HOME.
-			   in that case it does not make sense to compare uids. */
+#ifdef SOCKET_DIR		/* if SOCKET_DIR is not defined, the socket is in $HOME.
+				   in that case it does not make sense to compare uids. */
 		if (st.st_uid != real_uid)
 			Panic(0, "Unfortunately you are not its owner.");
 #endif
@@ -457,7 +458,7 @@ void SendCreateMsg(char *sty, struct NewWindow *nwin)
 
 	used = strlen(SocketPath);
 	if (used + 1 + strlen(sty) >= sizeof(SocketPath))
-	    Panic(0, "Socket path too long.");
+		Panic(0, "Socket path too long.");
 	snprintf(SocketPath + used, sizeof(SocketPath) - used, "/%s", sty);
 
 	if ((s = MakeClientSocket(1)) == -1)
@@ -496,7 +497,7 @@ void SendCreateMsg(char *sty, struct NewWindow *nwin)
 	m.protocol_revision = MSG_REVISION;
 	if (write(s, (char *)&m, sizeof(Message)) != sizeof(Message))
 		Msg(errno, "write");
-end:
+ end:
 	close(s);
 }
 
@@ -626,14 +627,14 @@ static int CreateTempDisplay(Message *m, int recvfd, Window *win)
 		return -1;
 	}
 	if (recvfd != -1) {
-		char ttyname_in_ns[MAXPATHLEN] = {0};
+		char ttyname_in_ns[MAXPATHLEN] = { 0 };
 		char *myttyname;
 		i = recvfd;
 		errno = 0;
 		myttyname = GetPtsPathOrSymlink(i);
 		if (myttyname && errno == ENODEV) {
 			ssize_t ret = readlink(myttyname, ttyname_in_ns,
-				       ARRAY_SIZE(ttyname_in_ns));
+					       ARRAY_SIZE(ttyname_in_ns));
 			if (ret < 0 || (size_t)ret >= ARRAY_SIZE(ttyname_in_ns)) {
 				Msg(errno, "Could not perform necessary sanity checks on pts device.");
 				close(i);
@@ -659,8 +660,7 @@ static int CreateTempDisplay(Message *m, int recvfd, Window *win)
 			strncpy(m->m_tty, myttyname, ARRAY_SIZE(m->m_tty) - 1);
 			m->m_tty[ARRAY_SIZE(m->m_tty) - 1] = 0;
 		} else if (myttyname == NULL || strcmp(myttyname, m->m_tty)) {
-			Msg(errno,
-			    "Attach: passed fd does not match tty: %s - %s!",
+			Msg(errno, "Attach: passed fd does not match tty: %s - %s!",
 			    m->m_tty, myttyname ? myttyname : "NULL");
 			close(i);
 			KillUnpriv(pid, SIG_BYE);
@@ -678,7 +678,7 @@ static int CreateTempDisplay(Message *m, int recvfd, Window *win)
 	if (attach) {
 		if (display || win) {
 			int unused_result = write(i, "Attaching from inside of screen?\n", 33);
-			(void)unused_result; /* unused */
+			(void)unused_result;	/* unused */
 			close(i);
 			KillUnpriv(pid, SIG_BYE);
 			Msg(0, "Attach msg ignored: coming from inside.");
@@ -688,7 +688,7 @@ static int CreateTempDisplay(Message *m, int recvfd, Window *win)
 		if (strcmp(user, LoginName))
 			if (*FindUserPtr(user) == NULL) {
 				int unused_result = write(i, "Access to session denied.\n", 26);
-				(void)unused_result; /* unused */
+				(void)unused_result;	/* unused */
 				close(i);
 				Kill(pid, SIG_BYE);
 				Msg(0, "Attach: access denied for user %s.", user);
@@ -698,9 +698,10 @@ static int CreateTempDisplay(Message *m, int recvfd, Window *win)
 
 	/* create new display */
 	GetTTY(i, &Mode);
-	if (MakeDisplay(user, m->m_tty, attach ? m->m.attach.envterm : "", attach && m->m.attach.envtruecolor, i, pid, &Mode) == NULL) {
+	if (MakeDisplay(user, m->m_tty, attach ? m->m.attach.envterm : "",
+			attach && m->m.attach.envtruecolor, i, pid, &Mode) == NULL) {
 		int unused_result = write(i, "Could not make display.\n", 24);
-		(void)unused_result; /* unused */
+		(void)unused_result;	/* unused */
 		close(i);
 		Msg(0, "Attach: could not make display for user %s", user);
 		KillUnpriv(pid, SIG_BYE);
@@ -910,9 +911,8 @@ void ReceiveMsg(void)
 				queryflag = -1;
 			if (CheckPid(m.m.command.apid)) {
 				Msg(0, "Query attempt with bad pid(%d)!", m.m.command.apid);
-			}
-			else {
-				KillUnpriv(m.m.command.apid, (queryflag >= 0) ? SIGCONT : SIG_BYE);     /* Send SIG_BYE if an error happened */
+			} else {
+				KillUnpriv(m.m.command.apid, (queryflag >= 0) ? SIGCONT : SIG_BYE);	/* Send SIG_BYE if an error happened */
 				queryflag = -1;
 			}
 		}
@@ -1035,7 +1035,7 @@ static void FinishAttach(Message *m)
 	RemoveLoginSlot();
 	if (displays->d_next == NULL)
 		for (Window *win = mru_window; win; win = win->w_prev_mru)
-			if (win->w_ptyfd >= 0 && win->w_slot != (slot_t) - 1)
+			if (win->w_ptyfd >= 0 && win->w_slot != (slot_t)-1)
 				SetUtmp(win);
 #endif
 
@@ -1166,34 +1166,33 @@ static void AskPassword(Message *m)
 
 	/* if GECOS data is CSV, we only want the text before the first comma */
 	if ((gecos_comma = strchr(ppp->pw_gecos, ',')))
-		if (!(realname = strndup(ppp->pw_gecos, gecos_comma -  ppp->pw_gecos)))
-			gecos_comma = NULL; /* well, it was worth a shot. */
+		if (!(realname = strndup(ppp->pw_gecos, gecos_comma - ppp->pw_gecos)))
+			gecos_comma = NULL;	/* well, it was worth a shot. */
 
 	snprintf(prompt, sizeof(prompt), "\ascreen used by %s%s<%s> on %s.\r\nPassword: ",
-		 gecos_comma ? realname : ppp->pw_gecos,
-		 ppp->pw_gecos[0] ? " " : "", ppp->pw_name, HostName);
+		 gecos_comma ? realname : ppp->pw_gecos, ppp->pw_gecos[0] ? " " : "", ppp->pw_name, HostName);
 
 	free(realname);
 	AddStr(prompt);
 }
 
 #if ENABLE_PAM
-#if defined(_sun) || defined(__sun_)    /* Solaris */
-# define PAM_MSG_CONST
-#else                                   /* Linux, BSD, etc. */
-# define PAM_MSG_CONST const
-#endif
-static int screen_conv(int num_msg, PAM_MSG_CONST struct pam_message **msg,
-		struct pam_response **resp, void *data)
+# if defined(_sun) || defined(__sun_)	/* Solaris */
+#  define PAM_MSG_CONST
+# else				/* Linux, BSD, etc. */
+#  define PAM_MSG_CONST const
+# endif
+static int screen_conv(int num_msg, PAM_MSG_CONST struct pam_message **msg, struct pam_response **resp, void *data)
 {
-	(void)num_msg;	/* unused */
-	(void)msg;	/* unused */
+	(void)num_msg;		/* unused */
+	(void)msg;		/* unused */
 
 	*resp = (struct pam_response *)data;
 	return PAM_SUCCESS;
 }
 
-static bool CheckPassword(const char *password) {
+static bool CheckPassword(const char *password)
+{
 	bool ret = false;
 
 	struct pam_response *reply;
@@ -1210,8 +1209,8 @@ static bool CheckPassword(const char *password) {
 
 	pamc.conv = &screen_conv;
 	pamc.appdata_ptr = (void *)reply;
-	pam_ret= pam_start("screen", ppp->pw_name, &pamc, &pamh);
-	if (pam_ret!= PAM_SUCCESS) {
+	pam_ret = pam_start("screen", ppp->pw_name, &pamc, &pamh);
+	if (pam_ret != PAM_SUCCESS) {
 		return false;
 	}
 
@@ -1241,17 +1240,18 @@ static bool CheckPassword(const char *password) {
 	return ret;
 }
 
-#else /* ENABLE_PAM */
+#else				/* ENABLE_PAM */
 
-static bool CheckPassword(const char *password) {
+static bool CheckPassword(const char *password)
+{
 	bool ret = false;
 	char *passwd = 0;
 
-#ifndef _PWD_H
+# ifndef _PWD_H
 	struct passwd *p;
-#else
+# else
 	struct spwd *p;
-#endif
+# endif
 
 	gid_t gid = getegid();
 	uid_t uid = geteuid();
@@ -1259,11 +1259,11 @@ static bool CheckPassword(const char *password) {
 	if (seteuid(0) || setegid(0))
 		Panic(0, "\r\ncan't get root uid/gid\r\n");
 
-#ifndef _PWD_H
+# ifndef _PWD_H
 	p = getpwnam_shadow(ppp->pw_name);
-#else
+# else
 	p = getspnam(ppp->pw_name);
-#endif
+# endif
 	if (p == NULL)
 		return false;
 
@@ -1274,16 +1274,16 @@ static bool CheckPassword(const char *password) {
 		AddStr("\r\ncan't open passwd file\r\n");
 		return false;
 	}
-#ifndef _PWD_H
+# ifndef _PWD_H
 	passwd = crypt(password, p->pw_passwd);
-	ret    = (strcmp(passwd, p->pw_passwd) == 0);
-#else
+	ret = (strcmp(passwd, p->pw_passwd) == 0);
+# else
 	passwd = crypt(password, p->sp_pwdp);
 	ret = (strcmp(passwd, p->sp_pwdp) == 0);
-#endif
+# endif
 	return ret;
 }
-#endif /* ENABLE_PAM */
+#endif				/* ENABLE_PAM */
 
 static void PasswordProcessInput(char *ibuf, size_t ilen)
 {
@@ -1303,7 +1303,7 @@ static void PasswordProcessInput(char *ibuf, size_t ilen)
 				/* uh oh, user failed */
 				memset(pwdata->buf, 0, sizeof(pwdata->buf));
 				AddStr("\r\nPassword incorrect.\r\n");
-				D_processinputdata = NULL; /* otherwise freed by FreeDis */
+				D_processinputdata = NULL;	/* otherwise freed by FreeDis */
 				FreeDisplay();
 				Msg(0, "Illegal reattach attempt from terminal %s.", pwdata->m.m_tty);
 				free(pwdata);

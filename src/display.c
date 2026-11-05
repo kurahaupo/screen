@@ -45,7 +45,7 @@
 #include "canvas.h"
 #include "encoding.h"
 #include "mark.h"
-#include "inline.h" /* must follow ansi.h and image.h */
+#include "inline.h"		/* must follow ansi.h and image.h */
 #include "misc.h"
 #include "process.h"
 #include "pty.h"
@@ -54,11 +54,11 @@
 #include "tty.h"
 #include "winmsg.h"
 
-#include "inline.h" /* must follow ansi.h and image.h */
+#include "inline.h"		/* must follow ansi.h and image.h */
 
 /* CSI parsing status */
 enum {
-	CSI_PB=0, CSI_PX=1, CSI_PY=2, CSI_DONE=3,
+	CSI_PB = 0, CSI_PX = 1, CSI_PY = 2, CSI_DONE = 3,
 	CSI_ESC_SEEN, CSI_BEGIN, CSI_INACTIVE, CSI_INVALID
 };
 
@@ -75,7 +75,7 @@ static void disp_map_fn(Event *, void *);
 static void disp_idle_fn(Event *, void *);
 static void disp_blanker_fn(Event *, void *);
 static void disp_mousetimeout_fn(Event *, void *);
-static void disp_processinput (Display *, unsigned char *, size_t);
+static void disp_processinput(Display *, unsigned char *, size_t);
 static void WriteLP(int, int);
 static void INSERTCHAR(uint32_t);
 static void RAW_PUTCHAR(uint32_t);
@@ -125,8 +125,8 @@ void DefClearLine(int y, int xs, int xe, int bce)
 
 int DefResize(int width, int height)
 {
-	(void)width; /* unused */
-	(void)height; /* unused */
+	(void)width;		/* unused */
+	(void)height;		/* unused */
 	return -1;
 }
 
@@ -965,8 +965,10 @@ void Redisplay(int cur_only)
 	else
 		RefreshAll(1);
 	RefreshHStatus();
-	CV_CALL(D_forecv, LayRestore();
-		LaySetCursor());
+	CV_CALL(D_forecv,
+		LayRestore();
+		LaySetCursor()
+	);
 }
 
 void RedisplayDisplays(int cur_only)
@@ -980,7 +982,7 @@ void RedisplayDisplays(int cur_only)
 /* XXX: use oml! */
 void ScrollH(int y, int xs, int xe, int n, int bce, struct mline *oml)
 {
-	(void)oml; /* unused */
+	(void)oml;		/* unused */
 
 	if (n == 0)
 		return;
@@ -1099,7 +1101,7 @@ void ScrollV(int xs, int ys, int xe, int ye, int n, int bce)
 		if (oldbot == D_bot) {	/* have scrolled */
 			if (--n == 0) {
 /* XXX
-	      ChangeScrollRegion(oldtop, oldbot);
+				ChangeScrollRegion(oldtop, oldbot);
 */
 				if (bce && !D_BE)
 					ClearLine(NULL, ye, xs, xe, bce);
@@ -1253,12 +1255,13 @@ int color256to16(int color)
 		min = r < g ? (r < b ? r : b) : (g < b ? g : b);
 		max = r > g ? (r > b ? r : b) : (g > b ? g : b);
 		if (min == max)
-			color = ((max + 1) & 2) << 2 | ((max + 1) & 4 ? 7 : 0);
+			color = ((max + 1) & 2) << 2
+			      | ((max + 1) & 4 ? 7 : 0);
 		else
-			color = (b - min) / (max - min) << 2 |
-				(g - min) / (max - min) << 1 |
-				(r - min) / (max - min) |
-				(max > 3 ? 8: 0);
+			color = (b - min) / (max - min) << 2
+			      | (g - min) / (max - min) << 1
+			      | (r - min) / (max - min)
+			      | (max > 3 ? 8 : 0);
 	}
 	return color;
 }
@@ -1361,7 +1364,7 @@ void SetColor(uint32_t foreground, uint32_t background)
 		tputs(tparm("\033[38;2;%p1%d;%p2%d;%p3%dm", _r, _g, _b), 1, DoAddChar);
 	}
 
-/* BACKGROUND */
+	/* BACKGROUND */
 	if (b != ob && b == 0) {
 		AddCStr("\033[49m");	/* works because AX is set */
 	}
@@ -1383,7 +1386,7 @@ void SetColor(uint32_t foreground, uint32_t background)
 			b = D_CCO == 88 && D_CAB ? color256to88(b) : color256to16(b);
 		}
 		if (D_CAB) {
-		//	AddCStr2(D_CAB, b); // FIXME
+		     // AddCStr2(D_CAB, b);	// FIXME
 			tputs(tparm("\033[48;5;%dm", b), 1, DoAddChar);
 		}
 	}
@@ -1524,7 +1527,8 @@ void MakeStatus(char *msg)
 		/* this is copied over from RemoveStatus() */
 		D_status = 0;
 		GotoPos(STATCOL(D_width, D_status_len), STATLINE());
-		RefreshLine(STATLINE(), STATCOL(D_width, D_status_len), STATCOL(D_width, D_status_len) + D_status_len - 1, 0);
+		RefreshLine(STATLINE(), STATCOL(D_width, D_status_len),
+			    STATCOL(D_width, D_status_len) + D_status_len - 1, 0);
 		GotoPos(D_status_lastx, D_status_lasty);
 		flayer = D_forecv ? D_forecv->c_layer : NULL;
 		if (flayer)
@@ -1560,7 +1564,8 @@ void RemoveStatus(void)
 	if (where == STATUS_ON_WIN) {
 		if (captionalways || (D_canvas.c_slperp && D_canvas.c_slperp->c_slnext)) {
 			GotoPos(STATCOL(D_width, D_status_len), STATLINE());
-			RefreshLine(STATLINE(), STATCOL(D_width, D_status_len), STATCOL(D_width, D_status_len) + D_status_len - 1, 0);
+			RefreshLine(STATLINE(), STATCOL(D_width, D_status_len),
+				    STATCOL(D_width, D_status_len) + D_status_len - 1, 0);
 			GotoPos(D_status_lastx, D_status_lasty);
 		}
 	} else
@@ -1633,7 +1638,8 @@ void ShowHStatus(char *str)
 {
 	int l, ox, oy, max;
 
-	if (D_status == STATUS_ON_WIN && (D_has_hstatus == HSTATUS_FIRSTLINE || D_has_hstatus == HSTATUS_LASTLINE) && STATLINE() == D_height - 1)
+	if (D_status == STATUS_ON_WIN && (D_has_hstatus == HSTATUS_FIRSTLINE || D_has_hstatus == HSTATUS_LASTLINE)
+	    && STATLINE() == D_height - 1)
 		return;		/* sorry, in use */
 	if (D_blocked)
 		return;
@@ -1711,7 +1717,8 @@ void RefreshHStatus(void)
 		return;
 	buf =
 	    MakeWinMsgEv(NULL, hstatusstring, D_fore, '%',
-			 (D_HS && D_has_hstatus == HSTATUS_HS && D_WS > 0) ? D_WS : D_width - !D_CLP + extrabytes, &D_hstatusev, 0);
+			 (D_HS && D_has_hstatus == HSTATUS_HS
+			  && D_WS > 0) ? D_WS : D_width - !D_CLP + extrabytes, &D_hstatusev, 0);
 	if (buf && *buf) {
 		ShowHStatus(buf);
 		if (D_has_hstatus != HSTATUS_IGNORE && D_hstatusev.timeout)
@@ -1728,7 +1735,9 @@ void RefreshHStatus(void)
 void RefreshAll(int isblank)
 {
 	for (Canvas *cv = D_cvlist; cv; cv = cv->c_next) {
-		CV_CALL(cv, LayRedisplayLine(-1, -1, -1, isblank));
+		CV_CALL(cv,
+			LayRedisplayLine(-1, -1, -1, isblank)
+		);
 		display = cv->c_display;	/* just in case! */
 	}
 	RefreshArea(0, 0, D_width - 1, D_height - 1, isblank);
@@ -2009,7 +2018,7 @@ void PutChar(struct mchar *c, int x, int y)
 
 void InsChar(struct mchar *c, int x, int xe, int y, struct mline *oml)
 {
-	(void)oml; /* unused */
+	(void)oml;		/* unused */
 	GotoPos(x, y);
 	if (y == D_bot && !D_CLP) {
 		if (x == D_width - 1) {
@@ -2150,11 +2159,11 @@ void ChangeScrollRegion(int newtop, int newbot)
 void SetXtermOSC(int i, char *s, char *t)
 {
 	static char *oscs[][2] = {
-		{WT_FLAG ";", "screen"},	/* set window title */
-		{"11;", ""},	/* background RGB */
-		{"20;", ""},	/* background */
-		{"39;", "black"},	/* default foreground (black?) */
-		{"49;", "white"}	/* default background (white?) */
+		{ WT_FLAG ";", "screen" },	/* set window title */
+		{ "11;", "" },	/* background RGB */
+		{ "20;", "" },	/* background */
+		{ "39;", "black" },	/* default foreground (black?) */
+		{ "49;", "white" }	/* default background (white?) */
 	};
 
 	if (!D_CXT)
@@ -2409,7 +2418,7 @@ void NukePending(void)
  */
 static void disp_writeev_eagain(Event *event, void *data)
 {
-	(void)event; /* unused */
+	(void)event;		/* unused */
 
 	display = (Display *)data;
 	evdeq(&D_writeev);
@@ -2422,7 +2431,7 @@ static void disp_writeev_fn(Event *event, void *data)
 {
 	int len, size = OUTPUT_BLOCK_SIZE;
 
-	(void)event; /* unused */
+	(void)event;		/* unused */
 
 	display = (Display *)data;
 	len = D_obufp - D_obuf;
@@ -2506,7 +2515,7 @@ static void disp_readev_fn(Event *event, void *data)
 	unsigned char *buf = bufspace + MAX_MOUSE_SEQUENCE;
 	Canvas *cv;
 
-	(void)event; /* unused */
+	(void)event;		/* unused */
 
 	display = (Display *)data;
 
@@ -2563,7 +2572,7 @@ static void disp_readev_fn(Event *event, void *data)
 				char *bufp = (char *)buf;
 				flayer = &p->w_layer;
 				while (size > 0)
-					LayProcess(&bufp, (size_t*)&size);
+					LayProcess(&bufp, (size_t *)&size);
 				return;
 			}
 		zmodem_abort(NULL, display);
@@ -2707,32 +2716,34 @@ static void disp_readev_fn(Event *event, void *data)
 
 				int x = D_mouse_parse.params[CSI_PX];
 				int y = D_mouse_parse.params[CSI_PY];
-				int bias = D_mouse_parse.sgrmode? 1 : 33;
+				int bias = D_mouse_parse.sgrmode ? 1 : 33;
 
 				x -= bias;
 				y -= bias;
 
-				if (x >= D_forecv->c_xs && x <= D_forecv->c_xe && y >= D_forecv->c_ys && y <= D_forecv->c_ye) {
-					if ((D_fore && D_fore->w_mouse) || (D_mousetrack && D_forecv->c_layer->l_mode == 1)) {
+				if (x >= D_forecv->c_xs && x <= D_forecv->c_xe && y >= D_forecv->c_ys
+				    && y <= D_forecv->c_ye) {
+					if ((D_fore && D_fore->w_mouse)
+					    || (D_mousetrack && D_forecv->c_layer->l_mode == 1)) {
 						/* Send clicks only if the window is expecting clicks */
 						x -= D_forecv->c_xoff;
 						y -= D_forecv->c_yoff;
 
-						if (x >= 0 && x < D_forecv->c_layer->l_width && y >= 0 && y < D_forecv->c_layer->l_height) {
-							char tmp[MAX_MOUSE_SEQUENCE+1];
+						if (x >= 0 && x < D_forecv->c_layer->l_width && y >= 0
+						    && y < D_forecv->c_layer->l_height) {
+							char tmp[MAX_MOUSE_SEQUENCE + 1];
 							int n;
 
 							x += bias;
 							y += bias;
 
 							if (D_mouse_parse.sgrmode) {
-								n = snprintf(
-								tmp, MAX_MOUSE_SEQUENCE, "\033[<%d;%d;%d%c",
-								D_mouse_parse.params[CSI_PB], x, y, c);
+								n = snprintf(tmp, MAX_MOUSE_SEQUENCE,
+									     "\033[<%d;%d;%d%c",
+									     D_mouse_parse.params[CSI_PB], x, y, c);
 							} else {
-								n = snprintf(
-								tmp, MAX_MOUSE_SEQUENCE, "\033[M%c%c%c",
-								D_mouse_parse.params[CSI_PB], x, y);
+								n = snprintf(tmp, MAX_MOUSE_SEQUENCE, "\033[M%c%c%c",
+									     D_mouse_parse.params[CSI_PB], x, y);
 							}
 
 							if (n > MAX_MOUSE_SEQUENCE)
@@ -2766,7 +2777,7 @@ static void disp_readev_fn(Event *event, void *data)
 
 		if (D_mouse_parse.state != CSI_INACTIVE) {
 			/* suppress partial sequence at end */
-			size = mark? mark - buf : 0;
+			size = mark ? mark - buf : 0;
 		}
 	}
 
@@ -2774,7 +2785,7 @@ static void disp_readev_fn(Event *event, void *data)
 		disp_processinput(display, buf, size);
 }
 
-static void disp_processinput(Display * display, unsigned char *buf, size_t size)
+static void disp_processinput(Display *display, unsigned char *buf, size_t size)
 {
 	if (D_encoding != (D_forecv ? D_forecv->c_layer->l_encoding : 0)) {
 		int c, enc;
@@ -2805,10 +2816,10 @@ static void disp_processinput(Display * display, unsigned char *buf, size_t size
 
 static void disp_mousetimeout_fn(Event *event, void *data)
 {
-	unsigned char buf[2] = {'\033', '['};
+	unsigned char buf[2] = { '\033', '[' };
 	int size = 0;
 
-	(void)event; /* unused */
+	(void)event;		/* unused */
 
 	display = (Display *)data;
 
@@ -2833,7 +2844,7 @@ static void disp_mousetimeout_fn(Event *event, void *data)
 
 static void disp_status_fn(Event *event, void *data)
 {
-	(void)event; /* unused */
+	(void)event;		/* unused */
 
 	display = (Display *)data;
 	if (D_status)
@@ -2853,7 +2864,7 @@ static void disp_hstatus_fn(Event *event, void *data)
 
 static void disp_blocked_fn(Event *event, void *data)
 {
-	(void)event; /* unused */
+	(void)event;		/* unused */
 
 	display = (Display *)data;
 	if (D_obufp - D_obuf > D_obufmax + D_blocked_fuzz) {
@@ -2872,7 +2883,7 @@ static void disp_map_fn(Event *event, void *data)
 	int l, i;
 	unsigned char *q;
 
-	(void)event; /* unused */
+	(void)event;		/* unused */
 
 	display = (Display *)data;
 	if (!(l = D_seql))
@@ -2899,7 +2910,7 @@ static void disp_idle_fn(Event *event, void *data)
 {
 	Display *olddisplay;
 
-	(void)event; /* unused */
+	(void)event;		/* unused */
 
 	display = (Display *)data;
 	if (idletimo <= 0 || idleaction.nr == RC_ILLEGAL)
@@ -2932,7 +2943,7 @@ static void disp_blanker_fn(Event *event, void *data)
 	char buf[IOSIZE], *b;
 	int size;
 
-	(void)event; /* unused */
+	(void)event;		/* unused */
 
 	display = (Display *)data;
 	size = read(D_blankerev.fd, buf, IOSIZE);

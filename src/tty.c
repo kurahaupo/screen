@@ -54,14 +54,14 @@
 #include "tty.h"
 
 static void consredir_readev_fn(Event *, void *);
-static struct baud_values *lookup_baud (int);
+static struct baud_values *lookup_baud(int);
 
 bool separate_sids = true;
 
 static void DoSendBreak(int, int, int);
 static void SigAlrmDummy(int);
 static int SttyMode(struct mode *, char *);
-static int SetBaud (struct mode *, int, int);
+static int SetBaud(struct mode *, int, int);
 
 /* Frank Schulz (fschulz@pyramid.com):
  * I have no idea why VSTART is not defined and my fix is probably not
@@ -85,7 +85,7 @@ static int SetBaud (struct mode *, int, int);
 #define TTYVTIME 0
 #endif
 
-static void SigAlrmDummy( __attribute__ ((unused))
+static void SigAlrmDummy( __attribute__((unused))
 			 int sigsig)
 {
 	return;
@@ -100,7 +100,7 @@ int OpenTTY(char *line, char *opt)
 {
 	int f;
 	struct mode Mode;
-	void (*sigalrm) (int);
+	void (*sigalrm)(int);
 
 	sigalrm = xsignal(SIGALRM, SigAlrmDummy);
 	alarm(2);
@@ -131,7 +131,7 @@ int OpenTTY(char *line, char *opt)
 	errno = 0;
 	if (ioctl(f, TIOCEXCL, NULL) < 0)
 		Msg(errno, "%s: ioctl TIOCEXCL failed", line);
-#endif	/* TIOCEXCL && TIOCNXCL */
+#endif				/* TIOCEXCL && TIOCNXCL */
 	/*
 	 * We create a sane tty mode. We do not copy things from the display tty
 	 */
@@ -220,20 +220,20 @@ void InitTTY(struct mode *m, int ttyflag)
 #endif				/* OPOST */
 	}
 
-/*
- * Or-ing the speed into c_cflags is dangerous.
- * It breaks on bsdi, where c_ispeed and c_ospeed are extra longs.
- *
- * #if defined(B9600)
- * 	m->tio.c_cflag |= B9600;
- * #endif
- * #if defined(IBSHIFT) && defined(B9600)
- * 	m->tio.c_cflag |= B9600 << IBSHIFT;
- * #endif
- *
- * We hope that we have the posix calls to do it right:
- * If these are not available you might try the above.
- */
+	/*
+	 * Or-ing the speed into c_cflags is dangerous.
+	 * It breaks on bsdi, where c_ispeed and c_ospeed are extra longs.
+	 *
+	 * #if defined(B9600)
+	 *     m->tio.c_cflag |= B9600;
+	 * #endif
+	 * #if defined(IBSHIFT) && defined(B9600)
+	 *     m->tio.c_cflag |= B9600 << IBSHIFT;
+	 * #endif
+	 *
+	 * We hope that we have the posix calls to do it right:
+	 * If these are not available you might try the above.
+	 */
 #if defined(B9600)
 	cfsetospeed(&m->tio, B9600);
 #endif				/* B9600 */
@@ -732,9 +732,9 @@ static void DoSendBreak(int fd, int n, int type)
  * The longest possible break allowed here is 15 seconds.
  */
 
-void SendBreak(Window * wp, int n, int closeopen)
+void SendBreak(Window *wp, int n, int closeopen)
 {
-	void (*sigalrm) (int);
+	void (*sigalrm)(int);
 
 #ifdef ENABLE_TELNET
 	if (wp->w_type == W_TYPE_TELNET) {
@@ -753,7 +753,7 @@ void SendBreak(Window * wp, int n, int closeopen)
 		errno = 0;
 		if (ioctl(wp->w_ptyfd, TIOCNXCL, NULL) < 0)
 			Msg(errno, "%s: ioctl TIOCNXCL failed", wp->w_tty);
-#endif	/* TIOCEXCL && TIOCNXCL */
+#endif				/* TIOCEXCL && TIOCNXCL */
 		close(wp->w_ptyfd);
 
 		usleep(1000 * (n ? n * 250 : 250));
@@ -780,7 +780,7 @@ void SendBreak(Window * wp, int n, int closeopen)
 static Event consredir_ev;
 static int consredirfd[2] = { -1, -1 };
 
-static void consredir_readev_fn(Event * event, void *data)
+static void consredir_readev_fn(Event *event, void *data)
 {
 	char *p, *n, buf[256];
 	size_t l;
@@ -1078,114 +1078,114 @@ char *TtyGetModemStatus(int fd, char *buf)
 
 static struct baud_values btable[] = {
 #if defined(B4000000)
-	{4000000, B4000000},
+	{ 4000000, B4000000 },
 #endif
 #if defined(B3500000)
-	{3500000, B3500000},
+	{ 3500000, B3500000 },
 #endif
 #if defined(B3000000)
-	{3000000, B3000000},
+	{ 3000000, B3000000 },
 #endif
 #if defined(B2500000)
-	{2500000, B2500000},
+	{ 2500000, B2500000 },
 #endif
 #if defined(B2000000)
-	{2000000, B2000000},
+	{ 2000000, B2000000 },
 #endif
 #if defined(B1500000)
-	{1500000, B1500000},
+	{ 1500000, B1500000 },
 #endif
 #if defined(B1152000)
-	{1152000, B1152000},
+	{ 1152000, B1152000 },
 #endif
 #if defined(B1000000)
-	{1000000, B1000000},
+	{ 1000000, B1000000 },
 #endif
 #if defined(B921600)
-	{921600, B921600},
+	{ 921600, B921600 },
 #endif
 #if defined(B576000)
-	{576000, B576000},
+	{ 576000, B576000 },
 #endif
 #if defined(B500000)
-	{500000, B500000},
+	{ 500000, B500000 },
 #endif
 #if defined(B460800)
-	{460800, B460800},
+	{ 460800, B460800 },
 #endif
 #if defined(B230400)
-	{230400, B230400},
+	{ 230400, B230400 },
 #endif
 #if defined(B115200)
-	{115200, B115200},
+	{ 115200, B115200 },
 #endif
 #if defined(B57600)
-	{57600, B57600},
+	{ 57600, B57600 },
 #endif
 #if defined(EXTB)
-	{38400, EXTB},
+	{ 38400, EXTB },
 #endif
 #if defined(B38400)
-	{38400, B38400},
+	{ 38400, B38400 },
 #endif
 #if defined(EXTA)
-	{19200, EXTA},
+	{ 19200, EXTA },
 #endif
 #if defined(B19200)
-	{19200, B19200},
+	{ 19200, B19200 },
 #endif
 #if defined(B9600)
-	{9600, B9600},
+	{ 9600, B9600 },
 #endif
 #if defined(B7200)
-	{7200, B7200},
+	{ 7200, B7200 },
 #endif
 #if defined(B4800)
-	{4800, B4800},
+	{ 4800, B4800 },
 #endif
 #if defined(B3600)
-	{3600, B3600},
+	{ 3600, B3600 },
 #endif
 #if defined(B2400)
-	{2400, B2400},
+	{ 2400, B2400 },
 #endif
 #if defined(B1800)
-	{1800, B1800},
+	{ 1800, B1800 },
 #endif
 #if defined(B1200)
-	{1200, B1200},
+	{ 1200, B1200 },
 #endif
 #if defined(B900)
-	{900, B900},
+	{ 900, B900 },
 #endif
 #if defined(B600)
-	{600, B600},
+	{ 600, B600 },
 #endif
 #if defined(B300)
-	{300, B300},
+	{ 300, B300 },
 #endif
 #if defined(B200)
-	{200, B200},
+	{ 200, B200 },
 #endif
 #if defined(B150)
-	{150, B150},
+	{ 150, B150 },
 #endif
 #if defined(B134)
-	{134, B134},
+	{ 134, B134 },
 #endif
 #if defined(B110)
-	{110, B110},
+	{ 110, B110 },
 #endif
 #if defined(B75)
-	{75, B75},
+	{ 75, B75 },
 #endif
 #if defined(B50)
-	{50, B50},
+	{ 50, B50 },
 #endif
 #if defined(B0)
-	{0, B0},
+	{ 0, B0 },
 #endif
-	{-1, -1}
+	{ -1, -1 }
 };
 
 /*

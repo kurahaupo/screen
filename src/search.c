@@ -71,7 +71,7 @@ static void searchend(char *buf, size_t len, void *data)
 	struct markdata *markdata;
 	Window *p;
 
-	(void)data; /* unused */
+	(void)data;		/* unused */
 
 	markdata = (struct markdata *)flayer->l_data;
 	p = markdata->md_window;
@@ -96,7 +96,7 @@ static void backsearchend(char *buf, size_t len, void *data)
 	int sx, ex, x = -1, y;
 	struct markdata *markdata;
 
-	(void)data; /* unused */
+	(void)data;		/* unused */
 
 	markdata = (struct markdata *)flayer->l_data;
 	markdata->isdir = -1;
@@ -229,7 +229,7 @@ static void is_process(char *p, size_t len, void *data)
 	int pos, x, y, dir;
 	struct markdata *markdata;
 
-	(void)data; /* unused */
+	(void)data;		/* unused */
 
 	if (len == 0)
 		return;
@@ -284,10 +284,12 @@ static void is_process(char *p, size_t len, void *data)
 	if (pos >= 0) {
 		x = pos % flayer->l_width;
 		y = pos / flayer->l_width;
-		LAY_CALL_UP
-		    (LayRedisplayLine(INPUTLINE, 0, flayer->l_width - 1, 0);
-		     revto(x, y); if (W2D(markdata->cy) == INPUTLINE)
-		     revto_line(markdata->cx, markdata->cy, INPUTLINE > 0 ? INPUTLINE - 1 : 1);) ;
+		LAY_CALL_UP(
+			LayRedisplayLine(INPUTLINE, 0, flayer->l_width - 1, 0);
+			revto(x, y);
+			if (W2D(markdata->cy) == INPUTLINE)
+				revto_line(markdata->cx, markdata->cy, INPUTLINE > 0 ? INPUTLINE - 1 : 1);
+		);
 	}
 	if (*p)
 		inp_setprompt(isprompts[markdata->isdir + (pos < 0) + 1], markdata->isstrl ? markdata->isstr : "");

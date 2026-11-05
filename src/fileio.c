@@ -201,9 +201,7 @@ int StartRc(char *rcfilename, int nopanic)
 				continue;
 			}
 			DisplaySleep1000(1000 * atoi(args[1]), 1);
-		}
-		else if (!strcmp(args[0], "termcapinfo") || !strcmp(args[0], "terminfo"))
-		{
+		} else if (!strcmp(args[0], "termcapinfo") || !strcmp(args[0], "terminfo")) {
 			if (!display)
 				continue;
 			if (argc < 3 || argc > 4) {
@@ -310,7 +308,8 @@ void RcLine(char *ubuf, int ubufl)
 }
 
 
-static void putc_encoded(FILE *f, uint32_t c, uint32_t font, int encoding) {
+static void putc_encoded(FILE *f, uint32_t c, uint32_t font, int encoding)
+{
 	/* Filler character which is used for double-width characters. */
 	if (c == 0xff && font == 0xff)
 		return;
@@ -421,7 +420,9 @@ void WriteFile(struct acluser *user, char *fn, int dump)
 					fputs("<\n", f);
 				}
 				if (dump == DUMP_SCROLLBACK) {
-					for (i = fore->w_histheight - fore->w_scrollback_height; i < fore->w_histheight; i++) {
+					for (i = fore->w_histheight - fore->w_scrollback_height;
+					     i < fore->w_histheight;
+					     i++) {
 						p = (WIN(i)->image);
 						pf = WIN(i)->font;
 						for (k = fore->w_width - 1; k >= 0 && p[k] == ' '; k--) ;

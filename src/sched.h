@@ -43,7 +43,7 @@ typedef enum {
 typedef struct Event Event;
 struct Event {
 	Event *next;
-	void (*handler) (Event *, void *);
+	void (*handler)(Event *, void *);
 	void *data;
 	int fd;
 	EventType type;
@@ -54,9 +54,9 @@ struct Event {
 	int *condneg;
 };
 
-void evenq (Event *);
-void evdeq (Event *);
-void SetTimeout (Event *, int);
-void sched (void) __attribute__((__noreturn__));
+void evenq(Event *);
+void evdeq(Event *);
+void SetTimeout(Event *, int);
+void sched(void) __attribute__((__noreturn__));
 
-#endif /* SCREEN_SCHED_H */
+#endif				/* SCREEN_SCHED_H */

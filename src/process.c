@@ -157,177 +157,177 @@ struct digraph {
 
 /* digraph table taken from old vim and rfc1345 */
 static struct digraph digraphs[MAX_DIGRAPH + 1] = {
-	{{' ', ' '}, 160},	/*   */
-	{{'N', 'S'}, 160},	/*   */
-	{{'~', '!'}, 161},	/* ¡ */
-	{{'!', '!'}, 161},	/* ¡ */
-	{{'!', 'I'}, 161},	/* ¡ */
-	{{'c', '|'}, 162},	/* ¢ */
-	{{'c', 't'}, 162},	/* ¢ */
-	{{'$', '$'}, 163},	/* £ */
-	{{'P', 'd'}, 163},	/* £ */
-	{{'o', 'x'}, 164},	/* ¤ */
-	{{'C', 'u'}, 164},	/* ¤ */
-	{{'C', 'u'}, 164},	/* ¤ */
-	{{'E', 'u'}, 164},	/* ¤ */
-	{{'Y', '-'}, 165},	/* ¥ */
-	{{'Y', 'e'}, 165},	/* ¥ */
-	{{'|', '|'}, 166},	/* ¦ */
-	{{'B', 'B'}, 166},	/* ¦ */
-	{{'p', 'a'}, 167},	/* § */
-	{{'S', 'E'}, 167},	/* § */
-	{{'"', '"'}, 168},	/* ¨ */
-	{{'\'', ':'}, 168},	/* ¨ */
-	{{'c', 'O'}, 169},	/* © */
-	{{'C', 'o'}, 169},	/* © */
-	{{'a', '-'}, 170},	/* ª */
-	{{'<', '<'}, 171},	/* « */
-	{{'-', ','}, 172},	/* ¬ */
-	{{'N', 'O'}, 172},	/* ¬ */
-	{{'-', '-'}, 173},	/* ­ */
-	{{'r', 'O'}, 174},	/* ® */
-	{{'R', 'g'}, 174},	/* ® */
-	{{'-', '='}, 175},	/* ¯ */
-	{{'\'', 'm'}, 175},	/* ¯ */
-	{{'~', 'o'}, 176},	/* ° */
-	{{'D', 'G'}, 176},	/* ° */
-	{{'+', '-'}, 177},	/* ± */
-	{{'2', '2'}, 178},	/* ² */
-	{{'2', 'S'}, 178},	/* ² */
-	{{'3', '3'}, 179},	/* ³ */
-	{{'3', 'S'}, 179},	/* ³ */
-	{{'\'', '\''}, 180},	/* ´ */
-	{{'j', 'u'}, 181},	/* µ */
-	{{'M', 'y'}, 181},	/* µ */
-	{{'p', 'p'}, 182},	/* ¶ */
-	{{'P', 'I'}, 182},	/* ¶ */
-	{{'~', '.'}, 183},	/* · */
-	{{'.', 'M'}, 183},	/* · */
-	{{',', ','}, 184},	/* ¸ */
-	{{'\'', ','}, 184},	/* ¸ */
-	{{'1', '1'}, 185},	/* ¹ */
-	{{'1', 'S'}, 185},	/* ¹ */
-	{{'o', '-'}, 186},	/* º */
-	{{'>', '>'}, 187},	/* » */
-	{{'1', '4'}, 188},	/* ¼ */
-	{{'1', '2'}, 189},	/* ½ */
-	{{'3', '4'}, 190},	/* ¾ */
-	{{'~', '?'}, 191},	/* ¿ */
-	{{'?', '?'}, 191},	/* ¿ */
-	{{'?', 'I'}, 191},	/* ¿ */
-	{{'A', '`'}, 192},	/* À */
-	{{'A', '!'}, 192},	/* À */
-	{{'A', '\''}, 193},	/* Á */
-	{{'A', '^'}, 194},	/* Â */
-	{{'A', '>'}, 194},	/* Â */
-	{{'A', '~'}, 195},	/* Ã */
-	{{'A', '?'}, 195},	/* Ã */
-	{{'A', '"'}, 196},	/* Ä */
-	{{'A', ':'}, 196},	/* Ä */
-	{{'A', '@'}, 197},	/* Å */
-	{{'A', 'A'}, 197},	/* Å */
-	{{'A', 'E'}, 198},	/* Æ */
-	{{'C', ','}, 199},	/* Ç */
-	{{'E', '`'}, 200},	/* È */
-	{{'E', '!'}, 200},	/* È */
-	{{'E', '\''}, 201},	/* É */
-	{{'E', '^'}, 202},	/* Ê */
-	{{'E', '>'}, 202},	/* Ê */
-	{{'E', '"'}, 203},	/* Ë */
-	{{'E', ':'}, 203},	/* Ë */
-	{{'I', '`'}, 204},	/* Ì */
-	{{'I', '!'}, 204},	/* Ì */
-	{{'I', '\''}, 205},	/* Í */
-	{{'I', '^'}, 206},	/* Î */
-	{{'I', '>'}, 206},	/* Î */
-	{{'I', '"'}, 207},	/* Ï */
-	{{'I', ':'}, 207},	/* Ï */
-	{{'D', '-'}, 208},	/* Ð */
-	{{'N', '~'}, 209},	/* Ñ */
-	{{'N', '?'}, 209},	/* Ñ */
-	{{'O', '`'}, 210},	/* Ò */
-	{{'O', '!'}, 210},	/* Ò */
-	{{'O', '\''}, 211},	/* Ó */
-	{{'O', '^'}, 212},	/* Ô */
-	{{'O', '>'}, 212},	/* Ô */
-	{{'O', '~'}, 213},	/* Õ */
-	{{'O', '?'}, 213},	/* Õ */
-	{{'O', '"'}, 214},	/* Ö */
-	{{'O', ':'}, 214},	/* Ö */
-	{{'/', '\\'}, 215},	/* × */
-	{{'*', 'x'}, 215},	/* × */
-	{{'O', '/'}, 216},	/* Ø */
-	{{'U', '`'}, 217},	/* Ù */
-	{{'U', '!'}, 217},	/* Ù */
-	{{'U', '\''}, 218},	/* Ú */
-	{{'U', '^'}, 219},	/* Û */
-	{{'U', '>'}, 219},	/* Û */
-	{{'U', '"'}, 220},	/* Ü */
-	{{'U', ':'}, 220},	/* Ü */
-	{{'Y', '\''}, 221},	/* Ý */
-	{{'I', 'p'}, 222},	/* Þ */
-	{{'T', 'H'}, 222},	/* Þ */
-	{{'s', 's'}, 223},	/* ß */
-	{{'s', '"'}, 223},	/* ß */
-	{{'a', '`'}, 224},	/* à */
-	{{'a', '!'}, 224},	/* à */
-	{{'a', '\''}, 225},	/* á */
-	{{'a', '^'}, 226},	/* â */
-	{{'a', '>'}, 226},	/* â */
-	{{'a', '~'}, 227},	/* ã */
-	{{'a', '?'}, 227},	/* ã */
-	{{'a', '"'}, 228},	/* ä */
-	{{'a', ':'}, 228},	/* ä */
-	{{'a', 'a'}, 229},	/* å */
-	{{'a', 'e'}, 230},	/* æ */
-	{{'c', ','}, 231},	/* ç */
-	{{'e', '`'}, 232},	/* è */
-	{{'e', '!'}, 232},	/* è */
-	{{'e', '\''}, 233},	/* é */
-	{{'e', '^'}, 234},	/* ê */
-	{{'e', '>'}, 234},	/* ê */
-	{{'e', '"'}, 235},	/* ë */
-	{{'e', ':'}, 235},	/* ë */
-	{{'i', '`'}, 236},	/* ì */
-	{{'i', '!'}, 236},	/* ì */
-	{{'i', '\''}, 237},	/* í */
-	{{'i', '^'}, 238},	/* î */
-	{{'i', '>'}, 238},	/* î */
-	{{'i', '"'}, 239},	/* ï */
-	{{'i', ':'}, 239},	/* ï */
-	{{'d', '-'}, 240},	/* ð */
-	{{'n', '~'}, 241},	/* ñ */
-	{{'n', '?'}, 241},	/* ñ */
-	{{'o', '`'}, 242},	/* ò */
-	{{'o', '!'}, 242},	/* ò */
-	{{'o', '\''}, 243},	/* ó */
-	{{'o', '^'}, 244},	/* ô */
-	{{'o', '>'}, 244},	/* ô */
-	{{'o', '~'}, 245},	/* õ */
-	{{'o', '?'}, 245},	/* õ */
-	{{'o', '"'}, 246},	/* ö */
-	{{'o', ':'}, 246},	/* ö */
-	{{':', '-'}, 247},	/* ÷ */
-	{{'o', '/'}, 248},	/* ø */
-	{{'u', '`'}, 249},	/* ù */
-	{{'u', '!'}, 249},	/* ù */
-	{{'u', '\''}, 250},	/* ú */
-	{{'u', '^'}, 251},	/* û */
-	{{'u', '>'}, 251},	/* û */
-	{{'u', '"'}, 252},	/* ü */
-	{{'u', ':'}, 252},	/* ü */
-	{{'y', '\''}, 253},	/* ý */
-	{{'i', 'p'}, 254},	/* þ */
-	{{'t', 'h'}, 254},	/* þ */
-	{{'y', '"'}, 255},	/* ÿ */
-	{{'y', ':'}, 255},	/* ÿ */
-	{{'"', '['}, 196},	/* Ä */
-	{{'"', '\\'}, 214},	/* Ö */
-	{{'"', ']'}, 220},	/* Ü */
-	{{'"', '{'}, 228},	/* ä */
-	{{'"', '|'}, 246},	/* ö */
-	{{'"', '}'}, 252},	/* ü */
-	{{'"', '~'}, 223}	/* ß */
+	{ { ' ',  ' '  }, 160 },	/*   */
+	{ { 'N',  'S'  }, 160 },	/*   */
+	{ { '~',  '!'  }, 161 },	/* ¡ */
+	{ { '!',  '!'  }, 161 },	/* ¡ */
+	{ { '!',  'I'  }, 161 },	/* ¡ */
+	{ { 'c',  '|'  }, 162 },	/* ¢ */
+	{ { 'c',  't'  }, 162 },	/* ¢ */
+	{ { '$',  '$'  }, 163 },	/* £ */
+	{ { 'P',  'd'  }, 163 },	/* £ */
+	{ { 'o',  'x'  }, 164 },	/* ¤ */
+	{ { 'C',  'u'  }, 164 },	/* ¤ */
+	{ { 'C',  'u'  }, 164 },	/* ¤ */
+	{ { 'E',  'u'  }, 164 },	/* ¤ */
+	{ { 'Y',  '-'  }, 165 },	/* ¥ */
+	{ { 'Y',  'e'  }, 165 },	/* ¥ */
+	{ { '|',  '|'  }, 166 },	/* ¦ */
+	{ { 'B',  'B'  }, 166 },	/* ¦ */
+	{ { 'p',  'a'  }, 167 },	/* § */
+	{ { 'S',  'E'  }, 167 },	/* § */
+	{ { '"',  '"'  }, 168 },	/* ¨ */
+	{ { '\'', ':'  }, 168 },	/* ¨ */
+	{ { 'c',  'O'  }, 169 },	/* © */
+	{ { 'C',  'o'  }, 169 },	/* © */
+	{ { 'a',  '-'  }, 170 },	/* ª */
+	{ { '<',  '<'  }, 171 },	/* « */
+	{ { '-',  ','  }, 172 },	/* ¬ */
+	{ { 'N',  'O'  }, 172 },	/* ¬ */
+	{ { '-',  '-'  }, 173 },	/* ­ */
+	{ { 'r',  'O'  }, 174 },	/* ® */
+	{ { 'R',  'g'  }, 174 },	/* ® */
+	{ { '-',  '='  }, 175 },	/* ¯ */
+	{ { '\'', 'm'  }, 175 },	/* ¯ */
+	{ { '~',  'o'  }, 176 },	/* ° */
+	{ { 'D',  'G'  }, 176 },	/* ° */
+	{ { '+',  '-'  }, 177 },	/* ± */
+	{ { '2',  '2'  }, 178 },	/* ² */
+	{ { '2',  'S'  }, 178 },	/* ² */
+	{ { '3',  '3'  }, 179 },	/* ³ */
+	{ { '3',  'S'  }, 179 },	/* ³ */
+	{ { '\'', '\'' }, 180 },	/* ´ */
+	{ { 'j',  'u'  }, 181 },	/* µ */
+	{ { 'M',  'y'  }, 181 },	/* µ */
+	{ { 'p',  'p'  }, 182 },	/* ¶ */
+	{ { 'P',  'I'  }, 182 },	/* ¶ */
+	{ { '~',  '.'  }, 183 },	/* · */
+	{ { '.',  'M'  }, 183 },	/* · */
+	{ { ',',  ','  }, 184 },	/* ¸ */
+	{ { '\'', ','  }, 184 },	/* ¸ */
+	{ { '1',  '1'  }, 185 },	/* ¹ */
+	{ { '1',  'S'  }, 185 },	/* ¹ */
+	{ { 'o',  '-'  }, 186 },	/* º */
+	{ { '>',  '>'  }, 187 },	/* » */
+	{ { '1',  '4'  }, 188 },	/* ¼ */
+	{ { '1',  '2'  }, 189 },	/* ½ */
+	{ { '3',  '4'  }, 190 },	/* ¾ */
+	{ { '~',  '?'  }, 191 },	/* ¿ */
+	{ { '?',  '?'  }, 191 },	/* ¿ */
+	{ { '?',  'I'  }, 191 },	/* ¿ */
+	{ { 'A',  '`'  }, 192 },	/* À */
+	{ { 'A',  '!'  }, 192 },	/* À */
+	{ { 'A',  '\'' }, 193 },	/* Á */
+	{ { 'A',  '^'  }, 194 },	/* Â */
+	{ { 'A',  '>'  }, 194 },	/* Â */
+	{ { 'A',  '~'  }, 195 },	/* Ã */
+	{ { 'A',  '?'  }, 195 },	/* Ã */
+	{ { 'A',  '"'  }, 196 },	/* Ä */
+	{ { 'A',  ':'  }, 196 },	/* Ä */
+	{ { 'A',  '@'  }, 197 },	/* Å */
+	{ { 'A',  'A'  }, 197 },	/* Å */
+	{ { 'A',  'E'  }, 198 },	/* Æ */
+	{ { 'C',  ','  }, 199 },	/* Ç */
+	{ { 'E',  '`'  }, 200 },	/* È */
+	{ { 'E',  '!'  }, 200 },	/* È */
+	{ { 'E',  '\'' }, 201 },	/* É */
+	{ { 'E',  '^'  }, 202 },	/* Ê */
+	{ { 'E',  '>'  }, 202 },	/* Ê */
+	{ { 'E',  '"'  }, 203 },	/* Ë */
+	{ { 'E',  ':'  }, 203 },	/* Ë */
+	{ { 'I',  '`'  }, 204 },	/* Ì */
+	{ { 'I',  '!'  }, 204 },	/* Ì */
+	{ { 'I',  '\'' }, 205 },	/* Í */
+	{ { 'I',  '^'  }, 206 },	/* Î */
+	{ { 'I',  '>'  }, 206 },	/* Î */
+	{ { 'I',  '"'  }, 207 },	/* Ï */
+	{ { 'I',  ':'  }, 207 },	/* Ï */
+	{ { 'D',  '-'  }, 208 },	/* Ð */
+	{ { 'N',  '~'  }, 209 },	/* Ñ */
+	{ { 'N',  '?'  }, 209 },	/* Ñ */
+	{ { 'O',  '`'  }, 210 },	/* Ò */
+	{ { 'O',  '!'  }, 210 },	/* Ò */
+	{ { 'O',  '\'' }, 211 },	/* Ó */
+	{ { 'O',  '^'  }, 212 },	/* Ô */
+	{ { 'O',  '>'  }, 212 },	/* Ô */
+	{ { 'O',  '~'  }, 213 },	/* Õ */
+	{ { 'O',  '?'  }, 213 },	/* Õ */
+	{ { 'O',  '"'  }, 214 },	/* Ö */
+	{ { 'O',  ':'  }, 214 },	/* Ö */
+	{ { '/',  '\\' }, 215 },	/* × */
+	{ { '*',  'x'  }, 215 },	/* × */
+	{ { 'O',  '/'  }, 216 },	/* Ø */
+	{ { 'U',  '`'  }, 217 },	/* Ù */
+	{ { 'U',  '!'  }, 217 },	/* Ù */
+	{ { 'U',  '\'' }, 218 },	/* Ú */
+	{ { 'U',  '^'  }, 219 },	/* Û */
+	{ { 'U',  '>'  }, 219 },	/* Û */
+	{ { 'U',  '"'  }, 220 },	/* Ü */
+	{ { 'U',  ':'  }, 220 },	/* Ü */
+	{ { 'Y',  '\'' }, 221 },	/* Ý */
+	{ { 'I',  'p'  }, 222 },	/* Þ */
+	{ { 'T',  'H'  }, 222 },	/* Þ */
+	{ { 's',  's'  }, 223 },	/* ß */
+	{ { 's',  '"'  }, 223 },	/* ß */
+	{ { 'a',  '`'  }, 224 },	/* à */
+	{ { 'a',  '!'  }, 224 },	/* à */
+	{ { 'a',  '\'' }, 225 },	/* á */
+	{ { 'a',  '^'  }, 226 },	/* â */
+	{ { 'a',  '>'  }, 226 },	/* â */
+	{ { 'a',  '~'  }, 227 },	/* ã */
+	{ { 'a',  '?'  }, 227 },	/* ã */
+	{ { 'a',  '"'  }, 228 },	/* ä */
+	{ { 'a',  ':'  }, 228 },	/* ä */
+	{ { 'a',  'a'  }, 229 },	/* å */
+	{ { 'a',  'e'  }, 230 },	/* æ */
+	{ { 'c',  ','  }, 231 },	/* ç */
+	{ { 'e',  '`'  }, 232 },	/* è */
+	{ { 'e',  '!'  }, 232 },	/* è */
+	{ { 'e',  '\'' }, 233 },	/* é */
+	{ { 'e',  '^'  }, 234 },	/* ê */
+	{ { 'e',  '>'  }, 234 },	/* ê */
+	{ { 'e',  '"'  }, 235 },	/* ë */
+	{ { 'e',  ':'  }, 235 },	/* ë */
+	{ { 'i',  '`'  }, 236 },	/* ì */
+	{ { 'i',  '!'  }, 236 },	/* ì */
+	{ { 'i',  '\'' }, 237 },	/* í */
+	{ { 'i',  '^'  }, 238 },	/* î */
+	{ { 'i',  '>'  }, 238 },	/* î */
+	{ { 'i',  '"'  }, 239 },	/* ï */
+	{ { 'i',  ':'  }, 239 },	/* ï */
+	{ { 'd',  '-'  }, 240 },	/* ð */
+	{ { 'n',  '~'  }, 241 },	/* ñ */
+	{ { 'n',  '?'  }, 241 },	/* ñ */
+	{ { 'o',  '`'  }, 242 },	/* ò */
+	{ { 'o',  '!'  }, 242 },	/* ò */
+	{ { 'o',  '\'' }, 243 },	/* ó */
+	{ { 'o',  '^'  }, 244 },	/* ô */
+	{ { 'o',  '>'  }, 244 },	/* ô */
+	{ { 'o',  '~'  }, 245 },	/* õ */
+	{ { 'o',  '?'  }, 245 },	/* õ */
+	{ { 'o',  '"'  }, 246 },	/* ö */
+	{ { 'o',  ':'  }, 246 },	/* ö */
+	{ { ':',  '-'  }, 247 },	/* ÷ */
+	{ { 'o',  '/'  }, 248 },	/* ø */
+	{ { 'u',  '`'  }, 249 },	/* ù */
+	{ { 'u',  '!'  }, 249 },	/* ù */
+	{ { 'u',  '\'' }, 250 },	/* ú */
+	{ { 'u',  '^'  }, 251 },	/* û */
+	{ { 'u',  '>'  }, 251 },	/* û */
+	{ { 'u',  '"'  }, 252 },	/* ü */
+	{ { 'u',  ':'  }, 252 },	/* ü */
+	{ { 'y',  '\'' }, 253 },	/* ý */
+	{ { 'i',  'p'  }, 254 },	/* þ */
+	{ { 't',  'h'  }, 254 },	/* þ */
+	{ { 'y',  '"'  }, 255 },	/* ÿ */
+	{ { 'y',  ':'  }, 255 },	/* ÿ */
+	{ { '"',  '['  }, 196 },	/* Ä */
+	{ { '"',  '\\' }, 214 },	/* Ö */
+	{ { '"',  ']'  }, 220 },	/* Ü */
+	{ { '"',  '{'  }, 228 },	/* ä */
+	{ { '"',  '|'  }, 246 },	/* ö */
+	{ { '"',  '}'  }, 252 },	/* ü */
+	{ { '"',  '~'  }, 223 }	/* ß */
 };
 
 #define RESIZE_FLAG_H 1
@@ -382,9 +382,9 @@ void InitKeytab(void)
 {
 	for (size_t i = 0; i < ARRAY_SIZE(ktab); i++)
 		ktab[i] = (struct action){
-			       .nr = RC_ILLEGAL,
-			       .args = noargs,
-			       .argl = NULL,
+				.nr = RC_ILLEGAL,
+				.args = noargs,
+				.argl = NULL,
 			};
 	for (size_t i = 0; i < KMAP_KEYS + KMAP_AKEYS; i++)
 		umtab[i] =
@@ -401,8 +401,7 @@ void InitKeytab(void)
 			continue;
 		if (kmapdef[i] == NULL)
 			continue;
-		SaveAction(dmtab + i + (KMAPDEFSTART - T_CAPS), RC_STUFF,
-			   (char *[2]){ kmapdef[i] }, NULL);
+		SaveAction(dmtab + i + (KMAPDEFSTART - T_CAPS), RC_STUFF, (char *[2]){ kmapdef[i] }, NULL);
 	}
 	for (size_t i = 0; i < NKMAPADEF; i++) {
 		if (i + KMAPADEFSTART < T_CURSOR)
@@ -421,8 +420,7 @@ void InitKeytab(void)
 			continue;
 		if (kmapmdef[i] == NULL)
 			continue;
-		SaveAction(mmtab + i + (KMAPMDEFSTART - T_CAPS), RC_STUFF,
-			   (char *[2]){ kmapmdef[i] }, NULL);
+		SaveAction(mmtab + i + (KMAPMDEFSTART - T_CAPS), RC_STUFF, (char *[2]){ kmapmdef[i] }, NULL);
 	}
 
 	ktab['h'].nr = RC_HARDCOPY;
@@ -461,13 +459,11 @@ void InitKeytab(void)
 	ktab['M'].nr = RC_MONITOR;
 	ktab['?'].nr = RC_HELP;
 	ktab['*'].nr = RC_DISPLAYS;
-	SaveAction(ktab + '-', RC_SELECT,
-		   (char *[2]){ "-" }, NULL);
+	SaveAction(ktab + '-', RC_SELECT, (char *[2]){ "-" }, NULL);
 	for (int i = 0; i < 10; i++) {
 		char arg1[10];
 		snprintf(arg1, sizeof arg1, "%d", i);
-		SaveAction(ktab + '0' + i, RC_SELECT,
-			   (char *[2]){ arg1 }, NULL);
+		SaveAction(ktab + '0' + i, RC_SELECT, (char *[2]){ arg1 }, NULL);
 	}
 	ktab['\''].nr = RC_SELECT;	/* calling a window by name */
 	SaveAction(ktab + '"', RC_WINDOWLIST, (char *[2]){ "-b" }, NULL);
@@ -493,10 +489,8 @@ void InitKeytab(void)
 	ktab['X'].nr = RC_REMOVE;
 	ktab['F'].nr = RC_FIT;
 	ktab['\t'].nr = RC_FOCUS;
-	SaveAction(ktab + T_BACKTAB - T_CAPS + 256, RC_FOCUS,
-		   (char *[2]){ "prev" }, NULL);
-	SaveAction(ktab + '|', RC_SPLIT,
-		   (char *[2]){ "-v" }, NULL);
+	SaveAction(ktab + T_BACKTAB - T_CAPS + 256, RC_FOCUS, (char *[2]){ "prev" }, NULL);
+	SaveAction(ktab + '|', RC_SPLIT, (char *[2]){ "-v" }, NULL);
 	/* These come last; they may want overwrite others: */
 	if (DefaultEsc >= 0) {
 		ClearAction(&ktab[DefaultEsc]);
@@ -792,7 +786,8 @@ int FindCommnr(const char *str)
 	return RC_ILLEGAL;
 }
 
-static size_t CountArgs(char **args) {
+static size_t CountArgs(char **args)
+{
 	size_t argc = 0;
 	if (args)
 		for (; args[argc]; argc++) ;
@@ -803,32 +798,53 @@ static size_t CountArgs(char **args) {
 /* Make sure the following are kept in sync with ARGS_ANY */
 /* lookup for base-2 logarithm */
 static const int blog[2 << ARGS_ANY] = {
-    [1 << 0] = 1,
-    [1 << 1] = 2,
-    [1 << 2] = 3,
-    [1 << 3] = 4,
-    [1 << 4] = 5,
-    [1 << 5] = 6,
-    /* The last entry here should be equivalent to:
-    [1 << ARGS_ANY-1] = ARGS_ANY, */
+	[1 << 0] = 1,
+	[1 << 1] = 2,
+	[1 << 2] = 3,
+	[1 << 3] = 4,
+	[1 << 4] = 5,
+	[1 << 5] = 6,
+	/* The last entry here should be equivalent to:
+	   [1 << ARGS_ANY-1] = ARGS_ANY, */
 };
 static char *nums[] = { "no", "one", "two", "three", "four", "five" };
 
-static inline int lo_bit(int i) { return i & -i; }
-static inline int hi_bits(int i) { return i ^ lo_bit(i); }
-static inline int range_end_bit(int i)  { return (i + lo_bit(i)) >> 1; }	// top of a consecutive range
-static inline bool is_single_bit(int i) { return ! hi_bits(i); }
-static inline bool is_bit_pair(int i)   { return is_single_bit(hi_bits(i)); }
-static inline bool is_bit_range(int i)  { return is_single_bit(range_end_bit(i)); }
+static inline int lo_bit(int i)
+{
+	return i & -i;
+}
+
+static inline int hi_bits(int i)
+{
+	return i ^ lo_bit(i);
+}
+
+static inline int range_end_bit(int i)
+{
+	return (i + lo_bit(i)) >> 1;
+}				// top of a consecutive range
+
+static inline bool is_single_bit(int i)
+{
+	return !hi_bits(i);
+}
+
+static inline bool is_bit_pair(int i)
+{
+	return is_single_bit(hi_bits(i));
+}
+
+static inline bool is_bit_range(int i)
+{
+	return is_single_bit(range_end_bit(i));
+}
 #endif
 
 static bool CheckArgCount(struct comm *c, int argc)
 {
 	int allowed_counts_mask = c->flags & ARGS_MASK;
 
-	if (allowed_counts_mask == 0
-	 || allowed_counts_mask & 1U << (argc <= ARGS_ANY ?
-					 argc  : ARGS_ANY))
+	if (allowed_counts_mask == 0 || allowed_counts_mask & 1U << (argc <= ARGS_ANY ? argc : ARGS_ANY))
 		return true;
 
 	/* From here to the end of this function is just trying to be
@@ -836,39 +852,43 @@ static bool CheckArgCount(struct comm *c, int argc)
 	char const *name = c->name;
 #ifdef FANCY_ERROR_REPORTING
 	switch (allowed_counts_mask) {
-	  case ARGS_0: Msg(0, "%s: %s: no arguments allowed", rc_name, name); return -1;
-	  case ARGS_1: Msg(0, "%s: %s: exactly one argument required", rc_name, name); return -1;
-	  case ARGS_1M: Msg(0, "%s: %s: at least one argument required", rc_name, name); return -1;
-	  case ARGS_124: Msg(0, "%s: %s: one, two, or four arguments required", rc_name, name); return -1;
+	case ARGS_0:
+		Msg(0, "%s: %s: no arguments allowed", rc_name, name);
+		return -1;
+	case ARGS_1:
+		Msg(0, "%s: %s: exactly one argument required", rc_name, name);
+		return -1;
+	case ARGS_1M:
+		Msg(0, "%s: %s: at least one argument required", rc_name, name);
+		return -1;
+	case ARGS_124:
+		Msg(0, "%s: %s: one, two, or four arguments required", rc_name, name);
+		return -1;
 	}
 
 	int allowed_counts_mask = allowed_counts_mask & ~ARGS_M;
 	bool or_more = allowed_counts_mask & ARGS_M;
-	const int first = blog[lo_bit(allowed_counts_mask)]-1;
+	const int first = blog[lo_bit(allowed_counts_mask)] - 1;
 	if (!or_more && is_single_bit(allowed_counts_mask))
 		Msg(0, "%s: %s: exactly %s arguments required", rc_name, name, nums[first]);
 	else if (!or_more && is_bit_pair(allowed_counts_mask)) {
 		Msg(0, "%s: %s: %s or %s arguments required", rc_name, name,
-		    nums[first], nums[blog[hi_bits(allowed_counts_mask)]-1]);
-	}
-	else if (is_bit_range(allowed_counts_mask)) {
+		    nums[first], nums[blog[hi_bits(allowed_counts_mask)] - 1]);
+	} else if (is_bit_range(allowed_counts_mask)) {
 		/* Use bitwise carry propagation to find the top of the range.
 		 * Since we've already checked is_single_bit(allowed_counts_mask),
 		 * we know that first ≠ range_top (except for first = hi =
 		 * ARGS_M, but we will still correctly render that as "five or
 		 * more") */
-		const int range_top = blog[range_end_bit(allowed_counts_mask)]-1;
+		const int range_top = blog[range_end_bit(allowed_counts_mask)] - 1;
 		if (first == 0)
-			Msg(0, "%s: %s: no more than %s arguments allowed",
-			    rc_name, name, nums[range_top]);
+			Msg(0, "%s: %s: no more than %s arguments allowed", rc_name, name, nums[range_top]);
 		else if (range_top == ARGS_ANY)
-			Msg(0, "%s: %s: at least %s arguments required",
-			    rc_name, name, nums[first]);
+			Msg(0, "%s: %s: at least %s arguments required", rc_name, name, nums[first]);
 		else
 			Msg(0, "%s: %s: between %s and %s arguments required",
 			    rc_name, name, nums[first], nums[range_top]);
-	}
-	else
+	} else
 #endif
 		Msg(0, "%s: %s: wrong number of arguments", rc_name, name);
 
@@ -877,8 +897,8 @@ static bool CheckArgCount(struct comm *c, int argc)
 
 static int CheckArgNum(int nr, char **args)
 {
-    int argc = CountArgs(args);
-    return CheckArgCount(&comms[nr], argc) ? argc : -1;
+	int argc = CountArgs(args);
+	return CheckArgCount(&comms[nr], argc) ? argc : -1;
 }
 
 static void StuffFin(char *buf, size_t len, void *data UNUSED)
@@ -896,7 +916,7 @@ static void StuffFin(char *buf, size_t len, void *data UNUSED)
 # pragma GCC diagnostic ignored "-Wunused-parameter"
 #elif defined(_MSC_VER)
 # __pragma(warning(push))
-# __pragma(warning(disable: 4100)) /* unreferenced formal parameter */
+# __pragma(warning(disable: 4100))	/* unreferenced formal parameter */
 #endif
 
 /* If the command is not 'quieted', then use Msg to output the message. If it's a remote
@@ -1107,8 +1127,7 @@ static void DoCommandQuit(struct action *act)
 
 	if (*args) {
 		if (!strcmp(*args, "--confirm"))
-			Input("Really quit and kill all your windows [y/n]",
-			      1, INP_RAW, confirm_fn, NULL, RC_QUIT);
+			Input("Really quit and kill all your windows [y/n]", 1, INP_RAW, confirm_fn, NULL, RC_QUIT);
 		else
 			OutputMsg(0, "usage: quit [--confirm]");
 		return;
@@ -1170,7 +1189,7 @@ static void DoCommandZmodem(struct action *act)
 			return;
 		}
 		size_t i = 0;
-		for (; i < ARRAY_SIZE(zmodes) && strcmp(zmodes[i], *args) ; ++i) {}
+		for (; i < ARRAY_SIZE(zmodes) && strcmp(zmodes[i], *args); ++i) {}
 		if (i == ARRAY_SIZE(zmodes)) {
 			OutputMsg(0, "usage: zmodem [ on | off | auto | catch | pass | sendcmd CMD | recvcmd CMD ]");
 			return;
@@ -1248,7 +1267,7 @@ static void DoCommandAt(struct action *act)
 	 * we are walking along.
 	 */
 	switch (args[0][n]) {
-	case '*':	/* user */
+	case '*':		/* user */
 		{
 			Display *nd;
 			struct acluser *u;
@@ -1276,15 +1295,14 @@ static void DoCommandAt(struct action *act)
 					continue;
 				DoCommand(args + 1, argl + 1);
 				if (display)
-					OutputMsg(0, "command from %s: %s %s",
-						  s, args[1], args[2] ? args[2] : "");
+					OutputMsg(0, "command from %s: %s %s", s, args[1], args[2] ? args[2] : "");
 				display = NULL;
 				flayer = NULL;
 				fore = NULL;
 			}
 		}
 		break;
-	case '%':	/* display */
+	case '%':		/* display */
 		{
 			Display *nd;
 
@@ -1301,15 +1319,14 @@ static void DoCommandAt(struct action *act)
 					continue;
 				DoCommand(args + 1, argl + 1);
 				if (display)
-					OutputMsg(0, "command from %s: %s %s",
-						  s, args[1], args[2] ? args[2] : "");
+					OutputMsg(0, "command from %s: %s %s", s, args[1], args[2] ? args[2] : "");
 				display = NULL;
 				fore = NULL;
 				flayer = NULL;
 			}
 		}
 		break;
-	case '#':	/* window */
+	case '#':		/* window */
 		n--;
 		/* FALLTHROUGH */
 	default:
@@ -1358,8 +1375,7 @@ static void DoCommandAt(struct action *act)
 				DoCommand(args + 1, argl + 1);
 				if (fore && fore->w_layer.l_cvlist) {
 					display = fore->w_layer.l_cvlist->c_display;
-					OutputMsg(0, "command from %s: %s %s",
-						  s, args[1], args[2] ? args[2] : "");
+					OutputMsg(0, "command from %s: %s %s", s, args[1], args[2] ? args[2] : "");
 				}
 				display = NULL;
 				fore = NULL;
@@ -1367,7 +1383,7 @@ static void DoCommandAt(struct action *act)
 				OutputMsg(0, "%s: at [identifier][%%|*|#] command [args]", rc_name);
 		}
 	}
-out:
+ out:
 	free(s);
 	EffectiveAclUser = NULL;
 }
@@ -1649,8 +1665,7 @@ static void DoCommandBreaktype(struct action *act)
 					break;
 			}
 		if (n < 0 || n >= (int)(ARRAY_SIZE(types)))
-			OutputMsg(0, "%s invalid, chose one of %s, %s or %s", *args, types[0], types[1],
-				  types[2]);
+			OutputMsg(0, "%s invalid, chose one of %s, %s or %s", *args, types[0], types[1], types[2]);
 		else {
 			breaktype = n;
 			OutputMsg(0, "breaktype set to (%d) %s", n, types[n]);
@@ -1762,13 +1777,9 @@ static void DoCommandWidth(struct action *act)
 			return;
 		}
 		if (h == D_height)
-			OutputMsg(0,
-				  "Your termcap does not specify how to change the terminal's width to %d.",
-				  w);
+			OutputMsg(0, "Your termcap does not specify how to change the terminal's width to %d.", w);
 		else if (w == D_width)
-			OutputMsg(0,
-				  "Your termcap does not specify how to change the terminal's height to %d.",
-				  h);
+			OutputMsg(0, "Your termcap does not specify how to change the terminal's height to %d.", h);
 		else
 			OutputMsg(0,
 				  "Your termcap does not specify how to change the terminal's resolution to %dx%d.",
@@ -1856,13 +1867,9 @@ static void DoCommandHeight(struct action *act)
 			return;
 		}
 		if (h == D_height)
-			OutputMsg(0,
-				  "Your termcap does not specify how to change the terminal's width to %d.",
-				  w);
+			OutputMsg(0, "Your termcap does not specify how to change the terminal's width to %d.", w);
 		else if (w == D_width)
-			OutputMsg(0,
-				  "Your termcap does not specify how to change the terminal's height to %d.",
-				  h);
+			OutputMsg(0, "Your termcap does not specify how to change the terminal's height to %d.", h);
 		else
 			OutputMsg(0,
 				  "Your termcap does not specify how to change the terminal's resolution to %dx%d.",
@@ -1940,9 +1947,8 @@ static void DoCommandFlow(struct action *act)
 
 	if (*args) {
 		if (args[0][0] == 'a') {
-			fore->w_flow =
-			    (fore->w_flow & FLOW_AUTO) ? FLOW_AUTOFLAG | FLOW_AUTO | FLOW_ON : FLOW_AUTOFLAG;
-		} else 	if (ParseOnOff(act, &b) == 0)
+			fore->w_flow = (fore->w_flow & FLOW_AUTO) ? FLOW_AUTOFLAG | FLOW_AUTO | FLOW_ON : FLOW_AUTOFLAG;
+		} else if (ParseOnOff(act, &b) == 0)
 			fore->w_flow = (fore->w_flow & FLOW_AUTO) | b ? FLOW_ON : FLOW_OFF;
 	} else {
 		if (fore->w_flow & FLOW_AUTOFLAG)
@@ -2024,8 +2030,7 @@ static void DoCommandMonitor(struct action *act)
 				ACLBYTE(fore->w_mon_notify, i) |= ACLBIT(i);
 		if (fore->w_monitor == MON_OFF)
 			fore->w_monitor = MON_ON;
-		OutputMsg(0, "Window %d (%s) is now being monitored for all activity.", fore->w_number,
-			  fore->w_title);
+		OutputMsg(0, "Window %d (%s) is now being monitored for all activity.", fore->w_number, fore->w_title);
 	} else {
 		if (display)	/* we remove only this user */
 			ACLBYTE(fore->w_mon_notify, D_user->u_id)
@@ -2086,8 +2091,7 @@ static void DoCommandWindowlist(struct action *act)
 			else if (!strcmp(args[i], "-g"))
 				flag |= WLIST_NESTED;
 			else {
-				OutputMsg(0,
-					  "usage: windowlist [-b] [-g] [-m] [string [string] | title [title]]");
+				OutputMsg(0, "usage: windowlist [-b] [-g] [-m] [string [string] | title [title]]");
 				return;
 			}
 		if (i == argc)
@@ -2165,8 +2169,7 @@ static void DoCommandHistory(struct action *act)
 	 * (no window needed here).
 	 */
 	if (args[1] && argl[1] != 1) {
-		OutputMsg(0, "%s: paste destination: character, ^x, or (octal) \\032 expected.",
-			  rc_name);
+		OutputMsg(0, "%s: paste destination: character, ^x, or (octal) \\032 expected.", rc_name);
 		return;
 	} else if (fore)
 		enc = fore->w_encoding;
@@ -2189,8 +2192,7 @@ static void DoCommandHistory(struct action *act)
 			if (enc != plop_tab[(int)(unsigned char)ch].enc)
 				l += RecodeBuf((unsigned char *)plop_tab[(int)(unsigned char)ch].buf,
 					       plop_tab[(int)(unsigned char)ch].len,
-					       plop_tab[(int)(unsigned char)ch].enc, enc,
-					       NULL);
+					       plop_tab[(int)(unsigned char)ch].enc, enc, NULL);
 			else
 				l += plop_tab[(int)(unsigned char)ch].len;
 		}
@@ -2207,8 +2209,7 @@ static void DoCommandHistory(struct action *act)
 	if (s[1] == 0 && args[1] == NULL)
 		if (enc == (*s == '.' ? user->u_plop.enc : plop_tab[(int)(unsigned char)*s].enc)) {
 			MakePaster(&fore->w_paster,
-				   *s == '.' ? user->u_plop.buf : plop_tab[(int)(unsigned char)*s].buf,
-				   l, 0);
+				   *s == '.' ? user->u_plop.buf : plop_tab[(int)(unsigned char)*s].buf, l, 0);
 			return;
 		}
 	/*
@@ -2226,8 +2227,7 @@ static void DoCommandHistory(struct action *act)
 	for (ss = s; (ch = *ss); ss++) {
 		struct plop *pp = (ch == '.' ? &user->u_plop : &plop_tab[(int)(unsigned char)ch]);
 		if (pp->enc != enc) {
-			l += RecodeBuf((unsigned char *)pp->buf, pp->len, pp->enc, enc,
-				       (unsigned char *)dbuf + l);
+			l += RecodeBuf((unsigned char *)pp->buf, pp->len, pp->enc, enc, (unsigned char *)dbuf + l);
 			continue;
 		}
 		memmove(dbuf + l, pp->buf, pp->len);
@@ -2285,8 +2285,7 @@ static void DoCommandPaste(struct action *act)
 	 * (no window needed here).
 	 */
 	if (args[1] && argl[1] != 1) {
-		OutputMsg(0, "%s: paste destination: character, ^x, or (octal) \\032 expected.",
-			  rc_name);
+		OutputMsg(0, "%s: paste destination: character, ^x, or (octal) \\032 expected.", rc_name);
 		return;
 	} else if (fore)
 		enc = fore->w_encoding;
@@ -2309,8 +2308,7 @@ static void DoCommandPaste(struct action *act)
 			if (enc != plop_tab[(int)(unsigned char)ch].enc)
 				l += RecodeBuf((unsigned char *)plop_tab[(int)(unsigned char)ch].buf,
 					       plop_tab[(int)(unsigned char)ch].len,
-					       plop_tab[(int)(unsigned char)ch].enc, enc,
-					       NULL);
+					       plop_tab[(int)(unsigned char)ch].enc, enc, NULL);
 			else
 				l += plop_tab[(int)(unsigned char)ch].len;
 		}
@@ -2327,8 +2325,7 @@ static void DoCommandPaste(struct action *act)
 	if (s[1] == 0 && args[1] == NULL)
 		if (enc == (*s == '.' ? user->u_plop.enc : plop_tab[(int)(unsigned char)*s].enc)) {
 			MakePaster(&fore->w_paster,
-				   *s == '.' ? user->u_plop.buf : plop_tab[(int)(unsigned char)*s].buf,
-				   l, 0);
+				   *s == '.' ? user->u_plop.buf : plop_tab[(int)(unsigned char)*s].buf, l, 0);
 			return;
 		}
 	/*
@@ -2346,8 +2343,7 @@ static void DoCommandPaste(struct action *act)
 	for (ss = s; (ch = *ss); ss++) {
 		struct plop *pp = (ch == '.' ? &user->u_plop : &plop_tab[(int)(unsigned char)ch]);
 		if (pp->enc != enc) {
-			l += RecodeBuf((unsigned char *)pp->buf, pp->len, pp->enc, enc,
-				       (unsigned char *)dbuf + l);
+			l += RecodeBuf((unsigned char *)pp->buf, pp->len, pp->enc, enc, (unsigned char *)dbuf + l);
 			continue;
 		}
 		memmove(dbuf + l, pp->buf, pp->len);
@@ -2403,8 +2399,7 @@ static void DoCommandWritebuf(struct action *act)
 			return;
 		}
 		if (enc != oldplop.enc) {
-			l = RecodeBuf((unsigned char *)oldplop.buf, oldplop.len, oldplop.enc, enc,
-				      NULL);
+			l = RecodeBuf((unsigned char *)oldplop.buf, oldplop.len, oldplop.enc, enc, NULL);
 			newbuf = malloc(l + 1);
 			if (!newbuf) {
 				OutputMsg(0, "%s", strnomem);
@@ -2454,8 +2449,7 @@ static void DoCommandReadbuf(struct action *act)
 		user->u_plop.len = l;
 		user->u_plop.buf = s;
 		user->u_plop.enc = i;
-		OutputMsg(0, "Read contents of %s into copybuffer",
-			  args[0] ? args[0] : BufferFile);
+		OutputMsg(0, "Read contents of %s into copybuffer", args[0] ? args[0] : BufferFile);
 	}
 }
 
@@ -2867,8 +2861,7 @@ static void DoCommandHardstatus(struct action *act)
 				return;
 			}
 		} else {
-			OutputMsg(0, "%s: usage: hardstatus [always]lastline|ignore|message|string [string]",
-				  rc_name);
+			OutputMsg(0, "%s: usage: hardstatus [always]lastline|ignore|message|string [string]", rc_name);
 			return;
 		}
 		if (new_use != -1) {
@@ -2942,7 +2935,7 @@ static void DoCommandCaption(struct action *act)
 	if (strcmp(args[0], "top") == 0) {
 		captiontop = 1;
 		args++;
-	} else if(strcmp(args[0], "bottom") == 0) {
+	} else if (strcmp(args[0], "bottom") == 0) {
 		captiontop = 0;
 		args++;
 	}
@@ -3087,8 +3080,7 @@ static void DoCommandNumber(struct action *act)
 	char **args = act->args;
 
 	if (*args == NULL)
-		OutputMsg(0, queryflag >= 0 ? "%d (%s)" : "This is window %d (%s).", fore->w_number,
-			  fore->w_title);
+		OutputMsg(0, queryflag >= 0 ? "%d (%s)" : "This is window %d (%s).", fore->w_number, fore->w_title);
 	else {
 		int old = fore->w_number;
 		int rel = 0, parse;
@@ -3482,9 +3474,8 @@ static void DoCommandBindkey(struct action *act)
 			if (kme->str == NULL) {
 				if (args[1])
 					break;
-			} else
-			    if (*argl == (kme->fl & ~KMAP_NOTIMEOUT)
-				&& memcmp(kme->str, *args, *argl) == 0)
+			} else if (*argl == (kme->fl & ~KMAP_NOTIMEOUT)
+				   && memcmp(kme->str, *args, *argl) == 0)
 				break;
 		if (i == kmap_extn) {
 			if (!args[1]) {
@@ -3631,7 +3622,7 @@ static void DoCommandAclgrp(struct action *act)
 				free((char *)g);
 			}
 		}
-	} else {	/* show all groups of user */
+	} else {		/* show all groups of user */
 
 		char buf[256], *p = buf;
 		int ngroups = 0;
@@ -3654,8 +3645,7 @@ static void DoCommandAclgrp(struct action *act)
 		}
 		if (ngroups)
 			*(--p) = '\0';
-		OutputMsg(0, "%s's group%s: %s.", args[0], (ngroups == 1) ? "" : "s",
-			  (ngroups == 0) ? "none" : buf);
+		OutputMsg(0, "%s's group%s: %s.", args[0], (ngroups == 1) ? "" : "s", (ngroups == 0) ? "none" : buf);
 	}
 }
 
@@ -3767,8 +3757,7 @@ static void DoCommandEncoding(struct action *act)
 
 	if (*args && !strcmp(args[0], "-d")) {
 		if (!args[1])
-			OutputMsg(0, "encodings directory is %s",
-				  screenencodings ? screenencodings : "<unset>");
+			OutputMsg(0, "encodings directory is %s", screenencodings ? screenencodings : "<unset>");
 		else {
 			free(screenencodings);
 			screenencodings = SaveStr(args[1]);
@@ -4115,7 +4104,7 @@ static bool ParseSGR3Mode(struct action *act, sgr3_mode_t *m)
 		return true;
 	}
 	if (!strcmp(args[0], "strict")
-	      || !strcmp(args[0], "on")) {
+	    || !strcmp(args[0], "on")) {
 		*m = SGR3_STRICT;
 		return true;
 	}
@@ -4149,8 +4138,7 @@ static void DoCommandSgr3mode(struct action *act)
 	if (ParseSGR3Mode(act, &nwin_default.sgr3_mode)) {
 		if (msgok)
 			OutputMsg(0, "In window %u, SGR 3 (\\e[3m) will select %s",
-				  D_fore->w_number,
-				  sgr3_mode_desc(nwin_default.sgr3_mode));
+				  D_fore->w_number, sgr3_mode_desc(nwin_default.sgr3_mode));
 	}
 }
 
@@ -4171,8 +4159,7 @@ static void DoCommandFit(struct action *act)
 	D_forecv->c_xoff = D_forecv->c_xs;
 	D_forecv->c_yoff = D_forecv->c_ys;
 	RethinkViewportOffsets(D_forecv);
-	ResizeLayer(D_forecv->c_layer, D_forecv->c_xe - D_forecv->c_xs + 1, D_forecv->c_ye - D_forecv->c_ys + 1,
-		    NULL);
+	ResizeLayer(D_forecv->c_layer, D_forecv->c_xe - D_forecv->c_xs + 1, D_forecv->c_ye - D_forecv->c_ys + 1, NULL);
 	flayer = D_forecv->c_layer;
 	LaySetCursor();
 }
@@ -4279,7 +4266,7 @@ static void DoCommandAuth(struct action *act)
 
 	(void)ParseSwitch(act, &do_auth);
 	if (msgok)
-		OutputMsg(0, "Authentication: %s" , do_auth ? "enabled" : "disabled");
+		OutputMsg(0, "Authentication: %s", do_auth ? "enabled" : "disabled");
 }
 
 
@@ -4429,8 +4416,7 @@ static void DoCommandGroup(struct action *act)
 	}
 	if (msgok) {
 		if (fore->w_group)
-			OutputMsg(0, "window group is %d (%s)\n", fore->w_group->w_number,
-				  fore->w_group->w_title);
+			OutputMsg(0, "window group is %d (%s)\n", fore->w_group->w_number, fore->w_group->w_title);
 		else
 			OutputMsg(0, "window belongs to no group");
 	}
@@ -4639,8 +4625,7 @@ static void DoCommandCjkwidth(struct action *act)
 
 	if (ParseSwitch(act, &cjkwidth) == 0) {
 		if (msgok)
-			OutputMsg(0, "Treat ambiguous width characters as %s width",
-				  cjkwidth ? "full" : "half");
+			OutputMsg(0, "Treat ambiguous width characters as %s width", cjkwidth ? "full" : "half");
 	}
 }
 
@@ -4707,7 +4692,7 @@ void DoAction(struct action *act)
 		}
 	}
 
-	static void (*despatch_action[RC_LAST+1])(struct action *act) = {
+	static void (*despatch_action[RC_LAST + 1])(struct action * act) = {
 
 		[RC_ACLADD]		= DoCommandAclchg,
 		[RC_ACLCHG]		= DoCommandAclchg,
@@ -4761,9 +4746,9 @@ void DoAction(struct action *act)
 		[RC_DEFHSTATUS]		= DoCommandDefhstatus,
 		[RC_DEFKANJI]		= DoCommandDefencoding,
 		[RC_DEFLOG]		= DoCommandDeflog,
-	      # if defined(ENABLE_UTMP) && defined(LOGOUTOK)
+# if defined(ENABLE_UTMP) && defined(LOGOUTOK)
 		[RC_DEFLOGIN]		= DoCommandDeflogin,
-	      # endif
+# endif
 		[RC_DEFMODE]		= DoCommandDefmode,
 		[RC_DEFMONITOR]		= DoCommandDefmonitor,
 		[RC_DEFMOUSETRACK]	= DoCommandDefmousetrack,
@@ -4812,9 +4797,9 @@ void DoAction(struct action *act)
 		[RC_LICENSE]		= DoCommandLicense,
 		[RC_LOCKSCREEN]		= DoCommandLockscreen,
 		[RC_LOGFILE]		= DoCommandLogfile,
-	      # if defined(ENABLE_UTMP) && defined(LOGOUTOK)
+# if defined(ENABLE_UTMP) && defined(LOGOUTOK)
 		[RC_LOGIN]		= DoCommandLogin,
-	      # endif
+# endif
 		[RC_LOGTSTAMP]		= DoCommandLogtstamp,
 		[RC_LOG]		= DoCommandLog,
 		[RC_MAPDEFAULT]		= DoCommandMapdefault,
@@ -5021,9 +5006,9 @@ int Parse(char *buf, int bufl, char **args, int *argl)
 		if (*p == '\0' || *p == '#' || *p == '\n') {
 			*p = '\0';
 			*ap = NULL;
-			return ap-args;
+			return ap - args;
 		}
-		if (ap-args >= MAXARGS) {
+		if (ap - args >= MAXARGS) {
 			Msg(0, "%s: too many tokens.", rc_name);
 			return 0;
 		}
@@ -5034,9 +5019,8 @@ int Parse(char *buf, int bufl, char **args, int *argl)
 				delim = 0;
 			else if (delim != '\'' && *p == '\\'
 				 && (p[1] == 'n' || p[1] == 'r' || p[1] == 't' || p[1] == '\'' || p[1] == '"'
-				     || p[1] == '\\' || p[1] == '$' || p[1] == '#' || p[1] == '^' || (p[1] >= '0'
-												      && p[1] <=
-												      '7'))) {
+				     || p[1] == '\\' || p[1] == '$' || p[1] == '#' || p[1] == '^'
+				     || (p[1] >= '0' && p[1] <= '7'))) {
 				p++;
 				if (*p >= '0' && *p <= '7') {
 					*pp = *p - '0';
@@ -5068,8 +5052,7 @@ int Parse(char *buf, int bufl, char **args, int *argl)
 				}
 			} else if (delim != '\'' && *p == '$'
 				   && (p[1] == '{' || p[1] == ':' || (p[1] >= 'a' && p[1] <= 'z')
-				       || (p[1] >= 'A' && p[1] <= 'Z') || (p[1] >= '0' && p[1] <= '9') || p[1] == '_'))
-			{
+				       || (p[1] >= 'A' && p[1] <= 'Z') || (p[1] >= '0' && p[1] <= '9') || p[1] == '_')) {
 				char *ps, *pe, op, *v, xbuf[11], path[MAXPATHLEN];
 				int vl;
 
@@ -5706,7 +5689,7 @@ char *AddWindowFlags(char *buf, int len, Window *p)
 	if (p->w_bell == BELL_DONE)
 		*s++ = '!';
 #ifdef ENABLE_UTMP
-	if (p->w_slot != (slot_t) 0 && p->w_slot != (slot_t) - 1)
+	if (p->w_slot != (slot_t)0 && p->w_slot != (slot_t)-1)
 		*s++ = '$';
 #endif
 	if (p->w_log != NULL) {
@@ -5789,9 +5772,9 @@ void ShowWindows(struct action *act, int where)
 	} else
 		ss = buf;
 	if (!act || !act->quiet)
-	    Msg(0, "%s", ss);
+		Msg(0, "%s", ss);
 	else if (queryflag >= 0)
-	    QueryMsg(0, "%s", ss);
+		QueryMsg(0, "%s", ss);
 
 	wmbc_free(wmbc);
 	wmb_free(wmb);
@@ -5998,7 +5981,10 @@ static void ColonFin(char *buf, size_t len, void *data UNUSED)
 				s = mbuf;
 				for (l = m - 1; l >= 0 && strncmp(buf, comms[l].name, len) == 0; l--) ;
 				for (m = ++l;
-				     m <= r && strncmp(buf, comms[m].name, len) == 0 && (uintptr_t)(s - mbuf) < ARRAY_SIZE(mbuf); m++)
+				     m <= r
+				     && strncmp(buf, comms[m].name, len) == 0
+				     && (uintptr_t)(s - mbuf) < ARRAY_SIZE(mbuf);
+				     m++)
 					s += snprintf(s, ARRAY_SIZE(mbuf) - (s - mbuf), " %s", comms[m].name);
 				if (l < m - 1) {
 					if (showmessage)
@@ -6810,8 +6796,10 @@ void SetForeCanvas(Display *d, Canvas *cv)
 		RefreshHStatus();
 		RefreshXtermOSC();
 		flayer = D_forecv->c_layer;
-		CV_CALL(D_forecv, LayRestore();
-			LaySetCursor());
+		CV_CALL(D_forecv,
+			LayRestore();
+			LaySetCursor()
+		);
 		WindowChanged(NULL, WINESC_FOCUS);
 	}
 
@@ -6896,7 +6884,8 @@ uint64_t ParseAttrColor(char *str, int msgok)
 			case '7':
 			case '8':
 			case '9':
-				if (!*cm) *cm = 1;
+				if (!*cm)
+					*cm = 1;
 				*cl = *cl * 10 + (*str - '0');
 				break;
 			case ';':
@@ -6923,7 +6912,7 @@ uint64_t ParseAttrColor(char *str, int msgok)
 			case '7':
 			case '8':
 			case '9':
-				*cl = ((*cl & 0x0F000000)+0x01000000) + ((*cl << 4) | (*str - '0'));
+				*cl = ((*cl & 0x0F000000) + 0x01000000) + ((*cl << 4) | (*str - '0'));
 				break;
 			case 'a':
 			case 'b':
@@ -6931,7 +6920,7 @@ uint64_t ParseAttrColor(char *str, int msgok)
 			case 'd':
 			case 'e':
 			case 'f':
-				*cl = ((*cl & 0x0F000000)+0x01000000) + ((*cl << 4) | (*str - ('a' - 10)));
+				*cl = ((*cl & 0x0F000000) + 0x01000000) + ((*cl << 4) | (*str - ('a' - 10)));
 				break;
 			case 'A':
 			case 'B':
@@ -6939,7 +6928,7 @@ uint64_t ParseAttrColor(char *str, int msgok)
 			case 'D':
 			case 'E':
 			case 'F':
-				*cl = ((*cl & 0x0F000000)+0x01000000) + ((*cl << 4) | (*str - ('A' - 10)));
+				*cl = ((*cl & 0x0F000000) + 0x01000000) + ((*cl << 4) | (*str - ('A' - 10)));
 				break;
 			case ';':
 				cl = &bg;
@@ -6961,8 +6950,7 @@ uint64_t ParseAttrColor(char *str, int msgok)
 	 *       about upper boundaries.
 	 */
 	if (fm == 4) {
-		if (fg <= 0x03000000)
-		{
+		if (fg <= 0x03000000) {
 			fg &= 0x0FFF;
 			fg = ((fg & 0x0F00) << 8) | ((fg & 0x0F0) << 4) | (fg & 0x0F);
 			fg = fg | (fg << 4);
@@ -6976,8 +6964,7 @@ uint64_t ParseAttrColor(char *str, int msgok)
 		}
 	}
 	if (bm == 4) {
-		if (bg <= 0x03000000)
-		{
+		if (bg <= 0x03000000) {
 			bg &= 0x0FFF;
 			bg = ((bg & 0x0F00) << 8) | ((bg & 0x0F0) << 4) | (bg & 0x0F);
 			bg = bg | (bg << 4);
@@ -7015,13 +7002,13 @@ uint64_t ParseAttrColor(char *str, int msgok)
  */
 void ApplyAttrColor(uint64_t i, struct mchar *mc)
 {
-	uint8_t  a = i >> 56;
-	uint8_t  h = i >> 48;
+	uint8_t a = i >> 56;
+	uint8_t h = i >> 48;
 
 	uint32_t b = i >> 24 & 0xFFFFFF | h << 20 & 0x07000000;
 	uint32_t f = i       & 0xFFFFFF | h << 24 & 0x07000000;
 
-	mc->attr	= a;
-	mc->colorbg	= b;
-	mc->colorfg	= f;
+	mc->attr = a;
+	mc->colorbg = b;
+	mc->colorfg = f;
 }

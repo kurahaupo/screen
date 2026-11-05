@@ -164,19 +164,19 @@ int main(void)
 
 		/* we should be able to now affect the first character */
 		char c = 'm';
-		ASSERT(*wmb_contents(wmb) == 'f');  /* sanity check */
+		ASSERT(*wmb_contents(wmb) == 'f');	/* sanity check */
 		wmbc_putchar(wmbc, c);
 		ASSERT(*wmb_contents(wmb) == c);
 
 		/* fast-forward to the null byte (which should bring our pointer to a
 		 * single byte before our position after having written "foo") */
-		ASSERT(wmbc_offset(wmbc) == 1);  /* sanity check */
+		ASSERT(wmbc_offset(wmbc) == 1);	/* sanity check */
 		wmbc_fastfw0(wmbc);
 		ASSERT(wmbc_offset(wmbc) == 3);
 
 		/* that should allow us to continue where we left off, similar to how
 		 * wmbc_finish allows us to continue */
-		ASSERT(wmb_contents(wmb)[3] != c);  /* test case sanity check */
+		ASSERT(wmb_contents(wmb)[3] != c);	/* test case sanity check */
 		wmbc_putchar(wmbc, c);
 		ASSERT(wmb_contents(wmb)[3] == c);
 
@@ -212,8 +212,8 @@ int main(void)
 		size_t sznew = wmb_size(wmb);
 		char cfail = wmb_contents(wmb)[sznew - 1] + 1;
 		wmbc_fastfw_end(wmbc);
-		ASSERT(wmbc_offset(wmbc) > szstart);      /* sanity check */
-		FAILLOC_VOID(wmbc_putchar(wmbc, cfail));  /* fail expansion */
+		ASSERT(wmbc_offset(wmbc) > szstart);	/* sanity check */
+		FAILLOC_VOID(wmbc_putchar(wmbc, cfail));	/* fail expansion */
 		ASSERT_GCC(wmb_size(wmb) == sznew);
 		/* should not have written char at last position */
 		ASSERT_GCC(wmb_contents(wmb)[sznew - 1] != cfail);
@@ -240,7 +240,7 @@ int main(void)
 		wmbc_rewind(wmbc);
 		ASSERT(*wmbc_strncpy(wmbc, str, n) == str[0]);
 		ASSERT(wmbc_offset(wmbc) == n);
-		ASSERT(STREQ(wmbc_finish(wmbc), "test"));  /* finish adds null byte */
+		ASSERT(STREQ(wmbc_finish(wmbc), "test"));	/* finish adds null byte */
 
 		/* if we cannot fit any more contents, then the buffer should be
 		 * expanded in both instances (look at that---a safe strcpy) */
@@ -305,7 +305,7 @@ int main(void)
 		/* should trigger expansion if we do not have enough room */
 		size_t szfirst = wmb_size(wmb);
 		wmbc_fastfw_end(wmbc);
-		ASSERT(wmbc_offset(wmbc) == szfirst);  /* sanity check */
+		ASSERT(wmbc_offset(wmbc) == szfirst);	/* sanity check */
 		ASSERT(wmbc_printf(wmbc, "%s", add) == (int)szadd);
 		ASSERT(wmb_size(wmb) > szfirst);
 		ASSERT(STREQ(&wmbc_finish(wmbc)[szfirst], add));
@@ -315,10 +315,10 @@ int main(void)
 		 * number of bytes that could fit */
 		size_t szsecond = wmb_size(wmb);
 		wmbc_fastfw_end(wmbc);
-		wmbc->p--;  /* :x */
+		wmbc->p--;	/* :x */
 		ASSERT_GCC(FAILLOC(wmbc_printf(wmbc, "%s", add)) == 1);
 		ASSERT_GCC(wmbc_offset(wmbc) == wmb_size(wmb));
-		ASSERT_GCC(wmb_size(wmb) == szsecond);  /* sanity check */
+		ASSERT_GCC(wmb_size(wmb) == szsecond);	/* sanity check */
 
 		wmbc_free(wmbc);
 		wmb_free(wmb);
@@ -359,7 +359,7 @@ int main(void)
 		 * expect that expansion will take place */
 		size_t szfirst = wmb_size(wmb1);
 		wmbc_fastfw_end(wmbc1);
-		ASSERT(wmbc_offset(wmbc1) == szfirst);  /* sanity check */
+		ASSERT(wmbc_offset(wmbc1) == szfirst);	/* sanity check */
 		/* this line did actually catch a bug due to realloc */
 		ASSERT(*wmbc_mergewmb(wmbc1, wmb2) == *str2);
 		ASSERT(wmb_size(wmb1) > szfirst);
@@ -369,7 +369,7 @@ int main(void)
 		 * the buffer contents */
 		size_t szsecond = wmb_size(wmb1);
 		wmbc_fastfw_end(wmbc1);
-		ASSERT(wmbc_offset(wmbc1) == szsecond);  /* sanity check */
+		ASSERT(wmbc_offset(wmbc1) == szsecond);	/* sanity check */
 		ASSERT_GCC(FAILLOC(wmbc_mergewmb(wmbc1, wmb2) == NULL));
 		ASSERT_GCC(wmb_size(wmb1) == szsecond);
 

@@ -39,7 +39,7 @@
 #include "encoding.h"
 #include "fileio.h"
 #include "help.h"
-#include "inline.h" /* must follow ansi.h and image.h */
+#include "inline.h"		/* must follow ansi.h and image.h */
 #include "logfile.h"
 #include "mark.h"
 #include "misc.h"
@@ -47,7 +47,7 @@
 #include "resize.h"
 #include "winmsg.h"
 
-#include "inline.h" /* must follow ansi.h and image.h */
+#include "inline.h"		/* must follow ansi.h and image.h */
 
 /* widths for Z0/Z1 switching */
 const int Z0width = 132;
@@ -73,20 +73,20 @@ struct mchar mchar_so = { ' ', A_RV, 0, 0, 0, 0 };
 /* Default bell/monitor/silence renditions in ParseAttrColor() encoding. */
 uint64_t renditions[NUM_RENDS] = {
 	((uint64_t)(A_US | A_BD) << 56),	/* bell: ub */
-	((uint64_t)A_BD << 56),		/* monitor: b */
-	((uint64_t)A_US << 56)		/* silence: u */
+	((uint64_t)A_BD << 56),			/* monitor: b */
+	((uint64_t)A_US << 56)			/* silence: u */
 };
 
 /* keep string_t and string_t_string in sync! */
 static char *string_t_string[] = {
-	[NONE]  	= "NONE",
+	[NONE]		= "NONE",
 	[DCS]		= "DCS",	/* Device Control String */
 	[OSC]		= "OSC",	/* Operating System Command */
 	[APC]		= "APC",	/* Application Program Command
 					 *  - used for status change */
-	[PM]    	= "PM",		/* Privacy Message */
-	[AKA]   	= "AKA",	/* Title for current screen */
-	[GM]    	= "GM",		/* Global Message (to every display) */
+	[PM]		= "PM",		/* Privacy Message */
+	[AKA]		= "AKA",	/* Title for current screen */
+	[GM]		= "GM",		/* Global Message (to every display) */
 	[STATUS]	= "STATUS"	/* User hardstatus line */
 };
 
@@ -228,7 +228,7 @@ void SetCharsets(Window *win, char *s)
  */
 void WriteString(Window *win, char *buf, size_t len)
 {
-	struct cs_parser * const cs = &win->w_cs;
+	struct cs_parser *const cs = &win->w_cs;
 
 	if (len == 0)
 		return;
@@ -436,7 +436,7 @@ void WriteString(Window *win, char *buf, size_t len)
 					break;
 				C0ControlCases(win,);
 				default:
-					if (c >= '@' && c <= '~') {		// (c & 0xc0) == 0x40 && c != 0x7f
+					if (c >= '@' && c <= '~') {	// (c & 0xc0) == 0x40 && c != 0x7f
 						if (cs->num_params < MAX_CS_PARAMS)
 							cs->num_params++;
 						DoControlSequence(win, c, win->w_intermediate);
@@ -628,8 +628,7 @@ void WriteString(Window *win, char *buf, size_t len)
 					if (win->w_insert) {
 						save_mline(&win->w_mlines[win->w_y], win->w_width);
 						MInsChar(win, &win->w_rend, win->w_x, win->w_y);
-						LInsChar(&win->w_layer, &win->w_rend, win->w_x, win->w_y,
-							 &mline_old);
+						LInsChar(&win->w_layer, &win->w_rend, win->w_x, win->w_y, &mline_old);
 						win->w_x++;
 					} else {
 						MPutChar(win, &win->w_rend, win->w_x, win->w_y);
@@ -642,8 +641,7 @@ void WriteString(Window *win, char *buf, size_t len)
 					if (win->w_wrap)
 						win->w_x++;
 				} else {
-					MWrapChar(win, &win->w_rend, win->w_y, win->w_top, win->w_bot,
-						  win->w_insert);
+					MWrapChar(win, &win->w_rend, win->w_y, win->w_top, win->w_bot, win->w_insert);
 					LWrapChar(&win->w_layer, &win->w_rend, win->w_y, win->w_top, win->w_bot,
 						  win->w_insert);
 					if (win->w_y != win->w_bot && win->w_y != win->w_height - 1)
@@ -820,12 +818,12 @@ static void DoESC(Window *win, int c, int intermediate)
 
 static void DoControlSequence(Window *win, int c, int intermediate)
 {
-	struct cs_parser * const cs = &win->w_cs;
+	struct cs_parser *const cs = &win->w_cs;
 	int a1 = cs->params[0], a2 = cs->params[1];
 
 #ifndef ALLOW_INVALID_COLON_DELIMITER
 	/* sub-args only valid for SelectRendition */
-	if (cs->has_colons && !( c == 'm' && !intermediate ))
+	if (cs->has_colons && !(c == 'm' && !intermediate))
 		return;
 #endif
 
@@ -1063,13 +1061,13 @@ static void DoControlSequence(Window *win, int c, int intermediate)
 				break;
 			bool i = c == 'h';
 			switch (a1) {
-			case 1:	/* CKM:  cursor key mode */
+			case 1:		/* CKM:  cursor key mode */
 				LCursorkeysMode(&win->w_layer, win->w_cursorkeys = i);
 #ifndef TIOCPKT
 				WNewAutoFlow(win, !i);
 #endif				/* !TIOCPKT */
 				break;
-			case 2:	/* ANM:  ansi/vt52 mode */
+			case 2:		/* ANM:  ansi/vt52 mode */
 				if (i) {
 					if (win->w_encoding)
 						break;
@@ -1084,51 +1082,51 @@ static void DoControlSequence(Window *win, int c, int intermediate)
 					win->w_ss = 0;
 				}
 				break;
-			case 3:	/* COLM: column mode */
+			case 3:		/* COLM: column mode */
 				ClearScreen(win);
 				win->w_x = 0;
 				win->w_y = 0;
 				WChangeSize(win, i ? Z0width : Z1width, win->w_height);
 				break;
-				/* case 4:        SCLM: scrolling mode */
-			case 5:	/* SCNM: screen mode */
+		     /* case 4:         SCLM: scrolling mode */
+			case 5:		/* SCNM: screen mode */
 				if (i != win->w_revvid)
 					WReverseVideo(win, i);
 				win->w_revvid = i;
 				break;
-			case 6:	/* OM:   origin mode */
+			case 6:		/* OM:   origin mode */
 				win->w_origin = i;
 				win->w_x = 0;
 				win->w_y = i ? win->w_top : 0;
 				LGotoPos(&win->w_layer, win->w_x, win->w_y);
 				break;
-			case 7:	/* AWM:  auto wrap mode */
+			case 7:		/* AWM:  auto wrap mode */
 				win->w_wrap = i;
 				break;
-		     /*	case 8:        ARM:  auto repeat mode */
-		     /*	case 9:        INLM: interlace mode */
-			case 9:	/* X10 mouse tracking */
+		     /* case 8:         ARM:  auto repeat mode */
+		     /* case 9:         INLM: interlace mode */
+			case 9:		/* X10 mouse tracking */
 				win->w_mouse = i ? 9 : 0;
 				LMouseMode(&win->w_layer, win->w_mouse);
 				break;
-		     /*	case 10:       EDM:  edit mode */
-		     /*	case 11:       LTM:  line transmit mode */
-		     /*	case 13:       SCFDM: space compression / field delimiting */
-		     /*	case 14:       TEM:  transmit execution mode */
-		     /*	case 16:       EKEM: edit key execution mode */
-		     /*	case 18:       PFF:  Printer term form feed */
-		     /*	case 19:       PEX:  Printer extend screen / scroll. reg */
+		     /* case 10:        EDM:  edit mode */
+		     /* case 11:        LTM:  line transmit mode */
+		     /* case 13:        SCFDM: space compression / field delimiting */
+		     /* case 14:        TEM:  transmit execution mode */
+		     /* case 16:        EKEM: edit key execution mode */
+		     /* case 18:        PFF:  Printer term form feed */
+		     /* case 19:        PEX:  Printer extend screen / scroll. reg */
 			case 25:	/* TCEM: text cursor enable mode */
 				win->w_curinv = !i;
 				LCursorVisibility(&win->w_layer, i ? win->w_curvvis : -1);
 				break;
-		     /*	case 34:       RLM:  Right to left mode */
-		     /*	case 35:       HEBM: hebrew keyboard map */
-		     /*	case 36:       HEM:  hebrew encoding */
-		     /*	case 38:             TeK Mode */
-		     /*	case 40:             132 col enable */
-		     /*	case 42:       NRCM: 7bit NRC character mode */
-		     /*	case 44:             margin bell enable */
+		     /* case 34:        RLM:  Right to left mode */
+		     /* case 35:        HEBM: hebrew keyboard map */
+		     /* case 36:        HEM:  hebrew encoding */
+		     /* case 38:              TeK Mode */
+		     /* case 40:              132 col enable */
+		     /* case 42:        NRCM: 7bit NRC character mode */
+		     /* case 44:              margin bell enable */
 			case 47:	/*       xterm-like alternate screen */
 			case 1047:	/*       xterm-like alternate screen */
 			case 1049:	/*       xterm-like alternate screen */
@@ -1156,8 +1154,8 @@ static void DoControlSequence(Window *win, int c, int intermediate)
 				else
 					RestoreCursor(win, &win->w_saved);
 				break;
-		     /*	case 66:       NKM:  Numeric keypad appl mode */
-		     /*	case 68:       KBUM: Keyboard usage mode (data process) */
+		     /* case 66:        NKM:  Numeric keypad appl mode */
+		     /* case 68:        KBUM: Keyboard usage mode (data process) */
 			case 1000:	/* VT200 mouse tracking */
 			case 1001:	/* VT200 highlight mouse */
 			case 1002:	/* button event mouse */
@@ -1165,12 +1163,12 @@ static void DoControlSequence(Window *win, int c, int intermediate)
 				win->w_mouse = i ? a1 : 0;
 				LMouseMode(&win->w_layer, win->w_mouse);
 				break;
-		     /*	case 1005:     UTF-8 mouse mode rejected */
+		     /* case 1005:      UTF-8 mouse mode rejected */
 			case 1006:	/* SGR mouse mode */
 				win->w_extmouse = i ? a1 : 0;
 				LExtMouseMode(&win->w_layer, win->w_extmouse);
 				break;
-		     /*	case 1015:     UXRVT mouse mode rejected */
+		     /* case 1015:      UXRVT mouse mode rejected */
 			case 2004:	/* bracketed paste mode */
 				win->w_bracketed = i;
 				LBracketedPasteMode(&win->w_layer, win->w_bracketed);
@@ -1325,9 +1323,9 @@ static void PrintStart(Window *win)
 
 	/* find us a nice display to print on, fore preferred */
 	display = win->w_lastdisp;
-	if (!(display && win== D_fore && (printcmd || D_PO)))
+	if (!(display && win == D_fore && (printcmd || D_PO)))
 		for (display = displays; display; display = display->d_next)
-			if (win== D_fore && (printcmd || D_PO))
+			if (win == D_fore && (printcmd || D_PO))
 				break;
 	if (!display) {
 		Canvas *cv;
@@ -1667,16 +1665,16 @@ static void CursorLeft(Window *win, int n)
 
 static void ASetMode(Window *win, bool on)
 {
-	struct cs_parser * const cs = &win->w_cs;
+	struct cs_parser *const cs = &win->w_cs;
 
 	for (size_t i = 0; i < cs->num_params; ++i) {
 		switch (cs->params[i]) {
-			/* case 2:            KAM: Lock keyboard */
+	     /* case 2:            KAM: Lock keyboard */
 		case 4:	/* IRM: Insert mode */
 			win->w_insert = on;
 			LAY_DISPLAYS(&win->w_layer, InsertMode(on));
 			break;
-			/* case 12:           SRM: Echo mode on */
+	     /* case 12:           SRM: Echo mode on */
 		case 20:	/* LNM: Linefeed mode */
 			win->w_autolf = on;
 			break;
@@ -1749,8 +1747,9 @@ static enum attr_mask_e rendlist[][30] = {
 	}
 };
 
-const char * sgr3_mode_desc(sgr3_mode_t m){
-	static const char * const desc[] = {
+const char *sgr3_mode_desc(sgr3_mode_t m)
+{
+	static const char *const desc[] = {
 		[SGR3_STRICT] = "strict",
 		[SGR3_LEGACY] = "legacy",
 		[SGR3_UNSET]  = "(unset)",
@@ -1762,7 +1761,8 @@ const char * sgr3_mode_desc(sgr3_mode_t m){
 
 static sgr3_mode_t rend_mode = 1;
 
-void ConfigSGR3Mode(sgr3_mode_t v) {
+void ConfigSGR3Mode(sgr3_mode_t v)
+{
 	if (v < ARRAY_SIZE(rendlist))
 		rend_mode = v;
 }
@@ -1772,18 +1772,28 @@ static void SelectRendition(Window *win)
 	int attr = win->w_rend.attr;
 	int colorbg = win->w_rend.colorbg;
 	int colorfg = win->w_rend.colorfg;
-	struct cs_parser * const cs = &win->w_cs;
+	struct cs_parser *const cs = &win->w_cs;
 
 	for (size_t i = 0, k; i < cs->num_params; i = k) {
 		int j = cs->params[i];
 
-		for (k = i + 1; k < cs->num_params && cs->seps[k - 1] == ':' ; ++k) {}
+		for (k = i + 1; k < cs->num_params && cs->seps[k - 1] == ':'; ++k) {}
 
 		int *target_color = NULL;
 		bool bright = 0;
-		switch (j/10) {
-			case 9:  bright = 1; /*FALLTHRU*/ case 3: target_color = &colorfg; break;
-			case 10: bright = 1; /*FALLTHRU*/ case 4: target_color = &colorbg; break;
+		switch (j / 10) {
+		case 9:
+			bright = 1;
+			/*FALLTHRU*/
+		case 3:
+			target_color = &colorfg;
+			break;
+		case 10:
+			bright = 1;
+			/*FALLTHRU*/
+		case 4:
+			target_color = &colorbg;
+			break;
 		}
 		if (target_color) {
 			int cm = j % 10;
@@ -1813,8 +1823,8 @@ static void SelectRendition(Window *win)
 			cs_param_t const cm2 = cs->params[i + 1];
 
 			/* Indexed colour space aka 256 colours; example control sequences:
-			 *  \e[48:5:12m			Standard
-			 *  \e[48;5;12m			Customary
+			 *  \e[48:5:12m                 Standard
+			 *  \e[48;5;12m                 Customary
 			 * where 12 is usually the palette element for bright blue
 			 */
 			if (cm2 == 5) {
@@ -1837,9 +1847,9 @@ static void SelectRendition(Window *win)
 			}
 
 			/* Truecolor (24bit) colour space; example control sequences:
-			 *  \e[48:2:0:12:13:14m		Standard
-			 *  \e[48;2;12;13;14m		Customary
-			 *  \e[48:2:12:13:14m		Fix for botched clients
+			 *  \e[48:2:0:12:13:14m         Standard
+			 *  \e[48;2;12;13;14m           Customary
+			 *  \e[48:2:12:13:14m           Fix for botched clients
 			 * which sets red=12, green=13, blue=14, color-space=0/empty (application)
 			 * giving very dark gun-metal gray
 			 */
@@ -1861,7 +1871,7 @@ static void SelectRendition(Window *win)
 				cs_param_t const b = cs->params[i + 4];
 
                                 /* Are any out of range 0~255? */
-				if ( (r | g | b) & ~255U )
+				if ((r | g | b) & ~255U)
 					continue;
 				*target_color = 0x04000000 | r << 16 | g << 8 | b;
 				continue;
@@ -2168,7 +2178,7 @@ static void MScrollV(Window *win, int n, int ys, int ye, int bce)
 		if (ye - ys + 1 < n)
 			n = ye - ys + 1;
 		if (n > 256) {
-			MScrollV(win, - (n - 256), ys, ye, bce);
+			MScrollV(win, -(n - 256), ys, ye, bce);
 			n = 256;
 		}
 
@@ -2496,4 +2506,3 @@ static void WChangeSize(Window *win, int w, int h)
 			Redisplay(0);
 	}
 }
-

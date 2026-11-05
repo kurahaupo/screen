@@ -163,37 +163,37 @@ int main(int argc, char **argv)
 
 static void putcha(char c)
 {
-  putchar(c);
+	putchar(c);
 }
 
 static void PutStr(char const *s)
 {
-  tputs(s, 1, putcha);
-  fflush(stdout);
+	tputs(s, 1, putcha);
+	fflush(stdout);
 }
 
 static void CPutStr(char const *s, int c)
 {
-  tputs(tgoto(s, 0, c), 1, putcha);
-  fflush(stdout);
+	tputs(tgoto(s, 0, c), 1, putcha);
+	fflush(stdout);
 }
 
 static void CCPutStr(char const *s, int x, int y)
 {
-  tputs(tgoto(s, y, x), 1, putcha);
-  fflush(stdout);
+	tputs(tgoto(s, y, x), 1, putcha);
+	fflush(stdout);
 }
 
 static void GotoPos(int x, int y)
 {
-  tputs(tgoto(CM, x, y), 1, putcha);
-  fflush(stdout);
+	tputs(tgoto(CM, x, y), 1, putcha);
+	fflush(stdout);
 }
 
 static void RETURN(void)
 {
-  printf("Press <RETURN> to continue");
-  fflush(stdout);
-  while(getchar() != '\n');
-  PutStr(CL);
+	printf("Press <RETURN> to continue");
+	fflush(stdout);
+	while (getchar() != '\n') {}
+	PutStr(CL);
 }

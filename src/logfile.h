@@ -35,12 +35,12 @@
 typedef struct Log Log;
 struct Log {
 	Log *next;
-	FILE *fp;	/* a hopefully uniq filepointer to the log file */
-	char *name;	/* the name. used to reopen, when stat fails. */
-	int opencount;	/* synchronize logfopen() and logfclose() */
-	int writecount;	/* increments at logfwrite(), counts write() and fflush() */
-	int flushcount;	/* increments at logfflush(), zeroed at logfwrite() */
-	struct stat *st;/* how the file looks like */
+	FILE *fp;		/* a hopefully uniq filepointer to the log file */
+	char *name;		/* the name. used to reopen, when stat fails. */
+	int opencount;		/* synchronize logfopen() and logfclose() */
+	int writecount;		/* increments at logfwrite(), counts write() and fflush() */
+	int flushcount;		/* increments at logfflush(), zeroed at logfwrite() */
+	struct stat *st;	/* how the file looks like */
 };
 
 /*
@@ -49,27 +49,27 @@ struct Log {
  * otherwise.
  * example: l = logfopen(name, islogfile(name) : NULL ? fopen(name, "a"));
  */
-Log *logfopen (char *name, FILE *fp);
+Log *logfopen(char *name, FILE *fp);
 
 /*
  * lookup a logfile by name. This is useful, so that we can provide
  * logfopen with a nonzero second argument, exactly when needed.
  * islogfile(NULL); returns nonzero if there are any open logfiles at all.
  */
-int islogfile (char *name);
+int islogfile(char *name);
 
 /*
  * logfclose does free()
  */
-int logfclose (Log *);
-int logfwrite (Log *, char *, size_t);
+int logfclose(Log *);
+int logfwrite(Log *, char *, size_t);
 
 /*
  * logfflush should be called periodically. If no argument is passed,
  * all logfiles are flushed, else the specified file
  * the number of flushed filepointers is returned
  */
-int logfflush (Log *ifany);
+int logfflush(Log *ifany);
 
 /*
  * a reopen function may be registered here, in case you want to bring your
@@ -79,7 +79,7 @@ int logfflush (Log *ifany);
  * if you provide NULL as parameter to logreopen_register, the builtin
  * reopen function will be reactivated.
  */
-void logreopen_register (int (*fn) (char *, int, struct Log *) );
+void logreopen_register(int (*fn)(char *, int, struct Log *));
 
 /*
  * Your custom reopen function is required to reuse the exact
@@ -89,6 +89,6 @@ void logreopen_register (int (*fn) (char *, int, struct Log *) );
  * lf_move_fd may help you here, if you do not have dup2(2).
  * It closes fd and opens wantfd to access whatever fd accessed.
  */
-int lf_move_fd (int fd, int wantfd);
+int lf_move_fd(int fd, int wantfd);
 
-#endif /*  SCREEN_LOGFILE_H */
+#endif				/*  SCREEN_LOGFILE_H */

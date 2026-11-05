@@ -91,7 +91,7 @@ static int logfile_reopen(char *name, int wantfd, Log *l)
 	return 0;
 }
 
-static int (*lf_reopen_fn) (char *, int, struct Log *) = logfile_reopen;
+static int (*lf_reopen_fn)(char *, int, struct Log *) = logfile_reopen;
 
 /*
  * Whenever logfwrite discoveres that it is required to close and
@@ -105,7 +105,7 @@ static int (*lf_reopen_fn) (char *, int, struct Log *) = logfile_reopen;
  *    reinitialise itself.
  * d) return 0 on success.
  */
-void logreopen_register(int (*fn) (char *, int, struct Log *))
+void logreopen_register(int (*fn)(char *, int, struct Log *))
 {
 	lf_reopen_fn = fn ? fn : logfile_reopen;
 }
@@ -149,7 +149,7 @@ static Log *lookup_logfile(char *name)
 	return NULL;
 }
 
-Log *logfopen(char *name, FILE * fp)
+Log *logfopen(char *name, FILE *fp)
 {
 	Log *l;
 

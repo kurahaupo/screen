@@ -7,26 +7,26 @@
 
 #include "image.h"
 
-char *SaveStr (const char *);
-char *SaveStrn (const char *, size_t);
+char *SaveStr(const char *);
+char *SaveStrn(const char *, size_t);
 #ifndef HAVE_STRERROR
-char *strerror (int);
+char *strerror(int);
 #endif
-void  centerline (char *, int);
-void  leftline (char *, int, struct mchar *);
-char *Filename (char *);
-char *stripdev (char *);
-void  closeallfiles (int);
-int   UserContext (void);
-void  UserReturn (int);
-int   UserStatus (void);
-void (*xsignal (int, void (*)(int))) (int);
+void centerline(char *, int);
+void leftline(char *, int, struct mchar *);
+char *Filename(char *);
+char *stripdev(char *);
+void closeallfiles(int);
+int UserContext(void);
+void UserReturn(int);
+int UserStatus(void);
+void (*xsignal(int, void(*)(int)))(int);
 #if defined(HAVE_SETEUID) || defined(HAVE_SETREUID)
-void  xseteuid  (int);
-void  xsetegid  (int);
+void xseteuid(int);
+void xsetegid(int);
 #endif
-int   AddXChar (char *, int);
-int   AddXChars (char *, int, char *);
+int AddXChar(char *, int);
+int AddXChars(char *, int, char *);
 
 //# define UNSAFE_ARRAY_SIZE(x) (((&(x))[1]) - &*(x))
 # define UNSAFE_ARRAY_SIZE(x) (sizeof(x) / sizeof((x)[0]))
@@ -71,7 +71,6 @@ int   AddXChars (char *, int, char *);
 # endif
 #endif
 #ifndef UNUSED
-# define UNUSED	/*UNUSED*/
+# define UNUSED /*UNUSED*/
 #endif
-
-#endif /* SCREEN_MISC_H */
+#endif				/* SCREEN_MISC_H */

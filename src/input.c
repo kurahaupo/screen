@@ -57,7 +57,7 @@ static struct inpline inphist;
 
 struct inpdata {
 	struct inpline inp;
-	size_t inpmaxlen;		/* MAXSTR, or less, if caller has shorter buffer */
+	size_t inpmaxlen;	/* MAXSTR, or less, if caller has shorter buffer */
 	char *inpstring;	/* the prompt */
 	size_t inpstringlen;	/* length of the prompt */
 	int inpmode;		/* INP_NOECHO, INP_RAW, INP_EVERY */
@@ -138,14 +138,13 @@ void Input(char *istr, size_t len, int mode, InputCallback *finfunc, void *priv,
 			.pos = 0,
 			.next = inpdata->inp.next,	// NOT OVERWRITTEN = keep old value?
 			.prev = inphist.prev,
-		},
+			 },
 		.inpmaxlen = len,
 		.inpstring = NULL,
 		.inpstringlen = 0,
 		.inpmode = mode,
 		.inpfinfunc = finfunc,
-		.priv =  priv ? priv
-			      : &inpdata->privdata,	// self-referential
+		.priv = priv ? priv : &inpdata->privdata,	// self-referential
 		.privdata = data,
 		.search = NULL,
 	};
@@ -210,7 +209,7 @@ static void InpProcess(char **ppbuf, size_t *plen)
 			inpdata->inp.buf[inpdata->inp.len] = ch;
 			if (ch) {
 				display = inpdisplay;
-				inpdata->inpfinfunc (inpdata->inp.buf, inpdata->inp.len, inpdata->priv);
+				inpdata->inpfinfunc(inpdata->inp.buf, inpdata->inp.len, inpdata->priv);
 				ch = inpdata->inp.buf[inpdata->inp.len];
 			}
 		} else if (inpdata->inpmode & INP_RAW) {

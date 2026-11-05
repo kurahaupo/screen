@@ -306,7 +306,7 @@ void UpdateLayoutCanvas(Canvas *cv, Window *wi)
 	}
 }
 
-static void dump_canvas(Canvas *cv, FILE * file)
+static void dump_canvas(Canvas *cv, FILE *file)
 {
 	Canvas *c;
 	for (c = cv->c_slperp; c && c->c_slnext; c = c->c_slnext) {

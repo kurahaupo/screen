@@ -16,4 +16,4 @@ void TelWindowSize(Window *);
 void TelStatus(Window *, char *, size_t);
 #endif
 
-#endif /* SCREEN_TELNET_H */
+#endif				/* SCREEN_TELNET_H */

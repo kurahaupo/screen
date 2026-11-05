@@ -65,7 +65,7 @@ static char Termcap[TERMCAP_BUFSIZE + 8];	/* new termcap +8:"TERMCAP=" */
 #define endTermcap  ((&Termcap)[1])
 
 static size_t Termcaplen;
-char Term[MAXSTR + 5];			/* +5: "TERM=" */
+char Term[MAXSTR + 5];		/* +5: "TERM=" */
 char screenterm[MAXTERMLEN + 1];	/* new $TERM, usually "screen" */
 
 char *extra_incap, *extra_outcap;
@@ -205,8 +205,8 @@ int InitTermcap(int width, int height)
 		/* ISO2022 */
 		if ((D_EA && strstr(D_EA, "\033(B")) || (D_AS && strstr(D_AS, "\033(0")))
 			D_CG0 = 1;
-		if (strstr(D_termname, "xterm") || strstr(D_termname, "rxvt") || (D_CKM &&
-					(strstr(D_CKM, "\033[M") || strstr(D_CKM, "\033[<")))) {
+		if (strstr(D_termname, "xterm") || strstr(D_termname, "rxvt")
+		 || (D_CKM && (strstr(D_CKM, "\033[M") || strstr(D_CKM, "\033[<")))) {
 			D_CXT = 1;
 			kmapdef[0] = D_CKM ? SaveStr(D_CKM) : NULL;
 		}
@@ -669,17 +669,17 @@ static int remmapseq(char *seq, int k)
  */
 static inline bool AddCapSprintf(const char *fmt, ...)
 {
-	if ( Termcaplen >= endTermcap - Termcap )
+	if (Termcaplen >= endTermcap - Termcap)
 		return false;
 
-	char * const p = Termcap+Termcaplen;
+	char *const p = Termcap + Termcaplen;
 
 	va_list v;
 	va_start(v, fmt);
 	int n = vsnprintf(p, endTermcap - p, fmt, v);
 	va_end(v);
 
-	if (n < 0 || (unsigned) n >= endTermcap - p)
+	if (n < 0 || (unsigned)n >= endTermcap - p)
 		return false;
 
 	Termcaplen += n;
@@ -693,11 +693,11 @@ static inline bool AddCap(const char *s)
 {
 	size_t n = strlen(s);
 
-	char * const p = Termcap+Termcaplen;
-	if (n + 1 >= (size_t) (endTermcap - p))
+	char *const p = Termcap + Termcaplen;
+	if (n + 1 >= (size_t)(endTermcap - p))
 		return false;
 	else {
-		memcpy(p, s, n+1);
+		memcpy(p, s, n + 1);
 		Termcaplen += n;
 		return true;
 	}
@@ -752,13 +752,13 @@ char *MakeTermcap(bool aflag)
 	} while (0);		/* Goto-free programming... */
 
 	if (strlen(Term) > TERMCAP_BUFSIZE - 40)
-		strcpy(Term+5, "too_long");
+		strcpy(Term + 5, "too_long");
 	Termcaplen = 0;
 	AddCapSprintf("TERMCAP=SC|%s|VT 300/ISO-6429 virtual terminal:", Term + 5);
 	if (extra_outcap && *extra_outcap) {
 		const char *cp, *p;
 		for (cp = extra_outcap; (p = strchr(cp, ':')); cp = p)
-			AddCapSprintf("%.*s:", p-cp, cp);
+			AddCapSprintf("%.*s:", p - cp, cp);
 		if (cp && *cp)
 			AddCapSprintf("%s:", cp);
 	}
@@ -806,10 +806,10 @@ char *MakeTermcap(bool aflag)
 			       "ue=\\E[24m:");
 		if (D_CZH)
 			AddCap("ZH=\\E[3\\0720m:"	/* '\072' == ':' → \e[3:0m */
-			       "ZR=\\E[23\\0720m:");	/*		 → \e[23:0m */
+			       "ZR=\\E[23\\0720m:");	/*               → \e[23:0m */
 		if (D_SO)
 			AddCap("so=\\E[3\\0721m:"	/* '\072' == ':' → \e[3:1m */
-			       "se=\\E[23\\0721m:");	/*		 → \e[23:1m */
+			       "se=\\E[23\\0721m:");	/*               → \e[23:1m */
 		if (D_MB)
 			AddCap("mb=\\E[5m:");
 		if (D_MD)
@@ -853,9 +853,9 @@ char *MakeTermcap(bool aflag)
 			if (i >= T_KEYPAD)	/* don't put keypad codes in TERMCAP */
 				continue;	/* - makes it too big */
 #if (TERMCAP_BUFSIZE < 1024)
-			if (i >= T_FEXTRA && i < T_BACKTAB) /* also skip extra vt220 keys */
+			if (i >= T_FEXTRA && i < T_BACKTAB)	/* also skip extra vt220 keys */
 				continue;
-			if (i > T_BACKTAB && i < T_NAVIGATE) /* more vt220 keys */
+			if (i > T_BACKTAB && i < T_NAVIGATE)	/* more vt220 keys */
 				continue;
 #endif
 			if (i >= T_CURSOR && i < T_OCAPS) {
@@ -912,11 +912,9 @@ void DumpTermcap(int aflag, FILE *f)
 		return;
 	p++;
 	/* write termcap entry with wrapping */
-	while ((pe = index(p, ':')))
-	{
+	while ((pe = index(p, ':'))) {
 		n = pe - p + 1;
-		if ((col > 8) && ((col + n) > TERMCAP_MAX_WIDTH))
-		{
+		if ((col > 8) && ((col + n) > TERMCAP_MAX_WIDTH)) {
 			fwrite("\\\n\t:", 1, 4, f);
 			col = 8;
 		}
@@ -924,7 +922,7 @@ void DumpTermcap(int aflag, FILE *f)
 		col += n;
 		p = ++pe;
 	}
-	if(*p)
+	if (*p)
 		fwrite(p, 1, strlen(p), f);
 	fputc('\n', f);
 }
@@ -1118,7 +1116,7 @@ static char *findcap(char *cap, char **tepp, int n)
 {
 	char *tep;
 	char c, *p, *cp;
-	enum { M_LIT, M_CARET, M_BSLASH, M_OCTAL, M__LAST = M_OCTAL+3 } mode = M_LIT;
+	enum { M_LIT, M_CARET, M_BSLASH, M_OCTAL, M__LAST = M_OCTAL + 3 } mode = M_LIT;
 	int num = 0, capl;
 
 	if (!extra_incap)
@@ -1186,7 +1184,7 @@ static char *findcap(char *cap, char **tepp, int n)
 			if (mode >= M_OCTAL) {
 				num = num * 8 + (c - '0');
 				++mode;	/* counting digits */
-				if (! isdigit(*p) || mode == M_OCTAL+3) {
+				if (!isdigit(*p) || mode == M_OCTAL + 3) {
 					c = num;
 					mode = M_LIT;
 				}

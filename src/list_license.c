@@ -76,8 +76,8 @@ static char license[] = {
 
 static int gl_License_header(ListData *ldata)
 {
-	(void)ldata; /* unused */
-	char str_version[75]; /* 75 is strlen("Screen version ") + sizeof(version[60]); */
+	(void)ldata;		/* unused */
+	char str_version[75];	/* 75 is strlen("Screen version ") + sizeof(version[60]); */
 
 	snprintf(str_version, 75, "Screen version %s", version);
 
@@ -88,7 +88,7 @@ static int gl_License_header(ListData *ldata)
 
 static int gl_License_footer(ListData *ldata)
 {
-	(void)ldata; /* unused */
+	(void)ldata;		/* unused */
 
 	centerline("[Press Space for next page or Return to end.]", flayer->l_height - 1);
 	return 1;
@@ -96,7 +96,7 @@ static int gl_License_footer(ListData *ldata)
 
 static int gl_License_row(ListData *ldata, ListRow *lrow)
 {
-	(void)ldata; /* unused */
+	(void)ldata;		/* unused */
 
 	char *line = calloc(flayer->l_width + 1, sizeof(char));
 	char *start = (char *)lrow->data;
@@ -189,15 +189,15 @@ static int gl_License_input(ListData *ldata, char **inp, size_t *len)
 
 static int gl_License_freerow(ListData *ldata, ListRow *row)
 {
-	(void)ldata; /* unused */
-	(void)row; /* unused */
+	(void)ldata;		/* unused */
+	(void)row;		/* unused */
 	/* There was no allocation when row->data was set. So nothing to do here. */
 	return 0;
 }
 
 static int gl_License_free(ListData *ldata)
 {
-	(void)ldata; /* unused */
+	(void)ldata;		/* unused */
 	/* There was no allocation in ldata->data. So nothing to do here. */
 	return 0;
 }

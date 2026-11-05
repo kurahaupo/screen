@@ -40,11 +40,11 @@
 static char ListID[] = "window";
 
 struct gl_Window_Data {
-	Window *group;	/* Set only for a W_TYPE_GROUP window */
+	Window *group;		/* Set only for a W_TYPE_GROUP window */
 	int order;		/* MRU? NUM? */
 	int onblank;
 	int nested;
-	Window *fore;	/* The foreground window we had. */
+	Window *fore;		/* The foreground window we had. */
 };
 
 /* Is this wdata for a group window? */
@@ -54,13 +54,13 @@ struct gl_Window_Data {
 #define FOR_EACH_WINDOW(_wdata, _w, fn) do {					\
 	if ((_wdata)->order == WLIST_MRU) {					\
 		Window *_ww;							\
-		for (_ww = mru_window; _ww; _ww = _ww->w_prev_mru) {			\
+		for (_ww = mru_window; _ww; _ww = _ww->w_prev_mru) {		\
 			_w = _ww;						\
 			fn							\
 		}								\
 	} else {								\
 		Window *_ww;							\
-		for (_ww = first_window; _ww; _ww = _ww->w_next) {			\
+		for (_ww = first_window; _ww; _ww = _ww->w_next) {		\
 			_w = _ww;						\
 			fn							\
 		}								\
@@ -191,7 +191,7 @@ static int gl_Window_header(ListData *ldata)
 
 static int gl_Window_footer(ListData *ldata)
 {
-	(void)ldata; /* unused */
+	(void)ldata;		/* unused */
 	centerline("[Press ctrl-l to refresh; Return to end.]", flayer->l_height - 1);
 	return 1;
 }
@@ -361,7 +361,8 @@ static int gl_Window_input(ListData *ldata, char **inp, size_t *len)
 	case 'K':		/* Kill a window */
 		{
 			char str[MAXSTR];
-			snprintf(str, ARRAY_SIZE(str) - 1, "Really kill window %d (%s) [y/n]", win->w_number, win->w_title);
+			snprintf(str, ARRAY_SIZE(str) - 1, "Really kill window %d (%s) [y/n]", win->w_number,
+				 win->w_title);
 			Input(str, 1, INP_RAW, window_kill_confirm, (char *)win, 0);
 		}
 		break;
@@ -369,7 +370,7 @@ static int gl_Window_input(ListData *ldata, char **inp, size_t *len)
 	case 033:		/* escape */
 	case 007:		/* ^G */
 		if (!WLIST_FOR_GROUP(wdata)) {
-			Window * w = wdata->onblank ? wdata->fore : NULL;
+			Window *w = wdata->onblank ? wdata->fore : NULL;
 			glist_abort();
 			display = cd;
 			if (w)
@@ -413,8 +414,8 @@ static int gl_Window_input(ListData *ldata, char **inp, size_t *len)
 
 static int gl_Window_freerow(ListData *ldata, ListRow *row)
 {
-	(void)ldata; /* unused */
-	(void)row; /* unused */
+	(void)ldata;		/* unused */
+	(void)row;		/* unused */
 	return 0;
 }
 
@@ -427,8 +428,8 @@ static int gl_Window_free(ListData *ldata)
 static int gl_Window_match(ListData *ldata, ListRow *row, const char *needle)
 {
 	Window *w = row->data;
-	
-	(void)ldata; /* unused */
+
+	(void)ldata;		/* unused */
 
 	if (strstr(w->w_title, needle))
 		return 1;
@@ -459,8 +460,8 @@ void display_windows(int onblank, int order, Window *group)
 
 	if (group) {
 		onblank = 0;	/* When drawing a group window, ignore 'onblank' */
-		order = (group->w_list_nested ? WLIST_NESTED : 0) +
-			(group->w_list_order ? WLIST_MRU : WLIST_NUM); /* restore windowlist order flags */
+		order = (group->w_list_nested ? WLIST_NESTED : 0)
+		      + (group->w_list_order ? WLIST_MRU : WLIST_NUM);	/* restore windowlist order flags */
 	}
 
 	if (onblank) {
@@ -499,7 +500,7 @@ void display_windows(int onblank, int order, Window *group)
 	wdata = calloc(1, sizeof(struct gl_Window_Data));
 	wdata->group = group;
 	wdata->order = (order & ~WLIST_NESTED);
-	wdata->nested = ! !(order & WLIST_NESTED);
+	wdata->nested = !!(order & WLIST_NESTED);
 	wdata->onblank = onblank;
 
 	/* Set the most recent window as selected. */
@@ -557,7 +558,7 @@ static void WListUpdate(Window *p, ListData *ldata)
 	} else if (wdata->order == WLIST_NUM) {
 		if (first_window != p)
 			for (before = first_window; before; before = before->w_next)
-				if (before->w_next== p)
+				if (before->w_next == p)
 					break;
 	}
 

@@ -32,8 +32,7 @@
 #define KMAPADEF(s)
 #define KMAPMDEF(s)
 
-struct term term[T_N] =
-{
+struct term term[T_N] = {
 /* display size */
   { "li", T_NUM  },
   { "co", T_NUM  },
