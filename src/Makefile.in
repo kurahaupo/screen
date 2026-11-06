@@ -367,6 +367,7 @@ encoding.o: $(srcdir)/encoding.c
 encoding.o: $(srcdir)/encoding.h
 encoding.o: $(srcdir)/fileio.h
 encoding.o: $(srcdir)/image.h
+encoding.o: $(srcdir)/inline.h
 encoding.o: $(srcdir)/layer.h
 encoding.o: $(srcdir)/layout.h
 encoding.o: $(srcdir)/logfile.h
