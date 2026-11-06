@@ -482,12 +482,12 @@ static void RAW_PUTCHAR(uint32_t c)
 	}
 	if (D_encoding)
 		c = PrepareEncodedChar(c);
-      kanjiloop:
-	if (D_xtable && D_xtable[(int)(unsigned char)D_rend.font]
-	    && D_xtable[(int)(unsigned char)D_rend.font][(int)(unsigned char)c])
-		AddStr(D_xtable[(int)(unsigned char)D_rend.font][(int)(unsigned char)c]);
+ kanjiloop:
+	if (D_xtable && D_xtable[(uint8_t)D_rend.font]
+	    && D_xtable[(uint8_t)D_rend.font][(uint8_t)c])
+		AddStr(D_xtable[(uint8_t)D_rend.font][(uint8_t)c]);
 	else
-		AddChar(D_rend.font != '0' ? c : (uint32_t) D_c0_tab[(int)(unsigned char)c]);
+		AddChar(D_rend.font != '0' ? c : (uint32_t)D_c0_tab[(uint8_t)c]);
 
  addedutf8:
 	if (++D_x >= D_width) {
