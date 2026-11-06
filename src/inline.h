@@ -113,19 +113,26 @@ static inline void copy_mline2mchar(struct mchar *mc, struct mline const *ml, si
 
 /* Inline functions moved from ansi.h */
 
+static inline bool is_dw_font(int f)
+{
+	return f && (f & 0x60) == 0;
+}
+
 static inline bool dw_left(struct mline *ml, int x, int enc)
 {
 	uint32_t *font = ml->font;
 	uint32_t fx = font[x];
-	return enc == UTF8 ? font[x + 1] == 0xff && ml->image[x + 1] == 0xff : (fx & 0xe0) == 0 && (fx & 0x1f) != 0;
-	// : (fx-1 & 0xff) < 0x1f;  /* equivalent */
+	return enc == UTF8 ? font[x + 1] == 0xff && ml->image[x + 1] == 0xff
+			   : (fx & 0xe0) == 0 && (fx & 0x1f) != 0;
+			// : (fx-1 & 0xff) < 0x1f;	/* equivalent */
 }
 
 static inline bool dw_right(struct mline *ml, int x, int enc)
 {
 	uint32_t *font = ml->font;
 	uint32_t fx = font[x];
-	return enc == UTF8 ? fx == 0xff && ml->image[x] == 0xff : (fx & 0xe0) == 0x80;
+	return enc == UTF8 ? fx == 0xff && ml->image[x] == 0xff
+			   : (fx & 0xe0) == 0x80;
 	/* TODO: check whether that should be «(fx & 0xc0) == 0x80» */
 }
 

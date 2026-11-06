@@ -482,12 +482,12 @@ static void RAW_PUTCHAR(uint32_t c)
 	}
 	if (D_encoding)
 		c = PrepareEncodedChar(c);
- kanjiloop:
+      kanjiloop:
 	if (D_xtable && D_xtable[(int)(unsigned char)D_rend.font]
 	    && D_xtable[(int)(unsigned char)D_rend.font][(int)(unsigned char)c])
 		AddStr(D_xtable[(int)(unsigned char)D_rend.font][(int)(unsigned char)c]);
 	else
-		AddChar(D_rend.font != '0' ? c : (uint32_t)D_c0_tab[(int)(unsigned char)c]);
+		AddChar(D_rend.font != '0' ? c : (uint32_t) D_c0_tab[(int)(unsigned char)c]);
 
  addedutf8:
 	if (++D_x >= D_width) {
@@ -687,7 +687,7 @@ void GotoPos(int x2, int y2)
 	int m;
 	char *s;
 	int CMcost;
-	enum move_t xm = M_NONE, ym = M_NONE;
+	move_t xm = M_NONE, ym = M_NONE;
 
 	if (!display)
 		return;
@@ -712,7 +712,7 @@ void GotoPos(int x2, int y2)
 	if (y1 < 0		/* don't know the y position */
 	    || (y2 > D_bot && y1 <= D_bot)	/* have to cross border */
 	    ||(y2 < D_top && y1 >= D_top)) {	/* of scrollregion ?    */
- DoCM:
+	      DoCM:
 		if (D_HO && !x2 && !y2)
 			AddCStr(D_HO);
 		else
@@ -1054,7 +1054,7 @@ void ScrollH(int y, int xs, int xe, int n, int bce, struct mline *oml)
 void ScrollV(int xs, int ys, int xe, int ye, int n, int bce)
 {
 	int up;
-	int /*oldtop,*/ oldbot;
+	int /*oldtop, */ oldbot;
 	int alok, dlok, aldlfaster;
 	int missy = 0;
 
@@ -1239,45 +1239,62 @@ void SetFont(int new)
 		AddCStr2(D_CS0, new);
 }
 
+static inline int gray4tocolor16(int gray)
+{
+	/* Convert 2-bit gray-scale to 16-color palette, which encodes a 3-bit
+	 * color cube and 1 brightness bit, and noting that light (8) black (0)
+	 * is usually darker than dark (0) white (7).
+	 *
+	 *   from      0₁₀     1₁₀     2₁₀     3₁₀
+	 *            00₂     01₂     10₂     11₂
+	 *     to   0000₂   1000₂   0111₂   1111₂
+	 *             0₁₀     8₁₀     7₁₀    15₁₀
+	 */
+#if 1
+	return (gray & 1 ? 8 : 0)
+	     | (gray & 2 ? 7 : 0);
+#else
+	static const uint8_t r[] = { 0, 8, 7, 15 };
+	return r[gray & 3];
+#endif
+}
+
 int color256to16(int color)
 {
-	int min, max;
-	int r, g, b;
-
-	if (color >= 232) {
-		color = (color - 232) / 6;
-		color = (color & 1) << 3 | (color & 2 ? 7 : 0);
-	} else if (color >= 16) {
+	if (color >= 232)
+		return gray4tocolor16((color - 232) / 6);
+	if (color >= 16) {
 		color -= 16;
-		r = color / 36;
-		g = (color / 6) % 6;
-		b = color % 6;
-		min = r < g ? (r < b ? r : b) : (g < b ? g : b);
-		max = r > g ? (r > b ? r : b) : (g > b ? g : b);
+		int r = color / 36;
+		int g = color / 6 % 6;
+		int b = color % 6;
+		int min = r < g ? (r < b ? r : b)
+				: (g < b ? g : b);
+		int max = r > g ? (r > b ? r : b)
+				: (g > b ? g : b);
 		if (min == max)
-			color = ((max + 1) & 2) << 2
-			      | ((max + 1) & 4 ? 7 : 0);
-		else
-			color = (b - min) / (max - min) << 2
-			      | (g - min) / (max - min) << 1
-			      | (r - min) / (max - min)
-			      | (max > 3 ? 8 : 0);
+			return gray4tocolor16(max + 1 >> 1);
+		return (b - min) / (max - min) << 2
+		     | (g - min) / (max - min) << 1
+		     | (r - min) / (max - min)
+		     | max << 1 & 8;
 	}
 	return color;
 }
 
 int color256to88(int color)
 {
-	int r, g, b;
-
 	if (color >= 232)
 		return (color - 232) / 3 + 80;
 	if (color >= 16) {
 		color -= 16;
-		r = color / 36;
-		g = (color / 6) % 6;
-		b = color % 6;
-		return ((r + 1) / 2) * 16 + ((g + 1) / 2) * 4 + ((b + 1) / 2) + 16;
+		int r = color / 36    + 1 >> 1;
+		int g = color / 6 % 6 + 1 >> 1;
+		int b = color     % 6 + 1 >> 1;
+		return r * 16
+		     + g * 4
+		     + b
+		     + 16;
 	}
 	return color;
 }
@@ -1348,7 +1365,7 @@ void SetColor(uint32_t foreground, uint32_t background)
 			f = D_CCO == 88 && D_CAF ? color256to88(f) : color256to16(f);
 		}
 		if (D_CAF) {
-			//AddCStr2(D_CAF, f); //FIXME
+		     // AddCStr2(D_CAF, f);	// FIXME
 			tputs(tparm("\033[38;5;%dm", f), 1, DoAddChar);
 		}
 

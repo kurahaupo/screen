@@ -28,10 +28,9 @@ void xsetegid(int);
 int AddXChar(char *, int);
 int AddXChars(char *, int, char *);
 
-//# define UNSAFE_ARRAY_SIZE(x) (((&(x))[1]) - &*(x))
 # define UNSAFE_ARRAY_SIZE(x) (sizeof(x) / sizeof((x)[0]))
 
-#if __STDC_VERSION__ >= 202300
+#if __STDC_VERSION__ >= 202001
 
 # define UNUSED		[[maybe_unused]]
 # define UNUSED_ARG
@@ -67,9 +66,9 @@ int AddXChars(char *, int, char *);
 #  define MARK_UNUSED(x)
 # else
 #  define MARK_UNUSED(x) (void)(x);
-#  define UNUSED
 # endif
 #endif
+
 #ifndef UNUSED
 # define UNUSED /*UNUSED*/
 #endif

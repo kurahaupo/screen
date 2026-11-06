@@ -34,10 +34,10 @@
 #include <sys/time.h>
 
 typedef enum {
-	EV_TIMEOUT	= 0,
-	EV_READ		= 1,
-	EV_WRITE	= 2,
-	EV_ALWAYS	= 3
+	EV_TIMEOUT = 0,
+	EV_READ = 1,
+	EV_WRITE = 2,
+	EV_ALWAYS = 3
 } EventType;
 
 typedef struct Event Event;

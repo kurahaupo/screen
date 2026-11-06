@@ -49,16 +49,16 @@ struct GenericList {
 };
 
 struct ListData {
-	const char *name;		/* An identifier for the list */
-	ListRow *root;			/* The first item in the list */
-	ListRow *selected;		/* The selected row */
-	ListRow *top;			/* The topmost visible row */
+	const char *name;	/* An identifier for the list */
+	ListRow *root;		/* The first item in the list */
+	ListRow *selected;	/* The selected row */
+	ListRow *top;		/* The topmost visible row */
 
 	const GenericList *list_fn;	/* The functions that deal with the list */
 
-	char *search;			/* The search term, if any */
+	char *search;		/* The search term, if any */
 
-	void *data;			/* List specific data */
+	void *data;		/* List specific data */
 };
 
 

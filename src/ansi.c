@@ -105,7 +105,7 @@ static char *state_t_string[] = {
 
 static void DoESC(Window *, int, int);
 static void DoControlSequence(Window *, int, int);
-static void StringStart(Window *, enum string_t);
+static void StringStart(Window *, string_t);
 static void StringChar(Window *, int);
 static int StringEnd(Window *);
 static void PrintStart(Window *);
@@ -260,7 +260,7 @@ void WriteString(Window *win, char *buf, size_t len)
 				}
 			}
 
- tryagain:
+		      tryagain:
 			switch (win->w_state) {
 			case PRIN:
 				switch (c) {
@@ -361,7 +361,7 @@ void WriteString(Window *win, char *buf, size_t len)
 				case '[':
 					win->w_intermediate = 0;
 					win->w_state = CSI;
-					*cs = (struct cs_parser){};
+					*cs = (struct cs_parser){ 0 };
 					break;
 				case ']':
 					StringStart(win, OSC);
@@ -382,9 +382,11 @@ void WriteString(Window *win, char *buf, size_t len)
 				case 'k':
 					StringStart(win, AKA);
 					break;
+
 				C0ControlCases(win,
 					win->w_state = LIT;
 				);
+
 				default:
 					if (c >= ' ' && c <= '/') {
 						if (win->w_intermediate) {
@@ -481,7 +483,7 @@ void WriteString(Window *win, char *buf, size_t len)
 								win->w_autoaka = 0;
 							win->w_intermediate = 0;
 							win->w_state = CSI;
-							*cs = (struct cs_parser){};
+							*cs = (struct cs_parser){ 0 };
 							break;
 						case 0xc0 ^ 'P':
 							StringStart(win, DCS);
@@ -1088,7 +1090,7 @@ static void DoControlSequence(Window *win, int c, int intermediate)
 				win->w_y = 0;
 				WChangeSize(win, i ? Z0width : Z1width, win->w_height);
 				break;
-		     /* case 4:         SCLM: scrolling mode */
+		     /*	case 4:         SCLM: scrolling mode */
 			case 5:		/* SCNM: screen mode */
 				if (i != win->w_revvid)
 					WReverseVideo(win, i);
@@ -1103,31 +1105,46 @@ static void DoControlSequence(Window *win, int c, int intermediate)
 			case 7:		/* AWM:  auto wrap mode */
 				win->w_wrap = i;
 				break;
-		     /* case 8:         ARM:  auto repeat mode */
-		     /* case 9:         INLM: interlace mode */
+		     /*	case 8:		ARM:  auto repeat mode */
+		     /*	case 9:		INLM: interlace mode */
 			case 9:		/* X10 mouse tracking */
 				win->w_mouse = i ? 9 : 0;
 				LMouseMode(&win->w_layer, win->w_mouse);
 				break;
-		     /* case 10:        EDM:  edit mode */
-		     /* case 11:        LTM:  line transmit mode */
-		     /* case 13:        SCFDM: space compression / field delimiting */
-		     /* case 14:        TEM:  transmit execution mode */
-		     /* case 16:        EKEM: edit key execution mode */
-		     /* case 18:        PFF:  Printer term form feed */
-		     /* case 19:        PEX:  Printer extend screen / scroll. reg */
+		     /*	case 10:	EDM:  edit mode */
+		     /*	case 11:	LTM:  line transmit mode */
+		     /*	case 13:	SCFDM: space compression / field delimiting */
+		     /*	case 14:	TEM:  transmit execution mode */
+		     /*	case 16:	EKEM: edit key execution mode */
+		     /*	case 18:	PFF:  Printer term form feed */
+		     /*	case 19:	PEX:  Printer extend screen / scroll. reg */
 			case 25:	/* TCEM: text cursor enable mode */
 				win->w_curinv = !i;
 				LCursorVisibility(&win->w_layer, i ? win->w_curvvis : -1);
 				break;
-		     /* case 34:        RLM:  Right to left mode */
-		     /* case 35:        HEBM: hebrew keyboard map */
-		     /* case 36:        HEM:  hebrew encoding */
-		     /* case 38:              TeK Mode */
-		     /* case 40:              132 col enable */
-		     /* case 42:        NRCM: 7bit NRC character mode */
-		     /* case 44:              margin bell enable */
+		     /*	case 34:	RLM:  Right to left mode */
+		     /*	case 35:	HEBM: hebrew keyboard map */
+		     /*	case 36:	HEM:  hebrew encoding */
+		     /*	case 38:	      TeK Mode */
+		     /*	case 40:	      132 col enable */
+		     /*	case 42:	NRCM: 7bit NRC character mode */
+		     /*	case 44:	      margin bell enable */
 			case 47:	/*       xterm-like alternate screen */
+		     /*	case 66:	NKM:  Numeric keypad appl mode */
+		     /*	case 68:	KBUM: Keyboard usage mode (data process) */
+			case 1000:	/* VT200 mouse tracking */
+			case 1001:	/* VT200 highlight mouse */
+			case 1002:	/* button event mouse */
+			case 1003:	/* any event mouse */
+				win->w_mouse = i ? a1 : 0;
+				LMouseMode(&win->w_layer, win->w_mouse);
+				break;
+		     /*	case 1005:	UTF-8 mouse mode rejected */
+			case 1006:	/* SGR mouse mode */
+				win->w_extmouse = i ? a1 : 0;
+				LExtMouseMode(&win->w_layer, win->w_extmouse);
+				break;
+		     /*	case 1015:	UXRVT mouse mode rejected */
 			case 1047:	/*       xterm-like alternate screen */
 			case 1049:	/*       xterm-like alternate screen */
 				if (use_altscreen) {
@@ -1154,24 +1171,12 @@ static void DoControlSequence(Window *win, int c, int intermediate)
 				else
 					RestoreCursor(win, &win->w_saved);
 				break;
-		     /* case 66:        NKM:  Numeric keypad appl mode */
-		     /* case 68:        KBUM: Keyboard usage mode (data process) */
-			case 1000:	/* VT200 mouse tracking */
-			case 1001:	/* VT200 highlight mouse */
-			case 1002:	/* button event mouse */
-			case 1003:	/* any event mouse */
-				win->w_mouse = i ? a1 : 0;
-				LMouseMode(&win->w_layer, win->w_mouse);
-				break;
-		     /* case 1005:      UTF-8 mouse mode rejected */
-			case 1006:	/* SGR mouse mode */
-				win->w_extmouse = i ? a1 : 0;
-				LExtMouseMode(&win->w_layer, win->w_extmouse);
-				break;
-		     /* case 1015:      UXRVT mouse mode rejected */
 			case 2004:	/* bracketed paste mode */
 				win->w_bracketed = i;
 				LBracketedPasteMode(&win->w_layer, win->w_bracketed);
+				break;
+			case 8803:
+				win->w_sgr3_mode = i ? SGR3_LEGACY : SGR3_STRICT;
 				break;
 			}
 		}
@@ -1187,7 +1192,7 @@ static void DoControlSequence(Window *win, int c, int intermediate)
 	}
 }
 
-static void StringStart(Window *win, enum string_t type)
+static void StringStart(Window *win, string_t type)
 {
 	win->w_StringType = type;
 	win->w_stringp = win->w_string;
@@ -1669,12 +1674,12 @@ static void ASetMode(Window *win, bool on)
 
 	for (size_t i = 0; i < cs->num_params; ++i) {
 		switch (cs->params[i]) {
-	     /* case 2:            KAM: Lock keyboard */
+	     /*	case 2:            KAM: Lock keyboard */
 		case 4:	/* IRM: Insert mode */
 			win->w_insert = on;
 			LAY_DISPLAYS(&win->w_layer, InsertMode(on));
 			break;
-	     /* case 12:           SRM: Echo mode on */
+	     /*	case 12:           SRM: Echo mode on */
 		case 20:	/* LNM: Linefeed mode */
 			win->w_autolf = on;
 			break;
@@ -1744,7 +1749,7 @@ static enum attr_mask_e rendlist[][30] = {
 		[27] = ~A_RV,
 		[28] = ~A_HI,
 		[29] = ~A_ST,
-	}
+	},
 };
 
 const char *sgr3_mode_desc(sgr3_mode_t m)
@@ -1775,8 +1780,9 @@ static void SelectRendition(Window *win)
 	struct cs_parser *const cs = &win->w_cs;
 
 	for (size_t i = 0, k; i < cs->num_params; i = k) {
-		int j = cs->params[i];
+		cs_param_t j = cs->params[i];
 
+		/* Take sub-parameters as a unit */
 		for (k = i + 1; k < cs->num_params && cs->seps[k - 1] == ':'; ++k) {}
 
 		int *target_color = NULL;
@@ -1887,28 +1893,29 @@ static void SelectRendition(Window *win)
 			colorfg = 0;
 		}
 
-		if (j >= 0 && j < (int)(ARRAY_SIZE(rendlist[0]))) {
-			size_t m = rend_mode;
+		if (j >= ARRAY_SIZE(rendlist[0]))
+			continue;
 
-			if (k >= i + 2) {
-				m = cs->params[i + 1];
-				/* permitted subparam values */
-				if (m >= ARRAY_SIZE(rendlist))
-					continue;
-				/* only allow subparams for params where they make a difference */
-				if (rendlist[0][j] == rendlist[1][j])
-					continue;
-				if (k > i + 2)
-					continue;
-			}
+		size_t m = rend_mode;
 
-			attr_mask_t l = rendlist[m][j];
-
-			if (l & A__UNSET)
-				attr &= l;
-			else
-				attr |= l;
+		if (k >= i + 2) {
+			m = cs->params[i + 1];
+			/* permitted subparam values */
+			if (m >= ARRAY_SIZE(rendlist))
+				continue;
+			/* only allow subparams for params where they make a difference */
+			if (rendlist[0][j] == rendlist[1][j])
+				continue;
+			if (k > i + 2)
+				continue;
 		}
+
+		attr_mask_t l = rendlist[m][j];
+
+		if (l & A__UNSET)
+			attr &= l;
+		else
+			attr |= l;
 	}
 
 	win->w_rend.attr = attr;
@@ -1971,7 +1978,7 @@ static void FindAKA(Window *win)
 	int y;
 
 	y = (win->w_autoaka > 0 && win->w_autoaka <= win->w_height) ? win->w_autoaka - 1 : win->w_y;
- try_line:
+try_line:
 	cp = line = win->w_mlines[y].image;
 	if (win->w_autoaka > 0 && *win->w_akabuf != '\0') {
 		for (;;) {

@@ -61,11 +61,14 @@ static void setseqoff(unsigned char *, int, int);
 static int addmapseq(char *, int, int);
 static int remmapseq(char *, int);
 
-static char Termcap[TERMCAP_BUFSIZE + 8];	/* new termcap +8:"TERMCAP=" */
-#define endTermcap  ((&Termcap)[1])
+static char Termcap[TERMCAP_BUFSIZE + 8] = "TERMCAP=";	/* new termcap +8:"TERMCAP=" */
+#define limTermcap  (Termcap + sizeof Termcap)
+static size_t Termcaplen = 0;
 
-static size_t Termcaplen;
 char Term[MAXSTR + 5];		/* +5: "TERM=" */
+#define Termname (Term + 5)
+#define limTerm  (Term + sizeof Term)
+
 char screenterm[MAXTERMLEN + 1];	/* new $TERM, usually "screen" */
 
 char *extra_incap, *extra_outcap;
@@ -205,8 +208,11 @@ int InitTermcap(int width, int height)
 		/* ISO2022 */
 		if ((D_EA && strstr(D_EA, "\033(B")) || (D_AS && strstr(D_AS, "\033(0")))
 			D_CG0 = 1;
-		if (strstr(D_termname, "xterm") || strstr(D_termname, "rxvt")
-		 || (D_CKM && (strstr(D_CKM, "\033[M") || strstr(D_CKM, "\033[<")))) {
+		if (strstr(D_termname, "xterm")
+		 || strstr(D_termname, "rxvt")
+		 || (D_CKM &&
+		     (strstr(D_CKM, "\033[M")
+		      || strstr(D_CKM, "\033[<")))) {
 			D_CXT = 1;
 			kmapdef[0] = D_CKM ? SaveStr(D_CKM) : NULL;
 		}
@@ -669,17 +675,16 @@ static int remmapseq(char *seq, int k)
  */
 static inline bool AddCapSprintf(const char *fmt, ...)
 {
-	if (Termcaplen >= endTermcap - Termcap)
+	char *const endTermcap = Termcap + Termcaplen;
+	if (limTermcap - endTermcap <= 1)
 		return false;
-
-	char *const p = Termcap + Termcaplen;
 
 	va_list v;
 	va_start(v, fmt);
-	int n = vsnprintf(p, endTermcap - p, fmt, v);
+	int n = vsnprintf(endTermcap, limTermcap - endTermcap, fmt, v);
 	va_end(v);
 
-	if (n < 0 || (unsigned)n >= endTermcap - p)
+	if (n < 0 || n >= limTermcap - endTermcap)
 		return false;
 
 	Termcaplen += n;
@@ -691,16 +696,17 @@ static inline bool AddCapSprintf(const char *fmt, ...)
  */
 static inline bool AddCap(const char *s)
 {
-	size_t n = strlen(s);
-
-	char *const p = Termcap + Termcaplen;
-	if (n + 1 >= (size_t)(endTermcap - p))
+	char *const endTermcap = Termcap + Termcaplen;
+	if (limTermcap - endTermcap <= 1)
 		return false;
-	else {
-		memcpy(p, s, n + 1);
-		Termcaplen += n;
-		return true;
-	}
+	int n = strlen(s);
+
+	if (n < 0 || n >= limTermcap - endTermcap)
+		return false;
+
+	memcpy(endTermcap, s, n + 1);
+	Termcaplen += n;
+	return true;
 }
 
 /*
@@ -710,8 +716,8 @@ static inline bool AddCap(const char *s)
 char *MakeTermcap(bool aflag)
 {
 	char buf[TERMCAP_BUFSIZE];
-	char *s, *tname;
-	int i, width, height;
+	char *s, *tname = NULL;
+	int width, height;
 
 	if (display) {
 		width = D_width;
@@ -729,32 +735,36 @@ char *MakeTermcap(bool aflag)
 	}
 	Termcaplen = 0;
 	if (*screenterm == '\0' || strlen(screenterm) > MAXSTR - 3) {
-		strncpy(screenterm, "screen", MAXTERMLEN);
-		screenterm[MAXTERMLEN] = '\0';
+		strncpy(screenterm, "screen", sizeof screenterm);
+		screenterm[sizeof screenterm - 1] = '\0';
 	}
+
 	do {
-		char *tn = stpcpy(Term, "TERM=");
-		char *etn = stpcpy(tn, screenterm);
-		if (!aflag && strlen(screenterm) + strlen(tname) < MAXSTR - 1) {
-			sprintf(etn, ".%s", tname);
-			if (e_tgetent(buf, tn) == 1)
-				break;
-		}
-		if (nwin_default.bce) {
-			strcpy(etn, "-bce");
-			if (e_tgetent(buf, tn) == 1)
-				break;
-		}
-		*etn = 0;
-		if (e_tgetent(buf, tn) == 1)
+		if (!aflag && tname
+		 && limTerm - Termname > snprintf(Termname, limTerm - Termname, "%s.%s", screenterm, tname)
+		 && e_tgetent(buf, Termname) == 1)
 			break;
-		strcpy(tn, "vt100");
+
+		if (nwin_default.bce
+		 && limTerm - Termname > snprintf(Termname, limTerm - Termname, "%s-bce", screenterm)
+		 && e_tgetent(buf, Termname) == 1)
+			break;
+
+		if (limTerm - Termname > snprintf(Termname, limTerm - Termname, "%s", screenterm)
+		 && e_tgetent(buf, Termname) == 1)
+			break;
+
+		if (tname
+		 && limTerm - Termname > snprintf(Termname, limTerm - Termname, "%s", tname)
+		 && e_tgetent(buf, Termname) == 1)
+			break;
+		strcpy(Termname, "vt100");
 	} while (0);		/* Goto-free programming... */
 
-	if (strlen(Term) > TERMCAP_BUFSIZE - 40)
-		strcpy(Term + 5, "too_long");
+	if (strlen(Termname) > TERMCAP_BUFSIZE - 35)
+		strcpy(Termname, "too_long");
 	Termcaplen = 0;
-	AddCapSprintf("TERMCAP=SC|%s|VT 300/ISO-6429 virtual terminal:", Term + 5);
+	AddCapSprintf("TERMCAP=SC|%s|VT 300/ISO-6429 virtual terminal:", Termname);
 	if (extra_outcap && *extra_outcap) {
 		const char *cp, *p;
 		for (cp = extra_outcap; (p = strchr(cp, ':')); cp = p)
@@ -762,10 +772,7 @@ char *MakeTermcap(bool aflag)
 		if (cp && *cp)
 			AddCapSprintf("%s:", cp);
 	}
-	if (Termcaplen + strlen(TermcapConst) < TERMCAP_BUFSIZE) {
-		strcpy(Termcap + Termcaplen, TermcapConst);
-		Termcaplen += strlen(TermcapConst);
-	}
+	AddCap(TermcapConst);
 	AddCapSprintf("li#%d:"
 		      "co#%d:", height, width);
 	AddCap("am:");
@@ -847,7 +854,7 @@ char *MakeTermcap(bool aflag)
 			AddCap("WS=\\E[8;%d;%dt:");
 	}
 
-	for (i = T_CAPS; i < T_ECAPS; i++) {
+	for (size_t i = T_CAPS; i < T_ECAPS; i++) {
 		struct action *act;
 		if (i < T_OCAPS) {
 			if (i >= T_KEYPAD)	/* don't put keypad codes in TERMCAP */

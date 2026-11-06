@@ -31,6 +31,7 @@
 
 #include "screen.h"
 #include "fileio.h"
+#include "inline.h"
 #include "misc.h"
 
 static int encmatch(char *, char *);

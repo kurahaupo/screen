@@ -132,16 +132,16 @@ struct Message {
 		} create;
 		struct {
 			char auser[MAXLOGINLEN + 1];	/* username */
-			pid_t apid;	/* pid of frontend */
-			int adaptflag;	/* adapt window size? */
-			int lines, columns;	/* display size */
+			pid_t apid;			/* pid of frontend */
+			int adaptflag;			/* adapt window size? */
+			int lines, columns;		/* display size */
 			char preselect[20];
-			int esc;	/* his new escape character unless -1 */
-			int meta_esc;	/* his new meta esc character unless -1 */
+			int esc;			/* his new escape character unless -1 */
+			int meta_esc;			/* his new meta esc character unless -1 */
 			char envterm[MAXTERMLEN + 1];	/* terminal type */
-			bool envtruecolor;
-			int encoding;	/* encoding of display */
-			int detachfirst;	/* whether to detach remote sessions first */
+			bool env_colorterm :1;		/* with COLORTERM=truecolor in env */
+			int encoding;			/* encoding of display */
+			int detachfirst;		/* whether to detach remote sessions first */
 		} attach;
 		struct {
 			char duser[MAXLOGINLEN + 1];	/* username */

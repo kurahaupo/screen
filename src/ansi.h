@@ -34,7 +34,7 @@
 #include <stdint.h>
 #include <stdlib.h>
 
-enum attr_e {
+typedef enum attr_e {
 			// attribute           terminfo code   termcap code    ECMA-48 SGR     custom SGR
 			//                     (on   / off)    (on / off)      (on / off)      (on / off)
 			//
@@ -50,9 +50,9 @@ enum attr_e {
 	ATTR_SO,	// standout mode       smso  / rmso     so / se          - / -         3:1 / 23:1
 	NATTR		//
 			//      * reset all    -     / sgr0     -  / me          - / 0
-};
+} attr_t;
 
-enum attr_mask_e {
+typedef enum attr_mask_e {
 
 	A_BD = 1 << ATTR_BD,
 	A_DI = 1 << ATTR_DI,
@@ -68,21 +68,21 @@ enum attr_mask_e {
 	A__UNSET = 1 << NATTR,
 	A__MASK = A__UNSET - 1,
 
-};
+} attr_mask_t;
 
-enum atyp_mask_e {
+typedef enum atyp_mask_e {
 
 	ATYP_M = 1 << 0,
 	ATYP_S = 1 << 1,
 	ATYP_U = 1 << 2,
 
-};
+} atyp_mask_t;
 
 /*
  *  Parser state
  */
 /* keep state_t and state_t_string in sync! */
-enum state_t {
+typedef enum state_e {
 	LIT,			/* Literal input */
 	ESC,			/* Start of escape sequence */
 	ASTR,			/* Start of control string */
@@ -92,7 +92,7 @@ enum state_t {
 	PRINESC,		/* ESC seen in printer mode */
 	PRINCSI,		/* CSI seen in printer mode */
 	PRIN4			/* CSI 4 seen in printer mode */
-};
+} state_t;
 
 #define MAX_CS_PARAMS	64	/* ISO-6429 specifies 16, and recommends
 				 * silently ignoring any more, but we
@@ -102,7 +102,7 @@ enum state_t {
 				 * step with common usage. */
 
 /* keep string_t and string_t_string in sync! */
-enum string_t {
+typedef enum string_e {
 	NONE,
 	DCS,			/* Device Control String */
 	OSC,			/* Operating System Command */
@@ -112,12 +112,12 @@ enum string_t {
 	AKA,			/* Title for current screen */
 	GM,			/* Global Message (to every display) */
 	STATUS			/* User hardstatus line */
-};
+} string_t;
 
 /*
  *  Types of movement used by GotoPos()
  */
-enum move_t {
+typedef enum move_e {
 	M_NONE,
 	M_UP,
 	M_CUP,
@@ -129,7 +129,7 @@ enum move_t {
 	M_CRI,
 	M_RW,
 	M_CR			/* CR and rewrite */
-};
+} move_t;
 
 #define EXPENSIVE	1000
 
@@ -170,8 +170,6 @@ enum move_t {
 #define UCS_REPL	0xfffd	/* character for illegal codes */
 #define UCS_REPL_DW	0xff1f	/* character for illegal codes */
 #define UCS_HIDDEN	0xffff
-
-#define is_dw_font(f)	((f) && ((f) & 0x60) == 0)
 
 typedef struct Window Window;
 

@@ -699,7 +699,7 @@ static int CreateTempDisplay(Message *m, int recvfd, Window *win)
 	/* create new display */
 	GetTTY(i, &Mode);
 	if (MakeDisplay(user, m->m_tty, attach ? m->m.attach.envterm : "",
-			attach && m->m.attach.envtruecolor, i, pid, &Mode) == NULL) {
+			attach && m->m.attach.env_colorterm, i, pid, &Mode) == NULL) {
 		int unused_result = write(i, "Could not make display.\n", 24);
 		(void)unused_result;	/* unused */
 		close(i);
@@ -925,12 +925,12 @@ void ReceiveMsg(void)
 	}
 }
 
-void ReceiveRaw(int s)
+void ReceiveRaw(int ss)
 {
 	struct sockaddr_un a;
 	socklen_t alen = sizeof a;
-	int s2 = accept(s, (struct sockaddr *)&a, &alen);
-	if (s2 < 0) {
+	int s = accept(ss, (struct sockaddr *)&a, &alen);
+	if (s < 0) {
 		Msg(errno, "accept");
 		return;
 	}

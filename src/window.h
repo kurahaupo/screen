@@ -47,7 +47,7 @@ struct NewWindow {
 	char **args;		/* argv vector */
 	char *dir;		/* directory for chdir */
 	char *term;		/* TERM to be set instead of "screen" */
-	bool hastruecolor;	/* should we include TRUECOLOR=truecolor? */
+	bool hastruecolor;	/* export COLORTERM=truecolor? */
 	bool aflag;
 	bool dynamicaka;
 	int flowflag;
@@ -87,11 +87,11 @@ struct pseudowin {
 /* bits for fdpat: */
 #define F_PMASK 	0x0003
 #define F_PSHIFT	2
-#define F_PFRONT	0x0001			/* . */
-#define F_PBACK 	0x0002			/* ! */
+#define F_PFRONT	0x0001	/* . */
+#define F_PBACK 	0x0002	/* ! */
 #define F_PBOTH 	(F_PFRONT | F_PBACK)	/* : */
 
-#define F_UWP		0x1000			/* | */
+#define F_UWP		0x1000	/* | */
 
 /* The screen process ...)
  * ... wants to write to pseudo */
@@ -189,8 +189,8 @@ struct Window {
 	AclBits w_lio_notify;	/* whom to tell when lastio+seconds < time() */
 	AclBits w_mon_notify;	/* whom to tell monitor status */
 
-	enum state_t w_state;	/* parser state */
-	enum string_t w_StringType;
+	state_t w_state;	/* parser state */
+	string_t w_StringType;
 	struct mline *w_mlines;
 	struct mchar w_rend;	/* current rendition */
 	char w_FontL;		/* character font GL */
@@ -252,7 +252,7 @@ struct Window {
 	char *w_cmdargs[MAXARGS];	/* command line argument vector */
 	char *w_dir;		/* directory for chdir */
 	char *w_term;		/* TERM to be set instead of "screen" */
-	bool w_truecolor;	/* TERM to be set instead of "screen" */
+	bool w_truecolor;	/* export COLORTERM=truecolor? */
 
 #if defined (ENABLE_UTMP)
 	int w_lflag;		/* login flag */

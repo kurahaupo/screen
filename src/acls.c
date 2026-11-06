@@ -396,12 +396,13 @@ int AclLinkUser(char *from, char *to)
  */
 char *DoSu(struct acluser **up, char *name, char *pw1, char *pw2)
 {
+#if 1
 	(void)up;
 	(void)name;
 	(void)pw1;
 	(void)pw2;
 
-#if 0
+#else
 	struct acluser *u;
 	int sorry = 0;
 	if (!(u = *FindUserPtr(name)))
@@ -424,8 +425,10 @@ char *DoSu(struct acluser **up, char *name, char *pw1, char *pw2)
 #ifdef SHADOWPW
 		for (t = 0; t < 13; t++) {
 			c = pass[t];
-			if (!(c == '.' || c == '/' ||
-			      (c >= '0' && c <= '9') || (c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z')))
+			if (!(c == '.' || c == '/'
+			 || (c >= '0' && c <= '9')
+			 || (c >= 'a' && c <= 'z')
+			 || (c >= 'A' && c <= 'Z')))
 				break;
 		}
 		if (t < 13) {
@@ -452,7 +455,11 @@ char *DoSu(struct acluser **up, char *name, char *pw1, char *pw2)
 	}
 
 	openlog("screen", LOG_PID, LOG_AUTHPRIV);
-	syslog(LOG_NOTICE, "%s: \"su %s\" %s for \"%s\"", SocketPath, name, sorry ? "failed" : "succeeded",
+	syslog(LOG_NOTICE,
+	       "%s: \"su %s\" %s for \"%s\"",
+	       SocketPath,
+	       name,
+	       sorry ? "failed" : "succeeded",
 	       (*up)->u_name);
 	closelog();
 

@@ -177,6 +177,7 @@ void nwin_compose(struct NewWindow *def, struct NewWindow *new, struct NewWindow
 	COMPOSE(hstatus);
 	COMPOSE(charset);
 	COMPOSE(poll_zombie_timeout);
+	COMPOSE(hastruecolor);
 	COMPOSE(sgr3_mode);
 #undef COMPOSE
 }

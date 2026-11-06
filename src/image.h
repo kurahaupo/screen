@@ -57,6 +57,5 @@ enum {
 	NUM_RENDS
 };
 
-//# include "ansiinline.h"
-
 #endif				/* SCREEN_IMAGE_H */
+

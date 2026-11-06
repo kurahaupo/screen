@@ -1194,7 +1194,7 @@ static struct baud_values btable[] = {
  */
 static struct baud_values *lookup_baud(int baud)
 {
-	for (struct baud_values *p = btable; p->bps >= 0; p++)
+	for (struct baud_values * p = btable; p->bps >= 0; p++)
 		if (baud == p->bps || baud == p->sym)
 			return p;
 	return NULL;

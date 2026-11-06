@@ -70,7 +70,7 @@
 
 
 static size_t CountArgs(char **);
-static bool CheckArgCount(struct comm *, int);
+static bool CheckArgCount(struct comm *, size_t);
 static int CheckArgNum(int, char **);
 static void ClearAction(struct action *);
 static void SaveAction(struct action *, int, char **, int *);
@@ -327,7 +327,7 @@ static struct digraph digraphs[MAX_DIGRAPH + 1] = {
 	{ { '"',  '{'  }, 228 },	/* ä */
 	{ { '"',  '|'  }, 246 },	/* ö */
 	{ { '"',  '}'  }, 252 },	/* ü */
-	{ { '"',  '~'  }, 223 }	/* ß */
+	{ { '"',  '~'  }, 223 },	/* ß */
 };
 
 #define RESIZE_FLAG_H 1
@@ -410,6 +410,7 @@ void InitKeytab(void)
 			continue;
 		if (kmapadef[i] == NULL)
 			continue;
+
 		SaveAction(dmtab + i + (KMAPADEFSTART - T_CURSOR + KMAP_KEYS), RC_STUFF,
 			   (char *[2]){ kmapadef[i] }, NULL);
 	}
@@ -523,7 +524,7 @@ static struct action *FindKtab(char *class, int create)
 			Msg(0, "Command class name too long.");
 			return NULL;
 		}
-		kp = malloc(sizeof(struct kclass));
+		kp = malloc(sizeof *kp);
 		if (kp == NULL) {
 			Msg(0, "%s", strnomem);
 			return NULL;
@@ -786,27 +787,16 @@ int FindCommnr(const char *str)
 	return RC_ILLEGAL;
 }
 
-static size_t CountArgs(char **args)
+static inline size_t CountArgs(char **args)
 {
 	size_t argc = 0;
 	if (args)
-		for (; args[argc]; argc++) ;
+		for (; args[argc]; argc++) {}
 	return argc;
 }
 
 #ifdef FANCY_ERROR_REPORTING
-/* Make sure the following are kept in sync with ARGS_ANY */
-/* lookup for base-2 logarithm */
-static const int blog[2 << ARGS_ANY] = {
-	[1 << 0] = 1,
-	[1 << 1] = 2,
-	[1 << 2] = 3,
-	[1 << 3] = 4,
-	[1 << 4] = 5,
-	[1 << 5] = 6,
-	/* The last entry here should be equivalent to:
-	   [1 << ARGS_ANY-1] = ARGS_ANY, */
-};
+
 static char *nums[] = { "no", "one", "two", "three", "four", "five" };
 
 static inline int lo_bit(int i)
@@ -822,7 +812,8 @@ static inline int hi_bits(int i)
 static inline int range_end_bit(int i)
 {
 	return (i + lo_bit(i)) >> 1;
-}				// top of a consecutive range
+	// top of a consecutive range
+}
 
 static inline bool is_single_bit(int i)
 {
@@ -838,13 +829,41 @@ static inline bool is_bit_range(int i)
 {
 	return is_single_bit(range_end_bit(i));
 }
-#endif
 
-static bool CheckArgCount(struct comm *c, int argc)
+# if defined __GNUC__ || defined __clang__
+static inline int log_lo_bit(int x)
+{
+	x &= ARGS_MASK;
+	return __builtin_ffs(x) - 1;
+}
+# else
+static inline int log_lo_bit(int x)
+{
+	/* Make sure the following are kept in sync with ARGS_ANY */
+	/* lookup for base-2 logarithm */
+	static const int blog[2 << ARGS_ANY] = {
+		[1 << 0] = 1,
+		[1 << 1] = 2,
+		[1 << 2] = 3,
+		[1 << 3] = 4,
+		[1 << 4] = 5,
+		/* fill in more entries as necessary */
+		[1 << ARGS_ANY] = ARGS_ANY+1,
+	};
+	x &= ARGS_MASK;
+	return blog[x] - 1;
+}
+# endif
+
+#endif	/*FANCY_ERROR_REPORTING*/
+
+static bool CheckArgCount(struct comm *c, size_t argc)
 {
 	int allowed_counts_mask = c->flags & ARGS_MASK;
 
-	if (allowed_counts_mask == 0 || allowed_counts_mask & 1U << (argc <= ARGS_ANY ? argc : ARGS_ANY))
+	if (allowed_counts_mask == 0
+	 || allowed_counts_mask & 1U << (argc <= ARGS_ANY ?
+					 argc  : ARGS_ANY))
 		return true;
 
 	/* From here to the end of this function is just trying to be
@@ -852,35 +871,44 @@ static bool CheckArgCount(struct comm *c, int argc)
 	char const *name = c->name;
 #ifdef FANCY_ERROR_REPORTING
 	switch (allowed_counts_mask) {
-	case ARGS_0:
+	case ARGS(0):
 		Msg(0, "%s: %s: no arguments allowed", rc_name, name);
-		return -1;
-	case ARGS_1:
+		return false;
+	case ARGS(1):
 		Msg(0, "%s: %s: exactly one argument required", rc_name, name);
-		return -1;
-	case ARGS_1M:
-		Msg(0, "%s: %s: at least one argument required", rc_name, name);
-		return -1;
-	case ARGS_124:
+		return false;
+	case ARGS(1)
+	   | ARGS(2)
+	   | ARGS(4):
 		Msg(0, "%s: %s: one, two, or four arguments required", rc_name, name);
-		return -1;
+		return false;
+	case ARGS_ATLEAST(1):
+		Msg(0, "%s: %s: at least one argument required", rc_name, name);
+		return false;
 	}
 
-	int allowed_counts_mask = allowed_counts_mask & ~ARGS_M;
-	bool or_more = allowed_counts_mask & ARGS_M;
-	const int first = blog[lo_bit(allowed_counts_mask)] - 1;
-	if (!or_more && is_single_bit(allowed_counts_mask))
+	bool or_more = allowed_counts_mask & ARGS_MASK;
+	allowed_counts_mask &= ~ARGS_M;	/* CHECK THIS */
+	const int first = log_lo_bit(lo_bit(allowed_counts_mask));
+	if (!or_more && is_single_bit(allowed_counts_mask)) {
+		/* Exactly one allowed count, not including "or more" */
 		Msg(0, "%s: %s: exactly %s arguments required", rc_name, name, nums[first]);
-	else if (!or_more && is_bit_pair(allowed_counts_mask)) {
+		return false;
+	}
+	if (!or_more && is_bit_pair(allowed_counts_mask)) {
+		/* Exactly two allowed counts, not including "or more" */
 		Msg(0, "%s: %s: %s or %s arguments required", rc_name, name,
-		    nums[first], nums[blog[hi_bits(allowed_counts_mask)] - 1]);
-	} else if (is_bit_range(allowed_counts_mask)) {
-		/* Use bitwise carry propagation to find the top of the range.
+		    nums[first], nums[log_lo_bit(hi_bits(allowed_counts_mask))]);
+		return false;
+	}
+	if (is_bit_range(allowed_counts_mask)) {
+		/* Contiguous range of allowed counts.
+		 * Use bitwise carry propagation to find the top of the range.
 		 * Since we've already checked is_single_bit(allowed_counts_mask),
 		 * we know that first ≠ range_top (except for first = hi =
-		 * ARGS_M, but we will still correctly render that as "five or
-		 * more") */
-		const int range_top = blog[range_end_bit(allowed_counts_mask)] - 1;
+		 * ARGS_ANY, but we will still correctly render that as "five
+		 * or more") */
+		const int range_top = log_lo_bit(range_end_bit(allowed_counts_mask));
 		if (first == 0)
 			Msg(0, "%s: %s: no more than %s arguments allowed", rc_name, name, nums[range_top]);
 		else if (range_top == ARGS_ANY)
@@ -888,17 +916,19 @@ static bool CheckArgCount(struct comm *c, int argc)
 		else
 			Msg(0, "%s: %s: between %s and %s arguments required",
 			    rc_name, name, nums[first], nums[range_top]);
-	} else
-#endif
-		Msg(0, "%s: %s: wrong number of arguments", rc_name, name);
-
+		return false;
+	}
+#endif	/*FANCY_ERROR_REPORTING*/
+	Msg(0, "%s: %s: wrong number of arguments", rc_name, name);
 	return false;
 }
 
 static int CheckArgNum(int nr, char **args)
 {
 	int argc = CountArgs(args);
-	return CheckArgCount(&comms[nr], argc) ? argc : -1;
+	if (CheckArgCount(&comms[nr], argc))
+		return argc;
+	return -1;
 }
 
 static void StuffFin(char *buf, size_t len, void *data UNUSED)
@@ -4950,9 +4980,9 @@ static void SaveAction(struct action *act, int nr, char **args, int *argl)
 		act->argl = NULL;
 		return;
 	}
-	if ((pp = malloc((size_t)(argc + 1) * sizeof(*pp))) == NULL)
+	if ((pp = malloc((argc + 1) * sizeof *pp)) == NULL)
 		Panic(0, "%s", strnomem);
-	if ((lp = malloc((size_t)(argc) * sizeof(*lp))) == NULL)
+	if ((lp = malloc(argc * sizeof *lp)) == NULL)
 		Panic(0, "%s", strnomem);
 	act->nr = nr;
 	act->args = pp;
@@ -5960,7 +5990,7 @@ static void ColonFin(char *buf, size_t len, void *data UNUSED)
 		int showmessage = 0;
 		char *s = buf;
 
-		while (*s && (uintptr_t)(s - buf) < len)
+		while (*s && (uintptr_t) (s - buf) < len)
 			if (*s++ == ' ')
 				return;
 
@@ -5983,7 +6013,7 @@ static void ColonFin(char *buf, size_t len, void *data UNUSED)
 				for (m = ++l;
 				     m <= r
 				     && strncmp(buf, comms[m].name, len) == 0
-				     && (uintptr_t)(s - mbuf) < ARRAY_SIZE(mbuf);
+				     && s - mbuf < (ptrdiff_t)ARRAY_SIZE(mbuf);
 				     m++)
 					s += snprintf(s, ARRAY_SIZE(mbuf) - (s - mbuf), " %s", comms[m].name);
 				if (l < m - 1) {
@@ -6978,12 +7008,12 @@ uint64_t ParseAttrColor(char *str, int msgok)
 		}
 	}
 
-	r = (((uint64_t)attr & 0x0FF) << 56);
+	r = (((uint64_t) attr & 0x0FF) << 56);
 
-	r |= (((uint64_t)bg & 0x0FFFFFF) << 24);
-	r |= ((uint64_t)fg & 0x0FFFFFF);
-	r |= ((uint64_t)fm << 48);
-	r |= ((uint64_t)bm << 52);
+	r |= (((uint64_t) bg & 0x0FFFFFF) << 24);
+	r |= ((uint64_t) fg & 0x0FFFFFF);
+	r |= ((uint64_t) fm << 48);
+	r |= ((uint64_t) bm << 52);
 
 	return r;
 }

@@ -794,8 +794,9 @@ int main(int argc, char **argv)
 			Panic(0, "Please set a terminal type.");
 		if (strlen(attach_term) > MAXTERMLEN)
 			Panic(0, "$TERM too long - sorry.");
-		char *ts = getenv("TRUECOLOR");
-		attach_truecolor = ts && (!strcmp(ts, "truecolor") || !strcmp(ts, "24bit"));
+		char *ts = getenv("COLORTERM");
+		attach_truecolor = ts && (!strcmp(ts, "truecolor")
+				       || !strcmp(ts, "24bit"));
 		GetTTY(0, &attach_Mode);
 	}
 
@@ -1047,8 +1048,7 @@ int main(int argc, char **argv)
 	if (UserAdd(LoginName, NULL) < 0)
 		Panic(0, "Could not create user info");
 	if (!detached) {
-		if (MakeDisplay(LoginName, attach_tty, attach_term, attach_truecolor, n, getppid(), &attach_Mode) ==
-		    NULL)
+		if (MakeDisplay(LoginName, attach_tty, attach_term, attach_truecolor, n, getppid(), &attach_Mode) == NULL)
 			Panic(0, "Could not alloc display");
 		PanicPid = 0;
 		D_encoding = nwin_options.encoding > 0 ? nwin_options.encoding : 0;
@@ -1512,14 +1512,14 @@ void MakeNewEnv(void)
 	*np++ = Term;		/* NewEnv[1] */
 	np += 3;		/* room for SHELL, TERMCAP, and WINDOW */
 	if (hastruecolor)
-		*np++ = "TRUECOLOR=truecolor";
+		*np++ = "COLORTERM=truecolor";
 
 	for (op = environ; *op; ++op) {
 		if (!IsSymbol(*op, "TERM") && !IsSymbol(*op, "TERMCAP")
 		    && !IsSymbol(*op, "STY") && !IsSymbol(*op, "WINDOW")
 		    && !IsSymbol(*op, "SCREENCAP") && !IsSymbol(*op, "SHELL")
 		    && !IsSymbol(*op, "LINES") && !IsSymbol(*op, "COLUMNS")
-		    && !IsSymbol(*op, "TRUECOLOR"))
+		    && !IsSymbol(*op, "COLORTERM"))
 			*np++ = *op;
 	}
 	*np = NULL;
