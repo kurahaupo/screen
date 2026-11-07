@@ -73,14 +73,6 @@ typedef enum attr_mask_e {
 	A_DFT_COLOR = 1U << NATTR+1,	/* what "\e[0m" does */
 } attr_mask_t;
 
-typedef enum atyp_mask_e {
-
-	ATYP_M = 1 << 0,	/* generic me reset */
-	ATYP_S = 1 << 1,	/* so/se pair (standout) */
-	ATYP_U = 1 << 2,	/* us/ue pair (italic) */
-
-} atyp_mask_t;
-
 /*
  *  Parser state
  */
