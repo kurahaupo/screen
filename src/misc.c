@@ -114,7 +114,7 @@ char *stripdev(char *name)
  *    Signal handling
  */
 
-void (*xsignal(int sig, void (*func)(int)))(int)
+signal_handler_t xsignal(int sig, signal_handler_t func)
 {
 	struct sigaction osa, sa;
 	sa.sa_handler = func;
