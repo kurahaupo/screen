@@ -795,21 +795,6 @@ static inline size_t CountArgs(char **args)
 	return argc;
 }
 
-#ifdef FANCY_ERROR_REPORTING
-
-static char *nums[] = { "no", "one", "two", "three", "four", "five" };
-
-static inline bool is_bit_pair(int i)
-{
-	return is_single_bit(hi_bits(i));
-}
-
-static inline bool is_bit_range(int i)
-{
-	return is_single_bit(range_end_bit(i));
-}
-#endif	/*FANCY_ERROR_REPORTING*/
-
 static bool CheckArgCount(struct comm *c, size_t argc)
 {
 	int allowed_counts_mask = c->flags & ARGS_MASK;
@@ -841,8 +826,10 @@ static bool CheckArgCount(struct comm *c, size_t argc)
 	}
 
 	bool or_more = allowed_counts_mask & ARGS_MORE;
-	allowed_counts_mask &= ARGS_MASK;
 	const int first = log_lo_bit(lo_bit(allowed_counts_mask));
+
+	static char *nums[] = { "no", "one", "two", "three", "four", "five" };
+
 	if (!or_more && is_single_bit(allowed_counts_mask)) {
 		/* Exactly one allowed count, not including "or more" */
 		Msg(0, "%s: %s: exactly %s arguments required", rc_name, name, nums[first]);

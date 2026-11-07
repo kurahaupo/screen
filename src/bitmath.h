@@ -180,6 +180,8 @@ static inline uint64_t  lo_bit(uint64_t i)        { return i & -i; }
 static inline uint64_t  hi_bits(uint64_t i)       { return i ^ lo_bit(i); }
 static inline uint64_t  range_end_bit(uint64_t i) { return (i + lo_bit(i)) >> 1; }	// top of a consecutive range
 static inline bool      is_single_bit(uint64_t i) { return ! hi_bits(i); }
+static inline bool      is_bit_pair(int i)        { return is_single_bit(hi_bits(i)); }
+static inline bool      is_bit_range(int i)       { return is_single_bit(range_end_bit(i)); }
 
 #if HAVE_STDC_COUNT_TRAILING_ZEROS
 # define log_lo_bit(x) ( (x) ? stdc_count_trailing_zeros(x) : -1 )
