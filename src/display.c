@@ -1821,9 +1821,7 @@ void RefreshHStatus(void)
 void RefreshAll(int isblank)
 {
 	for (Canvas *cv = D_cvlist; cv; cv = cv->c_next) {
-		CV_CALL(cv,
-			LayRedisplayLine(-1, -1, -1, isblank)
-		);
+		CV_CALL(cv, LayRedisplayLine(-1, -1, -1, isblank));
 		display = cv->c_display;	/* just in case! */
 	}
 	RefreshArea(0, 0, D_width - 1, D_height - 1, isblank);
