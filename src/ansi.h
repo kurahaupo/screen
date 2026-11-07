@@ -98,14 +98,6 @@ enum rend_flags_e {
 
 };
 
-typedef enum atyp_mask_e {
-
-	ATYP_M = 1 << 0,	/* generic me reset */
-	ATYP_S = 1 << 1,	/* so/se pair (standout) */
-	ATYP_U = 1 << 2,	/* us/ue pair (italic) */
-
-} atyp_mask_t;
-
 /*
  *  Parser state
  */
