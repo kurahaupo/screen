@@ -408,7 +408,8 @@ void WriteFile(struct acluser *user, char *fn, int dump)
 		if (f == NULL) {
 			UserReturn(0);
 		} else {
-			uint32_t *p, *pf;
+			uint32_t *p;
+			uint8_t *pf;
 			switch (dump) {
 			case DUMP_HARDCOPY:
 			case DUMP_SCROLLBACK:

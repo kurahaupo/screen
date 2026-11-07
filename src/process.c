@@ -44,6 +44,7 @@
 #include <sys/types.h>
 #include <time.h>
 
+#include "aatypes.h"
 #include "bitmath.h"
 #include "display.h"
 #include "encoding.h"

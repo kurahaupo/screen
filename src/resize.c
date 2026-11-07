@@ -35,6 +35,7 @@
 #include <stdbool.h>
 #include <sys/ioctl.h>
 
+#include "aatypes.h"
 #include "canvas.h"
 #include "display.h"
 #include "image.h"
@@ -312,13 +313,13 @@ static void FreeMline(struct mline *ml)
 {
 	if (ml->image)
 		free(ml->image);
-	if (ml->attr && ml->attr != null)
+	if (ml->attr && ml->attr != null_attr)
 		free(ml->attr);
-	if (ml->font && ml->font != null)
+	if (ml->font && ml->font != null_font)
 		free(ml->font);
-	if (ml->colorbg && ml->colorbg != null)
+	if (ml->colorbg && ml->colorbg != null_color)
 		free(ml->colorbg);
-	if (ml->colorfg && ml->colorfg != null)
+	if (ml->colorfg && ml->colorfg != null_color)
 		free(ml->colorfg);
 	*ml = mline_zero;
 }
@@ -326,10 +327,10 @@ static void FreeMline(struct mline *ml)
 static int AllocMline(struct mline *ml, int w)
 {
 	ml->image = malloc(w * 4);
-	ml->attr = null;
-	ml->font = null;
-	ml->colorbg = null;
-	ml->colorfg = null;
+	ml->attr = null_attr;
+	ml->font = null_font;
+	ml->colorbg = null_color;
+	ml->colorfg = null_color;
 	if (ml->image == NULL)
 		return -1;
 	return 0;
@@ -340,29 +341,29 @@ static int BcopyMline(struct mline *mlf, int xf, struct mline *mlt, int xt, int 
 	int r = 0;
 
 	memmove(mlt->image + xt, mlf->image + xf, l * 4);
-	if (mlf->attr != null && mlt->attr == null) {
+	if (mlf->attr != null_attr && mlt->attr == null_attr) {
 		if ((mlt->attr = calloc(w, 4)) == NULL)
-			mlt->attr = null, r = -1;
+			mlt->attr = null_attr, r = -1;
 	}
-	if (mlt->attr != null)
+	if (mlt->attr != null_attr)
 		memmove(mlt->attr + xt, mlf->attr + xf, l * 4);
-	if (mlf->font != null && mlt->font == null) {
+	if (mlf->font != null_font && mlt->font == null_font) {
 		if ((mlt->font = calloc(w, 4)) == NULL)
-			mlt->font = null, r = -1;
+			mlt->font = null_font, r = -1;
 	}
-	if (mlt->font != null)
+	if (mlt->font != null_font)
 		memmove(mlt->font + xt, mlf->font + xf, l * 4);
-	if (mlf->colorbg != null && mlt->colorbg == null) {
+	if (mlf->colorbg != null_color && mlt->colorbg == null_color) {
 		if ((mlt->colorbg = calloc(w, 4)) == NULL)
-			mlt->colorbg = null, r = -1;
+			mlt->colorbg = null_color, r = -1;
 	}
-	if (mlt->colorbg != null)
+	if (mlt->colorbg != null_color)
 		memmove(mlt->colorbg + xt, mlf->colorbg + xf, l * 4);
-	if (mlf->colorfg != null && mlt->colorfg == null) {
+	if (mlf->colorfg != null_color && mlt->colorfg == null_color) {
 		if ((mlt->colorfg = calloc(w, 4)) == NULL)
-			mlt->colorfg = null, r = -1;
+			mlt->colorfg = null_color, r = -1;
 	}
-	if (mlt->colorfg != null)
+	if (mlt->colorfg != null_color)
 		memmove(mlt->colorfg + xt, mlf->colorfg + xf, l * 4);
 	return r;
 }
@@ -371,8 +372,10 @@ static int maxwidth;
 
 static void CheckMaxSize(int wi)
 {
-	uint32_t *oldnull = null;
-	uint32_t *oldblank = blank;
+	image_t *oldblank = blank;
+	attr_mask_t *oldnull_attr = null_attr;
+	color_t *oldnull_color = null_color;
+	font_t *oldnull_font = null_font;
 	Window *p;
 	int i;
 	struct mline *ml;
@@ -382,30 +385,34 @@ static void CheckMaxSize(int wi)
 	if (wi < maxwidth)
 		return;
 	maxwidth = wi + 1;
-	blank = xrealloc(blank, maxwidth * 4);
-	null = xrealloc(null, maxwidth * 4);
-	mline_old.image = xrealloc(mline_old.image, maxwidth * 4);
-	mline_old.attr = xrealloc(mline_old.attr, maxwidth * 4);
-	mline_old.font = xrealloc(mline_old.font, maxwidth * 4);
-	mline_old.colorbg = xrealloc(mline_old.colorbg, maxwidth * 4);
-	mline_old.colorfg = xrealloc(mline_old.colorfg, maxwidth * 4);
-	if (!(blank && null && mline_old.image && mline_old.attr && mline_old.font
-	      && mline_old.colorbg && mline_old.colorfg))
+	blank = xrealloc(blank, maxwidth * sizeof *blank);
+	null_attr = xrealloc(null_attr, maxwidth * sizeof *null_attr);
+	null_font = xrealloc(null_font, maxwidth * sizeof *null_font);
+	null_color = xrealloc(null_color, maxwidth * sizeof *null_color);
+	mline_old.image = xrealloc(mline_old.image, maxwidth * sizeof *mline_old.image);
+	mline_old.attr = xrealloc(mline_old.attr, maxwidth * sizeof *mline_old.attr);
+	mline_old.font = xrealloc(mline_old.font, maxwidth * sizeof *mline_old.font);
+	mline_old.colorbg = xrealloc(mline_old.colorbg, maxwidth * sizeof *mline_old.colorbg);
+	mline_old.colorfg = xrealloc(mline_old.colorfg, maxwidth * sizeof *mline_old.colorfg);
+	if (!(blank           && null_attr      && null_font      && null_color
+	   && mline_old.image && mline_old.attr && mline_old.font && mline_old.colorbg && mline_old.colorfg))
 		Panic(0, "%s", strnomem);
 
 	MakeBlankLine(blank, maxwidth);
-	memset(null, 0, maxwidth * 4);
+	memset(null_attr, 0, maxwidth * sizeof *null_attr);
+	memset(null_color, 0, maxwidth * sizeof *null_color);
+	memset(null_font, 0, maxwidth * sizeof *null_font);
 
 	mline_blank.image = blank;
-	mline_blank.attr = null;
+	mline_blank.attr = null_attr;
 	mline_null.image = null;
-	mline_null.attr = null;
-	mline_blank.font = null;
-	mline_null.font = null;
-	mline_blank.colorbg = null;
-	mline_null.colorbg = null;
-	mline_blank.colorfg = null;
-	mline_null.colorfg = null;
+	mline_null.attr = null_attr;
+	mline_blank.font = null_font;
+	mline_null.font = null_font;
+	mline_blank.colorbg = null_color;
+	mline_null.colorbg = null_color;
+	mline_blank.colorfg = null_color;
+	mline_null.colorfg = null_color;
 
 #define RESET_AFC(x, bl)	\
 do {				\
@@ -413,16 +420,16 @@ do {				\
 		x = bl;		\
 } while (0)
 
-#define RESET_LINES(lines, count)		\
-do {						\
-	ml = lines;				\
-	for (i = 0; i < count; i++, ml++) {	\
-		RESET_AFC(ml->image, blank);	\
-		RESET_AFC(ml->attr, null);	\
-		RESET_AFC(ml->font, null);	\
-		RESET_AFC(ml->colorbg, null);	\
-		RESET_AFC(ml->colorfg, null);	\
-	}					\
+#define RESET_LINES(lines, count)			\
+do {							\
+	ml = lines;					\
+	for (i = 0; i < count; i++, ml++) {		\
+		RESET_AFC(ml->image, blank);		\
+		RESET_AFC(ml->attr, null_attr);		\
+		RESET_AFC(ml->font, null_font);		\
+		RESET_AFC(ml->colorbg, null_color);	\
+		RESET_AFC(ml->colorfg, null_color);	\
+	}						\
 } while (0)
 
 	/* We have to run through all windows to substitute

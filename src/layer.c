@@ -28,6 +28,7 @@
 
 #include "config.h"
 
+#include "aatypes.h"
 #include "display.h"
 #include "encoding.h"
 #include "image.h"

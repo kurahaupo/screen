@@ -1161,7 +1161,7 @@ void ScrollV(int xs, int ys, int xe, int ye, int n, int bce)
 */
 }
 
-void SetAttr(int new)
+static void SetAttr(attr_mask_t new)
 {
 	if (!display)
 		return;

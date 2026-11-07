@@ -485,7 +485,7 @@ struct mline *recode_mline(struct mline *ml, int w, int from, int to)
 
 	if (from == to || (from != UTF8 && to != UTF8) || w == 0)
 		return ml;
-	if (ml->font == null && encodings[from].deffont == FONT_LATIN1)
+	if (ml->font == null_font && encodings[from].deffont == FONT_LATIN1)
 		return ml;
 	if (w > maxlen) {
 		for (i = 0; i < 2; i++) {
@@ -681,7 +681,7 @@ void WinSwitchEncoding(Window *p, int encoding)
 	flayer = oldflayer;
 	for (j = 0; j < p->w_height + p->w_histheight; j++) {
 		ml = j < p->w_height ? &p->w_mlines[j] : &p->w_hlines[j - p->w_height];
-		if (ml->font == null && encodings[p->w_encoding].deffont == FONT_LATIN1)
+		if (ml->font == null_font && encodings[p->w_encoding].deffont == FONT_LATIN1)
 			continue;
 		for (i = 0; i < p->w_width; i++) {
 			c = ml->image[i] | (ml->font[i] << 8);
@@ -689,9 +689,9 @@ void WinSwitchEncoding(Window *p, int encoding)
 				c |= encodings[p->w_encoding].deffont << 8;
 			if (c < 256)
 				continue;
-			if (ml->font == null) {
+			if (ml->font == null_font) {
 				if ((ml->font = calloc(p->w_width + 1, 4)) == NULL) {
-					ml->font = null;
+					ml->font = null_font;
 					break;
 				}
 			}
@@ -1468,7 +1468,8 @@ int RecodeBuf(unsigned char *fbuf, int flen, int fenc, int tenc, unsigned char *
 
 int ContainsSpecialDeffont(struct mline *ml, int xs, int xe, int encoding)
 {
-	uint32_t *f, *i;
+	uint8_t *f;
+	uint32_t *i;
 	int c, x, dx;
 
 	if (encoding == UTF8 || encodings[encoding].deffont == FONT_LATIN1)

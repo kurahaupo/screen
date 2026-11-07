@@ -247,7 +247,7 @@ static int rem(int x1, int y1, int x2, int y2, int redisplay, char *pt, int yend
 	uint32_t *im;
 	struct mline *ml;
 	int font;
-	uint32_t *fo;
+	uint8_t *fo;
 
 	markdata->second = 0;
 	if (y2 < y1 || ((y2 == y1) && (x2 < x1))) {
