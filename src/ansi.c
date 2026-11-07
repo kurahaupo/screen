@@ -1818,7 +1818,7 @@ static void SelectRendition(Window *win)
 				/* not enough params left */
 				break;
 
-			cs_param_t cm2 = cs->params[i + 1];
+			cs_param_t const cm2 = cs->params[i + 1];
 
 			/* Indexed colour space aka 256 colours; example control sequences:
 			 *  \e[48:5:12m                 Standard
@@ -1836,7 +1836,7 @@ static void SelectRendition(Window *win)
 					/* not enough params left */
 					break;
 
-				cs_param_t jj = cs->params[i + 2];
+				cs_param_t const jj = cs->params[i + 2];
 				if (jj & ~255)
 					/* Value out of range */
 					continue;
@@ -1864,9 +1864,9 @@ static void SelectRendition(Window *win)
 					/* not enough params left */
 					break;
 
-				cs_param_t r = cs->params[i + 2];
-				cs_param_t g = cs->params[i + 3];
-				cs_param_t b = cs->params[i + 4];
+				cs_param_t const r = cs->params[i + 2];
+				cs_param_t const g = cs->params[i + 3];
+				cs_param_t const b = cs->params[i + 4];
 
 				/* Are any out of range 0~255? */
 				if ((r | g | b) & ~255U)
