@@ -405,7 +405,7 @@ static void CheckMaxSize(int wi)
 
 	mline_blank.image = blank;
 	mline_blank.attr = null_attr;
-	mline_null.image = null;
+	mline_null.image = blank;
 	mline_null.attr = null_attr;
 	mline_blank.font = null_font;
 	mline_null.font = null_font;

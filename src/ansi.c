@@ -2409,7 +2409,7 @@ int MFindUsedLine(Window *win, int ye, int ys)
 		if (ml->colorfg != null_color && memcmp(ml->colorfg, null_color, win->w_width * sizeof *ml->colorfg))
 			break;
 		if (win->w_encoding == UTF8) {
-			if (ml->font != null_font && memcmp(ml->font, null_font, win->w_width))
+			if (ml->font != null_font && memcmp(ml->font, null_font, win->w_width * sizeof *ml->font))
 				break;
 		}
 	}
