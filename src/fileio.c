@@ -426,7 +426,7 @@ void WriteFile(struct acluser *user, char *fn, int dump)
 					     i++) {
 						p = (WIN(i)->image);
 						pf = WIN(i)->font;
-						for (k = fore->w_width - 1; k >= 0 && p[k] == ' '; k--) ;
+						for (k = fore->w_width - 1; k >= 0 && p[k] == ' '; k--) {}
 						for (j = 0; j <= k; j++)
 							putc_encoded(f, p[j], pf[j], fore->w_encoding);
 						putc('\n', f);
@@ -435,7 +435,7 @@ void WriteFile(struct acluser *user, char *fn, int dump)
 				for (i = 0; i < fore->w_height; i++) {
 					p = fore->w_mlines[i].image;
 					pf = fore->w_mlines[i].font;
-					for (k = fore->w_width - 1; k >= 0 && p[k] == ' '; k--) ;
+					for (k = fore->w_width - 1; k >= 0 && p[k] == ' '; k--) {}
 					for (j = 0; j <= k; j++)
 						putc_encoded(f, p[j], pf[j], fore->w_encoding);
 					putc('\n', f);
