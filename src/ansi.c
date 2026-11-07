@@ -33,6 +33,7 @@
 
 #include <fcntl.h>
 
+#include "aatypes.h"
 #include "display.h"
 #include "encoding.h"
 #include "fileio.h"
@@ -59,8 +60,10 @@ bool visual_bell = 0;
 
 char *printcmd = NULL;
 
-uint32_t *blank;		/* line filled with spaces */
-uint32_t *null;			/* line filled with '\0' */
+image_t *blank;		/* line filled with spaces */
+attr_mask_t *null_attr;		/* line filled with default */
+color_t *null_color;		/* line filled with default (0) */
+font_t *null_font;		/* line filled with default */
 
 struct mline mline_old;
 struct mline mline_blank;
@@ -2044,32 +2047,32 @@ static void Report(Window *win, char *fmt, int n1, int n2)
 static void MFixLine(Window *win, int y, struct mchar *mc)
 {
 	struct mline *ml = &win->w_mlines[y];
-	if (mc->attr && ml->attr == null) {
+	if (mc->attr && ml->attr == null_attr) {
 		if ((ml->attr = calloc(win->w_width + 1, 4)) == NULL) {
-			ml->attr = null;
+			ml->attr = null_attr;
 			mc->attr = win->w_rend.attr = 0;
 			WMsg(win, 0, "Warning: no space for attr - turned off");
 		}
 	}
-	if (mc->font && ml->font == null) {
+	if (mc->font && ml->font == null_font) {
 		if ((ml->font = calloc(win->w_width + 1, 4)) == NULL) {
-			ml->font = null;
+			ml->font = null_font;
 			win->w_FontL = win->w_charsets[win->w_ss ? win->w_ss : win->w_Charset] = 0;
 			win->w_FontR = win->w_charsets[win->w_ss ? win->w_ss : win->w_CharsetR] = 0;
 			mc->font = win->w_rend.font = FONT_LATIN1;
 			WMsg(win, 0, "Warning: no space for font - turned off");
 		}
 	}
-	if (mc->colorbg && ml->colorbg == null) {
+	if (mc->colorbg && ml->colorbg == null_color) {
 		if ((ml->colorbg = calloc(win->w_width + 1, 4)) == NULL) {
-			ml->colorbg = null;
+			ml->colorbg = null_color;
 			mc->colorbg = win->w_rend.colorbg = 0;
 			WMsg(win, 0, "Warning: no space for color background - turned off");
 		}
 	}
-	if (mc->colorfg && ml->colorfg == null) {
+	if (mc->colorfg && ml->colorfg == null_color) {
 		if ((ml->colorfg = calloc(win->w_width + 1, 4)) == NULL) {
-			ml->colorfg = null;
+			ml->colorfg = null_color;
 			mc->colorfg = win->w_rend.colorfg = 0;
 			WMsg(win, 0, "Warning: no space for color foreground - turned off");
 		}
@@ -2151,18 +2154,18 @@ static void MScrollV(Window *win, int n, int ys, int ye, int bce)
 		for (int i = ys; i < ys + n; i++, ml++) {
 			if (ys == win->w_top)
 				WAddLineToHist(win, ml);
-			if (ml->attr != null)
+			if (ml->attr != null_attr)
 				free(ml->attr);
-			ml->attr = null;
-			if (ml->font != null)
+			ml->attr = null_attr;
+			if (ml->font != null_font)
 				free(ml->font);
-			ml->font = null;
-			if (ml->colorbg != null)
+			ml->font = null_font;
+			if (ml->colorbg != null_color)
 				free(ml->colorbg);
-			ml->colorbg = null;
-			if (ml->colorfg != null)
+			ml->colorbg = null_color;
+			if (ml->colorfg != null_color)
 				free(ml->colorfg);
-			ml->colorfg = null;
+			ml->colorfg = null_color;
 			memcpy(ml->image, blank, (win->w_width + 1) * sizeof *ml->image);
 			if (bce)
 				MBceLine(win, i, 0, win->w_width, bce);
@@ -2184,18 +2187,18 @@ static void MScrollV(Window *win, int n, int ys, int ye, int bce)
 		ml = win->w_mlines + ye;
 		/* Clear lines */
 		for (int i = ye; i > ye - n; i--, ml--) {
-			if (ml->attr != null)
+			if (ml->attr != null_attr)
 				free(ml->attr);
-			ml->attr = null;
-			if (ml->font != null)
+			ml->attr = null_attr;
+			if (ml->font != null_font)
 				free(ml->font);
-			ml->font = null;
-			if (ml->colorbg != null)
+			ml->font = null_font;
+			if (ml->colorbg != null_color)
 				free(ml->colorbg);
-			ml->colorbg = null;
-			if (ml->colorfg != null)
+			ml->colorbg = null_color;
+			if (ml->colorfg != null_color)
 				free(ml->colorfg);
-			ml->colorfg = null;
+			ml->colorfg = null_color;
 			memcpy(ml->image, blank, (win->w_width + 1) * sizeof *ml->image);
 			if (bce)
 				MBceLine(win, i, 0, win->w_width, bce);
@@ -2344,40 +2347,46 @@ static void MBceLine(Window *win, int y, int xs, int xe, int bce)
 
 static void WAddLineToHist(Window *win, struct mline *ml)
 {
-	uint32_t *q, *o;
+	font_t *q_font, *o_font;
+	attr_mask_t *q_attr, *o_attr;
+	color_t *q_color, *o_color;
+	image_t *q_image;
 	struct mline *hml;
 
 	if (win->w_histheight == 0)
 		return;
 	hml = &win->w_hlines[win->w_histidx];
-	q = ml->image;
+	q_image = ml->image;
 	ml->image = hml->image;
-	hml->image = q;
+	hml->image = q_image;
 
-	q = ml->attr;
-	o = hml->attr;
-	hml->attr = q;
-	ml->attr = null;
-	if (o != null)
-		free(o);
-	q = ml->font;
-	o = hml->font;
-	hml->font = q;
-	ml->font = null;
-	if (o != null)
-		free(o);
-	q = ml->colorbg;
-	o = hml->colorbg;
-	hml->colorbg = q;
-	ml->colorbg = null;
-	if (o != null)
-		free(o);
-	q = ml->colorfg;
-	o = hml->colorfg;
-	hml->colorfg = q;
-	ml->colorfg = null;
-	if (o != null)
-		free(o);
+	q_attr = ml->attr;
+	o_attr = hml->attr;
+	hml->attr = q_attr;
+	ml->attr = null_attr;
+	if (o_attr != null_attr)
+		free(o_attr);
+
+	q_font = ml->font;
+	o_font = hml->font;
+	hml->font = q_font;
+	ml->font = null_font;
+	if (o_font != null_font)
+		free(o_font);
+
+	q_color = ml->colorbg;
+	o_color = hml->colorbg;
+	hml->colorbg = q_color;
+	ml->colorbg = null_color;
+	if (o_color != null_color)
+		free(o_color);
+
+	q_color = ml->colorfg;
+	o_color = hml->colorfg;
+	hml->colorfg = q_color;
+	ml->colorfg = null_color;
+	if (o_color != null_color)
+		free(o_color);
 
 	if (++win->w_histidx >= win->w_histheight)
 		win->w_histidx = 0;
@@ -2393,14 +2402,14 @@ int MFindUsedLine(Window *win, int ye, int ys)
 	for (y = ye; y >= ys; y--, ml--) {
 		if (memcmp(ml->image, blank, win->w_width * sizeof *ml->image))
 			break;
-		if (ml->attr != null && memcmp(ml->attr, null, win->w_width * sizeof *ml->attr))
+		if (ml->attr != null_attr && memcmp(ml->attr, null_attr, win->w_width * sizeof *ml->attr))
 			break;
-		if (ml->colorbg != null && memcmp(ml->colorbg, null, win->w_width * sizeof *ml->colorbg))
+		if (ml->colorbg != null_color && memcmp(ml->colorbg, null_color, win->w_width * sizeof *ml->colorbg))
 			break;
-		if (ml->colorfg != null && memcmp(ml->colorfg, null, win->w_width * sizeof *ml->colorfg))
+		if (ml->colorfg != null_color && memcmp(ml->colorfg, null_color, win->w_width * sizeof *ml->colorfg))
 			break;
 		if (win->w_encoding == UTF8) {
-			if (ml->font != null && memcmp(ml->font, null, win->w_width))
+			if (ml->font != null_font && memcmp(ml->font, null_font, win->w_width))
 				break;
 		}
 	}

@@ -39,37 +39,25 @@
 
 /* Inline functions moved from image.h */
 
-static inline void bcopy_uint32(uint32_t *pt, size_t ot, uint32_t const *pf, size_t of, size_t n)
-{
-	memmove(pt + ot, pf + of, n * sizeof *pt);
-}
-
 #define save_mline(ml, n)  copy_mline2(&mline_old, 0, ml, 0, n)
 #define copy_mline(ml, xf, xt, n) copy_mline2(ml, xt, ml, xf, n)
 static inline void copy_mline2(struct mline *mt, size_t ot, struct mline const *mf, size_t of, size_t n)
 {
-	bcopy_uint32(mt->image, ot, mf->image, of, n);
-	bcopy_uint32(mt->attr, ot, mf->attr, of, n);
-	bcopy_uint32(mt->font, ot, mf->font, of, n);
-	bcopy_uint32(mt->colorbg, ot, mf->colorbg, of, n);
-	bcopy_uint32(mt->colorfg, ot, mf->colorfg, of, n);
+	memmove(mt->image + ot, mf->image + of, n * sizeof *mt->image);
+	memmove(mt->attr + ot, mf->attr + of, n * sizeof *mt->attr);
+	memmove(mt->font + ot, mf->font + of, n * sizeof *mt->font);
+	memmove(mt->colorbg + ot, mf->colorbg + of, n * sizeof *mt->colorbg);
+	memmove(mt->colorfg + ot, mf->colorfg + of, n * sizeof *mt->colorfg);
 }
-
-static inline void bzero_uint32_g(uint32_t *p, size_t o, size_t n)
-{
-	if (p && n)
-		memset(p + o, 0, n * sizeof *p);
-}
-
-extern uint32_t *blank;		/* from ansi.h */
 
 static inline void clear_mline(struct mline *ml, size_t o, size_t n)
 {
-	bcopy_uint32(ml->image, o, blank, 0, n);
-	bzero_uint32_g(ml->attr, o, n);
-	bzero_uint32_g(ml->font, o, n);
-	bzero_uint32_g(ml->colorbg, o, n);
-	bzero_uint32_g(ml->colorfg, o, n);
+        for (size_t i = 0; i<n; ++i)
+		ml->image[i+o] = ' ';
+	memset(ml->attr + o, 0, n * sizeof *ml->attr);
+	memset(ml->font + o, 0, n * sizeof *ml->font);
+	memset(ml->colorbg + o, 0, n * sizeof *ml->colorbg);
+	memset(ml->colorfg + o, 0, n * sizeof *ml->colorfg);
 }
 
 static inline bool cmp_mline(struct mline const *ml1, struct mline const *ml2, size_t x)
@@ -85,7 +73,9 @@ static inline bool cmp_mchar(struct mchar const *mc1, struct mchar const *mc2)
 {
 	return mc1->image == mc2->image
 	    && mc1->attr == mc2->attr
-	    && mc1->font == mc2->font && mc1->colorbg == mc2->colorbg && mc1->colorfg == mc2->colorfg;
+	    && mc1->font == mc2->font
+	    && mc1->colorbg == mc2->colorbg
+	    && mc1->colorfg == mc2->colorfg;
 }
 
 static inline bool cmp_mchar_mline(struct mchar const *mc, struct mline const *ml, size_t x)
@@ -125,8 +115,8 @@ static inline bool is_dw_font(int f)
 
 static inline bool dw_left(struct mline *ml, int x, int enc)
 {
-	uint32_t *font = ml->font;
-	uint32_t fx = font[x];
+	font_t *font = ml->font;
+	font_t fx = font[x];
 	return enc == UTF8 ? font[x + 1] == 0xff && ml->image[x + 1] == 0xff
 			   : (fx & 0xe0) == 0 && (fx & 0x1f) != 0;
 			// : (fx-1 & 0xff) < 0x1f;	/* equivalent */
@@ -134,8 +124,8 @@ static inline bool dw_left(struct mline *ml, int x, int enc)
 
 static inline bool dw_right(struct mline *ml, int x, int enc)
 {
-	uint32_t *font = ml->font;
-	uint32_t fx = font[x];
+	font_t *font = ml->font;
+	font_t fx = font[x];
 	return enc == UTF8 ? fx == 0xff && ml->image[x] == 0xff
 			   : (fx & 0xe0) == 0x80;
 	/* TODO: check whether that should be «(fx & 0xc0) == 0x80» */

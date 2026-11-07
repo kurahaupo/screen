@@ -32,24 +32,26 @@
 
 #include <stdint.h>	//
 
+#include "aatypes.h"
+
 /* structure representing single cell of terminal */
 struct mchar {
-	uint32_t image;		/* actual letter like a, b, c ... as Unicode code point */
-	uint16_t attr;		/* attributes - bold, standout etc.  (should be attr_mask_t) */
-	uint16_t font;		/* font :) */
-	uint32_t colorbg;	/* background color */
-	uint32_t colorfg;	/* foreground color */
-	uint32_t mbcs;		/* used for multi byte character sets;
+	image_t image;		/* actual letter like a, b, c ... as Unicode code point */
+	attr_mask_t attr;	/* attributes - bold, standout etc.  (should be attr_mask_t) */
+	font_t font;		/* font :) */
+	color_t colorbg;	/* background color */
+	color_t colorfg;	/* foreground color */
+	mbcs_t mbcs;		/* used for multi byte character sets;
 				 * TODO: possible to remove? use image instead, since
 				 * it's now wide enough */
 };
 
 struct mline {
-	uint32_t *image;
-	uint32_t *attr;
-	uint32_t *font;
-	uint32_t *colorbg;
-	uint32_t *colorfg;
+	image_t *image;
+	attr_mask_t *attr;
+	font_t *font;
+	color_t *colorbg;
+	color_t *colorfg;
 };
 
 enum {
