@@ -32,13 +32,22 @@ endif
 SCREENENCODINGS = $(datadir)/screen/utf8encodings
 
 CC = @CC@
+
+# POSIX says "cc" must understand «-I», but unfortunately «-I.» effectively
+# turns «#include <pty.h>» into «#include "pty.h"», which breaks compilation.
+#IFLAGS= -I. -I$(srcdir)
+
+# Fortunately gcc & clang understand «-iquote» but unfortunately that's a
+# GNUism; we need a better solution
+IFLAGS= -iquote. -iquote$(srcdir)
+
 CFLAGS = @CFLAGS@ -Wall -Wextra -std=c17
-CPPFLAGS = @CPPFLAGS@ -iquote. -iquote$(srcdir) -DSCREENENCODINGS='"$(SCREENENCODINGS)"' -DBUILD_DATE='"$(BUILD_DATE)"'
+CPPFLAGS = @CPPFLAGS@ $(IFLAGS) -DSCREENENCODINGS='"$(SCREENENCODINGS)"' -DBUILD_DATE='"$(BUILD_DATE)"'
 LDFLAGS = @LDFLAGS@
 LIBS = @LIBS@
 
-CPP=@CPP@
-CPP_DEPEND=$(CC) -MM
+CCE_DEPEND = $(CC) -E  @CPPFLAGS@ $(IFLAGS)
+CPP_DEPEND = $(CC) -MM @CPPFLAGS@ $(IFLAGS)
 
 INSTALL = @INSTALL@
 INSTALL_PROGRAM = @INSTALL_PROGRAM@
@@ -48,14 +57,47 @@ AWK = @AWK@
 
 SHELL=/bin/sh
 
-CFILES=	screen.c \
-	acls.c ansi.c attacher.c backtick.c canvas.c comm.c \
-	display.c encoding.c fileio.c help.c input.c layer.c \
-	layout.c list_display.c list_generic.c list_license.c list_window.c logfile.c mark.c \
-	misc.c process.c pty.c resize.c sched.c search.c socket.c stringbuf.c telnet.c \
-	term.c termcap.c tty.c utmp.c viewport.c window.c winmsg.c \
-	winmsgbuf.c winmsgcond.c
-GCFILES =  kmapdef.c
+CFILES = \
+	acls.c \
+	ansi.c \
+	attacher.c \
+	backtick.c \
+	canvas.c \
+	comm.c \
+	display.c \
+	encoding.c \
+	fileio.c \
+	help.c \
+	input.c \
+	layer.c \
+	layout.c \
+	list_display.c \
+	list_generic.c \
+	list_license.c \
+	list_window.c \
+	logfile.c \
+	mark.c \
+	misc.c \
+	process.c \
+	pty.c \
+	resize.c \
+	sched.c \
+	screen.c \
+	search.c \
+	socket.c \
+	stringbuf.c \
+	telnet.c \
+	term.c \
+	termcap.c \
+	tty.c \
+	utmp.c \
+	viewport.c \
+	window.c \
+	winmsg.c \
+	winmsgbuf.c \
+	winmsgcond.c
+GCFILES = \
+	kmapdef.c
 OFILES=$(CFILES:c=o) $(GCFILES:c=o)
 
 TESTCFILES := $(wildcard $(srcdir)/tests/test-*.c)
@@ -151,17 +193,45 @@ distclean: mostlyclean
 
 ###############################################################################
 
-mdepend: $(CFILES) $(GCFILES) term.h
-	@rm -f DEPEND ; \
-	for i in $(CFILES) $(GCFILES) ; do \
-	  echo "$$i" ; \
-	  echo `echo "$$i" | sed -e 's/.c$$/.o/'`": $$i" `\
-            cc -E $$i |\
-            grep '^# .*"\./.*\.h"' |\
-            (sort -t'"' -u -k 2,2 2>/dev/null || sort -t'"' -u +1 -2) |\
-            sed -e 's/.*"\.\/\(.*\)".*/\1/'\
-          ` >> DEPEND ; \
-	done
+config.h: config.status
+
+config.status: $(srcdir)/configure.ac
+	$(srcdir)/configure
+
+mdepend: $(CFILES) $(GCFILES) config.h comm.h term.h
+	{ \
+        for i in $(CFILES) ; do \
+          echo "$(srcdir)/$$i" ; \
+        done ; \
+        for i in $(GCFILES) ; do \
+          echo "$$i" ; \
+        done ; \
+        } | \
+	while IFS= read  i ; do \
+	  echo "$$i" >&2 ; \
+          j="$${i#$(srcdir)/}" ; k=$${j%.c}.o ; \
+          echo "$$k": "$$i" ; \
+	  $(CCE_DEPEND) "$$i" | \
+	  sed -e '/^#.*".*"/!d' \
+	      -e 's#.*"\(.*\)".*#'"$$k: "'\1#' \
+	      -e '\?/usr/include/? d' \
+	      -e '\?/usr/lib? d' \
+	      -e '/[<>]/d' ; \
+	done | \
+	if test . -ef "$(srcdir)" ; then \
+	  echo >&2 Mode 1 ; \
+	  sed -e 's#^\./##' \
+	      -e 's# \./# #g' ; \
+	else \
+	  echo >&2 Mode 2 ; \
+	  set -x ; \
+	  sed -e 's#^\./##' \
+	      -e 's# \./# #g' \
+	      -e '#^$(srcdir)/#$$(srcdir)/#' \
+	      -e '# $(srcdir)/# $$(srcdir)/#g' \
+	      ; \
+	fi > DEPEND ; \
+	sort -u -o DEPEND DEPEND
 
 depend: depend.in
 	./config.status || $(srcdir)/configure
@@ -169,12 +239,11 @@ depend: depend.in
 depend.in::
 	mkdir -p ../build ; \
 	cd ../build ; \
-	cp ../src/Makefile.in ../src/Makefile.in~ && \
 	sed -e '/^#* Dependencies/q' < ../src/Makefile.in > .tmp_make$$$$-a && \
 	{ \
 	  for i in $(CFILES) ; do \
 	    echo ../src/$$i >&2 ; \
-	    $(CPP_DEPEND) -I. -I../src ../src/$$i || \
+	    $(CPP_DEPEND) ../src/$$i || \
 	      break ; \
 	  done ; \
 	  for i in $(GCFILES) ; do \
@@ -199,6 +268,7 @@ depend.in::
 	    -e   'bb' \
 	    -e '}' | \
 	sort -o .tmp_make$$$$-b && \
+	cp ../src/Makefile.in ../src/Makefile.in.~$$$$~ && \
 	cat .tmp_make$$$$-a .tmp_make$$$$-b > ../src/Makefile.in && \
 	rm -f .tmp_make$$$$-*
 
