@@ -1318,12 +1318,14 @@ void SetFont(int new)
 
 static inline int gray4tocolor16(int gray)
 {
-	/* Convert 2-bit gray-scale to: dark-black, light-black, dark-white,
-	 * light-white
-	 *	00	01	10	11
-	 *      0       1       2	3
-	 *      0       8       7       15
-	 *      0000    1000    0111    1111
+	/* Convert 2-bit gray-scale to 16-color palette, which encodes a 3-bit
+	 * color cube and 1 brightness bit, and noting that light (8) black (0)
+	 * is usually darker than dark (0) white (7).
+	 *
+	 *   from      0₁₀     1₁₀     2₁₀     3₁₀
+	 *            00₂     01₂     10₂     11₂
+	 *     to   0000₂   1000₂   0111₂   1111₂
+	 *             0₁₀     8₁₀     7₁₀    15₁₀
 	 */
 #if 0
 	return (gray & 1 ? 8 : 0)
