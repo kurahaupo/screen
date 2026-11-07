@@ -1316,7 +1316,7 @@ void SetFont(int new)
 		AddCStr2(D_CS0, new);
 }
 
-static inline int color4to16(int color)
+static inline int gray4tocolor16(int gray)
 {
 	/* Convert 2-bit gray-scale to: dark-black, light-black, dark-white,
 	 * light-white
@@ -1325,14 +1325,19 @@ static inline int color4to16(int color)
 	 *      0       8       7       15
 	 *      0000    1000    0111    1111
 	 */
+#if 0
+	return (gray & 1 ? 8 : 0)
+	     | (gray & 2 ? 7 : 0);
+#else
 	static const uint8_t r[] = { 0, 8, 7, 15 };
-	return r[color];
+	return r[gray & 3];
+#endif
 }
 
 int color256to16(int color)
 {
 	if (color >= 232)
-		return color4to16((color - 232) / 6);
+		return gray4tocolor16((color - 232) / 6);
 	if (color >= 16) {
 		color -= 16;
 		int r = color / 36;
@@ -1343,7 +1348,7 @@ int color256to16(int color)
 		int max = r > g ? (r > b ? r : b)
 				: (g > b ? g : b);
 		if (min == max)
-			return color4to16(max + 1 >> 1);
+			return gray4tocolor16(max + 1 >> 1);
 		return (b - min) / (max - min) << 2
 		     | (g - min) / (max - min) << 1
 		     | (r - min) / (max - min)
