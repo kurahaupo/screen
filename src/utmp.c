@@ -28,22 +28,21 @@
 
 #include "config.h"
 
-#include "utmp.h"
-
 #include <sys/types.h>
 #include <sys/stat.h>
+
 #include <fcntl.h>
 #include <stdint.h>
 #include <stdbool.h>
-
-#include "screen.h"
 
 #ifdef HAVE_UTEMPTER
 #include <utempter.h>
 #endif
 
 #include "misc.h"
+#include "screen.h"
 #include "tty.h"
+#include "utmp.h"
 #include "winmsg.h"
 
 /*

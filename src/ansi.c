@@ -28,23 +28,23 @@
 
 #include "config.h"
 
-#include "ansi.h"
-
-#include <sys/types.h>
-#include <fcntl.h>
 #include <sys/ioctl.h>
+#include <sys/types.h>
 
-#include "screen.h"
+#include <fcntl.h>
 
+#include "display.h"
 #include "encoding.h"
 #include "fileio.h"
 #include "help.h"
-#include "inline.h"		/* must follow ansi.h and image.h */
+#include "inline.h"
 #include "logfile.h"
 #include "mark.h"
 #include "misc.h"
 #include "process.h"
 #include "resize.h"
+#include "screen.h"
+#include "window.h"
 #include "winmsg.h"
 
 #include "inline.h"		/* must follow ansi.h and image.h */
@@ -96,7 +96,7 @@ static char *state_t_string[] = {
 	[ESC]		= "ESC",	/* Start of escape sequence */
 	[ASTR]		= "ASTR",	/* Start of control string */
 	[STRESC]	= "STRESC",	/* ESC seen in control string */
-	[CSI]		= "CSI",	/* Reading arguments in "CSI Pn ;... */
+	[CTL_SEQ]	= "CS",		/* Reading arguments in "CSI Pn ;... */
 	[PRIN]		= "PRIN",	/* Printer mode */
 	[PRINESC]	= "PRINESC",	/* ESC seen in printer mode */
 	[PRINCSI]	= "PRINCSI",	/* CSI seen in printer mode */
@@ -159,7 +159,7 @@ static void WChangeSize(Window *, int, int);
 	case '\a':    WBell(win, visual_bell); Action break; \
 	case '\b':    BackSpace(win);          Action break; \
 	case '\t':    ForwardTab(win);         Action break; \
-	case '\n':    if (win->w_autoaka) FindAKA(win); /*FALLTHROUGH*/ \
+	case '\n':    if (win->w_autoaka) FindAKA(win); FALLTHROUGH; \
 	case '\v':    LineFeed(win, 0);        Action break; \
 	case '\r':    Return(win);             Action break; \
 	case '\016':  MapCharset(win, G1);     Action break; \
@@ -328,7 +328,7 @@ void WriteString(Window *win, char *buf, size_t len)
 						break;
 					}
 				c = '\\';
-				/* FALLTHROUGH */
+				FALLTHROUGH;
 			case STRESC:
 				switch (c) {
 				case '\\':
@@ -360,7 +360,7 @@ void WriteString(Window *win, char *buf, size_t len)
 				switch (c) {
 				case '[':
 					win->w_intermediate = 0;
-					win->w_state = CSI;
+					win->w_state = CTL_SEQ;
 					*cs = (struct cs_parser){ 0 };
 					break;
 				case ']':
@@ -405,7 +405,7 @@ void WriteString(Window *win, char *buf, size_t len)
 					}
 				}
 				break;
-			case CSI:
+			case CTL_SEQ:
 				switch (c) {
 				case '0':
 				case '1':
@@ -429,7 +429,7 @@ void WriteString(Window *win, char *buf, size_t len)
 					break;
 				case ':':
 					cs->has_colons = true;
-					/*FALLTHRU*/
+					FALLTHROUGH;
 				case ';':
 					if (cs->num_params < MAX_CS_PARAMS) {
 						cs->seps[cs->num_params] = c;
@@ -482,7 +482,7 @@ void WriteString(Window *win, char *buf, size_t len)
 							if (win->w_autoaka < 0)
 								win->w_autoaka = 0;
 							win->w_intermediate = 0;
-							win->w_state = CSI;
+							win->w_state = CTL_SEQ;
 							*cs = (struct cs_parser){ 0 };
 							break;
 						case 0xc0 ^ 'P':
@@ -1176,7 +1176,7 @@ static void DoControlSequence(Window *win, int c, int intermediate)
 				LBracketedPasteMode(&win->w_layer, win->w_bracketed);
 				break;
 			case 8803:
-				win->w_sgr3_mode = i ? SGR3_LEGACY : SGR3_STRICT;
+				win->w_sgr3_mode = i ? SGR3_STANDOUT : SGR3_ITALIC;
 				break;
 			}
 		}
@@ -1283,7 +1283,7 @@ static int StringEnd(Window *win)
 		if (win->w_stringp > win->w_string)
 			memmove(win->w_string, p, win->w_stringp - win->w_string);
 		*win->w_stringp = '\0';
-		/* FALLTHROUGH */
+		FALLTHROUGH;
 	case APC:
 		if (win->w_hstatus) {
 			if (strcmp(win->w_hstatus, win->w_string) == 0)
@@ -1710,7 +1710,7 @@ static void ASetMode(Window *win, bool on)
  */
 
 static enum attr_mask_e rendlist[][30] = {
-	[SGR3_STRICT] = {	/* strict mode */
+	[SGR3_ITALIC] = {	/* strict mode */
 		[0]  = ~A__MASK,
 		[1]  = A_BD,
 		[2]  = A_DI,
@@ -1730,7 +1730,7 @@ static enum attr_mask_e rendlist[][30] = {
 		[28] = ~A_HI,
 		[29] = ~A_ST,
 	},
-	[SGR3_LEGACY] = {	/* legacy mode */
+	[SGR3_STANDOUT] = {	/* legacy mode */
 		[0]  = ~A__MASK,
 		[1]  = A_BD,
 		[2]  = A_DI,
@@ -1755,21 +1755,13 @@ static enum attr_mask_e rendlist[][30] = {
 const char *sgr3_mode_desc(sgr3_mode_t m)
 {
 	static const char *const desc[] = {
-		[SGR3_STRICT] = "strict",
-		[SGR3_LEGACY] = "legacy",
-		[SGR3_UNSET]  = "(unset)",
+		[SGR3_ITALIC]   = "italic",
+		[SGR3_STANDOUT] = "standout",
+		[SGR3_UNSET]    = "(unset)",
 	};
 	if (m >= 0 && m < ARRAY_SIZE(desc) && desc[m])
 		return desc[m];
 	return "(unknown mode)";
-}
-
-static sgr3_mode_t rend_mode = 1;
-
-void ConfigSGR3Mode(sgr3_mode_t v)
-{
-	if (v < ARRAY_SIZE(rendlist))
-		rend_mode = v;
 }
 
 static void SelectRendition(Window *win)
@@ -1790,13 +1782,13 @@ static void SelectRendition(Window *win)
 		switch (j / 10) {
 		case 9:
 			bright = 1;
-			/*FALLTHRU*/
+			FALLTHROUGH;
 		case 3:
 			target_color = &colorfg;
 			break;
 		case 10:
 			bright = 1;
-			/*FALLTHRU*/
+			FALLTHROUGH;
 		case 4:
 			target_color = &colorbg;
 			break;
@@ -1826,7 +1818,7 @@ static void SelectRendition(Window *win)
 				/* not enough params left */
 				break;
 
-			cs_param_t const cm2 = cs->params[i + 1];
+			cs_param_t cm2 = cs->params[i + 1];
 
 			/* Indexed colour space aka 256 colours; example control sequences:
 			 *  \e[48:5:12m                 Standard
@@ -1844,7 +1836,7 @@ static void SelectRendition(Window *win)
 					/* not enough params left */
 					break;
 
-				cs_param_t const jj = cs->params[i + 2];
+				cs_param_t jj = cs->params[i + 2];
 				if (jj & ~255)
 					/* Value out of range */
 					continue;
@@ -1872,11 +1864,11 @@ static void SelectRendition(Window *win)
 					/* not enough params left */
 					break;
 
-				cs_param_t const r = cs->params[i + 2];
-				cs_param_t const g = cs->params[i + 3];
-				cs_param_t const b = cs->params[i + 4];
+				cs_param_t r = cs->params[i + 2];
+				cs_param_t g = cs->params[i + 3];
+				cs_param_t b = cs->params[i + 4];
 
-                                /* Are any out of range 0~255? */
+				/* Are any out of range 0~255? */
 				if ((r | g | b) & ~255U)
 					continue;
 				*target_color = 0x04000000 | r << 16 | g << 8 | b;
@@ -1896,19 +1888,19 @@ static void SelectRendition(Window *win)
 		if (j >= ARRAY_SIZE(rendlist[0]))
 			continue;
 
-		size_t m = rend_mode;
+		sgr3_mode_t m = win->w_sgr3_mode;
 
-		if (k >= i + 2) {
-			m = cs->params[i + 1];
-			/* permitted subparam values */
-			if (m >= ARRAY_SIZE(rendlist))
+		/* Special SGR3 handling... */
+		if (j == 3 && k == i + 2) {
+			sgr3_mode_t mm = cs->params[i + 1];
+			/* ignore out-of-range subparam values */
+			if (mm >= ARRAY_SIZE(rendlist))
 				continue;
-			/* only allow subparams for params where they make a difference */
-			if (rendlist[0][j] == rendlist[1][j])
-				continue;
-			if (k > i + 2)
-				continue;
-		}
+			/* use current mode for 0=SGR3_UNSET */
+			if (mm)
+				m = mm;
+		} else if (k >= i + 2)
+			continue;
 
 		attr_mask_t l = rendlist[m][j];
 
@@ -2171,7 +2163,7 @@ static void MScrollV(Window *win, int n, int ys, int ye, int bce)
 			if (ml->colorfg != null)
 				free(ml->colorfg);
 			ml->colorfg = null;
-			memmove(ml->image, blank, (win->w_width + 1) * 4);
+			memcpy(ml->image, blank, (win->w_width + 1) * sizeof *ml->image);
 			if (bce)
 				MBceLine(win, i, 0, win->w_width, bce);
 		}
@@ -2204,7 +2196,7 @@ static void MScrollV(Window *win, int n, int ys, int ye, int bce)
 			if (ml->colorfg != null)
 				free(ml->colorfg);
 			ml->colorfg = null;
-			memmove(ml->image, blank, (win->w_width + 1) * 4);
+			memcpy(ml->image, blank, (win->w_width + 1) * sizeof *ml->image);
 			if (bce)
 				MBceLine(win, i, 0, win->w_width, bce);
 		}
@@ -2399,13 +2391,13 @@ int MFindUsedLine(Window *win, int ye, int ys)
 	struct mline *ml = win->w_mlines + ye;
 
 	for (y = ye; y >= ys; y--, ml--) {
-		if (memcmp(ml->image, blank, win->w_width * 4))
+		if (memcmp(ml->image, blank, win->w_width * sizeof *ml->image))
 			break;
-		if (ml->attr != null && memcmp(ml->attr, null, win->w_width * 4))
+		if (ml->attr != null && memcmp(ml->attr, null, win->w_width * sizeof *ml->attr))
 			break;
-		if (ml->colorbg != null && memcmp(ml->colorbg, null, win->w_width * 4))
+		if (ml->colorbg != null && memcmp(ml->colorbg, null, win->w_width * sizeof *ml->colorbg))
 			break;
-		if (ml->colorfg != null && memcmp(ml->colorfg, null, win->w_width * 4))
+		if (ml->colorfg != null && memcmp(ml->colorfg, null, win->w_width * sizeof *ml->colorfg))
 			break;
 		if (win->w_encoding == UTF8) {
 			if (ml->font != null && memcmp(ml->font, null, win->w_width))

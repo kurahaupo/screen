@@ -29,19 +29,23 @@
 #include "config.h"
 
 #include <sys/types.h>
+
 #include <ctype.h>
 #include <stdbool.h>
 #include <stdint.h>
 #include <stdbool.h>
 
-#include "mark.h"
-
+#include "display.h"
 #include "encoding.h"
 #include "fileio.h"
-#include "inline.h"		/* must follow ansi.h and image.h */
+#include "inline.h"
+#include "layer.h"
+#include "mark.h"
+#include "misc.h"
 #include "process.h"
 #include "screen.h"
 #include "search.h"
+#include "window.h"
 #include "winmsg.h"
 
 /*
@@ -691,7 +695,7 @@ static void MarkProcess(char **inbufp, size_t *inlenp)
 		case 0201:
 		case 'g':
 			rep_cnt = 1;
-			/* FALLTHROUGH */
+			FALLTHROUGH;
 		case 0205:
 		case 'G':
 			/* rep_cnt is here the WIN line number */
@@ -742,7 +746,7 @@ static void MarkProcess(char **inbufp, size_t *inlenp)
 				rep_cnt = 1;
 			else
 				rep_cnt = 9;
-			/* FALLTHROUGH */
+			FALLTHROUGH;
 		case 'c':
 		case 'C':
 			/* set start column (c) and end column (C) */
@@ -820,7 +824,7 @@ static void MarkProcess(char **inbufp, size_t *inlenp)
 			revto(lineend(markdata->cy), markdata->cy);
 			if (od == 'y')
 				break;
-			/* FALLTHROUGH */
+			FALLTHROUGH;
 		case 'W':
 			if (od == 'W') {
 				if (rep_cnt == 0)
@@ -837,15 +841,15 @@ static void MarkProcess(char **inbufp, size_t *inlenp)
 			}
 			cx = markdata->cx;
 			cy = markdata->cy;
-			/* FALLTHROUGH */
+			FALLTHROUGH;
 		case 'A':
 			if (od == 'A')
 				markdata->append_mode = 1;
-			/* FALLTHROUGH */
+			FALLTHROUGH;
 		case '>':
 			if (od == '>')
 				markdata->write_buffer = 1;
-			/* FALLTHROUGH */
+			FALLTHROUGH;
 		case ' ':
 		case '\r':
 			if (!markdata->second) {

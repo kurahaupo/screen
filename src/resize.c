@@ -28,18 +28,23 @@
 
 #include "config.h"
 
-#include "resize.h"
-
 #include <sys/types.h>
+
 #include <signal.h>
 #include <stdint.h>
 #include <stdbool.h>
 #include <sys/ioctl.h>
 
-#include "screen.h"
-
+#include "canvas.h"
+#include "display.h"
+#include "image.h"
+#include "layer.h"
 #include "process.h"
+#include "resize.h"
+#include "screen.h"
 #include "telnet.h"
+#include "viewport.h"
+#include "window.h"
 
 /* maximum window width */
 #define MAXWIDTH 1000
@@ -452,8 +457,8 @@ static void MakeBlankLine(uint32_t *p, int n)
 }
 
 #define OLDWIN(y) ((y < p->w_histheight) \
-        ? &p->w_hlines[(p->w_histidx + y) % p->w_histheight] \
-        : &p->w_mlines[y - p->w_histheight])
+		   ? &p->w_hlines[(p->w_histidx + y) % p->w_histheight] \
+		   : &p->w_mlines[y - p->w_histheight])
 
 #define NEWWIN(y) ((y < hi) ? &nhlines[y] : &nmlines[y - hi])
 

@@ -30,9 +30,11 @@
 #ifndef SCREEN_ANSI_H
 #define SCREEN_ANSI_H
 
-#include <stdbool.h>
-#include <stdint.h>
-#include <stdlib.h>
+#include <stdbool.h>	//
+#include <stddef.h>	// for size_t
+#include <stdint.h>	//
+
+#define ANSI_PROBE_FAILURE_LIMIT 2	/* max 2 missing; 5 out of 7 standard attributes must match */
 
 typedef enum attr_e {
 			// attribute           terminfo code   termcap code    ECMA-48 SGR     custom SGR
@@ -40,10 +42,10 @@ typedef enum attr_e {
 			//
 	ATTR_BD,	// bold mode           bold  / *        md / *           1 / 21
 	ATTR_DI,	// dim mode            dim   / *        mh / *           2 / 22
-	ATTR_IT,	// italicized          simt  / ritm     ZH / ZR          3 / 23        3:0 / 23:0
+	ATTR_IT,	// italicized          sitm  / ritm     ZH / ZR          3 / 23        3:0 / 23:0
 	ATTR_US,	// underscore mode     smul  / rmul     us / ue          4 / 24
-	ATTR_BL,	// slow blink          blink / *        mb / *           5 / 25                        (> 0.4s; < 2.5hz; < 150/min)
-	ATTR_FB,	// fast blink          -                -                6 / 26                        (≤ 0.4s; ≥ 2.5hz; ≥ 150/min; SGR only)
+	ATTR_BL,	// slow blink          blink / *        mb / *           5 / 25                        (> 0.4s; < 2.5Hz; < 150/min)
+	ATTR_FB,	// fast blink          -                -                6 / 26                        (≤ 0.4s; ≥ 2.5Hz; ≥ 150/min; SGR only)
 	ATTR_RV,	// reverse video       rev   / *        mr / *           7 / 27
 	ATTR_HI,	// hidden              invis / *        mk / *           8 / 28
 	ATTR_ST,	// strikeThru          smxx  / rmxx     -                9 / 29                        (terminfo only)
@@ -54,27 +56,28 @@ typedef enum attr_e {
 
 typedef enum attr_mask_e {
 
-	A_BD = 1 << ATTR_BD,
-	A_DI = 1 << ATTR_DI,
-	A_IT = 1 << ATTR_IT,
-	A_US = 1 << ATTR_US,
-	A_BL = 1 << ATTR_BL,
-	A_FB = 1 << ATTR_FB,
-	A_RV = 1 << ATTR_RV,
-	A_HI = 1 << ATTR_HI,
-	A_ST = 1 << ATTR_ST,
-	A_SO = 1 << ATTR_SO,
+	A_BD = 1U << ATTR_BD,
+	A_DI = 1U << ATTR_DI,
+	A_IT = 1U << ATTR_IT,
+	A_US = 1U << ATTR_US,
+	A_BL = 1U << ATTR_BL,
+	A_FB = 1U << ATTR_FB,
+	A_RV = 1U << ATTR_RV,
+	A_HI = 1U << ATTR_HI,
+	A_ST = 1U << ATTR_ST,
+	A_SO = 1U << ATTR_SO,
 
-	A__UNSET = 1 << NATTR,
-	A__MASK = A__UNSET - 1,
+	A__UNSET = 1U << NATTR,
+	A__MASK = A__UNSET - 1U,
 
+	A_DFT_COLOR = 1U << NATTR+1,	/* what "\e[0m" does */
 } attr_mask_t;
 
 typedef enum atyp_mask_e {
 
-	ATYP_M = 1 << 0,
-	ATYP_S = 1 << 1,
-	ATYP_U = 1 << 2,
+	ATYP_M = 1 << 0,	/* generic me reset */
+	ATYP_S = 1 << 1,	/* so/se pair (standout) */
+	ATYP_U = 1 << 2,	/* us/ue pair (italic) */
 
 } atyp_mask_t;
 
@@ -87,7 +90,7 @@ typedef enum state_e {
 	ESC,			/* Start of escape sequence */
 	ASTR,			/* Start of control string */
 	STRESC,			/* ESC seen in control string */
-	CSI,			/* Reading arguments in "CSI Pn ;... */
+	CTL_SEQ,		/* Reading arguments in "CSI Pn ;... */
 	PRIN,			/* Printer mode */
 	PRINESC,		/* ESC seen in printer mode */
 	PRINCSI,		/* CSI seen in printer mode */
@@ -171,27 +174,27 @@ typedef enum move_e {
 #define UCS_REPL_DW	0xff1f	/* character for illegal codes */
 #define UCS_HIDDEN	0xffff
 
-typedef struct Window Window;
-
 typedef enum sgr3_mode_e {
-	SGR3_STRICT = 0,
-	SGR3_LEGACY = 1,
-	SGR3_UNSET = 2,
+	SGR3_UNSET = 0,
+	SGR3_ITALIC = 1,
+	SGR3_STANDOUT = 2,
+	SGR3_DEFAULT = SGR3_ITALIC, /* legacy compatibility? */
 } sgr3_mode_t;
-void ConfigSGR3Mode(sgr3_mode_t);
-void ConfigSGR3ModeDef(sgr3_mode_t);
+
 const char *sgr3_mode_desc(sgr3_mode_t);
 
-void ResetAnsiState(Window *);
-void ResetCharsets(Window *);
-void WriteString(Window *, char *, size_t);
-void ChangeAKA(Window *, char *, size_t);
-void SetCharsets(Window *, char *);
-int GetAnsiStatus(Window *, char *);
-void WNewAutoFlow(Window *, int);
-void WBell(Window *, bool);
-void WMsg(Window *, int, char *);
-int MFindUsedLine(Window *, int, int);
+struct Window;
+
+void ResetAnsiState(struct Window *);
+void ResetCharsets(struct Window *);
+void WriteString(struct Window *, char *, size_t);
+void ChangeAKA(struct Window *, char *, size_t);
+void SetCharsets(struct Window *, char *);
+int GetAnsiStatus(struct Window *, char *);
+void WNewAutoFlow(struct Window *, int);
+void WBell(struct Window *, bool);
+void WMsg(struct Window *, int, char *);
+int MFindUsedLine(struct Window *, int, int);
 
 /* global variables */
 

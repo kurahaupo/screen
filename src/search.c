@@ -28,14 +28,18 @@
 
 #include "config.h"
 
-#include "search.h"
-
-#include <stdint.h>
 #include <sys/types.h>
 
+#include <stdint.h>
+
+#include "canvas.h"
+#include "input.h"
+#include "layer.h"
 #include "mark.h"
 #include "misc.h"
-#include "input.h"
+#include "screen.h"
+#include "search.h"
+#include "window.h"
 
 #define INPUTLINE (flayer->l_height - 1)
 
@@ -241,13 +245,15 @@ static void is_process(char *p, size_t len, void *data)
 	switch (*p) {
 	case '\007':		/* CTRL-G */
 		pos = markdata->isstartpos;
-	 /*FALLTHROUGH*/ case '\033':	/* ESC */
+		FALLTHROUGH;
+	case '\033':		/* ESC */
 		*p = 0;
 		break;
 	case '\013':		/* CTRL-K */
 	case '\027':		/* CTRL-W */
 		markdata->isistrl = 1;
-	 /*FALLTHROUGH*/ case '\b':
+		FALLTHROUGH;
+	case '\b':
 	case '\177':
 		if (markdata->isistrl == 0)
 			return;
@@ -284,12 +290,14 @@ static void is_process(char *p, size_t len, void *data)
 	if (pos >= 0) {
 		x = pos % flayer->l_width;
 		y = pos / flayer->l_width;
-		LAY_CALL_UP(
+		LAY_CALL_UP_START();
+		{
 			LayRedisplayLine(INPUTLINE, 0, flayer->l_width - 1, 0);
 			revto(x, y);
 			if (W2D(markdata->cy) == INPUTLINE)
 				revto_line(markdata->cx, markdata->cy, INPUTLINE > 0 ? INPUTLINE - 1 : 1);
-		);
+		}
+		LAY_CALL_UP_END();
 	}
 	if (*p)
 		inp_setprompt(isprompts[markdata->isdir + (pos < 0) + 1], markdata->isstrl ? markdata->isstr : "");

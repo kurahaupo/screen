@@ -28,12 +28,11 @@
 
 #include "config.h"
 
-#include "telnet.h"
-
 #ifdef ENABLE_TELNET
 
 #include <sys/types.h>
 #include <sys/socket.h>
+
 #include <fcntl.h>
 #include <netdb.h>
 #include <stdio.h>
@@ -42,6 +41,7 @@
 
 #include "ansi.h"
 #include "misc.h"
+#include "telnet.h"
 #include "termcap.h"
 
 static void TelReply(Window *, char *, size_t);
@@ -477,4 +477,8 @@ void TelStatus(Window *win, char *buf, size_t len)
 	return;
 }
 
+#else
+// ISO C forbids an empty translation unit [-Werror=pedantic]
+#include "misc.h"
+static char unused UNUSED;
 #endif				/* ENABLE_TELNET */

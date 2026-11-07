@@ -28,8 +28,6 @@
 
 #include "config.h"
 
-#include "attacher.h"
-
 #include <fcntl.h>
 #include <pwd.h>
 #include <signal.h>
@@ -39,15 +37,18 @@
 #include <stdint.h>
 #include <stdbool.h>
 
-#include "screen.h"
-
 #ifdef ENABLE_PAM
 #include <security/pam_appl.h>
 #endif
 
+#include "aalimits.h"
+#include "acls.h"
+#include "attacher.h"
 #include "misc.h"
+#include "screen.h"
 #include "socket.h"
 #include "tty.h"
+#include "window.h"
 
 static int WriteMessage(int, Message *);
 static void AttacherSigInt(int);
@@ -81,6 +82,23 @@ static void QueryResultFail(int sigsig)
 	(void)sigsig;		/* unused */
 	QueryResult = 2;
 }
+
+/* almost BSD strlcpy, but return the bytes copied, not the intended size */
+static inline size_t xstrlcpy(char *dst, const char *src, size_t size)
+{
+	if (size == 0)
+		return 0;
+	if (src == NULL)
+		src = "";
+	size_t l = strlen(src);
+	if (l >= size)
+		l = size - 1;
+	memcpy(dst, src, l);
+	memset(dst+l, 0, size-l);
+	return l;
+}
+
+# define XSCPY(a, x) xstrlcpy(a, x, IS_ARRAY(a) * sizeof a)
 
 /*
  *  Send message to a screen backend.
@@ -132,8 +150,7 @@ int Attach(int how)
 	memset((char *)&m, 0, sizeof(Message));
 	m.type = how;
 	m.protocol_revision = MSG_REVISION;
-	strncpy(m.m_tty, attach_tty_is_in_new_ns ? attach_tty_name_in_ns : attach_tty, ARRAY_SIZE(m.m_tty) - 1);
-	m.m_tty[ARRAY_SIZE(m.m_tty) - 1] = 0;
+	XSCPY(m.m_tty, attach_tty_is_in_new_ns ? attach_tty_name_in_ns : attach_tty);
 
 	if (how == MSG_WINCH) {
 		if ((lasts = MakeClientSocket(0)) >= 0) {
@@ -216,8 +233,7 @@ int Attach(int how)
 		Panic(0, "That screen is %sdetached.", dflag ? "already " : "not ");
 	if (dflag && (how == MSG_DETACH || how == MSG_POW_DETACH)) {
 		m.m.detach.dpid = getpid();
-		strncpy(m.m.detach.duser, LoginName, ARRAY_SIZE(m.m.detach.duser) - 1);
-		m.m.detach.duser[ARRAY_SIZE(m.m.detach.duser) - 1] = 0;
+		XSCPY(m.m.detach.duser, LoginName);
 		if (dflag == 2)
 			m.type = MSG_POW_DETACH;
 		else
@@ -239,16 +255,13 @@ int Attach(int how)
 			Panic(0, "Cannot contact screen again. Sigh.");
 		m.type = how;
 	}
-	strncpy(m.m.attach.envterm, attach_term, MAXTERMLEN);
-	m.m.attach.envterm[MAXTERMLEN] = 0;
-	m.m.attach.env_colorterm = attach_truecolor;
+	XSCPY(m.m.attach.envterm, attach_term);
+	m.m.attach.env_colorterm = attach_colorterm;
 
-	strncpy(m.m.attach.auser, LoginName, ARRAY_SIZE(m.m.attach.auser) - 1);
-	m.m.attach.auser[ARRAY_SIZE(m.m.attach.auser) - 1] = 0;
+	XSCPY(m.m.attach.auser, LoginName);
 	m.m.attach.esc = DefaultEsc;
 	m.m.attach.meta_esc = DefaultMetaEsc;
-	strncpy(m.m.attach.preselect, preselect ? preselect : "", ARRAY_SIZE(m.m.attach.preselect) - 1);
-	m.m.attach.preselect[ARRAY_SIZE(m.m.attach.preselect) - 1] = 0;
+	XSCPY(m.m.attach.preselect, preselect);
 	m.m.attach.apid = getpid();
 	m.m.attach.adaptflag = adaptflag;
 	m.m.attach.lines = m.m.attach.columns = 0;
@@ -316,8 +329,7 @@ void AttacherFinit(int sigsig)
 	/* Check if signal comes from backend */
 	if (stat(SocketPath, &statb) == 0 && (statb.st_mode & 0777) != 0600) {
 		memset((char *)&m, 0, sizeof(Message));
-		strncpy(m.m_tty, attach_tty_is_in_new_ns ? attach_tty_name_in_ns : attach_tty, ARRAY_SIZE(m.m_tty) - 1);
-		m.m_tty[ARRAY_SIZE(m.m_tty) - 1] = 0;
+		XSCPY(m.m_tty, attach_tty_is_in_new_ns ? attach_tty_name_in_ns : attach_tty);
 		m.m.detach.dpid = getpid();
 		m.type = MSG_HANGUP;
 		m.protocol_revision = MSG_REVISION;
@@ -444,8 +456,7 @@ void SendCmdMessage(char *sty, char *match, char **av, int query)
 	memset((char *)&m, 0, sizeof(Message));
 	m.type = query ? MSG_QUERY : MSG_COMMAND;
 	if (attach_tty) {
-		strncpy(m.m_tty, attach_tty_is_in_new_ns ? attach_tty_name_in_ns : attach_tty, ARRAY_SIZE(m.m_tty) - 1);
-		m.m_tty[ARRAY_SIZE(m.m_tty) - 1] = 0;
+		XSCPY(m.m_tty, attach_tty_is_in_new_ns ? attach_tty_name_in_ns : attach_tty);
 	}
 	p = m.m.command.cmd;
 	n = 0;
@@ -462,11 +473,10 @@ void SendCmdMessage(char *sty, char *match, char **av, int query)
 	}
 	*p = 0;
 	m.m.command.nargs = n;
-	strncpy(m.m.attach.auser, LoginName, ARRAY_SIZE(m.m.attach.auser) - 1);
-	m.m.command.auser[ARRAY_SIZE(m.m.command.auser) - 1] = 0;
+	strncpy(m.m.attach.auser, LoginName, sizeof m.m.attach.auser - 1);
+	ARRAY_END(m.m.command.auser)[-1] = 0;
 	m.protocol_revision = MSG_REVISION;
-	strncpy(m.m.command.preselect, preselect ? preselect : "", ARRAY_SIZE(m.m.command.preselect) - 1);
-	m.m.command.preselect[ARRAY_SIZE(m.m.command.preselect) - 1] = 0;
+	XSCPY(m.m.command.preselect, preselect);
 	m.m.command.apid = getpid();
 	if (query) {
 		/* Create a server socket so we can get back the result */
@@ -492,8 +502,8 @@ void SendCmdMessage(char *sty, char *match, char **av, int query)
 		if (r < 0)
 			Panic(0, "Could not create a listening socket to read the results.");
 
-		strncpy(m.m.command.writeback, SocketPath, ARRAY_SIZE(m.m.command.writeback) - 1);
-		m.m.command.writeback[ARRAY_SIZE(m.m.command.writeback) - 1] = '\0';
+		strncpy(m.m.command.writeback, SocketPath, sizeof m.m.command.writeback - 1);
+		ARRAY_END(m.m.command.writeback)[-1] = '\0';
 
 		/* Send the message, then wait for a response */
 		xsignal(SIGCONT, QueryResultSuccess);

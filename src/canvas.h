@@ -30,77 +30,82 @@
 #ifndef SCREEN_CANVAS_H
 #define SCREEN_CANVAS_H
 
-#include "layer.h"
-#include "sched.h"
+#include "layer.h"	// before canvas.h, for struct Layer
+#include "sched.h"	// before canvas.h, for struct Event
 
-#define SLICE_UNKN 0
-#define SLICE_VERT (1 << 0)
-#define SLICE_HORI (1 << 1)
+#define SLICE_UNKN	0
+#define SLICE_VERT	(1 << 0)
+#define SLICE_HORI	(1 << 1)
 
-#define SLICE_THIS (1 << 2)	/* used in equal test */
-#define SLICE_GLOBAL (1 << 3)
+#define SLICE_THIS	(1 << 2)	/* used in equal test */
+#define SLICE_GLOBAL	(1 << 3)
 
-typedef struct Display Display;
-typedef struct Viewport Viewport;
-typedef struct Window Window;
+struct Viewport;
+struct Window;
 
-typedef struct Canvas Canvas;
-struct Canvas {
-	Canvas *c_next;		/* next canvas on display */
-	Display *c_display;	/* back pointer to display */
+typedef struct Canvas {
+	struct Canvas *c_next;		/* next canvas on display */
+	struct Display *c_display;	/* back pointer to display */
 
-	Canvas *c_slnext;	/* next canvas in display slice */
-	Canvas *c_slprev;	/* prev canvas in display slice */
-	Canvas *c_slperp;	/* perpendicular slice */
-	Canvas *c_slback;	/* perpendicular slice back pointer */
-	int c_slorient;		/* our slice orientation */
-	int c_slweight;		/* size ratio */
+	struct Canvas *c_slnext;	/* next canvas in display slice */
+	struct Canvas *c_slprev;	/* prev canvas in display slice */
+	struct Canvas *c_slperp;	/* perpendicular slice */
+	struct Canvas *c_slback;	/* perpendicular slice back pointer */
+	int c_slorient;			/* our slice orientation */
+	int c_slweight;			/* size ratio */
 
-	Viewport *c_vplist;
-	Layer *c_layer;		/* layer on this canvas */
-	Canvas *c_lnext;	/* next canvas that displays layer */
-	Layer c_blank;		/* bottom layer, always blank */
-	int c_xoff;		/* canvas x offset on display */
-	int c_yoff;		/* canvas y offset on display */
+	struct Viewport *c_vplist;
+	Layer *c_layer;			/* layer on this canvas */
+	struct Canvas *c_lnext;		/* next canvas that displays layer */
+	Layer c_blank;			/* bottom layer, always blank */
+	int c_xoff;			/* canvas x offset on display */
+	int c_yoff;			/* canvas y offset on display */
 	int c_xs;
 	int c_xe;
 	int c_ys;
 	int c_ye;
-	Event c_captev;		/* caption changed event */
-};
+	struct Event c_captev;		/* caption changed event */
+} Canvas;
 
-void SetCanvasWindow(Canvas *, Window *);
-void SetForeCanvas(Display *, Canvas *);
-Canvas *FindCanvas(int, int);
+void SetCanvasWindow(struct Canvas *, struct Window *);
+void SetForeCanvas(struct Display *, struct Canvas *);
+struct Canvas *FindCanvas(int, int);
 int MakeDefaultCanvas(void);
 int AddCanvas(int);
 void RemCanvas(void);
 void OneCanvas(void);
-void FreeCanvas(Canvas *);
-int CountCanvas(Canvas *);
-void ResizeCanvas(Canvas *);
+void FreeCanvas(struct Canvas *);
+int CountCanvas(struct Canvas *);
+void ResizeCanvas(struct Canvas *);
 void RecreateCanvasChain(void);
-void RethinkViewportOffsets(Canvas *);
-int CountCanvasPerp(Canvas *);
-void EqualizeCanvas(Canvas *, bool);
-void DupLayoutCv(Canvas *, Canvas *, bool);
-void PutWindowCv(Canvas *);
+void RethinkViewportOffsets(struct Canvas *);
+int CountCanvasPerp(struct Canvas *);
+void EqualizeCanvas(struct Canvas *, bool);
+void DupLayoutCv(struct Canvas *, struct Canvas *, bool);
+void PutWindowCv(struct Canvas *);
 
-#define CV_CALL(cv, cmd)		\
+#define CV_CALL_START(cv)		\
 {					\
-  Display *olddisplay = display;	\
+  struct Display *olddisplay = display;	\
   Layer *oldflayer = flayer;		\
   Layer *l = cv->c_layer;		\
-  Canvas *cvlist = l->l_cvlist;		\
-  Canvas *cvlnext = cv->c_lnext;	\
+  struct Canvas *cvlist = l->l_cvlist;	\
+  struct Canvas *cvlnext = cv->c_lnext;	\
   flayer = l;				\
   l->l_cvlist = cv;			\
   cv->c_lnext = NULL;			\
-  cmd;					\
+  (void) 0
+
+#define CV_CALL_END(cv)			\
   flayer = oldflayer;			\
   l->l_cvlist = cvlist;			\
   cv->c_lnext = cvlnext;		\
   display = olddisplay;			\
-}
+} while (0)		/* obliging ';' */
+
+#define CV_CALL(cv, simple_cmd)		\
+  CV_CALL_START(cv);			\
+  simple_cmd;				\
+  CV_CALL_END(cv);
 
 #endif				/* SCREEN_CANVAS_H */

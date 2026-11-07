@@ -28,8 +28,6 @@
 
 #include "config.h"
 
-#include "socket.h"
-
 #include <pwd.h>
 #include <sys/types.h>
 #include <sys/stat.h>
@@ -56,8 +54,6 @@
 # endif				/* PWD_H */
 #endif
 
-#include "screen.h"
-
 #ifdef HAVE_DIRENT_H
 # include <dirent.h>
 #else
@@ -65,22 +61,28 @@
 # define dirent direct
 #endif
 
+#include "aalimits.h"
+#include "display.h"
+#include "encoding.h"
+#include "fileio.h"
+#include "layout.h"
+#include "list_generic.h"
+#include "misc.h"
+#include "process.h"
+#include "resize.h"
+#include "screen.h"
+#include "socket.h"
+#include "termcap.h"
+#include "tty.h"
+#include "utmp.h"
+#include "window.h"
+
 #ifndef CMSG_LEN
 # define CMSG_LEN(length) ((_CMSG_DATA_ALIGN(sizeof(struct cmsghdr))) + (length))
 #endif
 #ifndef CMSG_SPACE
 # define CMSG_SPACE(length) ((_CMSG_DATA_ALIGN(sizeof(struct cmsghdr))) + (_CMSG_DATA_ALIGN(length)))
 #endif
-
-#include "encoding.h"
-#include "fileio.h"
-#include "list_generic.h"
-#include "misc.h"
-#include "process.h"
-#include "resize.h"
-#include "termcap.h"
-#include "tty.h"
-#include "utmp.h"
 
 static int CheckPid(pid_t);
 static int ValidateDetachRequest(Message *);
@@ -99,6 +101,23 @@ static void KillUnpriv(pid_t pid, int sig)
 }
 
 #define SOCKMODE (S_IWRITE | S_IREAD | (displays ? S_IEXEC : 0) | (multi ? 1 : 0))
+
+/* almost BSD strlcpy, but return the bytes copied, not the intended size */
+static inline size_t xstrlcpy(char *dst, const char *src, size_t size)
+{
+	if (size == 0)
+		return 0;
+	if (src == NULL)
+		src = "";
+	size_t l = strlen(src);
+	if (l >= size)
+		l = size - 1;
+	memcpy(dst, src, l);
+	memset(dst+l, 0, size-l);
+	return l;
+}
+
+# define XSCPY(a, x) xstrlcpy(a, x, IS_ARRAY(a) * sizeof a)
 
 /*
  *  Socket directory manager
@@ -195,9 +214,9 @@ int FindSocket(int *fdp, int *nfoundp, int *notherp, char *match)
 			} else
 				cmatch = (*(n + matchlen) == 0);
 		}
-		if (sdirlen + 1 + strlen(name) >= sizeof(SocketPath))
+		if (sdirlen + 1 + strlen(name) >= sizeof SocketPath)
 			continue;	/* skip entry — path would be too long */
-		snprintf(SocketPath + sdirlen, sizeof(SocketPath) - sdirlen, "/%s", name);
+		snprintf(SocketPath + sdirlen, sizeof SocketPath - sdirlen, "/%s", name);
 
 		errno = 0;
 		if (stat(SocketPath, &st)) {
@@ -216,7 +235,7 @@ int FindSocket(int *fdp, int *nfoundp, int *notherp, char *match)
 			} else {
 			}
 		}
-		if ((sent = malloc(sizeof(struct sent))) == NULL)
+		if ((sent = malloc(sizeof *sent)) == NULL)
 			continue;
 		sent->next = NULL;
 		sent->name = SaveStr(name);
@@ -371,8 +390,7 @@ int MakeServerSocket(void)
 	if ((s = socket(AF_UNIX, SOCK_STREAM, 0)) == -1)
 		Panic(errno, "socket");
 	a.sun_family = AF_UNIX;
-	strncpy(a.sun_path, SocketPath, ARRAY_SIZE(a.sun_path));
-	a.sun_path[ARRAY_SIZE(a.sun_path) - 1] = 0;
+	XSCPY(a.sun_path, SocketPath);
 	xseteuid(real_uid);
 	xsetegid(real_gid);
 	if (connect(s, (struct sockaddr *)&a, strlen(SocketPath) + 2) != -1) {
@@ -422,8 +440,7 @@ int MakeClientSocket(int err)
 	if ((s = socket(AF_UNIX, SOCK_STREAM, 0)) == -1)
 		Panic(errno, "socket");
 	a.sun_family = AF_UNIX;
-	strncpy(a.sun_path, SocketPath, ARRAY_SIZE(a.sun_path));
-	a.sun_path[ARRAY_SIZE(a.sun_path) - 1] = 0;
+	XSCPY(a.sun_path, SocketPath);
 	xseteuid(real_uid);
 	xsetegid(real_gid);
 	if (connect(s, (struct sockaddr *)&a, strlen(SocketPath) + 2) == -1) {
@@ -449,7 +466,6 @@ void SendCreateMsg(char *sty, struct NewWindow *nwin)
 	Message m;
 	char *p;
 	size_t len, n, used;
-	char **av;
 
 	if (strlen(sty) > FILENAME_MAX)
 		sty[FILENAME_MAX] = 0;
@@ -457,20 +473,19 @@ void SendCreateMsg(char *sty, struct NewWindow *nwin)
 		sty[2 * MAXSTR - 1] = 0;
 
 	used = strlen(SocketPath);
-	if (used + 1 + strlen(sty) >= sizeof(SocketPath))
+	if (used + 1 + strlen(sty) >= sizeof SocketPath)
 		Panic(0, "Socket path too long.");
-	snprintf(SocketPath + used, sizeof(SocketPath) - used, "/%s", sty);
+	snprintf(SocketPath + used, sizeof SocketPath - used, "/%s", sty);
 
 	if ((s = MakeClientSocket(1)) == -1)
 		exit(1);
-	memset((char *)&m, 0, sizeof(Message));
+	memset(&m, 0, sizeof m);
 	m.type = MSG_CREATE;
-	strncpy(m.m_tty, attach_tty, ARRAY_SIZE(m.m_tty) - 1);
-	m.m_tty[ARRAY_SIZE(m.m_tty) - 1] = 0;
+	XSCPY(m.m_tty, attach_tty);
 	p = m.m.create.line;
 	n = 0;
 	if (nwin->args != nwin_undef.args)
-		for (av = nwin->args; *av && n < MAXARGS - 1; ++av, ++n) {
+		for (char **av = nwin->args; *av && n < MAXARGS - 1; ++av, ++n) {
 			len = strlen(*av) + 1;
 			if (p + len >= m.m.create.line + ARRAY_SIZE(m.m.create.line) - 1)
 				break;
@@ -492,10 +507,10 @@ void SendCreateMsg(char *sty, struct NewWindow *nwin)
 		goto end;
 	}
 	if (nwin->term != nwin_undef.term)
-		strncpy(m.m.create.screenterm, nwin->term, MAXTERMLEN);
-	m.m.create.screenterm[MAXTERMLEN] = '\0';
+		strncpy(m.m.create.screenterm, nwin->term, sizeof m.m.create.screenterm);
+	m.m.create.screenterm[sizeof m.m.create.screenterm - 1] = '\0';
 	m.protocol_revision = MSG_REVISION;
-	if (write(s, (char *)&m, sizeof(Message)) != sizeof(Message))
+	if (write(s, &m, sizeof m) != sizeof m)
 		Msg(errno, "write");
  end:
 	close(s);
@@ -507,16 +522,14 @@ int SendErrorMsg(char *tty, char *buf)
 	int ret = 0;
 	Message m;
 
-	strncpy(m.m.message, buf, ARRAY_SIZE(m.m.message) - 1);
-	m.m.message[ARRAY_SIZE(m.m.message) - 1] = 0;
+	XSCPY(m.m.message, buf);
 	s = MakeClientSocket(0);
 	if (s < 0)
 		return -1;
 	m.type = MSG_ERROR;
-	strncpy(m.m_tty, tty, ARRAY_SIZE(m.m_tty) - 1);
-	m.m_tty[ARRAY_SIZE(m.m_tty) - 1] = 0;
+	XSCPY(m.m_tty, tty);
 	m.protocol_revision = MSG_REVISION;
-	if (write(s, (char *)&m, sizeof(Message)))
+	if (write(s, &m, sizeof m))
 		ret = -2;
 	close(s);
 	return ret;
@@ -657,8 +670,8 @@ static int CreateTempDisplay(Message *m, int recvfd, Window *win)
 			 * in this namespace we need to update m->m_tty to use
 			 * that symlink for all future operations.
 			 */
-			strncpy(m->m_tty, myttyname, ARRAY_SIZE(m->m_tty) - 1);
-			m->m_tty[ARRAY_SIZE(m->m_tty) - 1] = 0;
+			strncpy(m->m_tty, myttyname, sizeof m->m_tty);
+			m->m_tty[sizeof m->m_tty - 1] = 0;
 		} else if (myttyname == NULL || strcmp(myttyname, m->m_tty)) {
 			Msg(errno, "Attach: passed fd does not match tty: %s - %s!",
 			    m->m_tty, myttyname ? myttyname : "NULL");
@@ -747,8 +760,8 @@ void ReceiveMsg(void)
 	}
 
 	p = (char *)&m;
-	left = sizeof(Message);
-	memset(&msg, 0, sizeof(struct msghdr));
+	left = sizeof m;
+	memset(&msg, 0, sizeof msg);
 	iov.iov_base = &m;
 	iov.iov_len = left;
 	msg.msg_iov = &iov;
@@ -861,8 +874,7 @@ void ReceiveMsg(void)
 	case MSG_CONT:
 		if (display && D_userpid != 0 && kill(D_userpid, 0) == 0)
 			break;	/* Intruder Alert */
-		/* FALLTHROUGH */
-
+		FALLTHROUGH;
 	case MSG_ATTACH:
 		if (CreateTempDisplay(&m, recvfd, win))
 			break;
@@ -899,9 +911,9 @@ void ReceiveMsg(void)
 	case MSG_QUERY:
 		{
 			char *oldSocketPath = SaveStr(SocketPath);
-			strncpy(SocketPath, m.m.command.writeback, ARRAY_SIZE(SocketPath));
+			strncpy(SocketPath, m.m.command.writeback, sizeof SocketPath);
 			int s = MakeClientSocket(0);
-			strncpy(SocketPath, oldSocketPath, ARRAY_SIZE(SocketPath));
+			strncpy(SocketPath, oldSocketPath, sizeof SocketPath);
 			Free(oldSocketPath);
 			if (s >= 0) {
 				queryflag = s;
@@ -936,11 +948,11 @@ void ReceiveRaw(int ss)
 	}
 	char rd[256];
 	ssize_t len;
-	while ((len = read(s2, rd, sizeof rd - 1)) > 0) {
+	while ((len = read(s, rd, sizeof rd - 1)) > 0) {
 		rd[len] = 0;
 		printf("%s", rd);
 	}
-	close(s2);
+	close(s);
 }
 
 /*
@@ -1154,7 +1166,7 @@ static void AskPassword(Message *m)
 	char *gecos_comma;
 	char *realname = NULL;
 
-	pwdata = calloc(1, sizeof(struct pwdata));
+	pwdata = calloc(1, sizeof *pwdata);
 	if (!pwdata)
 		Panic(0, "%s", strnomem);
 
@@ -1169,7 +1181,7 @@ static void AskPassword(Message *m)
 		if (!(realname = strndup(ppp->pw_gecos, gecos_comma - ppp->pw_gecos)))
 			gecos_comma = NULL;	/* well, it was worth a shot. */
 
-	snprintf(prompt, sizeof(prompt), "\ascreen used by %s%s<%s> on %s.\r\nPassword: ",
+	snprintf(prompt, sizeof prompt, "\ascreen used by %s%s<%s> on %s.\r\nPassword: ",
 		 gecos_comma ? realname : ppp->pw_gecos, ppp->pw_gecos[0] ? " " : "", ppp->pw_name, HostName);
 
 	free(realname);
@@ -1202,7 +1214,7 @@ static bool CheckPassword(const char *password)
 	int pam_ret;
 	char *tty_name;
 
-	reply = (struct pam_response *)malloc(sizeof(struct pam_response));
+	reply = malloc(sizeof *reply);
 
 	reply[0].resp = strdup(password);
 	reply[0].resp_retcode = 0;
@@ -1301,7 +1313,7 @@ static void PasswordProcessInput(char *ibuf, size_t ilen)
 
 			if (!CheckPassword(pwdata->buf)) {
 				/* uh oh, user failed */
-				memset(pwdata->buf, 0, sizeof(pwdata->buf));
+				memset(pwdata->buf, 0, sizeof pwdata->buf);
 				AddStr("\r\nPassword incorrect.\r\n");
 				D_processinputdata = NULL;	/* otherwise freed by FreeDis */
 				FreeDisplay();
@@ -1312,7 +1324,7 @@ static void PasswordProcessInput(char *ibuf, size_t ilen)
 			}
 
 			/* great, pw matched, all is fine */
-			memset(pwdata->buf, 0, sizeof(pwdata->buf));
+			memset(pwdata->buf, 0, sizeof pwdata->buf);
 			AddStr("\r\n");
 
 			D_processinputdata = NULL;
@@ -1325,7 +1337,7 @@ static void PasswordProcessInput(char *ibuf, size_t ilen)
 			return;
 		}
 		if (c == Ctrl('c')) {
-			memset(pwdata->buf, 0, sizeof(pwdata->buf));
+			memset(pwdata->buf, 0, sizeof pwdata->buf);
 			AddStr("\r\n");
 			FreeDisplay();
 			Kill(pid, SIG_BYE);
@@ -1339,11 +1351,11 @@ static void PasswordProcessInput(char *ibuf, size_t ilen)
 			continue;
 		}
 		if (c == Ctrl('u')) {
-			memset(pwdata->buf, 0, sizeof(pwdata->buf));
+			memset(pwdata->buf, 0, sizeof pwdata->buf);
 			len = 0;
 			continue;
 		}
-		if (len < sizeof(pwdata->buf) - 1)
+		if (len < sizeof pwdata->buf - 1)
 			pwdata->buf[len++] = c;
 	}
 	pwdata->len = len;
@@ -1384,7 +1396,7 @@ static void DoCommandMsg(Message *mp)
 	for (fc = fullcmd; n > 0; n--) {
 		size_t len = strlen(p);
 		*fc++ = '"';
-		if (!(fc = strncpy_escape_quote(fc, p, fullcmd + ARRAY_SIZE(fullcmd) - 2))) {	/* '"' ' ' */
+		if (!(fc = strncpy_escape_quote(fc, p, fullcmd + sizeof fullcmd - 2))) {	/* '"' ' ' */
 			Msg(0, "Remote command too long.");
 			queryflag = -1;
 			return;
@@ -1465,9 +1477,9 @@ int SendAttachMsg(int s, Message *m, int fd)
 	char buf[CMSG_SPACE(sizeof(int))];
 	struct cmsghdr *cmsg;
 
-	iov.iov_base = (char *)m;
-	iov.iov_len = sizeof(Message);
-	memset(&msg, 0, sizeof(struct msghdr));
+	iov.iov_base = m;
+	iov.iov_len = sizeof *m;
+	memset(&msg, 0, sizeof msg);
 	msg.msg_name = NULL;
 	msg.msg_namelen = 0;
 	msg.msg_iov = &iov;

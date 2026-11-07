@@ -33,7 +33,6 @@
 
 #include "config.h"
 
-#include "process.h"
 
 #include <fcntl.h>
 #include <signal.h>
@@ -45,8 +44,7 @@
 #include <sys/types.h>
 #include <time.h>
 
-#include "screen.h"
-
+#include "bitmath.h"
 #include "display.h"
 #include "encoding.h"
 #include "fileio.h"
@@ -58,7 +56,9 @@
 #include "logfile.h"
 #include "mark.h"
 #include "misc.h"
+#include "process.h"
 #include "resize.h"
+#include "screen.h"
 #include "search.h"
 #include "socket.h"
 #include "telnet.h"
@@ -66,7 +66,9 @@
 #include "tty.h"
 #include "utmp.h"
 #include "viewport.h"
+#include "window.h"
 #include "winmsg.h"
+#include "winmsgbuf.h"
 
 
 static size_t CountArgs(char **);
@@ -143,7 +145,7 @@ struct action umtab[KMAP_KEYS + KMAP_AKEYS];
 struct action dmtab[KMAP_KEYS + KMAP_AKEYS];
 struct action mmtab[KMAP_KEYS + KMAP_AKEYS];
 struct kmap_ext *kmap_exts;
-int kmap_extn;
+size_t kmap_extn;
 int maptimeout = 300;
 
 #ifndef MAX_DIGRAPH
@@ -167,7 +169,6 @@ static struct digraph digraphs[MAX_DIGRAPH + 1] = {
 	{ { '$',  '$'  }, 163 },	/* £ */
 	{ { 'P',  'd'  }, 163 },	/* £ */
 	{ { 'o',  'x'  }, 164 },	/* ¤ */
-	{ { 'C',  'u'  }, 164 },	/* ¤ */
 	{ { 'C',  'u'  }, 164 },	/* ¤ */
 	{ { 'E',  'u'  }, 164 },	/* ¤ */
 	{ { 'Y',  '-'  }, 165 },	/* ¥ */
@@ -510,7 +511,6 @@ void InitKeytab(void)
 static struct action *FindKtab(char *class, int create)
 {
 	struct kclass *kp, **kpp;
-	int i;
 
 	if (class == NULL)
 		return ktab;
@@ -530,7 +530,7 @@ static struct action *FindKtab(char *class, int create)
 			return NULL;
 		}
 		kp->name = SaveStr(class);
-		for (i = 0; i < (int)(ARRAY_SIZE(kp->ktab)); i++) {
+		for (size_t i = 0; i < ARRAY_SIZE(kp->ktab); i++) {
 			kp->ktab[i].nr = RC_ILLEGAL;
 			kp->ktab[i].args = noargs;
 			kp->ktab[i].argl = NULL;
@@ -799,27 +799,6 @@ static inline size_t CountArgs(char **args)
 
 static char *nums[] = { "no", "one", "two", "three", "four", "five" };
 
-static inline int lo_bit(int i)
-{
-	return i & -i;
-}
-
-static inline int hi_bits(int i)
-{
-	return i ^ lo_bit(i);
-}
-
-static inline int range_end_bit(int i)
-{
-	return (i + lo_bit(i)) >> 1;
-	// top of a consecutive range
-}
-
-static inline bool is_single_bit(int i)
-{
-	return !hi_bits(i);
-}
-
 static inline bool is_bit_pair(int i)
 {
 	return is_single_bit(hi_bits(i));
@@ -829,32 +808,6 @@ static inline bool is_bit_range(int i)
 {
 	return is_single_bit(range_end_bit(i));
 }
-
-# if defined __GNUC__ || defined __clang__
-static inline int log_lo_bit(int x)
-{
-	x &= ARGS_MASK;
-	return __builtin_ffs(x) - 1;
-}
-# else
-static inline int log_lo_bit(int x)
-{
-	/* Make sure the following are kept in sync with ARGS_ANY */
-	/* lookup for base-2 logarithm */
-	static const int blog[2 << ARGS_ANY] = {
-		[1 << 0] = 1,
-		[1 << 1] = 2,
-		[1 << 2] = 3,
-		[1 << 3] = 4,
-		[1 << 4] = 5,
-		/* fill in more entries as necessary */
-		[1 << ARGS_ANY] = ARGS_ANY+1,
-	};
-	x &= ARGS_MASK;
-	return blog[x] - 1;
-}
-# endif
-
 #endif	/*FANCY_ERROR_REPORTING*/
 
 static bool CheckArgCount(struct comm *c, size_t argc)
@@ -887,8 +840,8 @@ static bool CheckArgCount(struct comm *c, size_t argc)
 		return false;
 	}
 
-	bool or_more = allowed_counts_mask & ARGS_MASK;
-	allowed_counts_mask &= ~ARGS_M;	/* CHECK THIS */
+	bool or_more = allowed_counts_mask & ARGS_MORE;
+	allowed_counts_mask &= ARGS_MASK;
 	const int first = log_lo_bit(lo_bit(allowed_counts_mask));
 	if (!or_more && is_single_bit(allowed_counts_mask)) {
 		/* Exactly one allowed count, not including "or more" */
@@ -942,11 +895,11 @@ static void StuffFin(char *buf, size_t len, void *data UNUSED)
 /* {{{{{{ */
 
 #if defined(__GNUC__) || defined(__clang__)
-# pragma GCC diagnostic push
-# pragma GCC diagnostic ignored "-Wunused-parameter"
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wunused-parameter"
 #elif defined(_MSC_VER)
-# __pragma(warning(push))
-# __pragma(warning(disable: 4100))	/* unreferenced formal parameter */
+#__pragma(warning(push))
+#__pragma(warning(disable : 4100))	/* unreferenced formal parameter */
 #endif
 
 /* If the command is not 'quieted', then use Msg to output the message. If it's a remote
@@ -957,7 +910,7 @@ static void StuffFin(char *buf, size_t len, void *data UNUSED)
  *
  * If the command is quieted, and it's not a remote query, then just don't print the message.
  */
-#define OutputMsg	(!act->quiet ? Msg : queryflag >= 0 ? QueryMsg : Dummy)
+#define OutputMsg (!act->quiet ? Msg : queryflag >= 0 ? QueryMsg : Dummy)
 
 static void DoCommandSelect(struct action *act)
 {
@@ -981,7 +934,6 @@ static void DoCommandSelect(struct action *act)
 		SwitchWindow(GetWindowByNumber(n));
 	else if (queryflag >= 0)
 		queryflag = -1;	/* ParseWinNum already prints out an appropriate error message. */
-
 }
 
 static void DoCommandMultiinput(struct action *act)
@@ -1003,7 +955,6 @@ static void DoCommandMultiinput(struct action *act)
 				ShowWindows(act, n);
 		}
 	}
-
 }
 
 static void DoCommandDefautonuke(struct action *act)
@@ -1015,7 +966,6 @@ static void DoCommandDefautonuke(struct action *act)
 	if (display && *rc_name)
 		D_auto_nuke = defautonuke;
 }
-
 
 static void DoCommandAutonuke(struct action *act)
 {
@@ -1056,7 +1006,6 @@ static void DoCommandDumptermcap(struct action *act)
 	WriteFile(user, NULL, DUMP_TERMCAP);
 }
 
-
 static void DoCommandHardcopy(struct action *act)
 {
 	char **args = act->args;
@@ -1093,7 +1042,6 @@ static void DoCommandLog(struct action *act)
 	if (ParseSwitch(act, &b) == 0)
 		LogToggle(b);
 }
-
 
 static void DoCommandSuspend(struct action *act)
 {
@@ -1342,10 +1290,9 @@ static void DoCommandAt(struct action *act)
 					continue;
 				fore = D_fore;
 				flayer = D_forecv->c_layer;
-				if (strncmp(args[0], D_usertty, n) &&
-				    (strncmp("/dev/", D_usertty, 5) ||
-				     strncmp(args[0], D_usertty + 5, n)) &&
-				    (strncmp("/dev/tty", D_usertty, 8) || strncmp(args[0], D_usertty + 8, n)))
+				if (strncmp(args[0], D_usertty, n)
+				    && (strncmp("/dev/", D_usertty, 5) || strncmp(args[0], D_usertty + 5, n))
+				    && (strncmp("/dev/tty", D_usertty, 8) || strncmp(args[0], D_usertty + 8, n)))
 					continue;
 				DoCommand(args + 1, argl + 1);
 				if (display)
@@ -1358,7 +1305,7 @@ static void DoCommandAt(struct action *act)
 		break;
 	case '#':		/* window */
 		n--;
-		/* FALLTHROUGH */
+		FALLTHROUGH;
 	default:
 		{
 			int ch;
@@ -1539,7 +1486,6 @@ static void DoCommandProcess(struct action *act)
 	}
 	ch = args[0][0];
 	process_fn(&ch, 0, NULL);
-
 }
 
 static void DoCommandStuff(struct action *act)
@@ -1571,7 +1517,7 @@ static void DoCommandStuff(struct action *act)
 		}
 		if (StuffKey(i - T_CAPS) == 0)
 			return;
-		s = display ? D_tcs[i].str : NULL;
+		s = display ? D_td.td_tcs[i].str : NULL;
 		if (s == NULL)
 			return;
 		len = strlen(s);
@@ -1643,7 +1589,6 @@ static void DoCommandOther(struct action *act)
 		SwitchWindow(display && D_other ? D_other : NextWindow());
 }
 
-
 static void DoCommandMeta(struct action *act)
 {
 	struct acluser *user = display ? D_user : users;
@@ -1682,7 +1627,7 @@ static void DoCommandBreaktype(struct action *act)
 
 	if (*args) {
 		if (ParseNum(act, &n))
-			for (n = 0; n < (int)(ARRAY_SIZE(types)); n++) {
+			for (n = 0; (size_t) n < ARRAY_SIZE(types); n++) {
 				int i;
 				for (i = 0; i < 4; i++) {
 					ch = args[0][i];
@@ -1694,7 +1639,7 @@ static void DoCommandBreaktype(struct action *act)
 				if (i == 4)
 					break;
 			}
-		if (n < 0 || n >= (int)(ARRAY_SIZE(types)))
+		if (n < 0 || (size_t) n >= ARRAY_SIZE(types))
 			OutputMsg(0, "%s invalid, chose one of %s, %s or %s", *args, types[0], types[1], types[2]);
 		else {
 			breaktype = n;
@@ -1702,7 +1647,6 @@ static void DoCommandBreaktype(struct action *act)
 		}
 	}
 }
-
 
 static void DoCommandPow_break(struct action *act)
 {
@@ -1802,8 +1746,10 @@ static void DoCommandWidth(struct action *act)
 		if (ResizeDisplay(w, h) == 0) {
 			Activate(D_fore ? D_fore->w_norefresh : 0);
 			/* autofit */
-			ResizeLayer(D_forecv->c_layer, D_forecv->c_xe - D_forecv->c_xs + 1,
-				    D_forecv->c_ye - D_forecv->c_ys + 1, NULL);
+			ResizeLayer(D_forecv->c_layer,
+				    D_forecv->c_xe - D_forecv->c_xs + 1,
+				    D_forecv->c_ye - D_forecv->c_ys + 1,
+				    NULL);
 			return;
 		}
 		if (h == D_height)
@@ -1892,8 +1838,10 @@ static void DoCommandHeight(struct action *act)
 		if (ResizeDisplay(w, h) == 0) {
 			Activate(D_fore ? D_fore->w_norefresh : 0);
 			/* autofit */
-			ResizeLayer(D_forecv->c_layer, D_forecv->c_xe - D_forecv->c_xs + 1,
-				    D_forecv->c_ye - D_forecv->c_ys + 1, NULL);
+			ResizeLayer(D_forecv->c_layer,
+				    D_forecv->c_xe - D_forecv->c_xs + 1,
+				    D_forecv->c_ye - D_forecv->c_ys + 1,
+				    NULL);
 			return;
 		}
 		if (h == D_height)
@@ -1906,7 +1854,6 @@ static void DoCommandHeight(struct action *act)
 				  w, h);
 	}
 }
-
 
 static void DoCommandDefdynamictitle(struct action *act)
 {
@@ -1960,7 +1907,6 @@ static void DoCommandScreen(struct action *act)
 	DoScreen("key", args);
 }
 
-
 static void DoCommandWrap(struct action *act)
 {
 	int msgok = display && !*rc_name;
@@ -1990,7 +1936,8 @@ static void DoCommandFlow(struct action *act)
 	}
 	SetFlow(fore->w_flow & FLOW_ON);
 	if (msgok)
-		OutputMsg(0, "%cflow%s", (fore->w_flow & FLOW_ON) ? '+' : '-',
+		OutputMsg(0, "%cflow%s",
+			  (fore->w_flow & FLOW_ON) ? '+' : '-',
 			  (fore->w_flow & FLOW_AUTOFLAG) ? "(auto)" : "");
 }
 
@@ -2025,8 +1972,8 @@ static void DoCommandWritelock(struct action *act)
 		if (!AclCheckPermWin(D_user, ACL_WRITE, fore))
 			fore->w_wlockuser = D_user;
 	}
-	OutputMsg(0, "writelock %s", (fore->w_wlock == WLOCK_AUTO) ? "auto" :
-		  ((fore->w_wlock == WLOCK_OFF) ? "off" : "on"));
+	OutputMsg(0, "writelock %s",
+		  (fore->w_wlock == WLOCK_AUTO) ? "auto" : ((fore->w_wlock == WLOCK_OFF) ? "off" : "on"));
 }
 
 static void DoCommandClear(struct action *act)
@@ -2063,8 +2010,7 @@ static void DoCommandMonitor(struct action *act)
 		OutputMsg(0, "Window %d (%s) is now being monitored for all activity.", fore->w_number, fore->w_title);
 	} else {
 		if (display)	/* we remove only this user */
-			ACLBYTE(fore->w_mon_notify, D_user->u_id)
-			    &= ~ACLBIT(D_user->u_id);
+			ACLBYTE(fore->w_mon_notify, D_user->u_id) &= ~ACLBIT(D_user->u_id);
 		else
 			for (i = 0; i < maxusercount; i++)
 				ACLBYTE(fore->w_mon_notify, i) &= ~ACLBIT(i);
@@ -2073,8 +2019,8 @@ static void DoCommandMonitor(struct action *act)
 				return;
 		if (i < 0)
 			fore->w_monitor = MON_OFF;
-		OutputMsg(0, "Window %d (%s) is no longer being monitored for activity.", fore->w_number,
-			  fore->w_title);
+		OutputMsg(0, "Window %d (%s) is no longer being monitored for activity.",
+			  fore->w_number, fore->w_title);
 	}
 }
 
@@ -2150,7 +2096,6 @@ static void DoCommandLicense(struct action *act)
 	display_license();
 }
 
-
 static void DoCommandCopy(struct action *act)
 {
 	if (flayer->l_layfn != &WinLf) {
@@ -2212,8 +2157,11 @@ static void DoCommandHistory(struct action *act)
 			if (enc == -1)
 				enc = user->u_plop.enc;
 			if (enc != user->u_plop.enc)
-				l += RecodeBuf((unsigned char *)user->u_plop.buf, user->u_plop.len,
-					       user->u_plop.enc, enc, NULL);
+				l += RecodeBuf((unsigned char *)user->u_plop.buf,
+					       user->u_plop.len,
+					       user->u_plop.enc,
+					       enc,
+					       NULL);
 			else
 				l += user->u_plop.len;
 		} else {
@@ -2222,7 +2170,9 @@ static void DoCommandHistory(struct action *act)
 			if (enc != plop_tab[(int)(unsigned char)ch].enc)
 				l += RecodeBuf((unsigned char *)plop_tab[(int)(unsigned char)ch].buf,
 					       plop_tab[(int)(unsigned char)ch].len,
-					       plop_tab[(int)(unsigned char)ch].enc, enc, NULL);
+					       plop_tab[(int)(unsigned char)ch].enc,
+					       enc,
+					       NULL);
 			else
 				l += plop_tab[(int)(unsigned char)ch].len;
 		}
@@ -2239,7 +2189,9 @@ static void DoCommandHistory(struct action *act)
 	if (s[1] == 0 && args[1] == NULL)
 		if (enc == (*s == '.' ? user->u_plop.enc : plop_tab[(int)(unsigned char)*s].enc)) {
 			MakePaster(&fore->w_paster,
-				   *s == '.' ? user->u_plop.buf : plop_tab[(int)(unsigned char)*s].buf, l, 0);
+				   *s == '.' ? user->u_plop.buf : plop_tab[(int)(unsigned char)*s].buf,
+				   l,
+				   0);
 			return;
 		}
 	/*
@@ -2257,7 +2209,11 @@ static void DoCommandHistory(struct action *act)
 	for (ss = s; (ch = *ss); ss++) {
 		struct plop *pp = (ch == '.' ? &user->u_plop : &plop_tab[(int)(unsigned char)ch]);
 		if (pp->enc != enc) {
-			l += RecodeBuf((unsigned char *)pp->buf, pp->len, pp->enc, enc, (unsigned char *)dbuf + l);
+			l += RecodeBuf((unsigned char *)pp->buf,
+				       pp->len,
+				       pp->enc,
+				       enc,
+				       (unsigned char *)dbuf + l);
 			continue;
 		}
 		memmove(dbuf + l, pp->buf, pp->len);
@@ -2328,8 +2284,11 @@ static void DoCommandPaste(struct action *act)
 			if (enc == -1)
 				enc = user->u_plop.enc;
 			if (enc != user->u_plop.enc)
-				l += RecodeBuf((unsigned char *)user->u_plop.buf, user->u_plop.len,
-					       user->u_plop.enc, enc, NULL);
+				l += RecodeBuf((unsigned char *)user->u_plop.buf,
+					       user->u_plop.len,
+					       user->u_plop.enc,
+					       enc,
+					       NULL);
 			else
 				l += user->u_plop.len;
 		} else {
@@ -2338,7 +2297,9 @@ static void DoCommandPaste(struct action *act)
 			if (enc != plop_tab[(int)(unsigned char)ch].enc)
 				l += RecodeBuf((unsigned char *)plop_tab[(int)(unsigned char)ch].buf,
 					       plop_tab[(int)(unsigned char)ch].len,
-					       plop_tab[(int)(unsigned char)ch].enc, enc, NULL);
+					       plop_tab[(int)(unsigned char)ch].enc,
+					       enc,
+					       NULL);
 			else
 				l += plop_tab[(int)(unsigned char)ch].len;
 		}
@@ -2355,7 +2316,9 @@ static void DoCommandPaste(struct action *act)
 	if (s[1] == 0 && args[1] == NULL)
 		if (enc == (*s == '.' ? user->u_plop.enc : plop_tab[(int)(unsigned char)*s].enc)) {
 			MakePaster(&fore->w_paster,
-				   *s == '.' ? user->u_plop.buf : plop_tab[(int)(unsigned char)*s].buf, l, 0);
+				   *s == '.' ? user->u_plop.buf : plop_tab[(int)(unsigned char)*s].buf,
+				   l,
+				   0);
 			return;
 		}
 	/*
@@ -2435,9 +2398,11 @@ static void DoCommandWritebuf(struct action *act)
 				OutputMsg(0, "%s", strnomem);
 				return;
 			}
-			user->u_plop.len =
-			    RecodeBuf((unsigned char *)oldplop.buf, oldplop.len, oldplop.enc, enc,
-				      (unsigned char *)newbuf);
+			user->u_plop.len = RecodeBuf((unsigned char *)oldplop.buf,
+						     oldplop.len,
+						     oldplop.enc,
+						     enc,
+						     (unsigned char *)newbuf);
 			user->u_plop.buf = newbuf;
 			user->u_plop.enc = enc;
 		}
@@ -2582,7 +2547,7 @@ static void DoCommandLogfile(struct action *act)
 		if (ParseSaveStr(act, &screenlogfile))
 			return;
 		if (fore && fore->w_log)
-			if (DoStartLog(fore, buf, ARRAY_SIZE(buf)))
+			if (DoStartLog(fore, buf, sizeof buf))
 				OutputMsg(0, "Error opening logfile \"%s\"", buf);
 		if (!msgok)
 			return;
@@ -2688,7 +2653,7 @@ static void DoCommandBell(struct action *act)
 
 	if (*args == NULL) {
 		char buf[256];
-		AddXChars(buf, ARRAY_SIZE(buf), BellString);
+		AddXChars(buf, sizeof buf, BellString);
 		OutputMsg(0, "bell_msg is '%s'", buf);
 		return;
 	}
@@ -2719,7 +2684,7 @@ static void DoCommandPow_detach_msg(struct action *act)
 
 	if (*args == NULL) {
 		char buf[256];
-		AddXChars(buf, ARRAY_SIZE(buf), PowDetachString);
+		AddXChars(buf, sizeof buf, PowDetachString);
 		OutputMsg(0, "pow_detach_msg is '%s'", buf);
 		return;
 	}
@@ -2760,7 +2725,6 @@ static void DoCommandDeflogin(struct action *act)
 	else if (ParseOnOff(act, &b) == 0)
 		nwin_default.lflag = b ? 1 : 0;
 }
-
 #endif
 
 static void DoCommandDefflow(struct action *act)
@@ -2886,7 +2850,7 @@ static void DoCommandHardstatus(struct action *act)
 		else if (!strcmp(args[0], "string")) {
 			if (!args[1]) {
 				char buf[256];
-				AddXChars(buf, ARRAY_SIZE(buf), hstatusstring);
+				AddXChars(buf, sizeof buf, hstatusstring);
 				OutputMsg(0, "hardstatus string is '%s'", buf);
 				return;
 			}
@@ -2948,7 +2912,7 @@ static void DoCommandStatus(struct action *act)
 			} else if (strcmp(args[i], "right") == 0) {
 				statuspos.col = STATUS_RIGHT;
 			} else {
-				Msg(0, "%s: usage: status [top|up|down|bottom] [left|right]", rc_name);
+				Msg(0, "%s: usage: status [top | up | down | bottom] [left | right]", rc_name);
 				break;
 			}
 			i++;
@@ -2979,12 +2943,12 @@ static void DoCommandCaption(struct action *act)
 	} else if (strcmp(args[0], "string") == 0) {
 		if (!args[1]) {
 			char buf[256];
-			AddXChars(buf, ARRAY_SIZE(buf), captionstring);
+			AddXChars(buf, sizeof buf, captionstring);
 			OutputMsg(0, "caption string is '%s'", buf);
 			return;
 		}
 	} else {
-		OutputMsg(0, "%s: usage: caption [ top | bottom ] always|splitonly|string <string>", rc_name);
+		OutputMsg(0, "%s: usage: caption [ top | bottom ] { always | splitonly | string <string> }", rc_name);
 		return;
 	}
 	if (!args[1])
@@ -3006,8 +2970,12 @@ static void DoCommandConsole(struct action *act)
 	if (b == 0)
 		OutputMsg(0, "%s: releasing console %s", rc_name, HostName);
 	else if (console_window)
-		OutputMsg(0, "%s: stealing console %s from window %d (%s)", rc_name,
-			  HostName, console_window->w_number, console_window->w_title);
+		OutputMsg(0,
+			  "%s: stealing console %s from window %d (%s)",
+			  rc_name,
+			  HostName,
+			  console_window->w_number,
+			  console_window->w_title);
 	else
 		OutputMsg(0, "%s: grabbing console %s", rc_name, HostName);
 	console_window = b ? fore : NULL;
@@ -3032,7 +3000,6 @@ static void DoCommandPartial(struct action *act)
 	(void)ParseSwitch(act, &b);
 	fore->w_norefresh = b;
 }
-
 
 static void DoCommandVbell(struct action *act)
 {
@@ -3205,8 +3172,7 @@ static void DoCommandSilence(struct action *act)
 		OutputMsg(0, "The window is now being monitored for %d sec. silence.", fore->w_silencewait);
 	} else {
 		if (display)	/* we remove only this user */
-			ACLBYTE(fore->w_lio_notify, D_user->u_id)
-			    &= ~ACLBIT(D_user->u_id);
+			ACLBYTE(fore->w_lio_notify, D_user->u_id) &= ~ACLBIT(D_user->u_id);
 		else
 			for (int n = 0; n < maxusercount; n++)
 				ACLBYTE(fore->w_lio_notify, n) &= ~ACLBIT(n);
@@ -3271,7 +3237,7 @@ static void DoCommandSessionname(struct action *act)
 			OutputMsg(errno, "%s: failed to rename(%s, %s)", rc_name, SocketPath, buf);
 			return;
 		}
-		strncpy(SocketPath, buf, ARRAY_SIZE(SocketPath));
+		strncpy(SocketPath, buf, sizeof SocketPath);
 		MakeNewEnv();
 		WindowChanged(NULL, WINESC_SESS_NAME);
 	}
@@ -3309,13 +3275,17 @@ static void DoCommandSlowpaste(struct action *act)
 	int msgok = display && !*rc_name;
 
 	if (*args == NULL)
-		OutputMsg(0, fore->w_slowpaste ?
-			  "Slowpaste in window %d is %d milliseconds." :
-			  "Slowpaste in window %d is unset.", fore->w_number, fore->w_slowpaste);
+		OutputMsg(0,
+			  fore->w_slowpaste ? "Slowpaste in window %d is %d milliseconds."
+					    : "Slowpaste in window %d is unset.",
+			  fore->w_number,
+			  fore->w_slowpaste);
 	else if (ParseNum(act, &fore->w_slowpaste) == 0 && msgok)
-		OutputMsg(0, fore->w_slowpaste ?
-			  "Slowpaste in window %d set to %d milliseconds." :
-			  "Slowpaste in window %d now unset.", fore->w_number, fore->w_slowpaste);
+		OutputMsg(0,
+			  fore->w_slowpaste ? "Slowpaste in window %d set to %d milliseconds."
+					    : "Slowpaste in window %d now unset.",
+			  fore->w_number,
+			  fore->w_slowpaste);
 }
 
 static void DoCommandMarkkeys(struct action *act)
@@ -3359,7 +3329,7 @@ static void DoCommandVbell_msg(struct action *act)
 
 	if (*args == NULL) {
 		char buf[256];
-		AddXChars(buf, ARRAY_SIZE(buf), VisualBellString);
+		AddXChars(buf, sizeof buf, VisualBellString);
 		OutputMsg(0, "vbell_msg is '%s'", buf);
 		return;
 	}
@@ -3456,7 +3426,7 @@ static void DoCommandBindkey(struct action *act)
 	Display *olddisplay = display;
 	int used = 0;
 	struct kmap_ext *kme = NULL;
-	int i;
+	size_t i;
 
 	for (; *args && **args == '-'; args++, argl++) {
 		if (strcmp(*args, "-t") == 0)
@@ -3505,7 +3475,7 @@ static void DoCommandBindkey(struct action *act)
 				if (args[1])
 					break;
 			} else if (*argl == (kme->fl & ~KMAP_NOTIMEOUT)
-				   && memcmp(kme->str, *args, *argl) == 0)
+				&& memcmp(kme->str, *args, *argl) == 0)
 				break;
 		if (i == kmap_extn) {
 			if (!args[1]) {
@@ -3667,8 +3637,7 @@ static void DoCommandAclgrp(struct action *act)
 		g = u->u_group;
 		while (g) {
 			ngroups++;
-			sprintf(p, "%s ", g->u->u_name);
-			p += strlen(p);
+			p += sprintf(p, "%s ", g->u->u_name);
 			if (p > buf + 200)
 				break;
 			g = g->next;
@@ -3950,7 +3919,7 @@ static void DoCommandDefhstatus(struct action *act)
 	if (*args == NULL) {
 		char buf[256] = { 0 };
 		if (nwin_default.hstatus)
-			AddXChars(buf, ARRAY_SIZE(buf), nwin_default.hstatus);
+			AddXChars(buf, sizeof buf, nwin_default.hstatus);
 		OutputMsg(0, "default hstatus is '%s'", buf);
 		return;
 	}
@@ -3971,6 +3940,11 @@ static void DoCommandHstatus(struct action *act)
 	WindowChanged(fore, WINESC_HSTATUS);
 }
 
+static inline bool dot_or_0_3(char c)
+{
+	return c == '.' || c >= '0' && c <= '3';
+}
+
 static void DoCommandDefcharset(struct action *act)
 {
 	char **args = act->args;
@@ -3979,7 +3953,7 @@ static void DoCommandDefcharset(struct action *act)
 	if (*args == NULL) {
 		char buf[256] = { 0 };
 		if (nwin_default.charset)
-			AddXChars(buf, ARRAY_SIZE(buf), nwin_default.charset);
+			AddXChars(buf, sizeof buf, nwin_default.charset);
 		OutputMsg(0, "default charset is '%s'", buf);
 		return;
 	}
@@ -3988,8 +3962,8 @@ static void DoCommandDefcharset(struct action *act)
 		OutputMsg(0, "%s: defcharset: string has illegal size.", rc_name);
 		return;
 	}
-	if (len > 4 && (((args[0][4] < '0' || args[0][4] > '3') && args[0][4] != '.') ||
-			((args[0][5] < '0' || args[0][5] > '3') && args[0][5] && args[0][5] != '.'))) {
+	if (len > 4 && ! dot_or_0_3(args[0][4])
+	 || len > 5 && ! dot_or_0_3(args[0][5])) {
 		OutputMsg(0, "%s: defcharset: illegal mapping number.", rc_name);
 		return;
 	}
@@ -4006,8 +3980,8 @@ static void DoCommandCharset(struct action *act)
 	if (*args == NULL) {
 		char buf[256] = { 0 };
 		if (nwin_default.charset)
-			AddXChars(buf, ARRAY_SIZE(buf), nwin_default.charset);
-		OutputMsg(0, "default charset is '%s'", buf);
+			AddXChars(buf, sizeof buf, nwin_default.charset);
+		OutputMsg(0, "charset is '%s'", buf);
 		return;
 	}
 	len = strlen(*args);
@@ -4015,8 +3989,8 @@ static void DoCommandCharset(struct action *act)
 		OutputMsg(0, "%s: charset: string has illegal size.", rc_name);
 		return;
 	}
-	if (len > 4 && (((args[0][4] < '0' || args[0][4] > '3') && args[0][4] != '.') ||
-			((args[0][5] < '0' || args[0][5] > '3') && args[0][5] && args[0][5] != '.'))) {
+	if (len > 4 && ! dot_or_0_3(args[0][4])
+	 || len > 5 && ! dot_or_0_3(args[0][5])) {
 		OutputMsg(0, "%s: charset: illegal mapping number.", rc_name);
 		return;
 	}
@@ -4064,9 +4038,11 @@ static void DoCommandRendition(struct action *act)
 		WindowChanged(NULL, 0);
 	}
 	if (msgok)
-		OutputMsg(0, "Standout attributes 0x%02hhx  colorbg 0x%02hhx  colorfg 0x%02hhx",
-			  mchar_so.attr, mchar_so.colorbg, mchar_so.colorfg);
-
+		OutputMsg(0,
+			  "Standout attributes 0x%02hhx  colorbg 0x%02hhx  colorfg 0x%02hhx",
+			  mchar_so.attr,
+			  mchar_so.colorbg,
+			  mchar_so.colorfg);
 }
 
 static void DoCommandSorendition(struct action *act)
@@ -4082,8 +4058,11 @@ static void DoCommandSorendition(struct action *act)
 		WindowChanged(NULL, 0);
 	}
 	if (msgok)
-		OutputMsg(0, "Standout attributes %#02hhx  colorbg %#02hhx  colorfg %#02hhx",
-			  mchar_so.attr, mchar_so.colorbg, mchar_so.colorfg);
+		OutputMsg(0,
+			  "Standout attributes %#02hhx  colorbg %#02hhx  colorfg %#02hhx",
+			  mchar_so.attr,
+			  mchar_so.colorbg,
+			  mchar_so.colorfg);
 }
 
 static void DoCommandSource(struct action *act)
@@ -4129,19 +4108,18 @@ static bool ParseSGR3Mode(struct action *act, sgr3_mode_t *m)
 	char **args = act->args;
 	if (!args[0])
 		return true;
-	if (!strcmp(args[0], "legacy")) {
-		*m = SGR3_LEGACY;
+	if (!strcmp(args[0], "standout")) {
+		*m = SGR3_STANDOUT;
 		return true;
 	}
-	if (!strcmp(args[0], "strict")
-	    || !strcmp(args[0], "on")) {
-		*m = SGR3_STRICT;
+	if (!strcmp(args[0], "italic")) {
+		*m = SGR3_ITALIC;
 		return true;
 	}
 
 	bool msgok = display && !*rc_name;
 	if (msgok)
-		OutputMsg(0, "Invalid parameter; need 'legacy' or 'strict'");
+		OutputMsg(0, "Invalid parameter; need 'italic' or 'standout'");
 	return false;
 }
 
@@ -4150,7 +4128,8 @@ static void DoCommandDefsgr3mode(struct action *act)
 	if (ParseSGR3Mode(act, &nwin_default.sgr3_mode)) {
 		bool msgok = display && !*rc_name;
 		if (msgok)
-			OutputMsg(0, "In new windows, SGR 3 (\\e[3m) will select %s",
+			OutputMsg(0,
+				  "In new windows, SGR 3 (\\e[3m) will select %s",
 				  sgr3_mode_desc(nwin_default.sgr3_mode));
 	}
 }
@@ -4165,10 +4144,12 @@ static void DoCommandSgr3mode(struct action *act)
 		return;
 	}
 
-	if (ParseSGR3Mode(act, &nwin_default.sgr3_mode)) {
+	if (ParseSGR3Mode(act, &D_fore->w_sgr3_mode)) {
 		if (msgok)
-			OutputMsg(0, "In window %u, SGR 3 (\\e[3m) will select %s",
-				  D_fore->w_number, sgr3_mode_desc(nwin_default.sgr3_mode));
+			OutputMsg(0,
+				  "In window %u, SGR 3 (\\e[3m) will select %s",
+				  D_fore->w_number,
+				  sgr3_mode_desc(D_fore->w_sgr3_mode));
 	}
 }
 
@@ -4202,11 +4183,11 @@ static void DoCommandFocus(struct action *act)
 	if (!*args || !strcmp(*args, "next"))
 		cv = D_forecv->c_next ? D_forecv->c_next : D_cvlist;
 	else if (!strcmp(*args, "prev")) {
-		for (cv = D_cvlist; cv->c_next && cv->c_next != D_forecv; cv = cv->c_next) ;
+		for (cv = D_cvlist; cv->c_next && cv->c_next != D_forecv; cv = cv->c_next) {}
 	} else if (!strcmp(*args, "top"))
 		cv = D_cvlist;
 	else if (!strcmp(*args, "bottom")) {
-		for (cv = D_cvlist; cv->c_next; cv = cv->c_next) ;
+		for (cv = D_cvlist; cv->c_next; cv = cv->c_next) {}
 	} else if (!strcmp(*args, "up"))
 		cv = FindCanvas(D_forecv->c_xs, D_forecv->c_ys - 1);
 	else if (!strcmp(*args, "down"))
@@ -4283,12 +4264,10 @@ static void DoCommandAltscreen(struct action *act)
 {
 	int msgok = display && !*rc_name;
 
-
 	(void)ParseSwitch(act, &use_altscreen);
 	if (msgok)
 		OutputMsg(0, "Will %sdo alternate screen switching", use_altscreen ? "" : "not ");
 }
-
 
 static void DoCommandAuth(struct action *act)
 {
@@ -4298,7 +4277,6 @@ static void DoCommandAuth(struct action *act)
 	if (msgok)
 		OutputMsg(0, "Authentication: %s", do_auth ? "enabled" : "disabled");
 }
-
 
 static void DoCommandBacktick(struct action *act)
 {
@@ -4343,18 +4321,18 @@ static void DoCommandBlankerprg(struct action *act)
 	if (!args[0]) {
 		if (blankerprg) {
 			char path[MAXPATHLEN];
-			char *p = path, **pp;
-			for (pp = blankerprg; *pp; pp++)
-				p += snprintf(p, ARRAY_SIZE(path) - (p - path) - 1, "%s ", *pp);
-			*(p - 1) = '\0';
+			char *p = path;
+			for (char **pp = blankerprg; *pp; pp++)
+				p += snprintf(p, (&path)[1] - p, "%s ", *pp);
+			if (p > path)
+				p[-1] = '\0';
 			OutputMsg(0, "blankerprg: %s", path);
 		} else
 			OutputMsg(0, "No blankerprg set.");
 		return;
 	}
 	if (blankerprg) {
-		char **pp;
-		for (pp = blankerprg; *pp; pp++)
+		for (char **pp = blankerprg; *pp; pp++)
 			free(*pp);
 		free(blankerprg);
 		blankerprg = NULL;
@@ -4393,7 +4371,7 @@ static void DoCommandIdle(struct action *act)
 	}
 	if (msgok) {
 		if (idletimo)
-			OutputMsg(0, "idle timeout %fs, %s", idletimo / 1000.0, comms[idleaction.nr].name);
+			OutputMsg(0, "idle timeout %.3fs, %s", idletimo / 1000.0, comms[idleaction.nr].name);
 		else
 			OutputMsg(0, "idle off");
 	}
@@ -4564,7 +4542,7 @@ static void DoCommandLayout(struct action *act)
 	} else if (!strcmp(args[0], "next")) {
 		if (!display) {
 			if (layout_attach && layout_attach != &layout_last_marker)
-				layout_attach = layout_attach->lay_next ? layout_attach->lay_next : layouts;;
+				layout_attach = layout_attach->lay_next ? layout_attach->lay_next : layouts;
 			return;
 		}
 		Layout *lay = D_layout;
@@ -4584,7 +4562,7 @@ static void DoCommandLayout(struct action *act)
 		Layout *lay = display ? D_layout : layout_attach;
 		Layout *target = lay;
 		if (lay) {
-			for (lay = layouts; lay->lay_next && lay->lay_next != target; lay = lay->lay_next) ;
+			for (lay = layouts; lay->lay_next && lay->lay_next != target; lay = lay->lay_next) {}
 		} else
 			lay = layouts;
 
@@ -4608,7 +4586,9 @@ static void DoCommandLayout(struct action *act)
 			else if (layout_attach == &layout_last_marker)
 				OutputMsg(0, "will attach to last layout");
 			else
-				OutputMsg(0, "will attach to layout %d (%s)", layout_attach->lay_number,
+				OutputMsg(0,
+					  "will attach to layout %d (%s)",
+					  layout_attach->lay_number,
 					  layout_attach->lay_title);
 			return;
 		}
@@ -4666,9 +4646,9 @@ static void DoCommandTruecolor(struct action *act)
 }
 
 #if defined(__GNUC__) || defined(__clang__)
-# pragma GCC diagnostic pop
+#pragma GCC diagnostic pop
 #elif defined(_MSC_VER)
-# __pragma(warning(pop))
+#__pragma(warning(pop))
 #endif
 
 /* }}}}}} */
@@ -4715,14 +4695,17 @@ void DoAction(struct action *act)
 		return;
 	if (display) {
 		if (AclCheckPermCmd(D_user, ACL_EXEC, &comms[nr])) {
-			OutputMsg(0, "%s: %s: permission denied (user %s)",
-				  rc_name, comms[nr].name, (EffectiveAclUser ? EffectiveAclUser : D_user)->u_name);
+			OutputMsg(0,
+				  "%s: %s: permission denied (user %s)",
+				  rc_name,
+				  comms[nr].name,
+				  (EffectiveAclUser ? EffectiveAclUser : D_user)->u_name);
 			queryflag = -1;
 			return;
 		}
 	}
 
-	static void (*despatch_action[RC_LAST + 1])(struct action * act) = {
+	static void (*despatch_action[RC_LAST + 1])(struct action *act) = {
 
 		[RC_ACLADD]		= DoCommandAclchg,
 		[RC_ACLCHG]		= DoCommandAclchg,
@@ -5082,7 +5065,8 @@ int Parse(char *buf, int bufl, char **args, int *argl)
 				}
 			} else if (delim != '\'' && *p == '$'
 				   && (p[1] == '{' || p[1] == ':' || (p[1] >= 'a' && p[1] <= 'z')
-				       || (p[1] >= 'A' && p[1] <= 'Z') || (p[1] >= '0' && p[1] <= '9') || p[1] == '_')) {
+				       || (p[1] >= 'A' && p[1] <= 'Z') || (p[1] >= '0' && p[1] <= '9')
+				       || p[1] == '_')) {
 				char *ps, *pe, op, *v, xbuf[11], path[MAXPATHLEN];
 				int vl;
 
@@ -5116,7 +5100,7 @@ int Parse(char *buf, int bufl, char **args, int *argl)
 					v = xbuf;
 					if (!strcmp(ps, "TERM"))
 						v = display ? D_termname : "unknown";
-					else if (!strcmp(ps, "TRUECOLOR"))
+					else if (!strcmp(ps, "COLORTERM"))
 						v = display ? D_hastruecolor ? "truecolor" : "" : "unknown";
 					else if (!strcmp(ps, "COLUMNS"))
 						sprintf(xbuf, "%d", display ? D_width : -1);
@@ -5477,7 +5461,9 @@ void Activate(int norefresh)
 	}
 
 	if (MayResizeLayer(D_forecv->c_layer))
-		ResizeLayer(D_forecv->c_layer, D_forecv->c_xe - D_forecv->c_xs + 1, D_forecv->c_ye - D_forecv->c_ys + 1,
+		ResizeLayer(D_forecv->c_layer,
+			    D_forecv->c_xe - D_forecv->c_xs + 1,
+			    D_forecv->c_ye - D_forecv->c_ys + 1,
 			    display);
 
 	fore = D_fore;
@@ -5685,8 +5671,7 @@ char *AddWindows(WinMsgBufContext *wmbc, int len, int flags, int where)
 			rend = renditions[REND_SILENCE];
 		if (rend != 0)
 			AddWinMsgRend(wmbc->buf, s, rend);
-		sprintf(s, "%d", win->w_number);
-		s += strlen(s);
+		s += sprintf(s, "%d", win->w_number);
 		if (!(flags & 2)) {
 			s = AddWindowFlags(s, len, win);
 		}
@@ -5713,8 +5698,7 @@ char *AddWindowFlags(char *buf, int len, Window *p)
 		*s++ = '-';
 	if (p->w_layer.l_cvlist && p->w_layer.l_cvlist->c_lnext)
 		*s++ = '&';
-	if (display && p->w_monitor == MON_DONE && (ACLBYTE(p->w_mon_notify, D_user->u_id) & ACLBIT(D_user->u_id))
-	    )
+	if (display && p->w_monitor == MON_DONE && (ACLBYTE(p->w_mon_notify, D_user->u_id) & ACLBIT(D_user->u_id)))
 		*s++ = '@';
 	if (p->w_bell == BELL_DONE)
 		*s++ = '!';
@@ -5771,7 +5755,6 @@ char *AddOtherUsers(char *buf, int len, Window *p)
 	return s;
 }
 
-
 /* Display window list as a message.  WHERE denotes the active window
  * number; if -1, then the active window will be determined using the
  * current foreground window, if available. */
@@ -5811,9 +5794,9 @@ void ShowWindows(struct action *act, int where)
 }
 
 /*
-* String Escape based windows listing
-* mls: currently does a Msg() call for each(!) window, dunno why
-*/
+ * String Escape based windows listing
+ * mls: currently does a Msg() call for each(!) window, dunno why
+ */
 static void ShowWindowsX(char *str)
 {
 	for (Window *w = first_window; w; w = w->w_next)
@@ -5833,55 +5816,50 @@ static void ShowInfo(void)
 	p = buf;
 	if (buf < (p += GetAnsiStatus(wp, p)))
 		*p++ = ' ';
-	sprintf(p, "(%d,%d)/(%d,%d)", wp->w_x + 1, wp->w_y + 1, wp->w_width, wp->w_height);
-	sprintf(p += strlen(p), "+%d", wp->w_histheight);
-	sprintf(p += strlen(p), " %c%sflow",
+	p += sprintf(p, "(%d,%d)/(%d,%d)", wp->w_x + 1, wp->w_y + 1, wp->w_width, wp->w_height);
+	p += sprintf(p, "+%d", wp->w_histheight);
+	p += sprintf(p,
+		" %c%sflow",
 		(wp->w_flow & FLOW_ON) ? '+' : '-',
 		(wp->w_flow & FLOW_AUTOFLAG) ? "" : ((wp->w_flow & FLOW_AUTO) ? "(+)" : "(-)"));
 	if (!wp->w_wrap)
-		sprintf(p += strlen(p), " -wrap");
+		p = stpcpy(p, " -wrap");
 	if (wp->w_insert)
-		sprintf(p += strlen(p), " ins");
+		p = stpcpy(p, " ins");
 	if (wp->w_origin)
-		sprintf(p += strlen(p), " org");
+		p = stpcpy(p, " org");
 	if (wp->w_keypad)
-		sprintf(p += strlen(p), " app");
+		p = stpcpy(p, " app");
 	if (wp->w_log)
-		sprintf(p += strlen(p), " log");
-	if (wp->w_monitor != MON_OFF && (ACLBYTE(wp->w_mon_notify, D_user->u_id) & ACLBIT(D_user->u_id))
-	    )
-		sprintf(p += strlen(p), " mon");
+		p = stpcpy(p, " log");
+	if (wp->w_monitor != MON_OFF && (ACLBYTE(wp->w_mon_notify, D_user->u_id) & ACLBIT(D_user->u_id)))
+		p = stpcpy(p, " mon");
 	if (wp->w_mouse)
-		sprintf(p += strlen(p), " mouse");
+		p = stpcpy(p, " mouse");
 	if (!wp->w_c1)
-		sprintf(p += strlen(p), " -c1");
+		p = stpcpy(p, " -c1");
 	if (wp->w_norefresh)
-		sprintf(p += strlen(p), " nored");
+		p = stpcpy(p, " nored");
 
-	p += strlen(p);
 	if (wp->w_encoding && (display == NULL || D_encoding != wp->w_encoding || EncodingDefFont(wp->w_encoding) <= 0)) {
 		*p++ = ' ';
-		strcpy(p, EncodingName(wp->w_encoding));
-		p += strlen(p);
+		p = stpcpy(p, EncodingName(wp->w_encoding));
 	}
 	if (wp->w_encoding != UTF8)
 		if (display && (D_CC0 || (D_CS0 && *D_CS0))) {
 			if (wp->w_gr == 2) {
-				sprintf(p, " G%c", wp->w_Charset + '0');
+				p += sprintf(p, " G%c", wp->w_Charset + '0');
 				if (wp->w_FontE >= ' ')
-					p[3] = wp->w_FontE;
+					*p++ = wp->w_FontE;
 				else {
-					p[3] = '^';
-					p[4] = wp->w_FontE ^ 0x40;
-					p++;
+					*p++ = '^';
+					*p++ = wp->w_FontE ^ 0x40;
 				}
-				p[4] = '[';
-				p++;
+				*p++ = '[';
 			} else if (wp->w_gr)
-				sprintf(p++, " G%c%c[", wp->w_Charset + '0', wp->w_CharsetR + '0');
+				p += sprintf(p, " G%c%c[", wp->w_Charset + '0', wp->w_CharsetR + '0');
 			else
-				sprintf(p, " G%c[", wp->w_Charset + '0');
-			p += 4;
+				p += sprintf(p, " G%c[", wp->w_Charset + '0');
 			for (i = 0; i < 4; i++) {
 				if (wp->w_charsets[i] == ASCII)
 					*p++ = 'B';
@@ -5918,8 +5896,7 @@ static void ShowDInfo(void)
 		return;
 	p = buf;
 	l = 512;
-	sprintf(p, "(%d,%d)", D_width, D_height);
-	w = strlen(p);
+	w = sprintf(p, "(%d,%d)", D_width, D_height);
 	l -= w;
 	p += w;
 	if (D_encoding) {
@@ -5990,14 +5967,14 @@ static void ColonFin(char *buf, size_t len, void *data UNUSED)
 		int showmessage = 0;
 		char *s = buf;
 
-		while (*s && (uintptr_t) (s - buf) < len)
+		while (*s && (uintptr_t)(s - buf) < len)
 			if (*s++ == ' ')
 				return;
 
 		/* Showing a message when there's no hardstatus or caption cancels the input */
-		if (display &&
-		    (captionalways || D_has_hstatus == HSTATUS_LASTLINE
-		     || (D_canvas.c_slperp && D_canvas.c_slperp->c_slnext)))
+		if (display
+		    && (captionalways || D_has_hstatus == HSTATUS_LASTLINE
+			|| (D_canvas.c_slperp && D_canvas.c_slperp->c_slnext)))
 			showmessage = 1;
 
 		while (l <= r) {
@@ -6009,11 +5986,11 @@ static void ColonFin(char *buf, size_t len, void *data UNUSED)
 				r = m - 1;
 			else {
 				s = mbuf;
-				for (l = m - 1; l >= 0 && strncmp(buf, comms[l].name, len) == 0; l--) ;
+				for (l = m - 1; l >= 0 && strncmp(buf, comms[l].name, len) == 0; l--) {}
 				for (m = ++l;
 				     m <= r
 				     && strncmp(buf, comms[m].name, len) == 0
-				     && s - mbuf < (ptrdiff_t)ARRAY_SIZE(mbuf);
+				     && s < mbuf + sizeof mbuf;
 				     m++)
 					s += snprintf(s, ARRAY_SIZE(mbuf) - (s - mbuf), " %s", comms[m].name);
 				if (l < m - 1) {
@@ -6262,8 +6239,7 @@ int CompileKeys(char *s, int sl, unsigned char *array)
 			sl -= 2;
 			value = *(unsigned char *)s++;
 			array[value] = key;
-		}
-		while (*s == '=' && sl >= 2);
+		} while (*s == '=' && sl >= 2);
 		if (sl == 0)
 			break;
 		if (*s++ != ':')
@@ -6374,7 +6350,7 @@ static void suFin(char *buf, size_t len, void *data)
 		l = ARRAY_SIZE(i->pw2) - 1;
 	}
 	if (buf && len)
-		strncpy(p, buf, 1 + ((l < len) ? l : len));
+		strncpy(p, buf, 1 + ((l < len) ? l : len));	// TODO: verify this logic
 	if (!*i->name)
 		Input("Screen User: ", ARRAY_SIZE(i->name) - 1, INP_COOKED, suFin, (char *)i, 0);
 	else if (!*i->pw1)
@@ -6502,7 +6478,7 @@ int StuffKey(int i)
 
 	if (discard && (!act || act->nr != RC_COMMAND)) {
 		/* if the input was just a single byte we let it through */
-		if (D_tcs[keyno + T_CAPS].str && strlen(D_tcs[keyno + T_CAPS].str) == 1)
+		if (D_td.td_tcs[keyno + T_CAPS].str && strlen(D_td.td_tcs[keyno + T_CAPS].str) == 1)
 			return -1;
 		if (D_ESCseen) {
 			D_ESCseen = NULL;
@@ -6648,7 +6624,7 @@ static int ChangeCanvasSize(Canvas *fcv, int abs, int diff, bool gflag, int perc
 		/* fix weights to real size (can't be helped, sorry) */
 		for (cv = fcv->c_slback->c_slperp; cv; cv = cv->c_slnext) {
 			cv->c_slweight =
-			    cv->c_slorient == SLICE_VERT ? cv->c_ye - cv->c_ys + 2 : cv->c_xe - cv->c_xs + 2;
+				cv->c_slorient == SLICE_VERT ? cv->c_ye - cv->c_ys + 2 : cv->c_xe - cv->c_xs + 2;
 		}
 	}
 	if (abs)
@@ -6809,8 +6785,8 @@ void SetForeCanvas(Display *d, Canvas *cv)
 
 	display = d;
 	D_forecv = cv;
-	if ((focusminwidth && (focusminwidth < 0 || D_forecv->c_xe - D_forecv->c_xs + 1 < focusminwidth)) ||
-	    (focusminheight && (focusminheight < 0 || D_forecv->c_ye - D_forecv->c_ys + 1 < focusminheight))) {
+	if ((focusminwidth && (focusminwidth < 0 || D_forecv->c_xe - D_forecv->c_xs + 1 < focusminwidth))
+	    || (focusminheight && (focusminheight < 0 || D_forecv->c_ye - D_forecv->c_ys + 1 < focusminheight))) {
 		ResizeCanvas(&D_canvas);
 		RecreateCanvasChain();
 		RethinkDisplayViewports();
@@ -6826,10 +6802,7 @@ void SetForeCanvas(Display *d, Canvas *cv)
 		RefreshHStatus();
 		RefreshXtermOSC();
 		flayer = D_forecv->c_layer;
-		CV_CALL(D_forecv,
-			LayRestore();
-			LaySetCursor()
-		);
+		CV_CALL(D_forecv, LayRestoreAndSetCursor());
 		WindowChanged(NULL, WINESC_FOCUS);
 	}
 
@@ -6846,19 +6819,19 @@ void RefreshXtermOSC(void)
 
 /*
  *  ParseAttrColor - parses attributes and color
- *  	str - string containing attributes and/or colors
- *  	        d - dim
- *  	        u - underscore
- *  	        b - bold
- *  	        r - reverse
- *  	        s - standout
- *  	        l - blinking
- *  	        0-255;0-255 - foreground;background
- *  	        xABCDEF;xABCDEF - truecolor foreground;background
- *  	        #ABCDEF;#ABCDEF - truecolor foreground;background
- *  	        xABC;xABC - truecolor foreground;background
- *  	        #ABC;#ABC - truecolor foreground;background
- *  	msgok - can we be verbose if something is wrong
+ *	str - string containing attributes and/or colors
+ *	        d - dim
+ *	        u - underscore
+ *	        b - bold
+ *	        r - reverse
+ *	        s - standout
+ *	        l - blinking
+ *	        0-255;0-255 - foreground;background
+ *	        xABCDEF;xABCDEF - truecolor foreground;background
+ *	        #ABCDEF;#ABCDEF - truecolor foreground;background
+ *	        xABC;xABC - truecolor foreground;background
+ *	        #ABC;#ABC - truecolor foreground;background
+ *	msgok - can we be verbose if something is wrong
  *
  *  returns value representing encoded value
  */
@@ -7008,12 +6981,12 @@ uint64_t ParseAttrColor(char *str, int msgok)
 		}
 	}
 
-	r = (((uint64_t) attr & 0x0FF) << 56);
+	r = (((uint64_t)attr & 0x0FF) << 56);
 
-	r |= (((uint64_t) bg & 0x0FFFFFF) << 24);
-	r |= ((uint64_t) fg & 0x0FFFFFF);
-	r |= ((uint64_t) fm << 48);
-	r |= ((uint64_t) bm << 52);
+	r |= (((uint64_t)bg & 0x0FFFFFF) << 24);
+	r |= ((uint64_t)fg & 0x0FFFFFF);
+	r |= ((uint64_t)fm << 48);
+	r |= ((uint64_t)bm << 52);
 
 	return r;
 }

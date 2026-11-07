@@ -26,13 +26,23 @@
  ****************************************************************
  */
 
+#include "config.h"
+
 #include "term.h"
 
 #define KMAPDEF(s)
 #define KMAPADEF(s)
 #define KMAPMDEF(s)
 
-/* *INDENT-OFF* */
+/* *INDENT-OFF* */ /*
+ *  IMPORTANT:
+ *  The script "term.sh" reads this file, looking for lines that start with
+ *  whitepace and a ‘{’. These are then split into fields on whitespace: the
+ *  second field must be the quoted symbol name and the third field must be one
+ *  of ‘T_FLG’, ‘T_NUM’, or ‘T_STR’, which are the upper-case versions of the
+ *  union members ‘flg’, ‘num’, and ‘str’. Other flags may follow these.
+ *  It also looks for comments starting with ‘define’, ‘list’, or ‘nolist’.
+ */
 struct term term[T_N] = {
 /* display size */
 	{ "li", T_NUM },
@@ -102,21 +112,35 @@ struct term term[T_N] = {
 /* attributes */
 /* define T_ATTR */
 /* order is important for how we set up attributes */
-	{ "md", T_STR },	// md       bold    Bold mode
-	{ "mh", T_STR },	// mh       dim     Dim mode
-	{ "ZH", T_STR },	// ZH       simt    Italicized
-	{ "us", T_STR },	// us       smul    Underscore mode
-	{ "mb", T_STR },	// mb       blink   Blinking
-	{ "so", T_STR },	// so       smso    Standout mode
-	{ "mr", T_STR },	// mr       rev     Reverse mode
-	{ "ue", T_STR },
-	{ "se", T_STR },
-	{ "me", T_STR },
-	{ "ms", T_FLG },
-	{ "sg", T_NUM },
-	{ "ug", T_NUM },
-	{ "sa", T_STR },
-	{ "ZR", T_STR },
+	{ "md",  T_STR        }, // md	bold	begin	Bold
+	{ "mh",  T_STR        }, // mh	dim	begin	Dim
+	{ "ZH",  T_STR        }, // ZH	sitm	begin	Italicized
+	{ "us",  T_STR        }, // us	smul	begin	Underline
+	{ "mb",  T_STR        }, // mb	blink	begin	Blinking
+	{ "xFB", T_STR|T_SKIP }, // -	-	begin	Fast Blinking
+	{ "mr",  T_STR        }, // mr	rev	begin	Reverse
+	{ "xST", T_STR|T_SKIP }, // -	-	begin	Strikethru
+	{ "xHI", T_STR|T_SKIP }, // -	-	begin	Hidden
+	{ "so",  T_STR        }, // so	smso	begin	Standout
+/* define T_NEG_ATTR */
+	{ "rmd", T_STR|T_SKIP }, // -	-	end	Bold
+	{ "rmh", T_STR|T_SKIP }, // -	-	end	Dim
+	{ "ZR",  T_STR        }, // ZR	rmit	end	Italicized ("Roman")
+	{ "ue",  T_STR        }, // ue	rmul	end	Underline
+	{ "rmb", T_STR|T_SKIP }, // -	-	end	Blinking
+	{ "rFB", T_STR|T_SKIP }, // -	-	end	Fast Blinking
+	{ "rmr", T_STR|T_SKIP }, // -	-	end	Reverse
+	{ "rST", T_STR|T_SKIP }, // -	-	end	Strikethru
+	{ "rHI", T_STR|T_SKIP }, // -	-	end	Hidden
+	{ "se",  T_STR        }, // se	rmso	end	Standout
+/* define T_ATTREND2 */
+
+	{ "me",  T_STR        }, // me	sgr0	end	ALL
+
+	{ "ms",  T_FLG        }, // ms			safe to move while highlighted?
+	{ "sg",  T_NUM        }, // sg			standout change take space?
+	{ "ug",  T_NUM        }, // ug			underline change takes space?
+	{ "sa",  T_STR        }, // sa			parameterized attribute setting
 
 /* color */
 	{ "AF", T_STR },

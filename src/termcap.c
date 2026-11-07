@@ -28,46 +28,41 @@
 
 #include "config.h"
 
-#include "termcap.h"
-
 #include <sys/types.h>
-#include <stdint.h>
+
 #include <ctype.h>
+#include <stdarg.h>
+#include <stdint.h>
+#include <string.h>
 
-/* to get index() declaration on Solaris */
-#if defined(_sun_)
-# include <strings.h>
-#endif
-
-#include "screen.h"
-
+#include "display.h"
 #include "encoding.h"
 #include "kmapdef.h"
 #include "misc.h"
 #include "process.h"
 #include "resize.h"
+#include "screen.h"
+#include "stringbuf.h"
+#include "termcap.h"
+#include "window.h"
 
-static bool AddCap(const char *);
-static bool AddCapSprintf(const char *, ...);
 static void MakeString(char *, char *, int, char *);
-static char *findcap(char *, char **, int);
-static int copyarg(char **, char *);
-static int e_tgetent(char *, char *);
-static char *e_tgetstr(char *, char **);
-static int e_tgetflag(char *);
-static int e_tgetnum(char *);
 static int findseq_ge(char *, int, unsigned char **);
 static void setseqoff(unsigned char *, int, int);
 static int addmapseq(char *, int, int);
 static int remmapseq(char *, int);
 
-static char Termcap[TERMCAP_BUFSIZE + 8] = "TERMCAP=";	/* new termcap +8:"TERMCAP=" */
-#define limTermcap  (Termcap + sizeof Termcap)
-static size_t Termcaplen = 0;
+char Term[MAXSTR + 5] = "TERM=";
+#define limTerm		(Term + sizeof Term)
+#define Termname	(Term + 5)
+#define limTermname	limTerm
+enum { sizeof_Termname = sizeof Term - 5 };
 
-char Term[MAXSTR + 5];		/* +5: "TERM=" */
-#define Termname (Term + 5)
-#define limTerm  (Term + sizeof Term)
+static char Termcap[TERMCAP_BUFSIZE + 8] = "TERMCAP=";
+#define limTermcap	(Termcap + sizeof Termcap)
+#define Termdef		(Termcap + 8)
+#define limTermdef	limTermcap
+static char *endTermcap = Termcap;
 
 char screenterm[MAXTERMLEN + 1];	/* new $TERM, usually "screen" */
 
@@ -111,331 +106,9 @@ char *gettermcapstring(char *s)
 		if (term[i].type != T_STR)
 			continue;
 		if (strcmp(term[i].tcname, s) == 0)
-			return D_tcs[i].str;
+			return D_td.td_tcs[i].str;
 	}
 	return NULL;
-}
-
-/*
- * Compile the terminal capabilities for a display.
- * Input: tgetent(, D_termname) extra_incap, extra_outcap.
- * Effect: display initialisation.
- */
-int InitTermcap(int width, int height)
-{
-	char *s;
-	int i;
-	char tbuf[TERMCAP_BUFSIZE], *tp;
-	int t, xue, xse, xme;
-
-	memset(tbuf, 0, ARRAY_SIZE(tbuf));
-	if (*D_termname == 0 || e_tgetent(tbuf, D_termname) != 1) {
-		Msg(0, "Cannot find terminfo entry for '%s'.", D_termname);
-		return -1;
-	}
-
-	if ((D_tentry = malloc(TERMCAP_BUFSIZE + (extra_incap ? strlen(extra_incap) + 1 : 0))) == NULL) {
-		Msg(0, "%s", strnomem);
-		return -1;
-	}
-
-	/*
-	 * loop through all needed capabilities, record their values in the display
-	 */
-	tp = D_tentry;
-	for (i = 0; i < T_N; i++) {
-		switch (term[i].type) {
-		case T_FLG:
-			D_tcs[i].flg = e_tgetflag(term[i].tcname);
-			break;
-		case T_NUM:
-			D_tcs[i].num = e_tgetnum(term[i].tcname);
-			break;
-		case T_STR:
-			D_tcs[i].str = e_tgetstr(term[i].tcname, &tp);
-			/* no empty strings, please */
-			if (D_tcs[i].str && *D_tcs[i].str == 0)
-				D_tcs[i].str = NULL;
-			break;
-		default:
-			Panic(0, "Illegal tc type in entry #%d", i);
-		 /*NOTREACHED*/}
-	}
-
-	/*
-	 * Now a good deal of sanity checks on the retrieved capabilities.
-	 */
-	if (D_HC) {
-		Msg(0, "You can't run screen on a hardcopy terminal.");
-		return -1;
-	}
-	if (D_OS) {
-		Msg(0, "You can't run screen on a terminal that overstrikes.");
-		return -1;
-	}
-	if (!D_CL) {
-		Msg(0, "Clear screen capability required.");
-		return -1;
-	}
-	if (!D_CM) {
-		Msg(0, "Addressable cursor capability required.");
-		return -1;
-	}
-	if ((s = getenv("COLUMNS")) && (i = atoi(s)) > 0)
-		D_CO = i;
-	if ((s = getenv("LINES")) && (i = atoi(s)) > 0)
-		D_LI = i;
-	if (width)
-		D_CO = width;
-	if (height)
-		D_LI = height;
-	if (D_CO <= 0)
-		D_CO = 80;
-	if (D_LI <= 0)
-		D_LI = 24;
-
-	if (D_CTF) {
-		/* standard fixes for xterms etc */
-		/* assume color for everything that looks ansi-compatible */
-		if (!D_CAF && D_ME && (strstr(D_ME, "\033[m") || strstr(D_ME, "\033[0m"))) {
-			D_CAF = "\033[3%p1%dm";
-			D_CAB = "\033[4%p1%dm";
-		}
-		if (D_OP && strstr(D_OP, "\033[39;49m"))
-			D_CAX = 1;
-		if (D_OP && (strstr(D_OP, "\033[m") || strstr(D_OP, "\033[0m")))
-			D_OP = NULL;
-		/* ISO2022 */
-		if ((D_EA && strstr(D_EA, "\033(B")) || (D_AS && strstr(D_AS, "\033(0")))
-			D_CG0 = 1;
-		if (strstr(D_termname, "xterm")
-		 || strstr(D_termname, "rxvt")
-		 || (D_CKM &&
-		     (strstr(D_CKM, "\033[M")
-		      || strstr(D_CKM, "\033[<")))) {
-			D_CXT = 1;
-			kmapdef[0] = D_CKM ? SaveStr(D_CKM) : NULL;
-		}
-		/* "be" seems to be standard for xterms... */
-		if (D_CXT)
-			D_BE = 1;
-	}
-	if (nwin_default.flowflag == nwin_undef.flowflag)
-		nwin_default.flowflag = D_CNF ? FLOW_OFF : D_NX ? FLOW_ON : FLOW_AUTOFLAG;
-	D_CLP |= (!D_AM || D_XV || D_XN);
-	if (!D_BL)
-		D_BL = "\007";
-	if (!D_BC) {
-		if (D_BS)
-			D_BC = "\b";
-		else
-			D_BC = D_LE;
-	}
-	if (!D_CR)
-		D_CR = "\r";
-	if (!D_NL)
-		D_NL = "\n";
-
-	/*
-	 *  Set up attribute handling.
-	 *  This is rather complicated because termcap has different
-	 *  attribute groups.
-	 */
-
-	if (D_UG > 0)
-		D_US = D_UE = NULL;
-	if (D_SG > 0)
-		D_SO = D_SE = NULL;
-	/* Unfortunately there is no 'mg' capability.
-	 * For now we think that mg > 0 if sg and ug > 0.
-	 */
-	if (D_UG > 0 && D_SG > 0)
-		D_MH = D_MD = D_MR = D_MB = D_ME = NULL;
-
-	xue = ATYP_U;
-	xse = ATYP_S;
-	xme = ATYP_M;
-
-	if (D_SO && D_SE == NULL) {
-		Msg(0, "Warning: 'so' but no 'se' capability.");
-		if (D_ME)
-			xse = xme;
-		else
-			D_SO = NULL;
-	}
-	if (D_US && D_UE == NULL) {
-		Msg(0, "Warning: 'us' but no 'ue' capability.");
-		if (D_ME)
-			xue = xme;
-		else
-			D_US = NULL;
-	}
-	if ((D_MH || D_MD || D_MR || D_MB) && D_ME == NULL) {
-		Msg(0, "Warning: 'm?' but no 'me' capability.");
-		D_MH = D_MD = D_MR = D_MB = NULL;
-	}
-	/*
-	 * Does ME also reverse the effect of SO and/or US?  This is not
-	 * clearly specified by the termcap manual. Anyway, we should at
-	 * least look whether ME and SE/UE are equal:
-	 */
-	if (D_UE && D_SE && strcmp(D_SE, D_UE) == 0)
-		xse = xue;
-	if (D_SE && D_ME && strcmp(D_ME, D_SE) == 0)
-		xse = xme;
-	if (D_UE && D_ME && strcmp(D_ME, D_UE) == 0)
-		xue = xme;
-
-	for (i = 0; i < NATTR; i++) {
-		D_attrtab[i] = D_tcs[T_ATTR + i].str;
-		D_attrtyp[i] = i == ATTR_SO ? xse : (i == ATTR_US ? xue : xme);
-	}
-
-	/* Set up missing entries (attributes are priority ordered) */
-	s = NULL;
-	t = 0;
-	for (i = 0; i < NATTR; i++)
-		if ((s = D_attrtab[i])) {
-			t = D_attrtyp[i];
-			break;
-		}
-	for (i = 0; i < NATTR; i++) {
-		if (D_attrtab[i] == NULL) {
-			D_attrtab[i] = s;
-			D_attrtyp[i] = t;
-		} else {
-			s = D_attrtab[i];
-			t = D_attrtyp[i];
-		}
-	}
-	if (D_CAF || D_CAB || D_CSF || D_CSB)
-		D_hascolor = 1;
-	if (D_UT)
-		D_BE = 1;	/* screen erased with background color */
-
-	if (!D_DO)
-		D_DO = D_NL;
-	if (!D_SF)
-		D_SF = D_NL;
-	if (D_IN)
-		D_IC = D_IM = NULL;
-	if (D_EI == NULL)
-		D_IM = NULL;
-	/* some strange termcap entries have IC == IM */
-	if (D_IC && D_IM && strcmp(D_IC, D_IM) == 0)
-		D_IC = NULL;
-	if (D_KE == NULL)
-		D_KS = NULL;
-	if (D_CVN == NULL)
-		D_CVR = NULL;
-	if (D_VE == NULL)
-		D_VI = D_VS = NULL;
-	if (D_CCE == NULL)
-		D_CCS = NULL;
-
-	if (D_CG0) {
-		if (D_CS0 == NULL)
-			D_CS0 = "\033(%p1%c";
-		if (D_CE0 == NULL)
-			D_CE0 = "\033(B";
-		D_AC = NULL;
-		D_EA = NULL;
-	} else if (D_AC || (D_AS && D_AE)) {	/* some kind of graphics */
-		D_CS0 = (D_AS && D_AE) ? D_AS : "";
-		D_CE0 = (D_AS && D_AE) ? D_AE : "";
-		D_CC0 = D_AC;
-	} else {
-		D_CS0 = D_CE0 = "";
-		D_CC0 = NULL;
-		D_AC = "";	/* enable default string */
-	}
-
-	for (i = 0; i < 256; i++)
-		D_c0_tab[i] = i;
-	if (D_AC) {
-		/* init with default string first */
-		s = "l+m+k+j+u+t+v+w+q-x|n+o~s_p\"r#`+a:f'g#~o.v-^+<,>h#I#0#y<z>";
-		for (i = (strlen(s) - 2) & ~1; i >= 0; i -= 2)
-			D_c0_tab[(int)(unsigned char)s[i]] = s[i + 1];
-	}
-	if (D_CC0)
-		for (i = (strlen(D_CC0) - 2) & ~1; i >= 0; i -= 2)
-			D_c0_tab[(int)(unsigned char)D_CC0[i]] = D_CC0[i + 1];
-	if (D_PF == NULL)
-		D_PO = NULL;
-
-	if (D_CXC)
-		if (CreateTransTable(D_CXC))
-			return -1;
-
-	/* Termcap fields Z0 & Z1 contain width-changing sequences. */
-	if (D_CZ1 == NULL)
-		D_CZ0 = NULL;
-
-	CheckScreenSize(0);
-
-	if (D_TS == NULL || D_FS == NULL || D_DS == NULL)
-		D_HS = 0;
-	if (D_HS) {
-		if (D_WS < 0)
-			D_WS = 0;
-	}
-	D_has_hstatus = hardstatusemu & ~HSTATUS_ALWAYS;
-	if (D_HS && !(hardstatusemu & HSTATUS_ALWAYS))
-		D_has_hstatus = HSTATUS_HS;
-
-	if (D_CKJ) {
-		int enc = FindEncoding(D_CKJ);
-		if (enc != -1)
-			D_encoding = enc;
-	}
-	if (!D_tcs[T_NAVIGATE].str && D_tcs[T_NAVIGATE + 1].str)
-		D_tcs[T_NAVIGATE].str = D_tcs[T_NAVIGATE + 1].str;	/* kh = @1 */
-	if (!D_tcs[T_NAVIGATE + 2].str && D_tcs[T_NAVIGATE + 3].str)
-		D_tcs[T_NAVIGATE + 2].str = D_tcs[T_NAVIGATE + 3].str;	/* kH = @7 */
-
-	D_UPcost = CalcCost(D_UP);
-	D_DOcost = CalcCost(D_DO);
-	D_NLcost = CalcCost(D_NL);
-	D_LEcost = CalcCost(D_BC);
-	D_NDcost = CalcCost(D_ND);
-	D_CRcost = CalcCost(D_CR);
-	D_IMcost = CalcCost(D_IM);
-	D_EIcost = CalcCost(D_EI);
-
-	if (D_CAN) {
-		D_auto_nuke = true;
-	}
-	if (D_COL > 0) {
-		D_obufmax = D_COL;
-		D_obuflenmax = D_obuflen - D_obufmax;
-	}
-
-	/* Some xterm entries set F0 and F10 to the same string. Nuke F0. */
-	if (D_tcs[T_CAPS].str && D_tcs[T_CAPS + 10].str && !strcmp(D_tcs[T_CAPS].str, D_tcs[T_CAPS + 10].str))
-		D_tcs[T_CAPS].str = NULL;
-	/* Some xterm entries set kD to ^?. Nuke it. */
-	if (D_tcs[T_NAVIGATE_DELETE].str && !strcmp(D_tcs[T_NAVIGATE_DELETE].str, "\0177"))
-		D_tcs[T_NAVIGATE_DELETE].str = NULL;
-	/* wyse52 entries have kcub1 == kb == ^H. Nuke... */
-	if (D_tcs[T_CURSOR + 3].str && !strcmp(D_tcs[T_CURSOR + 3].str, "\008"))
-		D_tcs[T_CURSOR + 3].str = NULL;
-
-	D_nseqs = 0;
-	for (i = 0; i < T_OCAPS - T_CAPS; i++)
-		remap(i, 1);
-	for (i = 0; i < kmap_extn; i++)
-		remap(i + (KMAP_KEYS + KMAP_AKEYS), 1);
-	D_seqp = D_kmaps + 3;
-	D_seql = 0;
-	D_seqh = NULL;
-
-	D_tcinited = 1;
-	MakeTermcap(0);
-	/* Make sure libterm uses external term properties for our tputs() calls.  */
-	e_tgetent(tbuf, D_termname);
-	CheckEscape();
-	return 0;
 }
 
 int remap(int n, int map)
@@ -461,7 +134,7 @@ int remap(int n, int map)
 			a1 = &tab[n];
 			if (n >= KMAP_KEYS)
 				n -= T_OCAPS - T_CURSOR;
-			s = D_tcs[n + T_CAPS].str;
+			s = D_td.td_tcs[n + T_CAPS].str;
 			l = s ? strlen(s) : 0;
 			if (n >= T_CURSOR - T_CAPS)
 				a2 = &tab[n + (T_OCAPS - T_CURSOR)];
@@ -675,8 +348,7 @@ static int remmapseq(char *seq, int k)
  */
 static inline bool AddCapSprintf(const char *fmt, ...)
 {
-	char *const endTermcap = Termcap + Termcaplen;
-	if (limTermcap - endTermcap <= 1)
+	if (endTermcap >= limTermcap - 1)
 		return false;
 
 	va_list v;
@@ -684,10 +356,11 @@ static inline bool AddCapSprintf(const char *fmt, ...)
 	int n = vsnprintf(endTermcap, limTermcap - endTermcap, fmt, v);
 	va_end(v);
 
-	if (n < 0 || n >= limTermcap - endTermcap)
+	if (n < 0 || n >= limTermcap - endTermcap) {
+		limTermcap[-1] = 0;
 		return false;
-
-	Termcaplen += n;
+	}
+	endTermcap += n;
 	return true;
 }
 
@@ -696,21 +369,37 @@ static inline bool AddCapSprintf(const char *fmt, ...)
  */
 static inline bool AddCap(const char *s)
 {
-	char *const endTermcap = Termcap + Termcaplen;
-	if (limTermcap - endTermcap <= 1)
+# if defined USE_SIMPLE_ADDCAP
+	return AddCapSprintf("%s", s);
+#else
+	if (endTermcap >= limTermcap - 1)
 		return false;
 	int n = strlen(s);
 
-	if (n < 0 || n >= limTermcap - endTermcap)
+	if (n < 0 || n >= limTermcap - endTermcap) {
+		limTermcap[-1] = 0;
 		return false;
-
+	}
 	memcpy(endTermcap, s, n + 1);
-	Termcaplen += n;
+	endTermcap += n;
 	return true;
+#endif
+}
+
+static int e_tgetent(char *bp, char *name)
+{
+	int r;
+
+	xseteuid(real_uid);
+	xsetegid(real_gid);
+	r = tgetent(bp, name);
+	xseteuid(eff_uid);
+	xsetegid(eff_gid);
+	return r;
 }
 
 /*
- * Reads a displays capabilities and reconstructs a termcap entry in the
+ * Reads a display's capabilities and reconstructs a termcap entry in the
  * global buffer "Termcap". A pointer to this buffer is returned.
  */
 char *MakeTermcap(bool aflag)
@@ -730,10 +419,10 @@ char *MakeTermcap(bool aflag)
 	}
 	if ((s = getenv("SCREENCAP")) && strlen(s) < TERMCAP_BUFSIZE) {
 		sprintf(Termcap, "TERMCAP=%s", s);
-		strcpy(Term, "TERM=screen");
+		strcpy(Termname, "screen");
 		return Termcap;
 	}
-	Termcaplen = 0;
+	endTermcap = Termcap;
 	if (*screenterm == '\0' || strlen(screenterm) > MAXSTR - 3) {
 		strncpy(screenterm, "screen", sizeof screenterm);
 		screenterm[sizeof screenterm - 1] = '\0';
@@ -761,10 +450,11 @@ char *MakeTermcap(bool aflag)
 		strcpy(Termname, "vt100");
 	} while (0);		/* Goto-free programming... */
 
-	if (strlen(Termname) > TERMCAP_BUFSIZE - 35)
+	endTermcap = Termdef;
+
+	if (!AddCapSprintf("SC|%s|VT 300/ISO-6429 virtual terminal:", Termname))
 		strcpy(Termname, "too_long");
-	Termcaplen = 0;
-	AddCapSprintf("TERMCAP=SC|%s|VT 300/ISO-6429 virtual terminal:", Termname);
+
 	if (extra_outcap && *extra_outcap) {
 		const char *cp, *p;
 		for (cp = extra_outcap; (p = strchr(cp, ':')); cp = p)
@@ -860,9 +550,9 @@ char *MakeTermcap(bool aflag)
 			if (i >= T_KEYPAD)	/* don't put keypad codes in TERMCAP */
 				continue;	/* - makes it too big */
 #if (TERMCAP_BUFSIZE < 1024)
-			if (i >= T_FEXTRA && i < T_BACKTAB)	/* also skip extra vt220 keys */
-				continue;
-			if (i > T_BACKTAB && i < T_NAVIGATE)	/* more vt220 keys */
+			if (i >= T_FEXTRA
+			 && i < T_NAVIGATE
+			 && i != T_BACKTAB)	/* also skip extra vt220 keys */
 				continue;
 #endif
 			if (i >= T_CURSOR && i < T_OCAPS) {
@@ -892,13 +582,13 @@ char *MakeTermcap(bool aflag)
 			continue;
 		switch (term[i].type) {
 		case T_STR:
-			if (D_tcs[i].str == NULL)
+			if (D_td.td_tcs[i].str == NULL)
 				break;
-			MakeString(term[i].tcname, buf, ARRAY_SIZE(buf), D_tcs[i].str);
+			MakeString(term[i].tcname, buf, ARRAY_SIZE(buf), D_td.td_tcs[i].str);
 			AddCap(buf);
 			break;
 		case T_FLG:
-			if (D_tcs[i].flg == 0)
+			if (D_td.td_tcs[i].flg == 0)
 				break;
 			AddCapSprintf("%s:", term[i].tcname);
 			break;
@@ -915,11 +605,11 @@ void DumpTermcap(int aflag, FILE *f)
 	const char *p, *pe;
 	int n, col = 0;
 
-	if ((p = index(MakeTermcap(aflag), '=')) == NULL)
+	if ((p = strchr(MakeTermcap(aflag), '=')) == NULL)
 		return;
 	p++;
 	/* write termcap entry with wrapping */
-	while ((pe = index(p, ':'))) {
+	while ((pe = strchr(p, ':'))) {
 		n = pe - p + 1;
 		if ((col > 8) && ((col + n) > TERMCAP_MAX_WIDTH)) {
 			fwrite("\\\n\t:", 1, 4, f);
@@ -975,8 +665,30 @@ static void MakeString(char *cap, char *buf, int buflen, char *s)
 }
 
 #undef QUOTES
-#define QUOTES(p) \
-  (*p == '\\' && (p[1] == '\\' || p[1] == ',' || p[1] == '%'))
+static inline bool QUOTES(char const *p)
+{
+	return p[0] == '\\' && (p[1] == '\\'
+			     || p[1] == ','
+			     || p[1] == '%');
+}
+
+static int copyarg(char **pp, char *s)
+{
+	int l;
+	char *p;
+
+	for (l = 0, p = *pp; *p && *p != ','; p++) {
+		if (QUOTES(p))
+			p++;
+		if (s)
+			*s++ = *p;
+		l++;
+	}
+	if (*p == ',')
+		p++;
+	*pp = p;
+	return l;
+}
 
 int CreateTransTable(char *s)
 {
@@ -1077,41 +789,11 @@ void FreeTransTable(void)
 	D_xtable = NULL;
 }
 
-static int copyarg(char **pp, char *s)
-{
-	int l;
-	char *p;
-
-	for (l = 0, p = *pp; *p && *p != ','; p++) {
-		if (QUOTES(p))
-			p++;
-		if (s)
-			*s++ = *p;
-		l++;
-	}
-	if (*p == ',')
-		p++;
-	*pp = p;
-	return l;
-}
-
 /*
 **
 **  Termcap routines that use our extra_incap
 **
 */
-
-static int e_tgetent(char *bp, char *name)
-{
-	int r;
-
-	xseteuid(real_uid);
-	xsetegid(real_gid);
-	r = tgetent(bp, name);
-	xseteuid(eff_uid);
-	xsetegid(eff_gid);
-	return r;
-}
 
 /* findcap:
  *   cap = capability we are looking for
@@ -1243,4 +925,434 @@ static int e_tgetnum(char *cap)
 		return strtoul(tep, &tep, 0);	/* auto-detects octal & hex */
 	}
 	return tgetnum(cap);
+}
+
+static inline bool IsSGR(char *s, int code)
+{
+	if (!s)
+		return false;
+	if (s[0] != '\033' || s[1] != '[')
+		return false;
+	char *e;
+	unsigned long int x = strtoul(s+2, &e, 10);
+	if (e[0] != 'm' || e[1] != 0)
+		return false;
+	return (unsigned)code == x;
+}
+
+static inline bool SubstituteMissingAttr(attr_t to, attr_t from)
+{
+	if (D_td.td_attr[to].tda_set && D_td.td_attr[from].tda_set)
+		return false;
+	D_td.td_attr[to] = D_td.td_attr[from];
+	return true;
+}
+
+static inline void SetIntFromEnvVar(int *ip, char const *varname)
+{
+	char *s = getenv(varname);
+	if (!s)
+		return;
+	unsigned long int x = strtoul(s, &s, 10);
+	if (*s)
+		return;
+	*ip = x;
+}
+
+/*
+ * Compile the terminal capabilities for a display.
+ * Input: tgetent(, D_termname) extra_incap, extra_outcap.
+ * Effect: display initialisation.
+ */
+int InitTermcap(int width, int height)
+{
+	char tbuf[TERMCAP_BUFSIZE];
+	memset(tbuf, 0, sizeof tbuf);
+	if (*D_termname == 0 || e_tgetent(tbuf, D_termname) != 1) {
+		Msg(0, "Cannot find terminfo entry for '%s'.", D_termname);
+		return -1;
+	}
+
+	if ((D_tentry = malloc(TERMCAP_BUFSIZE + (extra_incap ? strlen(extra_incap) + 1 : 0))) == NULL) {
+		Msg(0, "%s", strnomem);
+		return -1;
+	}
+
+	memset(&D_td, 0, sizeof D_td);
+
+	/*
+	 * loop through all needed capabilities, record their values in the display
+	 */
+	char *tp = D_tentry;
+	for (size_t i = 0; i < T_N; i++) {
+		if (term[i].type & T_SKIP)
+			continue;
+		switch (term[i].type) {
+		case T_FLG:
+			D_td.td_tcs[i].flg = e_tgetflag(term[i].tcname);
+			break;
+		case T_NUM:
+			D_td.td_tcs[i].num = e_tgetnum(term[i].tcname);
+			break;
+		case T_STR:
+			D_td.td_tcs[i].str = e_tgetstr(term[i].tcname, &tp);
+			/* no empty strings, please */
+			if (D_td.td_tcs[i].str && D_td.td_tcs[i].str[0] == 0)
+				D_td.td_tcs[i].str = NULL;
+			break;
+		default:
+			Panic(0, "Illegal tc type in entry #%zu", i);
+			/*NOTREACHED*/}
+	}
+
+	/*
+	 * Now a good deal of sanity checks on the retrieved capabilities.
+	 */
+	if (D_HC) {
+		Msg(0, "You can't run screen on a hardcopy terminal.");
+		return -1;
+	}
+	if (D_OS) {
+		Msg(0, "You can't run screen on a terminal that overstrikes.");
+		return -1;
+	}
+	if (!D_CL) {
+		Msg(0, "Clear screen capability required.");
+		return -1;
+	}
+	if (!D_CM) {
+		Msg(0, "Addressable cursor capability required.");
+		return -1;
+	}
+	SetIntFromEnvVar(&D_CO, "COLUMNS");
+	SetIntFromEnvVar(&D_LI, "LINES");
+
+	if (width)
+		D_CO = width;
+	if (height)
+		D_LI = height;
+	if (D_CO <= 0)
+		D_CO = 80;
+	if (D_LI <= 0)
+		D_LI = 24;
+
+	if (D_CTF) {
+		/* standard fixes for xterms etc */
+		/* assume color for everything that looks ansi-compatible */
+		if (!D_CAF && D_ME && (strstr(D_ME, "\033[m") || strstr(D_ME, "\033[0m"))) {
+			D_CAF = "\033[3%p1%dm";
+			D_CAB = "\033[4%p1%dm";
+		}
+		if (D_OP && strstr(D_OP, "\033[39;49m"))
+			D_CAX = 1;
+		if (D_OP && (strstr(D_OP, "\033[m") || strstr(D_OP, "\033[0m")))
+			D_OP = NULL;
+		/* ISO2022 */
+		if ((D_EA && strstr(D_EA, "\033(B")) || (D_AS && strstr(D_AS, "\033(0")))
+			D_CG0 = 1;
+		if (strstr(D_termname, "xterm")
+		 || strstr(D_termname, "rxvt")
+		 || (D_CKM && (strstr(D_CKM, "\033[M")
+			    || strstr(D_CKM, "\033[<")))) {
+			D_CXT = 1;
+			kmapdef[0] = D_CKM ? SaveStr(D_CKM) : NULL;
+		}
+		/* "be" seems to be standard for xterms... */
+		if (D_CXT)
+			D_BE = 1;
+	}
+	if (nwin_default.flowflag == nwin_undef.flowflag)
+		nwin_default.flowflag = D_CNF ? FLOW_OFF : D_NX ? FLOW_ON : FLOW_AUTOFLAG;
+	D_CLP |= (!D_AM || D_XV || D_XN);
+	if (!D_BL)
+		D_BL = "\007";
+	if (!D_BC) {
+		if (D_BS)
+			D_BC = "\b";
+		else
+			D_BC = D_LE;
+	}
+	if (!D_CR)
+		D_CR = "\r";
+	if (!D_NL)
+		D_NL = "\n";
+
+	/*
+	 *  Set up attribute handling.
+	 *  This is rather complicated because termcap has different
+	 *  attribute groups.
+	 */
+
+	if (D_UG > 0)
+		D_US = D_UE = NULL;
+	if (D_SG > 0)
+		D_SO = D_SE = NULL;
+	/* Unfortunately there is no 'mg' capability.
+	 * For now we think that mg > 0 if sg and ug > 0.
+	 */
+	if (D_UG > 0 && D_SG > 0)
+		D_MH = D_MD = D_MR = D_MB = D_ME = NULL;
+
+	if (D_SO && D_SE == NULL) {
+		Msg(0, "Warning: 'so' but no 'se' capability.");
+		if (D_ME)
+			;
+		else
+			D_SO = NULL;
+	}
+	if (D_US && D_UE == NULL) {
+		Msg(0, "Warning: 'us' but no 'ue' capability.");
+		if (D_ME)
+			;
+		else
+			D_US = NULL;
+	}
+	if ((D_MH || D_MD || D_MR || D_MB) && D_ME == NULL) {
+		Msg(0, "Warning: 'm?' but no 'me' capability.");
+		D_MH = D_MD = D_MR = D_MB = NULL;
+	}
+	/*
+	 * Does ME also reverse the effect of SO and/or US?  This is not
+	 * clearly specified by the termcap manual. Anyway, we should at
+	 * least look whether ME and SE/UE are equal:
+	 * (now covered by logic above)
+	 */
+
+	const attr_mask_t A_ME = A__UNSET | A_BD | A_DI | A_BL | A_RV;
+	if (D_MD)   D_td.td_attr[ATTR_BD] = (TermDefAttr){ D_MD,  D_ME, A_ME };	// 1 / 21	B	md	bold		Bold
+	if (D_MH)   D_td.td_attr[ATTR_DI] = (TermDefAttr){ D_MH,  D_ME, A_ME };	// 2 / 22	B	mh	dim		Dim
+	if (D_CZH)  D_td.td_attr[ATTR_IT] = (TermDefAttr){ D_CZH, D_CZR, 0 };	// 3 / 23	B/E	ZH/ZR	simt/rmit	Italicized ("Roman")
+	if (D_US)   D_td.td_attr[ATTR_US] = (TermDefAttr){ D_US,  D_UE, 0 };	// 4 / 24	B/E	us/ue	smul/rmul	Underscore
+	if (D_MB)   D_td.td_attr[ATTR_BL] = (TermDefAttr){ D_MB,  D_ME, A_ME };	// 5 / 25	B	mb	blink		Blinking
+	if (D_SO)   D_td.td_attr[ATTR_SO] = (TermDefAttr){ D_SO,  D_SE, 0 };	// - / -	B/E	so/se	smso/rmso	Standout
+	if (D_MR)   D_td.td_attr[ATTR_RV] = (TermDefAttr){ D_MR,  D_ME, A_ME };	// 7 / 27	B	mr	rev		begin	Reverse
+
+	/* Guess some stuff about ECMA-48 terminals */
+        char mbuf[MAXSTR] = "ANSI PROBES", *cmb = mbuf+11, *const emb = mbuf + sizeof mbuf;
+	int const num_verify = ATTR_RV + 1 - ATTR_BD;
+	int ansi_probe_failures = 0;
+	for (int i=ATTR_BD; i<=ATTR_RV ; ++i) {
+		TermDefAttr *a = &D_td.td_attr[i];
+		int const j = i-ATTR_BD+1;
+		int const p = j == 1 ? 22 :	/* intensity change, but note that some terminals treat 1 as "heavy strike", not just "bright", so that \e[1;2m results in heavy-strike+dim */
+			      j == 6 ? 25 :	/* blink rate change */
+				       j+20;
+		if (a->tda_set   && !IsSGR(a->tda_set,   j)) { ansi_probe_failures = num_verify; seprintf(&cmb, emb, "; SGR#%u.set = ", j); seputsq(&cmb, emb, a->tda_set); break; }
+		if (a->tda_unset && !IsSGR(a->tda_unset, p)
+				 && !IsSGR(a->tda_unset, 0)) { ansi_probe_failures = num_verify; seprintf(&cmb, emb, "; SGR#%u.unset = ", j); seputsq(&cmb, emb, a->tda_unset); break; }
+		if (!a->tda_set || !a->tda_unset) { ++ansi_probe_failures; seprintf(&cmb, emb, "; SGR#%u missing", j); }
+	}
+	D_td.td_ansi = ansi_probe_failures <= ANSI_PROBE_FAILURE_LIMIT;
+	seprintf(&cmb, emb, "; probes=%u failures=%u limit=%u td_ansi=%s",
+		 num_verify,
+		 ansi_probe_failures,
+		 ANSI_PROBE_FAILURE_LIMIT,
+		 D_td.td_ansi ? "true" : "false");
+	if (ansi_probe_failures <= ANSI_PROBE_FAILURE_LIMIT+1) {
+		D_td.td_attr[ATTR_HI] = (TermDefAttr){ "\033[8m", "\033[28m", 0 };
+		seprintf(&cmb, emb, " +hidden");
+		D_td.td_attr[ATTR_ST] = (TermDefAttr){ "\033[9m", "\033[29m", 0 };
+		seprintf(&cmb, emb, " +strikethrough");
+	}
+	if (ansi_probe_failures <= ANSI_PROBE_FAILURE_LIMIT+2 && IsSGR(D_td.td_attr[ATTR_BL].tda_set, 5)) {
+		D_td.td_attr[ATTR_FB] = (TermDefAttr){ "\033[6m", "\033[25m", 0 };
+		seprintf(&cmb, emb, " +fast-blink");
+	}
+
+	/* Set up missing entries (attributes are priority ordered) */
+
+	/* Pick something to use as "standout" */
+	SubstituteMissingAttr(ATTR_SO, ATTR_BD) ||
+	SubstituteMissingAttr(ATTR_SO, ATTR_RV) ||
+	SubstituteMissingAttr(ATTR_SO, ATTR_US) ||
+	SubstituteMissingAttr(ATTR_SO, ATTR_BL) ? (void)0 : (void)0;
+
+	/* Use "standout" for missing functions */
+	SubstituteMissingAttr(ATTR_RV, ATTR_SO);
+	SubstituteMissingAttr(ATTR_BD, ATTR_SO);
+	SubstituteMissingAttr(ATTR_US, ATTR_SO);
+	//SubstituteMissingAttr(ATTR_BL, ATTR_SO);
+
+	/* Disable any functions that are missing either (or both) ‘set’ or ‘unset’ */
+	for (size_t i = 0; i<NATTR; ++i)
+		if (!D_td.td_attr[i].tda_set
+		 || !D_td.td_attr[i].tda_unset) {
+			D_td.td_ignored |= 1U << i;
+			D_td.td_attr[i] = (TermDefAttr){0,0,0};
+		}
+
+	/*
+	 * Merge any functions that have identical "set" strings.
+	 *  - create a merger/redirection map
+	 *  - delete all but one of the functions
+	 */
+	for (size_t i = 0, k = 0; i<NATTR-1; ++i)
+		if (D_td.td_attr[i].tda_set) {
+			attr_mask_t from = 0;
+			for (size_t j = i+1; j<NATTR; ++j)
+				if (D_td.td_attr[j].tda_set
+				 && !strcmp(D_td.td_attr[i].tda_set, D_td.td_attr[j].tda_set)) {
+					from |= 1U << j;
+					D_td.td_attr[j] = (TermDefAttr){0,0,0};
+				}
+			if (from) {
+				const attr_mask_t to = 1U << i;
+				from |= to;
+				D_td.td_merge[k++] = (TermDefMerge){ .from = from, .to = to };
+			}
+		}
+
+	/*
+         * Identify any functions that share "unset" strings. (This handles
+         * ‘me’ (sgr0) being the reset code for ‘bd’, ‘di’, ‘bl’ & ‘rv’, but
+         * will correctly reset other attributes when me="\E[0m".)
+	 */
+	for (size_t i = 0; i<NATTR; ++i)
+		if (D_td.td_attr[i].tda_set)
+			D_td.td_attr[i].tda_also_unset = 1U << i;
+	for (size_t i = 0; i<NATTR; ++i)
+		if (D_td.td_attr[i].tda_set)
+			for (size_t j = 0; j<NATTR; ++j)
+				if (i != j
+				 && D_td.td_attr[j].tda_set
+				 && !strcmp(D_td.td_attr[i].tda_unset, D_td.td_attr[j].tda_unset))
+					D_td.td_attr[i].tda_also_unset =
+					D_td.td_attr[j].tda_also_unset |=
+					D_td.td_attr[i].tda_also_unset;
+
+	if (D_CAF || D_CAB || D_CSF || D_CSB)
+		D_hascolor = 1;
+	if (D_UT)
+		D_BE = 1;	/* screen erased with background color */
+
+	if (!D_DO)
+		D_DO = D_NL;
+	if (!D_SF)
+		D_SF = D_NL;
+	if (D_IN)
+		D_IC = D_IM = NULL;
+	if (D_EI == NULL)
+		D_IM = NULL;
+	/* some strange termcap entries have IC == IM */
+	if (D_IC && D_IM && strcmp(D_IC, D_IM) == 0)
+		D_IC = NULL;
+	if (D_KE == NULL)
+		D_KS = NULL;
+	if (D_CVN == NULL)
+		D_CVR = NULL;
+	if (D_VE == NULL)
+		D_VI = D_VS = NULL;
+	if (D_CCE == NULL)
+		D_CCS = NULL;
+
+	if (D_CG0) {
+		if (D_CS0 == NULL)
+			D_CS0 = "\033(%p1%c";
+		if (D_CE0 == NULL)
+			D_CE0 = "\033(B";
+		D_AC = NULL;
+		D_EA = NULL;
+	} else if (D_AC || (D_AS && D_AE)) {	/* some kind of graphics */
+		D_CS0 = (D_AS && D_AE) ? D_AS : "";
+		D_CE0 = (D_AS && D_AE) ? D_AE : "";
+		D_CC0 = D_AC;
+	} else {
+		D_CS0 = D_CE0 = "";
+		D_CC0 = NULL;
+		D_AC = "";	/* enable default string */
+	}
+
+	for (int i = 0; i < 256; i++)
+		D_c0_tab[i] = i;
+	if (D_AC) {
+		/* init with default string first */
+		char s[] = "l+m+k+j+u+t+v+w+q-x|n+o~s_p\"r#`+a:f'g#~o.v-^+<,>h#I#0#y<z>";
+		for (int i = (strlen(s) - 2) & ~1; i >= 0; i -= 2)
+			D_c0_tab[(int)(unsigned char)s[i]] = s[i + 1];
+	}
+	if (D_CC0)
+		for (int i = (strlen(D_CC0) - 2) & ~1; i >= 0; i -= 2)
+			D_c0_tab[(int)(unsigned char)D_CC0[i]] = D_CC0[i + 1];
+	if (D_PF == NULL)
+		D_PO = NULL;
+
+	if (D_CXC)
+		if (CreateTransTable(D_CXC))
+			return -1;
+
+	/* Termcap fields Z0 & Z1 contain width-changing sequences. */
+	if (D_CZ1 == NULL)
+		D_CZ0 = NULL;
+
+	CheckScreenSize(0);
+
+	if (D_TS == NULL || D_FS == NULL || D_DS == NULL)
+		D_HS = 0;
+	if (D_HS) {
+		if (D_WS < 0)
+			D_WS = 0;
+	}
+	D_has_hstatus = hardstatusemu & ~HSTATUS_ALWAYS;
+	if (D_HS && !(hardstatusemu & HSTATUS_ALWAYS))
+		D_has_hstatus = HSTATUS_HS;
+
+	if (D_CKJ) {
+		int enc = FindEncoding(D_CKJ);
+		if (enc != -1)
+			D_encoding = enc;
+	}
+	if (!D_td.td_tcs[T_NAVIGATE].str && D_td.td_tcs[T_NAVIGATE + 1].str)
+		D_td.td_tcs[T_NAVIGATE].str = D_td.td_tcs[T_NAVIGATE + 1].str;	/* kh = @1 */
+	if (!D_td.td_tcs[T_NAVIGATE + 2].str && D_td.td_tcs[T_NAVIGATE + 3].str)
+		D_td.td_tcs[T_NAVIGATE + 2].str = D_td.td_tcs[T_NAVIGATE + 3].str;	/* kH = @7 */
+
+	D_UPcost = CalcCost(D_UP);
+	D_DOcost = CalcCost(D_DO);
+	D_NLcost = CalcCost(D_NL);
+	D_LEcost = CalcCost(D_BC);
+	D_NDcost = CalcCost(D_ND);
+	D_CRcost = CalcCost(D_CR);
+	D_IMcost = CalcCost(D_IM);
+	D_EIcost = CalcCost(D_EI);
+
+	if (D_CAN) {
+		D_auto_nuke = true;
+	}
+	if (D_COL > 0) {
+		D_obufmax = D_COL;
+		D_obuflenmax = D_obuflen - D_obufmax;
+	}
+
+	/* Some xterm entries set F0 and F10 to the same string. Nuke F0. */
+	if (D_td.td_tcs[T_CAPS].str && D_td.td_tcs[T_CAPS + 10].str && !strcmp(D_td.td_tcs[T_CAPS].str, D_td.td_tcs[T_CAPS + 10].str))
+		D_td.td_tcs[T_CAPS].str = NULL;
+	/* Some xterm entries set kD to ^?. Nuke it. */
+	if (D_td.td_tcs[T_NAVIGATE_DELETE].str && !strcmp(D_td.td_tcs[T_NAVIGATE_DELETE].str, "\0177"))
+		D_td.td_tcs[T_NAVIGATE_DELETE].str = NULL;
+	/* wyse52 entries have kcub1 == kb == ^H. Nuke... */
+	if (D_td.td_tcs[T_CURSOR + 3].str && !strcmp(D_td.td_tcs[T_CURSOR + 3].str, "\008"))
+		D_td.td_tcs[T_CURSOR + 3].str = NULL;
+
+	D_nseqs = 0;
+	for (size_t i = 0; i < T_OCAPS - T_CAPS; i++)
+		remap(i, 1);
+	for (size_t i = 0; i < kmap_extn; i++)
+		remap(i + (KMAP_KEYS + KMAP_AKEYS), 1);
+	D_seqp = D_kmaps + 3;
+	D_seql = 0;
+	D_seqh = NULL;
+
+	D_tcinited = 1;
+	MakeTermcap(0);
+	/* Make sure libterm uses external term properties for our tputs() calls.  */
+	e_tgetent(tbuf, D_termname);
+	CheckEscape();
+	if (cmb != mbuf) {
+		FILE *f = fopen("screentrace.txt", "w");
+		fprintf(f, "%s\n", mbuf);
+		fclose(f);
+	}
+	else
+		unlink("screentrace.txt");
+	return 0;
 }

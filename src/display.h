@@ -30,12 +30,20 @@
 #ifndef SCREEN_DISPLAY_H
 #define SCREEN_DISPLAY_H
 
-#include "layout.h"
-#include "canvas.h"
-#include "viewport.h"
-#include "comm.h"
-#include "image.h"
-#include "screen.h"
+#include <sys/types.h>	// before display.h, for pid_t
+
+#include <stdint.h>	// before ansi.h & image.h
+
+#include "layer.h"	// before canvas.h, for struct Layer
+#include "sched.h"	// before canvas.h, for struct Event
+#include "os.h"		// before tty.h, for struct termios
+
+#include "ansi.h"	// before display.h, for NATTR
+#include "canvas.h"	// before display.h, needs layer.h & sched.h
+#include "comm.h"	// before display.h, for struct action
+#include "image.h"	// before display.h, for struct mchar
+#include "term.h"	// before display.h, for T_N
+#include "tty.h"	// before display.h, for struct mode
 
 #define KMAP_KEYS (T_OCAPS-T_CAPS)
 #define KMAP_AKEYS (T_OCAPS-T_CURSOR)
@@ -74,11 +82,37 @@ struct statusposstr {
 #define STATUS_LEFT		0
 #define STATUS_RIGHT		1
 
-
 struct mouse_parse {
 	char sgrmode;		/* non-zero if parsing an SGR sequence */
 	int state;		/* current state of parsing */
 	int params[3];		/* parsed params: button, x, y */
+};
+
+struct Layout;
+
+/* TermDef: what termcap/terminfo can tell us about a terminal type, plus
+ * general knowledge about ECMA-48 (ANSI) terminals that can't be described by
+ * termcap/terminfo.
+ */
+typedef struct TermDef TermDef;
+typedef struct TermDefAttr TermDefAttr;
+typedef struct TermDefMerge TermDefMerge;
+struct TermDef {
+	bool td_ansi;		/* syntheize ECMA-48, ignore other entries; TODO - not implemented yet */
+
+	union tcu td_tcs[T_N];	/* terminal capabilities */
+
+	attr_mask_t td_ignored;	/* attributes we won't try to display */
+	struct TermDefMerge {
+		attr_mask_t from, to;
+	} td_merge[NATTR/2];	/* zero-terminated list */
+
+	struct TermDefAttr {
+		char *tda_set;
+		char *tda_unset;
+		attr_mask_t tda_also_unset;
+	} td_attr[NATTR];	/* order here matches ECMA-48 SGR params 1 thru 9 */
+
 };
 
 typedef struct Display Display;
@@ -88,7 +122,7 @@ struct Display {
 	Canvas d_canvas;	/* our canvas slice */
 	Canvas *d_cvlist;	/* the canvases of this display */
 	Canvas *d_forecv;	/* current input focus */
-	Layout *d_layout;	/* layout we're using */
+	struct Layout *d_layout;	/* layout we're using */
 	void (*d_processinput)(char *, size_t);
 	struct pwdata *d_processinputdata;	/* data for processinput */
 	int d_vpxmin, d_vpxmax;	/* min/max used position on display */
@@ -98,7 +132,7 @@ struct Display {
 				/* >0: block after nonblock secs */
 	char d_termname[MAXTERMLEN + 1];	/* $TERM */
 	char *d_tentry;		/* buffer for tgetstr */
-	char d_tcinited;	/* termcap inited flag */
+	bool d_tcinited;	/* termcap initialised yet? */
 	int d_width, d_height;	/* width/height of the screen */
 	int d_defwidth, d_defheight;	/* default width/height of windows */
 	int d_top, d_bot;	/* scrollregion start/end */
@@ -167,11 +201,12 @@ struct Display {
 	Event d_mapev;		/* timeout event */
 	int d_dontmap;		/* do not map next */
 	int d_mapdefault;	/* do map next to default */
-	union tcu d_tcs[T_N];	/* terminal capabilities */
-	char *d_attrtab[NATTR];	/* attrib emulation table */
-	char d_attrtyp[NATTR];	/* attrib group table */
+
+	TermDef d_td;
+	#define d_ignored	d_td.td_ignored
+
 	bool d_hascolor;	/* do we support color */
-	bool d_hastruecolor;	/* do we support TrueColor (was $COLORTERM set with valid string?) */
+	bool d_hastruecolor;	/* do we support TrueColor (initially set from ‘COLORTERM’ in the environment) */
 	char d_c0_tab[256];	/* conversion for C0 */
 	char ***d_xtable;	/* char translation table */
 	int d_UPcost, d_DOcost, d_LEcost, d_NDcost;
@@ -190,7 +225,7 @@ struct Display {
 	Event d_mousetimeoutev;	/* mouse sequence timeout event */
 };
 
-#define DISPLAY(x) display->x
+#define DISPLAY(x)	display->x
 
 #define D_user		DISPLAY(d_user)
 #define D_username	(DISPLAY(d_user) ? DISPLAY(d_user)->u_name : 0)
@@ -276,7 +311,7 @@ struct Display {
 #define D_dontmap	DISPLAY(d_dontmap)
 #define D_mapdefault	DISPLAY(d_mapdefault)
 #define D_kmaps		DISPLAY(d_kmaps)
-#define D_tcs		DISPLAY(d_tcs)
+#define D_td		DISPLAY(d_td)
 #define D_attrtab	DISPLAY(d_attrtab)
 #define D_attrtyp	DISPLAY(d_attrtyp)
 #define D_hascolor	DISPLAY(d_hascolor)
@@ -306,20 +341,10 @@ struct Display {
 #define D_blankerpid	DISPLAY(d_blankerpid)
 #define D_mousetimeoutev	DISPLAY(d_mousetimeoutev)
 
-
 #define GRAIN 4096		/* Allocation grain size for output buffer */
 #define OBUF_MAX 256		/* default for obuflimit */
 
 #define OUTPUT_BLOCK_SIZE 256	/* Block size of output to tty */
-
-#define AddChar(c)		\
-do				\
-  {				\
-    if (--D_obuffree <= 0)	\
-      Resize_obuf();		\
-    *D_obufp++ = (c);		\
-  }				\
-while (0)
 
 Display *MakeDisplay(char *, char *, char *, bool, int, pid_t, struct mode *);
 void FreeDisplay(void);
@@ -363,7 +388,6 @@ void ExtMouseMode(int);
 void BracketedPasteMode(bool);
 void CursorStyle(int);
 void SetRendition(struct mchar *);
-void SetRenditionMline(struct mline *, int);
 void MakeStatus(char *);
 void RemoveStatus(void);
 int ResizeDisplay(int, int);
@@ -399,5 +423,12 @@ extern Display *display, *displays;
 extern const struct LayFuncs BlankLf;
 
 extern struct statusposstr statuspos;
+
+static inline void AddChar(char c)
+{
+	if (--D_obuffree <= 0)
+		Resize_obuf();
+	*D_obufp++ = c;
+}
 
 #endif				/* SCREEN_DISPLAY_H */

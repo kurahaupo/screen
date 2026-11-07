@@ -31,16 +31,19 @@
  ****************************************************************
  */
 
-#include "backtick.h"
+#include "config.h"
 
+#include "backtick.h"
 #include "fileio.h"
 #include "misc.h"
+#include "screen.h"
+#include "window.h"
 #include "winmsg.h"
 
 /* TODO: get rid of global var */
 static Backtick *backticks;
 
-static void backtick_filter(struct backtick *bt)
+static void backtick_filter(Backtick *bt)
 {
 	char *p, *q;
 	int c;
@@ -56,10 +59,10 @@ static void backtick_filter(struct backtick *bt)
 
 static void backtick_fn(Event *ev, void *data)
 {
-	struct backtick *bt;
+	Backtick *bt;
 	int i, j, k, l;
 
-	bt = (struct backtick *)data;
+	bt = (Backtick *)data;
 	i = bt->bufi;
 	l = read(ev->fd, bt->buf + i, MAXSTR - i);
 	if (l <= 0) {
@@ -96,7 +99,7 @@ static void backtick_fn(Event *ev, void *data)
 
 void setbacktick(int num, int lifespan, int tick, char **cmdv)
 {
-	struct backtick **btp, *bt;
+	Backtick **btp, *bt;
 	char **v;
 
 	for (btp = &backticks; (bt = *btp) != NULL; btp = &bt->next)
@@ -120,12 +123,12 @@ void setbacktick(int num, int lifespan, int tick, char **cmdv)
 		return;
 	}
 	if (!bt) {
-		bt = malloc(sizeof(struct backtick));
+		bt = malloc(sizeof *bt);
 		if (!bt) {
 			Msg(0, "%s", strnomem);
 			return;
 		}
-		memset(bt, 0, sizeof(struct backtick));
+		memset(bt, 0, sizeof *bt);
 		bt->next = NULL;
 		*btp = bt;
 	}
@@ -168,12 +171,12 @@ char *runbacktick(Backtick *bt, int *tickp, time_t now)
 	if (f == -1)
 		return bt->result;
 	i = 0;
-	while ((l = read(f, bt->result + i, ARRAY_SIZE(bt->result) - i)) > 0) {
+	while ((l = read(f, bt->result + i, sizeof bt->result - i)) > 0) {
 		i += l;
 		for (j = 1; j < l; j++)
 			if (bt->result[i - j - 1] == '\n')
 				break;
-		if (j == l && i == ARRAY_SIZE(bt->result)) {
+		if (j == l && i == sizeof bt->result) {
 			j = ARRAY_SIZE(bt->result) / 2;
 			l = j + 1;
 		}

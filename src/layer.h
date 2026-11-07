@@ -100,40 +100,54 @@ struct Layer {
 #define LaySetCursor()	LGotoPos(flayer, flayer->l_x, flayer->l_y)
 #define LayCanResize(l)	(l->l_layfn->LayResize != DefResize)
 
+#define LayRestoreAndSetCursor() (LayRestore(), LaySetCursor())
+
 /* XXX: AArgh! think again! */
 
-#define LAY_CALL_UP(fn) do				\
-	{ 						\
-	  Layer *oldlay = flayer; 		\
-	  Canvas *oldcvlist, *cv;		\
-	  flayer = flayer->l_next;			\
-	  oldcvlist = flayer->l_cvlist;			\
-	  flayer->l_cvlist = oldlay->l_cvlist;		\
-	  for (cv = flayer->l_cvlist; cv; cv = cv->c_lnext)	\
-		cv->c_layer = flayer;			\
-	  fn;						\
-	  flayer = oldlay;				\
-	  for (cv = flayer->l_cvlist; cv; cv = cv->c_lnext)	\
-		cv->c_layer = flayer;			\
-	  flayer->l_next->l_cvlist = oldcvlist;		\
-	} while(0)
+#define LAY_CALL_UP_START() \
+	do {						\
+		Layer *oldlay = flayer;			\
+		Canvas *oldcvlist, *cv;			\
+		flayer = flayer->l_next;		\
+		oldcvlist = flayer->l_cvlist;		\
+		flayer->l_cvlist = oldlay->l_cvlist;	\
+		for (cv = flayer->l_cvlist; cv; cv = cv->c_lnext) \
+			cv->c_layer = flayer;		\
+		(void)0				/* obliging ';' */
 
-#define LAY_DISPLAYS(l, fn) do				\
-	{ 						\
-	  Display *olddisplay = display;		\
-	  Canvas *cv;				\
-	  for (display = displays; display; display = display->d_next) \
-	    {						\
-	      for (cv = D_cvlist; cv; cv = cv->c_next)	\
-		if (cv->c_layer == l)			\
-		  break;				\
-	      if (cv == NULL)				\
-		continue;				\
-	      fn;					\
-	    }						\
-	  display = olddisplay;				\
-	} while(0)
+#define LAY_CALL_UP_END()				\
+		flayer = oldlay;			\
+		for (cv = flayer->l_cvlist; cv; cv = cv->c_lnext) \
+			cv->c_layer = flayer;		\
+		flayer->l_next->l_cvlist = oldcvlist;	\
+	} while (0)				/* obliging ';' */
 
+#define LAY_CALL_UP(simple_cmd)				\
+	LAY_CALL_UP_START();				\
+		simple_cmd;				\
+	LAY_CALL_UP_END()		/* obliging ';' */
+
+#define LAY_DISPLAYS_START(l)				\
+	do {						\
+		Display *olddisplay = display;		\
+		Canvas *cv;				\
+		for (display = displays; display; display = display->d_next) { \
+			for (cv = D_cvlist; cv; cv = cv->c_next) \
+				if (cv->c_layer == l)	\
+					break;		\
+			if (cv == NULL)			\
+				continue;		\
+			(void)0		/* obliging ';' */
+
+#define LAY_DISPLAYS_END(l)				\
+		}					\
+		display = olddisplay;			\
+	} while (0)			/* obliging ';' */
+
+#define LAY_DISPLAYS(l, simple_cmd)			\
+	LAY_DISPLAYS_START(l);				\
+		simple_cmd;				\
+	LAY_DISPLAYS_END(l)		/* obliging ';' */
 
 /**
  * (Un)Pauses a layer.

@@ -33,13 +33,21 @@
 #ifndef SCREEN_WINDOW_H
 #define SCREEN_WINDOW_H
 
-#include "config.h"
+#include <sys/types.h>	// for pid_t
 
-#include "sched.h"
-#include "logfile.h"
-#include "screen.h"
-#include "layer.h"
-#include "display.h"
+#include <stdbool.h>
+#include <stddef.h>	// for size_t
+#include <stdint.h>
+
+#include "os.h"		// before acls.h, for MAXLOGINLEN; here, for IOSIZE
+
+#include "acls.h"	// before window.h, for AclBits
+#include "image.h"	// here, for struct mchar
+#include "layer.h"	// here, for struct Layer
+#include "sched.h"	//
+
+#include "aalimits.h"	// before ansi.h & here
+#include "ansi.h"	// for sgr3_mode_t
 
 struct NewWindow {
 	int StartAt;		/* where to start the search for the slot */
@@ -151,8 +159,8 @@ struct Window {
 	Layer *w_savelayer;	/* the layer to keep */
 	int w_blocked;		/* block input */
 	struct pseudowin *w_pwin;	/* ptr to pseudo */
-	Display *w_pdisplay;	/* display for printer relay */
-	Display *w_lastdisp;	/* where the last input was made */
+	struct Display *w_pdisplay;	/* display for printer relay */
+	struct Display *w_lastdisp;	/* where the last input was made */
 	uint16_t w_number;	/* window number */
 	Event w_readev;
 	Event w_writeev;
@@ -228,7 +236,7 @@ struct Window {
 	char *w_tabs;		/* line with tabs */
 	int w_bell;		/* bell status of this window */
 	int w_flow;		/* flow flags */
-	Log *w_log;		/* log to file */
+	struct Log *w_log;		/* log to file */
 	int w_logsilence;	/* silence in secs */
 	int w_monitor;		/* monitor status */
 	int w_silencewait;	/* wait for silencewait secs */
@@ -263,7 +271,7 @@ struct Window {
 	char w_tty[MAXSTR];
 
 	int w_zauto;
-	Display *w_zdisplay;
+	struct Display *w_zdisplay;
 #ifdef ENABLE_TELNET
 	struct sockaddr_in w_telsa;
 	char w_telbuf[IOSIZE];
@@ -342,11 +350,11 @@ int winexec(char **);
 void FreePseudowin(Window *);
 void nwin_compose(struct NewWindow *, struct NewWindow *, struct NewWindow *);
 int DoStartLog(Window *, char *, int);
-int ReleaseAutoWritelock(Display *, Window *);
-int ObtainAutoWritelock(Display *, Window *);
+int ReleaseAutoWritelock(struct Display *, Window *);
+int ObtainAutoWritelock(struct Display *, Window *);
 int OpenDevice(char **, int, int *, char **);
 void CloseDevice(Window *);
-void zmodem_abort(Window *, Display *);
+void zmodem_abort(Window *, struct Display *);
 void WindowDied(Window *, int, int);
 void ResetWindow(Window *);
 Window *GetWindowByNumber(uint16_t);

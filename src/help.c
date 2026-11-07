@@ -31,17 +31,18 @@
 
 #include "config.h"
 
-#include "help.h"
+#include <sys/types.h>
 
 #include <stdint.h>
 #include <stdbool.h>
-#include <sys/types.h>
 
-#include "screen.h"
-
-#include "misc.h"
+#include "display.h"
+#include "help.h"
+#include "layer.h"
 #include "list_generic.h"
+#include "misc.h"
 #include "process.h"
+#include "screen.h"
 
 char version[60];		/* initialised by main() */
 
@@ -161,7 +162,7 @@ static void HelpProcess(char **ppbuf, size_t *plen)
 		case ' ':
 			if (helppage() == 0)
 				break;
-			/* FALLTHROUGH */
+			FALLTHROUGH;
 		case '\r':
 		case '\n':
 			done = true;
@@ -359,6 +360,197 @@ static void HelpRedisplayLine(int y, int xs, int xe, int isblank)
 
 /*
 **
+**    here is all the copyright stuff
+**
+*/
+
+static void CopyrightProcess(char **, size_t *);
+static void CopyrightRedisplayLine(int, int, int, int);
+static void CopyrightAbort(void);
+static void copypage(void);
+
+struct copydata {
+	char *cps, *savedcps;	/* position in the message */
+	char *refcps, *refsavedcps;	/* backup for redisplaying */
+};
+
+static struct LayFuncs CopyrightLf = {
+	CopyrightProcess,
+	CopyrightAbort,
+	CopyrightRedisplayLine,
+	DefClearLine,
+	//DefRewrite,
+	DefResize,
+	DefRestore,
+	NULL
+};
+
+static const char cpmsg[] = "\
+\n\
+Screen version %v\n\
+\n\
+Copyright (c) 2010 Juergen Weigert, Sadrul Habib Chowdhury\n\
+Copyright (c) 2008, 2009 Juergen Weigert, Michael Schroeder, Micah Cowan, Sadrul Habib Chowdhury\n\
+Copyright (c) 1993-2002, 2003, 2005, 2006, 2007 Juergen Weigert, Michael Schroeder\n\
+Copyright (c) 1987 Oliver Laumann\n\
+\n\
+This program is free software; you can redistribute it and/or \
+modify it under the terms of the GNU General Public License as published \
+by the Free Software Foundation; either version 3, or (at your option) \
+any later version.\n\
+\n\
+This program is distributed in the hope that it will be useful, \
+but WITHOUT ANY WARRANTY; without even the implied warranty of \
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the \
+GNU General Public License for more details.\n\
+\n\
+You should have received a copy of the GNU General Public License \
+along with this program (see the file COPYING); if not, see \
+http://www.gnu.org/licenses/, or contact Free Software Foundation, Inc., \
+51 Franklin Street, Fifth Floor, Boston, MA  02111-1301  USA.\n\
+\n\
+Send bugreports, fixes, enhancements, t-shirts, money, beer & pizza to \
+screen-devel@gnu.org\n\n\n"
+#ifdef BUILTIN_TELNET
+    "+builtin-telnet "
+#else
+    "-builtin-telnet "
+#endif
+    ;
+
+static void CopyrightProcess(char **ppbuf, size_t *plen)
+{
+	int done = 0;
+	struct copydata *copydata;
+
+	copydata = (struct copydata *)flayer->l_data;
+	while (!done && *plen > 0) {
+		switch (**ppbuf) {
+		case ' ':
+			if (*copydata->cps) {
+				copypage();
+				break;
+			}
+			FALLTHROUGH;
+		case '\r':
+		case '\n':
+			CopyrightAbort();
+			done = 1;
+			break;
+		default:
+			break;
+		}
+		++*ppbuf;
+		--*plen;
+	}
+}
+
+static void CopyrightAbort(void)
+{
+	LAY_CALL_UP(LRefreshAll(flayer, 0));
+	ExitOverlayPage();
+}
+
+void display_copyright(void)
+{
+	struct copydata *copydata;
+
+	if (flayer->l_width < 10 || flayer->l_height < 5) {
+		LMsg(0, "Window size too small for copyright page");
+		return;
+	}
+	if (InitOverlayPage(sizeof(*copydata), &CopyrightLf, 0))
+		return;
+	copydata = (struct copydata *)flayer->l_data;
+	copydata->cps = (char *)cpmsg;
+	copydata->savedcps = 0;
+	flayer->l_x = 0;
+	flayer->l_y = flayer->l_height - 1;
+	copypage();
+}
+
+static void copypage(void)
+{
+	char *cps;
+	char *ws;
+	int x, y, l;
+	char cbuf[80];
+	struct copydata *copydata;
+
+	copydata = (struct copydata *)flayer->l_data;
+
+	LClearAll(flayer, 0);
+	x = y = 0;
+	cps = copydata->cps;
+	copydata->refcps = cps;
+	copydata->refsavedcps = copydata->savedcps;
+	while (*cps && y < flayer->l_height - 3) {
+		ws = cps;
+		while (*cps == ' ')
+			cps++;
+		if (strncmp(cps, "%v", 2) == 0) {
+			copydata->savedcps = cps + 2;
+			cps = version;
+			continue;
+		}
+		while (*cps && *cps != ' ' && *cps != '\n')
+			cps++;
+		l = cps - ws;
+		cps = ws;
+		if (l > flayer->l_width - 1)
+			l = flayer->l_width - 1;
+		if (x && x + l >= flayer->l_width - 2) {
+			x = 0;
+			y++;
+			continue;
+		}
+		if (x) {
+			LPutChar(flayer, &mchar_blank, x, y);
+			x++;
+		}
+		if (l)
+			LPutStr(flayer, ws, l, &mchar_blank, x, y);
+		x += l;
+		cps += l;
+		if (*cps == 0 && copydata->savedcps) {
+			cps = copydata->savedcps;
+			copydata->savedcps = 0;
+		}
+		if (*cps == '\n') {
+			x = 0;
+			y++;
+		}
+		if (*cps == ' ' || *cps == '\n')
+			cps++;
+	}
+	while (*cps == '\n')
+		cps++;
+	sprintf(cbuf, "[Press Space %s Return to end.]", *cps ? "for next page;" : "or");
+	centerline(cbuf, flayer->l_height - 2);
+	copydata->cps = cps;
+	LaySetCursor();
+}
+
+static void CopyrightRedisplayLine(int y, int xs, int xe, int isblank)
+{
+	if (y < 0) {
+		struct copydata *copydata;
+
+		copydata = (struct copydata *)flayer->l_data;
+		copydata->cps = copydata->refcps;
+		copydata->savedcps = copydata->refsavedcps;
+		copypage();
+		return;
+	}
+	if (y != 0 && y != flayer->l_height - 1)
+		return;
+	if (isblank)
+		return;
+	LClearArea(flayer, xs, y, xe, y, 0, 0);
+}
+
+/*
+**
 **    The bindkey help page
 **
 */
@@ -389,9 +581,6 @@ static const struct LayFuncs BindkeyLf = {
 
 void display_bindkey(char *title, struct action *tab)
 {
-	struct bindkeydata *bindkeydata;
-	int i, n;
-
 	if (flayer->l_height < 6) {
 		LMsg(0, "Window height too small for bindkey page");
 		return;
@@ -399,12 +588,12 @@ void display_bindkey(char *title, struct action *tab)
 	if (InitOverlayPage(sizeof(struct bindkeydata), &BindkeyLf, 0))
 		return;
 
-	bindkeydata = (struct bindkeydata *)flayer->l_data;
+	struct bindkeydata *bindkeydata = /*(struct bindkeydata *)*/flayer->l_data;
 	bindkeydata->title = title;
 	bindkeydata->tab = tab;
 
-	n = 0;
-	for (i = 0; i < KMAP_KEYS + KMAP_AKEYS + kmap_extn; i++) {
+	size_t n = 0;
+	for (size_t i = 0; i < KMAP_KEYS + KMAP_AKEYS + kmap_extn; i++) {
 		if (tab[i].nr != RC_ILLEGAL)
 			n++;
 	}
@@ -429,7 +618,8 @@ static void bindkeypage(void)
 	struct bindkeydata *bindkeydata;
 	struct kmap_ext *kme;
 	char tbuf[256];
-	int del, i, y, sl;
+	int del, y, sl;
+        size_t i;
 	struct action *act;
 	char *xch, *s, *p;
 
@@ -509,7 +699,7 @@ static void BindkeyProcess(char **ppbuf, size_t *plen)
 				bindkeypage();
 				break;
 			}
-			/* FALLTHROUGH */
+			FALLTHROUGH;
 		case '\r':
 		case '\n':
 			done = 1;
@@ -591,3 +781,167 @@ static void PadStr(char *str, int n, int x, int y)
 	if (l < n)
 		LPutStr(flayer, (char *)blank, n - l, &mchar_blank, x + l, y);
 }
+
+#if 0				/* FUTURE? */
+/*
+**
+**    here is all the displays stuff
+**
+*/
+
+static void DisplaysProcess(char **, int *);
+static void DisplaysRedisplayLine(int, int, int, int);
+static void displayspage(void);
+
+struct displaysdata {
+	int dummy_element_for_solaris;
+};
+
+static struct LayFuncs DisplaysLf = {
+	DisplaysProcess,
+	HelpAbort,
+	DisplaysRedisplayLine,
+	DefClearLine,
+	DefRewrite,
+	DefResize,
+	DefRestore
+};
+
+static void DisplaysProcess(char **ppbuf, int *plen)
+{
+	int done = 0;
+	struct displaysdata *displaysdata;
+
+	displaysdata = (struct displaysdata *)flayer->l_data;
+	while (!done && *plen > 0) {
+		switch (**ppbuf) {
+		case ' ':
+			displayspage();
+			break;
+			FALLTHROUGH;
+		case '\r':
+		case '\n':
+			HelpAbort();
+			done = 1;
+			break;
+		default:
+			break;
+		}
+		++*ppbuf;
+		--*plen;
+	}
+}
+
+void display_displays()
+{
+	struct displaysdata *displaysdata;
+
+	if (flayer->l_width < 10 || flayer->l_height < 5) {
+		LMsg(0, "Window size too small for displays page");
+		return;
+	}
+	if (InitOverlayPage(sizeof(*displaysdata), &DisplaysLf, 0))
+		return;
+	displaysdata = (struct displaysdata *)flayer->l_data;
+	flayer->l_x = 0;
+	flayer->l_y = flayer->l_height - 1;
+	displayspage();
+}
+
+/*
+ * layout of the displays page is as follows:
+ *
+ *    xterm 80x42      jnweiger@/dev/ttyp4    0(m11)    &rWx
+ *    facit 80x24 nb   mlschroe@/dev/ttyhf   11(tcsh)    rwx
+ *    xterm 80x42      jnhollma@/dev/ttyp5    0(m11)    &R.x
+ *
+ *      |     |    |      |         |         |   |     | |___ window permissions
+ *      |     |    |      |         |         |   |     |      (R. is locked r-only,
+ *      |     |    |      |         |         |   |     |       W has wlock)
+ *      |     |    |      |         |         |   |     |___ Window is shared
+ *      |     |    |      |         |         |   |___ Name/Title of window
+ *      |     |    |      |         |         |___ Number of window
+ *      |     |    |      |         |___ Name of the display (the attached device)
+ *      |     |    |      |___ Username who is logged in at the display
+ *      |     |    |___ Display is in nonblocking mode. Shows 'NB' if obuf is full.
+ *      |     |___ Displays geometry as width x height.
+ *      |___ the terminal type known by screen for this display.
+ *
+ */
+
+static void displayspage(void)
+{
+	int y, l;
+	char tbuf[80];
+	struct displaysdata *displaysdata;
+	struct display *d;
+	struct win *w;
+
+	displaysdata = (struct displaysdata *)flayer->l_data;
+
+	LClearAll(flayer, 0);
+
+	leftline("term-type   size         user interface           window", 0);
+	leftline("---------- ------- ---------- ----------------- ----------", 1);
+	y = 2;
+
+	for (d = displays; d; d = d->d_next) {
+		w = d->d_fore;
+
+		if (y >= flayer->l_height - 3)
+			break;
+		sprintf(tbuf, "%-10.10s%4dx%-4d%10.10s@%-16.16s%s",
+			d->d_termname, d->d_width, d->d_height, d->d_user->u_name,
+			d->d_usertty, d->d_nonblock ? (((d->d_obufp - d->d_obuf) > d->d_obufmax) ? "NB" : "nb") : "  ");
+
+		if (w) {
+			l = 10 - strlen(w->w_title);
+			if (l < 0)
+				l = 0;
+			sprintf(tbuf + strlen(tbuf), "%3d(%.10s)%*s%c%c%c%c", w->w_number, w->w_title, l, "",
+				/* w->w_dlist->next */ 0 ? '&' : ' ',
+				/*
+				 * The rwx triple:
+				 * -,r,R        no read, read, read only due to foreign wlock
+				 * -,.,w,W      no write, write suppressed by foreign wlock,
+				 *            write, own wlock
+				 * -,x  no execute, execute
+				 */
+#ifdef MULTIUSER
+				(AclCheckPermWin(d->d_user, ACL_READ, w) ? '-' :
+				 ((w->w_wlock == WLOCK_OFF || d->d_user == w->w_wlockuser) ?
+				  'r' : 'R')),
+				(AclCheckPermWin(d->d_user, ACL_READ, w) ? '-' :
+				 ((w->w_wlock == WLOCK_OFF) ? 'w' :
+				  ((d->d_user == w->w_wlockuser) ? 'W' : 'v'))),
+				(AclCheckPermWin(d->d_user, ACL_READ, w) ? '-' : 'x')
+#else
+				'r', 'w', 'x'
+#endif
+			    );
+		}
+		leftline(tbuf, y);
+		y++;
+	}
+	sprintf(tbuf, "[Press Space %s Return to end.]", 1 ? "to refresh;" : "or");
+	centerline(tbuf, flayer->l_height - 2);
+	SetCursor();
+}
+
+static void DisplaysRedisplayLine(int y, int xs, int xe, int isblank)
+{
+	if (y < 0) {
+		struct displaysdata *displaysdata;
+
+		displaysdata = (struct displaysdata *)flayer->l_data;
+		displayspage();
+		return;
+	}
+	if (y != 0 && y != flayer->l_height - 1)
+		return;
+	if (isblank)
+		return;
+	LClear(flayer, xs, y, xe, y, 0);
+	/* To be filled in... */
+}
+#endif				/* FUTURE? */

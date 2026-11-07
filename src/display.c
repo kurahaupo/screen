@@ -28,35 +28,34 @@
 
 #include "config.h"
 
-#include "display.h"
-
-#include <sys/types.h>
+#include <sys/ioctl.h>
 #include <sys/stat.h>
-#include <signal.h>
+#include <sys/types.h>
+
 #include <fcntl.h>
 #include <poll.h>
-#include <sys/ioctl.h>
+#include <signal.h>
 #include <stdbool.h>
 #include <stdint.h>
 #include <unistd.h>
 
-#include "screen.h"
-
-#include "canvas.h"
+#include "bitmath.h"
+#include "display.h"
 #include "encoding.h"
+#include "inline.h"
 #include "mark.h"
-#include "inline.h"		/* must follow ansi.h and image.h */
 #include "misc.h"
 #include "process.h"
 #include "pty.h"
 #include "resize.h"
+#include "screen.h"
 #include "termcap.h"
 #include "tty.h"
+#include "viewport.h"
+#include "window.h"
 #include "winmsg.h"
 
-#include "inline.h"		/* must follow ansi.h and image.h */
-
-/* CSI parsing status */
+/* CS parsing status */
 enum {
 	CSI_PB = 0, CSI_PX = 1, CSI_PY = 2, CSI_DONE = 3,
 	CSI_ESC_SEEN, CSI_BEGIN, CSI_INACTIVE, CSI_INVALID
@@ -179,7 +178,7 @@ Display *MakeDisplay(char *uname, char *utty, char *term, bool truecolor, int fd
 	if (!*(u = FindUserPtr(uname)) && UserAdd(uname, u))
 		return NULL;	/* could not find or add user */
 
-	if ((display = calloc(1, sizeof(Display))) == NULL)
+	if ((display = calloc(1, sizeof *display)) == NULL)
 		return NULL;
 	display->d_next = displays;
 	displays = display;
@@ -229,10 +228,8 @@ Display *MakeDisplay(char *uname, char *utty, char *term, bool truecolor, int fd
 	D_obufp = D_obuf;
 	D_printfd = -1;
 	D_userpid = pid;
-	strncpy(D_usertty, utty, ARRAY_SIZE(D_usertty) - 1);
-	D_usertty[ARRAY_SIZE(D_usertty) - 1] = 0;
-	strncpy(D_termname, term, MAXTERMLEN);
-	D_termname[MAXTERMLEN] = 0;
+	snprintf(D_usertty, sizeof D_usertty, "%s", utty);
+	snprintf(D_termname, sizeof D_termname, "%s", term);
 	D_hastruecolor = truecolor;
 	D_user = *u;
 	D_processinput = ProcessInput;
@@ -813,7 +810,7 @@ void GotoPos(int x2, int y2)
 	case M_CR:
 		AddCStr(D_CR);
 		D_x = 0;
-		/* FALLTHROUGH */
+		FALLTHROUGH;
 	case M_RW:
 		break;
 	default:
@@ -870,7 +867,11 @@ void ClearArea(int x1, int y1, int xs, int xe, int x2, int y2, int bce, int usel
 		if (y2 > D_bot || (y2 == D_bot && x2 >= D_width - 1))
 			D_lp_missing = 0;
 	}
-	if (x2 == D_width - 1 && (xs == 0 || y1 == y2) && xe == D_width - 1 && y2 == D_height - 1 && (!bce || D_BE)) {
+	if (x2 == D_width - 1
+	 && (xs == 0 || y1 == y2)
+	 && xe == D_width - 1
+	 && y2 == D_height - 1
+	 && (!bce || D_BE)) {
 		if (x1 == 0 && y1 == 0 && D_auto_nuke)
 			NukePending();
 		if (x1 == 0 && y1 == 0 && D_CL) {
@@ -965,10 +966,7 @@ void Redisplay(int cur_only)
 	else
 		RefreshAll(1);
 	RefreshHStatus();
-	CV_CALL(D_forecv,
-		LayRestore();
-		LaySetCursor()
-	);
+	CV_CALL(D_forecv, LayRestoreAndSetCursor());
 }
 
 void RedisplayDisplays(int cur_only)
@@ -1157,53 +1155,132 @@ void ScrollV(int xs, int ys, int xe, int ye, int n, int bce)
 	if (D_lp_missing && missy != D_bot)
 		WriteLP(D_width - 1, missy);
 /* XXX
-  ChangeScrollRegion(oldtop, oldbot);
-  if (D_lp_missing && missy != D_bot)
-    WriteLP(D_width - 1, missy);
+	ChangeScrollRegion(oldtop, oldbot);
+	if (D_lp_missing && missy != D_bot)
+		WriteLP(D_width - 1, missy);
 */
 }
 
 void SetAttr(int new)
 {
-	int i, j, old, typ;
-	old = D_rend.attr;
-
 	if (!display)
 		return;
-	if (old == new)
+
+	/* Ignore functionality not provided by this terminal */
+	new &= ~D_td.td_ignored & A__MASK;
+
+	/* Convert merged functionality to a single attribute */
+	for (size_t i = 0; i<ARRAY_SIZE(D_td.td_merge); ++i) {
+		TermDefMerge *tdm = &D_td.td_merge[i];
+		if (!tdm->from)
+			break;
+		if (new & tdm->from) {
+			new &=~ tdm->from;
+			new |= tdm->to;
+		}
+	}
+
+	if (D_rend.attr == new)
 		return;
-	D_rend.attr = new;
-	typ = D_atyp;
-	if ((new & old) != old) {
-		if ((typ & ATYP_U))
-			AddCStr(D_UE);
-		if ((typ & ATYP_S))
-			AddCStr(D_SE);
-		if ((typ & ATYP_M)) {
-			AddCStr(D_ME);
-			/* ansi attrib handling: \E[m resets color, too */
-			if (D_hascolor)
-				D_rend.colorbg = D_rend.colorfg = 0;
-			if (!D_CG0) {
-				/* D_ME may also reset the alternate charset */
-				D_rend.font = FONT_LATIN1;
-				D_realfont = FONT_LATIN1;
-			}
+
+	if (D_td.td_ansi) {
+		AddCStr("\033[");
+		int not_first = 0;
+
+		/* If it's more efficient to do so, reset all attribute, and
+		 * then set any remaining.
+		 */
+		if (count_one_bits(D_rend.attr & ~new & A__MASK)*3 >=
+		    count_one_bits(new)*2
+		      # if 0
+		      /*
+		       * (Commented out because we can't see newcolorfg &
+		       * newcolorbg; this means we're effectively assuming
+		       * they're both 0.)
+		       */
+
+		      /*
+		       * Sending ‘\e[0m’ will also reset the colors, so
+		       * estimate the output sizes required to restore them.
+		       *
+		       *	 0 = no additional output will be required (or refrained)
+		       *	 5 = will have to send \e[XNm (or \e[9Nm or \e[10Nm)
+		       *	11 = will have to send \e[XN:5:NNNm
+		       *	20 = will have to send \e[XN:2::NNN:NNN:NNNm
+		       *	-5 = will refrain from sending "\e[X0m"
+		       *
+		       * (Where X=3 for foreground or X=4 for background.
+		       */
+
+		      /*
+		       * More precise estimates would need to use decimal
+		       * logarithms of the actual color values.)
+		       */
+		      + ( newcolorfg == D_rend.colorfg
+			  ? newcolorfg & 0x01000000 ? 5 :
+			    newcolorfg & 0x02000000 ? 11 :
+			    newcolorfg & 0x04000000 ? 20
+						    : 0
+			  : newcolorfg & 0x07000000 ? 0
+						    : -5
+			)
+		      + ( newcolorbg == D_rend.colorbg
+			  ? newcolorbg & 0x01000000 ? 5 :
+			    newcolorbg & 0x02000000 ? 11 :
+			    newcolorbg & 0x04000000 ? 20
+						    : 0
+			  : newcolorbg & 0x07000000 ? 0
+						    : -5
+			)
+		      # endif
+		) {
+			AddChar('0');
+			not_first++;
+			D_rend.colorbg = D_rend.colorfg = 0;	/* "\e[0;...m" resets color as well as attributes */
 		}
-		old = 0;
-		typ = 0;
-	}
-	old ^= new;
-	for (i = 0, j = 1; old && i < NATTR; i++, j <<= 1) {
-		if ((old & j) == 0)
-			continue;
-		old ^= j;
-		if (D_attrtab[i]) {
-			AddCStr(D_attrtab[i]);
-			typ |= D_attrtyp[i];
+
+		for (attr_mask_t to_be_unset; to_be_unset = lo_bit(D_rend.attr & ~new) ;) {
+			int ll = log_lo_bit(to_be_unset)+1;
+			if (ll == 1) {
+				ll = 22;
+				to_be_unset = A_BD | A_DI;
+			} else if (ll == 6) {
+				ll = 25;
+				to_be_unset = A_BL | A_FB;
+			} else
+				ll += 20;
+			tputs(tparm(";%d"+!not_first++, ll), 1, DoAddChar);
+			D_rend.attr &=~ to_be_unset;
 		}
+		for (attr_mask_t to_be_set; to_be_set = lo_bit(~D_rend.attr & new) ;) {
+			int ll = log_lo_bit(to_be_set)+1;
+			tputs(tparm(";%d"+!not_first++, ll), 1, DoAddChar);
+			D_rend.attr |= to_be_set;
+		}
+		AddCStr("m");
+		D_rend.attr = new;
+		return;
 	}
-	D_atyp = typ;
+
+	/* Remove unwanted attributes first, because sometimes doing so will
+	 * remove attributes that we want to keep, meaning that we will have to
+	 * add them back in again. */
+	for (attr_mask_t to_be_unset; to_be_unset = lo_bit(D_rend.attr & ~new) ;) {
+		int ll = log_lo_bit(to_be_unset);
+		TermDefAttr *tda = &D_td.td_attr[ll];
+		to_be_unset |= tda->tda_also_unset;
+		D_rend.attr &= ~to_be_unset;
+		AddCStr(tda->tda_unset);
+		if (to_be_unset & A_DFT_COLOR)
+			D_rend.colorbg = D_rend.colorfg = 0;	/* "\e[m" resets color as well as attributes */
+	}
+
+	for (attr_mask_t to_be_set; to_be_set = lo_bit(~D_rend.attr & new) ;) {
+		int ll = log_lo_bit(to_be_set);
+		TermDefAttr *tda = &D_td.td_attr[ll];
+		D_rend.attr |= to_be_set;
+		AddCStr(tda->tda_set);
+	}
 }
 
 void SetFont(int new)
@@ -1239,30 +1316,23 @@ void SetFont(int new)
 		AddCStr2(D_CS0, new);
 }
 
-static inline int gray4tocolor16(int gray)
+static inline int color4to16(int color)
 {
-	/* Convert 2-bit gray-scale to 16-color palette, which encodes a 3-bit
-	 * color cube and 1 brightness bit, and noting that light (8) black (0)
-	 * is usually darker than dark (0) white (7).
-	 *
-	 *   from      0₁₀     1₁₀     2₁₀     3₁₀
-	 *            00₂     01₂     10₂     11₂
-	 *     to   0000₂   1000₂   0111₂   1111₂
-	 *             0₁₀     8₁₀     7₁₀    15₁₀
+	/* Convert 2-bit gray-scale to: dark-black, light-black, dark-white,
+	 * light-white
+	 *	00	01	10	11
+	 *      0       1       2	3
+	 *      0       8       7       15
+	 *      0000    1000    0111    1111
 	 */
-#if 1
-	return (gray & 1 ? 8 : 0)
-	     | (gray & 2 ? 7 : 0);
-#else
 	static const uint8_t r[] = { 0, 8, 7, 15 };
-	return r[gray & 3];
-#endif
+	return r[color];
 }
 
 int color256to16(int color)
 {
 	if (color >= 232)
-		return gray4tocolor16((color - 232) / 6);
+		return color4to16((color - 232) / 6);
 	if (color >= 16) {
 		color -= 16;
 		int r = color / 36;
@@ -1273,7 +1343,7 @@ int color256to16(int color)
 		int max = r > g ? (r > b ? r : b)
 				: (g > b ? g : b);
 		if (min == max)
-			return gray4tocolor16(max + 1 >> 1);
+			return color4to16(max + 1 >> 1);
 		return (b - min) / (max - min) << 2
 		     | (g - min) / (max - min) << 1
 		     | (r - min) / (max - min)
@@ -1309,16 +1379,15 @@ int color256to88(int color)
  */
 void SetColor(uint32_t foreground, uint32_t background)
 {
-	uint32_t f, b, of, ob;
 	static unsigned char sftrans[8] = { 0, 4, 2, 6, 1, 5, 3, 7 };
 
 	if (!display)
 		return;
 
-	f = foreground;
-	b = background;
-	of = D_rend.colorfg;
-	ob = D_rend.colorbg;
+	uint32_t f = foreground;
+	uint32_t b = background;
+	uint32_t of = D_rend.colorfg;
+	uint32_t ob = D_rend.colorbg;
 	D_rend.colorfg = f;
 	D_rend.colorbg = b;
 
@@ -1343,7 +1412,7 @@ void SetColor(uint32_t foreground, uint32_t background)
 	if (!D_hascolor)
 		return;
 
-/* FOREGROUND */
+	/* FOREGROUND */
 	if (f != of && f == 0) {
 		AddCStr("\033[39m");	/* works because AX is set */
 	}
@@ -1366,19 +1435,15 @@ void SetColor(uint32_t foreground, uint32_t background)
 		}
 		if (D_CAF) {
 		     // AddCStr2(D_CAF, f);	// FIXME
-			tputs(tparm("\033[38;5;%dm", f), 1, DoAddChar);
+			tputs(tparm("\033[38:5:%dm", f), 1, DoAddChar);
 		}
-
 	}
 	if (f != of && (f & 0x04000000) && hastruecolor) {
-		uint8_t _r, _g, _b;
-
-		_r = (f & 0x00ff0000) >> 16;
-		_g = (f & 0x0000ff00) >> 8;
-		_b = (f & 0x000000ff);
-
+		uint8_t _r = f >> 16;
+		uint8_t _g = f >> 8;
+		uint8_t _b = f;
 		/* TODO - properly get escape code */
-		tputs(tparm("\033[38;2;%p1%d;%p2%d;%p3%dm", _r, _g, _b), 1, DoAddChar);
+		tputs(tparm("\033[38:2::%p1%d:%p2%d:%p3%dm", _r, _g, _b), 1, DoAddChar);
 	}
 
 	/* BACKGROUND */
@@ -1404,18 +1469,15 @@ void SetColor(uint32_t foreground, uint32_t background)
 		}
 		if (D_CAB) {
 		     // AddCStr2(D_CAB, b);	// FIXME
-			tputs(tparm("\033[48;5;%dm", b), 1, DoAddChar);
+			tputs(tparm("\033[48:5:%dm", b), 1, DoAddChar);
 		}
 	}
 	if (b != ob && (b & 0x04000000) && hastruecolor) {
-		uint8_t _r, _g, _b;
-
-		_r = (b & 0x00ff0000) >> 16;
-		_g = (b & 0x0000ff00) >> 8;
-		_b = (b & 0x000000ff);
-
+		uint8_t _r = b >> 16;
+		uint8_t _g = b >> 8;
+		uint8_t _b = b;
 		/* TODO - properly get escape code */
-		tputs(tparm("\033[48;2;%p1%d;%p2%d;%p3%dm", _r, _g, _b), 1, DoAddChar);
+		tputs(tparm("\033[48:2::%p1%d:%p2%d:%p3%dm", _r, _g, _b), 1, DoAddChar);
 	}
 }
 
@@ -1438,7 +1500,7 @@ void SetRendition(struct mchar *mc)
 		SetFont(mc->font);
 }
 
-void SetRenditionMline(struct mline *ml, int x)
+static void SetRenditionMline(struct mline *ml, int x)
 {
 	if (!display)
 		return;
@@ -2805,12 +2867,11 @@ static void disp_readev_fn(Event *event, void *data)
 static void disp_processinput(Display *display, unsigned char *buf, size_t size)
 {
 	if (D_encoding != (D_forecv ? D_forecv->c_layer->l_encoding : 0)) {
-		int c, enc;
-		ptrdiff_t i, j;
-		char buf2[IOSIZE * 2 + 10];
-		enc = D_forecv ? D_forecv->c_layer->l_encoding : 0;
-		for (i = j = 0; i < (ptrdiff_t)size; i++) {
-			c = ((unsigned char *)buf)[i];
+		char buf2[IOSIZE * 2 + 10], *p = buf2;
+		int const enc = D_forecv ? D_forecv->c_layer->l_encoding : 0;
+		size_t const MaxEncLen = 9U;
+		for (size_t i = 0; i < size && p < ARRAY_END(buf2) - MaxEncLen ; i++) {
+			int c = buf[i];
 			c = DecodeChar(c, D_encoding, &D_decodestate);
 			if (c == -2)
 				i--;	/* try char again */
@@ -2818,17 +2879,15 @@ static void disp_processinput(Display *display, unsigned char *buf, size_t size)
 				continue;
 			if (pastefont) {
 				int font = FONT_LATIN1;
-				j += EncodeChar(buf2 + j, c, enc, &font);
-				j += EncodeChar(buf2 + j, -1, enc, &font);
+				p += EncodeChar(p, c, enc, &font);
+				p += EncodeChar(p, -1, enc, &font);
 			} else
-				j += EncodeChar(buf2 + j, c, enc, NULL);
-			if (j > (int)ARRAY_SIZE(buf2) - 10)	/* just in case... */
-				break;
+				p += EncodeChar(p, c, enc, NULL);
 		}
-		(*D_processinput) (buf2, j);
+		D_processinput(buf2, p - buf2);
 		return;
 	}
-	(*D_processinput) ((char *)buf, size);
+	D_processinput((void *)buf, size);
 }
 
 static void disp_mousetimeout_fn(Event *event, void *data)
@@ -3018,9 +3077,7 @@ void RunBlanker(char **cmdv)
 	char termname[MAXTERMLEN + 6];
 	char **np;
 
-	strncpy(termname, "TERM=", 6);
-	strncpy(termname + 5, D_termname, MAXTERMLEN);
-	termname[ARRAY_SIZE(termname) - 1] = 0;
+	snprintf(termname, sizeof termname, "TERM=%s", D_termname);
 	KillBlanker();
 	D_blankerpid = -1;
 	if ((D_blankerev.fd = OpenDevice(cmdv, 0, &ptype, &m)) == -1) {

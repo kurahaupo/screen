@@ -33,15 +33,15 @@
 
 #include "config.h"
 
-#include "list_generic.h"
-
 #include <stdbool.h>
 #include <stdint.h>
 
-#include "screen.h"
-
+#include "display.h"
 #include "help.h"
+#include "layer.h"
+#include "list_generic.h"
 #include "misc.h"
+#include "screen.h"
 
 static char ListID[] = "license";
 
@@ -54,24 +54,23 @@ static char license[] = {
 	"Copyright (c) 1993-2007 Juergen Weigert, Michael Schroeder\n"
 	"Copyright (c) 1987 Oliver Laumann\n"
 	"\n"
-	"This program is free software; you can redistribute it and/or modify "
-	"it under the terms of the GNU General Public License as published by "
-	"the Free Software Foundation; either version 3, or (at your option) "
-	"any later version.\n"
+	"This program is free software; you can redistribute it and/or modify it under "
+	"the terms of the GNU General Public License as published by the Free "
+	"Software Foundation; either version 3, or (at your option) any later "
+	"version.\n"
 	"\n"
-	"This program is distributed in the hope that it will be useful, but "
-	"WITHOUT ANY WARRANTY; without even the implied warranty of "
-	"MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU "
-	"General Public License for more details.\n"
+	"This program is distributed in the hope that it will be useful, but WITHOUT "
+	"ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or "
+	"FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for "
+	"more details.\n"
 	"\n"
-	"You should have received a copy of the GNU General Public License "
-	"along with this program (see the file COPYING); if not, see "
-	"https://www.gnu.org/licenses/, or contact\n"
-	" Free Software Foundation, Inc.,\n"
-	" 51 Franklin Street, Fifth Floor, Boston, MA  02111-1301  USA.\n"
+	"You should have received a copy of the GNU General Public License along with "
+	"this program (see the file COPYING); if not, see "
+	"https://www.gnu.org/licenses/, or contact Free Software Foundation, Inc., 51 "
+	"Franklin Street, Fifth Floor, Boston, MA  02111-1301  USA.\n"
 	"\n"
-	"Send bug reports, fixes, enhancements, t-shirts, money, beer & pizza "
-	"to screen-devel@gnu.org\n"
+	"Send bug reports, fixes, enhancements, t-shirts, money, beer & pizza to "
+	"screen-devel@gnu.org\n"
 };
 
 static int gl_License_header(ListData *ldata)

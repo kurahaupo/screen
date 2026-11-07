@@ -34,8 +34,10 @@
 #ifndef SCREEN_BACKTICK_H
 #define SCREEN_BACKTICK_H
 
-#include <time.h>
-#include "screen.h"
+#include <time.h>	// for time_t
+
+#include "aalimits.h"	// for MAXSTR
+#include "sched.h"	// for Event
 
 typedef struct backtick {
 	struct backtick *next;

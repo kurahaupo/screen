@@ -28,16 +28,18 @@
 
 #include "config.h"
 
-#include "layer.h"
-
+#include "display.h"
 #include "encoding.h"
-#include "inline.h"		/* must follow ansi.h and image.h */
+#include "image.h"
+#include "inline.h"
+#include "layer.h"
+#include "layout.h"
 #include "mark.h"
 #include "misc.h"
 #include "screen.h"
 #include "tty.h"
-
-#include "inline.h"		/* must follow ansi.h and image.h */
+#include "viewport.h"
+#include "window.h"
 
 /*
  * Layer subsystem.
@@ -62,8 +64,12 @@ static struct mline *mlineoffset(const struct mline *ml, const int offset)
 	return &mml;
 }
 
-#define RECODE_MCHAR(mc) ((l->l_encoding == UTF8) != (D_encoding == UTF8) ? recode_mchar(mc, l->l_encoding, D_encoding) : (mc))
-#define RECODE_MLINE(ml) ((l->l_encoding == UTF8) != (D_encoding == UTF8) ? recode_mline(ml, l->l_width, l->l_encoding, D_encoding) : (ml))
+# define RECODE_MCHAR(mc) ((l->l_encoding == UTF8) != (D_encoding == UTF8) ? recode_mchar(mc, l->l_encoding, D_encoding) : (mc))
+# define RECODE_MLINE(ml) ((l->l_encoding == UTF8) != (D_encoding == UTF8) ? recode_mline(ml, l->l_width, l->l_encoding, D_encoding) : (ml))
+
+#define FOR_EACH_UNPAUSED_CANVAS(l) \
+		for (Canvas *cv = (l)->l_cvlist; cv; cv = cv->c_lnext) \
+			if ((l)->l_pause.d && cv->c_slorient) {} else
 
 void LGotoPos(Layer *l, int x, int y)
 {
@@ -72,9 +78,7 @@ void LGotoPos(Layer *l, int x, int y)
 	if (l->l_pause.d)
 		LayPauseUpdateRegion(l, x, x, y, y);
 
-	for (Canvas *cv = l->l_cvlist; cv; cv = cv->c_lnext) {
-		if (l->l_pause.d && cv->c_slorient)
-			continue;
+	FOR_EACH_UNPAUSED_CANVAS(l) {
 		display = cv->c_display;
 		if (D_blocked)
 			continue;
@@ -109,9 +113,7 @@ void LScrollH(Layer *l, int n, int y, int xs, int xe, int bce, struct mline *ol)
 		return;
 	if (l->l_pause.d)
 		LayPauseUpdateRegion(l, xs, xe, y, y);
-	for (Canvas *cv = l->l_cvlist; cv; cv = cv->c_lnext) {
-		if (l->l_pause.d && cv->c_slorient)
-			continue;
+	FOR_EACH_UNPAUSED_CANVAS(l) {
 		for (Viewport *vp = cv->c_vplist; vp; vp = vp->v_next) {
 			y2 = y + vp->v_yoff;
 			if (y2 < vp->v_ys || y2 > vp->v_ye)
@@ -154,9 +156,7 @@ void LScrollV(Layer *l, int n, int ys, int ye, int bce)
 		return;
 	if (l->l_pause.d)
 		LayPauseUpdateRegion(l, 0, l->l_width - 1, ys, ye);
-	for (Canvas *cv = l->l_cvlist; cv; cv = cv->c_lnext) {
-		if (l->l_pause.d && cv->c_slorient)
-			continue;
+	FOR_EACH_UNPAUSED_CANVAS(l) {
 		for (Viewport *vp = cv->c_vplist; vp; vp = vp->v_next) {
 			xs2 = vp->v_xoff;
 			xe2 = l->l_width - 1 + vp->v_xoff;
@@ -203,9 +203,7 @@ void LInsChar(Layer *l, struct mchar *c, int x, int y, struct mline *ol)
 
 	if (l->l_pause.d)
 		LayPauseUpdateRegion(l, x, l->l_width - 1, y, y);
-	for (Canvas *cv = l->l_cvlist; cv; cv = cv->c_lnext) {
-		if (l->l_pause.d && cv->c_slorient)
-			continue;
+	FOR_EACH_UNPAUSED_CANVAS(l) {
 		for (Viewport *vp = cv->c_vplist; vp; vp = vp->v_next) {
 			y2 = y + vp->v_yoff;
 			if (y2 < vp->v_ys || y2 > vp->v_ye)
@@ -250,9 +248,7 @@ void LPutChar(Layer *l, struct mchar *c, int x, int y)
 		LayPauseUpdateRegion(l, x, x + (c->mbcs ? 1 : 0)
 				     , y, y);
 
-	for (Canvas *cv = l->l_cvlist; cv; cv = cv->c_lnext) {
-		if (l->l_pause.d && cv->c_slorient)
-			continue;
+	FOR_EACH_UNPAUSED_CANVAS(l) {
 		display = cv->c_display;
 		if (D_blocked)
 			continue;
@@ -279,9 +275,7 @@ void LPutStr(Layer *l, char *s, int n, struct mchar *r, int x, int y)
 	if (l->l_pause.d)
 		LayPauseUpdateRegion(l, x, x + n - 1, y, y);
 
-	for (Canvas *cv = l->l_cvlist; cv; cv = cv->c_lnext) {
-		if (l->l_pause.d && cv->c_slorient)
-			continue;
+	FOR_EACH_UNPAUSED_CANVAS(l) {
 		for (Viewport *vp = cv->c_vplist; vp; vp = vp->v_next) {
 			y2 = y + vp->v_yoff;
 			if (y2 < vp->v_ys || y2 > vp->v_ye)
@@ -327,9 +321,7 @@ void LPutWinMsg(Layer *l, char *s, int n, struct mchar *r, int x, int y)
 	len = strlen(s);
 	if (len > n)
 		len = n;
-	for (Canvas *cv = l->l_cvlist; cv; cv = cv->c_lnext) {
-		if (l->l_pause.d && cv->c_slorient)
-			continue;
+	FOR_EACH_UNPAUSED_CANVAS(l) {
 		for (Viewport *vp = cv->c_vplist; vp; vp = vp->v_next) {
 			y2 = y + vp->v_yoff;
 			if (y2 < vp->v_ys || y2 > vp->v_ye)
@@ -374,9 +366,7 @@ void LClearLine(Layer *l, int y, int xs, int xe, int bce, struct mline *ol)
 		xe = l->l_width - 1;
 	if (l->l_pause.d)
 		LayPauseUpdateRegion(l, xs, xe, y, y);
-	for (Canvas *cv = l->l_cvlist; cv; cv = cv->c_lnext) {
-		if (l->l_pause.d && cv->c_slorient)
-			continue;
+	FOR_EACH_UNPAUSED_CANVAS(l) {
 		for (Viewport *vp = cv->c_vplist; vp; vp = vp->v_next) {
 			xs2 = xs + vp->v_xoff;
 			xe2 = xe + vp->v_xoff;
@@ -411,9 +401,7 @@ void LClearArea(Layer *l, int xs, int ys, int xe, int ye, int bce, int uself)
 		xe = l->l_width - 1;
 	if (l->l_pause.d)
 		LayPauseUpdateRegion(l, xs, xe, ys, ye);
-	for (Canvas *cv = l->l_cvlist; cv; cv = cv->c_lnext) {
-		if (l->l_pause.d && cv->c_slorient)
-			continue;
+	FOR_EACH_UNPAUSED_CANVAS(l) {
 		display = cv->c_display;
 		if (D_blocked)
 			continue;
@@ -458,9 +446,7 @@ void LCDisplayLine(Layer *l, struct mline *ml, int y, int xs, int xe, int isblan
 	int xs2, xe2, y2;
 	if (l->l_pause.d)
 		LayPauseUpdateRegion(l, xs, xe, y, y);
-	for (Canvas *cv = l->l_cvlist; cv; cv = cv->c_lnext) {
-		if (l->l_pause.d && cv->c_slorient)
-			continue;
+	FOR_EACH_UNPAUSED_CANVAS(l) {
 		display = cv->c_display;
 		if (D_blocked)
 			continue;
@@ -525,9 +511,7 @@ void LWrapChar(Layer *l, struct mchar *c, int y, int top, int bot, bool ins)
 		/* cursor after wrapping */
 		yy = y == l->l_height - 1 ? y : y + 1;
 
-		for (Canvas *cv = l->l_cvlist; cv; cv = cv->c_lnext) {
-			if (l->l_pause.d && cv->c_slorient)
-				continue;
+		FOR_EACH_UNPAUSED_CANVAS(l) {
 			y2 = 0;	/* gcc -Wall */
 			display = cv->c_display;
 			if (D_blocked)
@@ -568,9 +552,7 @@ void LWrapChar(Layer *l, struct mchar *c, int y, int top, int bot, bool ins)
 	} else {
 		/* hard case: scroll up */
 
-		for (Canvas *cv = l->l_cvlist; cv; cv = cv->c_lnext) {
-			if (l->l_pause.d && cv->c_slorient)
-				continue;
+		FOR_EACH_UNPAUSED_CANVAS(l) {
 			display = cv->c_display;
 			if (D_blocked)
 				continue;
@@ -915,8 +897,7 @@ void ExitOverlayPage(void)
 	oldlay->l_cvlist = NULL;
 	LayerCleanupMemory(oldlay);
 	free((char *)oldlay);
-	LayRestore();
-	LaySetCursor();
+	LayRestoreAndSetCursor();
 }
 
 int LayProcessMouse(Layer *l, unsigned char ch)
