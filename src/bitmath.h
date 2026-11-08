@@ -197,7 +197,7 @@ static inline bool      is_bit_range(int i)       { return is_single_bit(range_e
 # define count_one_bits(x) stdc_count_one_bits(x)
 #elif HAVE_BUILTIN_POPCOUNT
 # define count_one_bits(x) ( sizeof(x) <= 4 ? __builtin_popcount(x) \
-					    : __builtin_popcountll(x)
+					    : __builtin_popcountll(x) )
 #else
 static inline uint8_t count_one_bits_ull(uint64_t x)
 {
@@ -209,7 +209,7 @@ static inline uint8_t count_one_bits_ull(uint64_t x)
 	x += x >> 8;
 	x += x >> 16;
 	x += x >> 32;
-	return x;
+	return x & 0xff;
 }
 static inline uint8_t count_one_bits_ul(uint32_t x)
 {
