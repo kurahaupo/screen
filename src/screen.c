@@ -446,7 +446,7 @@ int main(int argc, char **argv)
 	int n;
 	char *ap;
 	char *av0;
-	int mflag = 0;
+	bool mflag = false;
 	char *myname = (argc == 0) ? "screen" : argv[0];
 	struct stat st;
 	mode_t oumask;
