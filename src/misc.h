@@ -6,6 +6,8 @@
 struct mchar;
 typedef void signal_handler_t(int);
 
+#include "image.h"	// TODO CHECKME
+
 char *SaveStr(const char *);
 char *SaveStrn(const char *, size_t);
 #ifndef HAVE_STRERROR

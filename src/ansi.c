@@ -69,7 +69,7 @@ struct mline mline_old;
 struct mline mline_blank;
 struct mline mline_null;
 
-struct mchar mchar_null;
+struct mchar mchar_null = { 0, 0, 0, 0, 0, 0 };
 struct mchar mchar_blank = { ' ', 0, 0, 0, 0, 0 };
 struct mchar mchar_so = { ' ', A_RV, 0, 0, 0, 0 };
 

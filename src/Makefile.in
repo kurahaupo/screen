@@ -625,6 +625,8 @@ list_window.o: $(srcdir)/winmsg.h
 list_window.o: comm.h
 list_window.o: config.h
 list_window.o: term.h
+logfile.o: $(srcdir)/aatypes.h
+logfile.o: $(srcdir)/image.h
 logfile.o: $(srcdir)/logfile.c
 logfile.o: $(srcdir)/logfile.h
 logfile.o: $(srcdir)/misc.h
@@ -818,6 +820,8 @@ socket.o: term.h
 stringbuf.o: $(srcdir)/stringbuf.c
 stringbuf.o: $(srcdir)/stringbuf.h
 stringbuf.o: config.h
+telnet.o: $(srcdir)/aatypes.h
+telnet.o: $(srcdir)/image.h
 telnet.o: $(srcdir)/misc.h
 telnet.o: $(srcdir)/telnet.c
 telnet.o: config.h
@@ -871,6 +875,8 @@ tty.o: $(srcdir)/window.h
 tty.o: comm.h
 tty.o: config.h
 tty.o: term.h
+utmp.o: $(srcdir)/aatypes.h
+utmp.o: $(srcdir)/image.h
 utmp.o: $(srcdir)/misc.h
 utmp.o: $(srcdir)/os.h
 utmp.o: $(srcdir)/screen.h

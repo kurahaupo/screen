@@ -326,7 +326,7 @@ static void FreeMline(struct mline *ml)
 
 static int AllocMline(struct mline *ml, int w)
 {
-	ml->image = malloc(w * 4);
+	ml->image = malloc(w * sizeof *ml->image);
 	ml->attr = null_attr;
 	ml->font = null_font;
 	ml->colorbg = null_color;
@@ -342,25 +342,25 @@ static int BcopyMline(struct mline *mlf, int xf, struct mline *mlt, int xt, int 
 
 	memmove(mlt->image + xt, mlf->image + xf, l * 4);
 	if (mlf->attr != null_attr && mlt->attr == null_attr) {
-		if ((mlt->attr = calloc(w, 4)) == NULL)
+		if ((mlt->attr = calloc(w, sizeof *mlt->attr)) == NULL)
 			mlt->attr = null_attr, r = -1;
 	}
 	if (mlt->attr != null_attr)
 		memmove(mlt->attr + xt, mlf->attr + xf, l * 4);
 	if (mlf->font != null_font && mlt->font == null_font) {
-		if ((mlt->font = calloc(w, 4)) == NULL)
+		if ((mlt->font = calloc(w, sizeof *mlt->font)) == NULL)
 			mlt->font = null_font, r = -1;
 	}
 	if (mlt->font != null_font)
 		memmove(mlt->font + xt, mlf->font + xf, l * 4);
 	if (mlf->colorbg != null_color && mlt->colorbg == null_color) {
-		if ((mlt->colorbg = calloc(w, 4)) == NULL)
+		if ((mlt->colorbg = calloc(w, sizeof *mlt->colorbg)) == NULL)
 			mlt->colorbg = null_color, r = -1;
 	}
 	if (mlt->colorbg != null_color)
 		memmove(mlt->colorbg + xt, mlf->colorbg + xf, l * 4);
 	if (mlf->colorfg != null_color && mlt->colorfg == null_color) {
-		if ((mlt->colorfg = calloc(w, 4)) == NULL)
+		if ((mlt->colorfg = calloc(w, sizeof *mlt->colorfg)) == NULL)
 			mlt->colorfg = null_color, r = -1;
 	}
 	if (mlt->colorfg != null_color)
