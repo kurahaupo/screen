@@ -28,7 +28,7 @@ trap 'rm -rf tmp$$' 0
 # Do not re-order the compilation relative to the other steps, lest you
 # encounter a dangling #ifdef in the partially build tmp$$/comm.h.
 
-$CC -E $IQ./tmp$$ $IQ. "$IQ$srcdir" "$source_file" > tmp$$/comm.cpp || exit $?
+$CC -E "$IQ./tmp$$" "$IQ." "$IQ$srcdir" "$source_file" > tmp$$/comm.cpp || exit $?
 
 cat << EOF
 /*
@@ -77,7 +77,7 @@ EOF
 
 < $source_file >&2 \
 $AWK -v source_file="$source_file" '
-/^[[:space:]]+[{][[:space:]]*"/ {   #}
+/^[[:space:]]+[{][[:space:]]*"/ {	#}
     if (split($0, f, "\"") < 3) {
         printf "*** ERROR: invalid line %u in %s!!!\n\n", NR, source_file;
         exit 1;

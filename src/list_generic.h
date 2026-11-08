@@ -27,6 +27,8 @@
 #include <stddef.h>	// for size_t
 #include <stdint.h>	//
 
+struct Window;
+
 typedef struct ListData ListData;
 typedef struct ListRow ListRow;
 typedef struct GenericList GenericList;
@@ -60,8 +62,6 @@ struct ListData {
 
 	void *data;		/* List specific data */
 };
-
-struct Window;
 
 ListRow *glist_add_row(ListData *ldata, void *data, ListRow *after);
 

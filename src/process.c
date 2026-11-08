@@ -986,7 +986,7 @@ static void DoCommandObuflimit(struct action *act)
 	D_obuflenmax = D_obuflen - D_obufmax;
 }
 
-static void DoCommandDumptermcap(struct action *act)
+static void DoCommandDumptermcap(struct action *act UNUSED)
 {
 	struct acluser *user = display ? D_user : users;
 
@@ -1030,24 +1030,24 @@ static void DoCommandLog(struct action *act)
 		LogToggle(b);
 }
 
-static void DoCommandSuspend(struct action *act)
+static void DoCommandSuspend(struct action *act UNUSED)
 {
 	Detach(D_STOP);
 }
 
-static void DoCommandNext(struct action *act)
+static void DoCommandNext(struct action *act UNUSED)
 {
 	if (MoreWindows())
 		SwitchWindow(NextWindow());
 }
 
-static void DoCommandPrev(struct action *act)
+static void DoCommandPrev(struct action *act UNUSED)
 {
 	if (MoreWindows())
 		SwitchWindow(PreviousWindow());
 }
 
-static void DoCommandParent(struct action *act)
+static void DoCommandParent(struct action *act UNUSED)
 {
 	if (MoreWindows()) {
 		Window *w = ParentWindow();
@@ -1167,7 +1167,7 @@ static void DoCommandZmodem(struct action *act)
 		OutputMsg(0, "zmodem mode is %s", zmodes[zmodem_mode]);
 }
 
-static void DoCommandUnbindall(struct action *act)
+static void DoCommandUnbindall(struct action *act UNUSED)
 {
 	for (size_t i = 0; i < ARRAY_SIZE(ktab); i++)
 		ClearAction(&ktab[i]);
@@ -1513,7 +1513,7 @@ static void DoCommandStuff(struct action *act)
 		LayProcess(&s, &len);
 }
 
-static void DoCommandRedisplay(struct action *act)
+static void DoCommandRedisplay(struct action *act UNUSED)
 {
 	Activate(-1);
 }
@@ -1528,17 +1528,17 @@ static void DoCommandWindows(struct action *act)
 		ShowWindows(act, -1);
 }
 
-static void DoCommandVersion(struct action *act)
+static void DoCommandVersion(struct action *act UNUSED)
 {
 	OutputMsg(0, "screen %s", version);
 }
 
-static void DoCommandInfo(struct action *act)
+static void DoCommandInfo(struct action *act UNUSED)
 {
 	ShowInfo();
 }
 
-static void DoCommandDinfo(struct action *act)
+static void DoCommandDinfo(struct action *act UNUSED)
 {
 	ShowDInfo();
 }
@@ -1570,13 +1570,13 @@ static void DoCommandCommand(struct action *act)
 		SwitchWindow(display && D_other ? D_other : NextWindow());
 }
 
-static void DoCommandOther(struct action *act)
+static void DoCommandOther(struct action *act UNUSED)
 {
 	if (MoreWindows())
 		SwitchWindow(display && D_other ? D_other : NextWindow());
 }
 
-static void DoCommandMeta(struct action *act)
+static void DoCommandMeta(struct action *act UNUSED)
 {
 	struct acluser *user = display ? D_user : users;
 	char ch = user->u_Esc;
@@ -1587,7 +1587,7 @@ static void DoCommandMeta(struct action *act)
 		LayProcess(&s, &len);
 }
 
-static void DoCommandXon(struct action *act)
+static void DoCommandXon(struct action *act UNUSED)
 {
 	char ch = Ctrl('q');
 	char *s = &ch;
@@ -1655,7 +1655,7 @@ static void DoCommandBreak(struct action *act)
 	SendBreak(fore, n, false);
 }
 
-static void DoCommandLockscreen(struct action *act)
+static void DoCommandLockscreen(struct action *act UNUSED)
 {
 	Detach(D_LOCK);
 }
@@ -1836,9 +1836,7 @@ static void DoCommandHeight(struct action *act)
 		else if (w == D_width)
 			OutputMsg(0, "Your termcap does not specify how to change the terminal's height to %d.", h);
 		else
-			OutputMsg(0,
-				  "Your termcap does not specify how to change the terminal's resolution to %dx%d.",
-				  w, h);
+			OutputMsg(0, "Your termcap does not specify how to change the terminal's resolution to %d×%d.", w, h);
 	}
 }
 
@@ -1881,7 +1879,7 @@ static void DoCommandColon(struct action *act)
 	}
 }
 
-static void DoCommandLastmsg(struct action *act)
+static void DoCommandLastmsg(struct action *act UNUSED)
 {
 	if (D_status_lastmsg)
 		OutputMsg(0, "%s", D_status_lastmsg);
@@ -1963,7 +1961,7 @@ static void DoCommandWritelock(struct action *act)
 		  (fore->w_wlock == WLOCK_AUTO) ? "auto" : ((fore->w_wlock == WLOCK_OFF) ? "off" : "on"));
 }
 
-static void DoCommandClear(struct action *act)
+static void DoCommandClear(struct action *act UNUSED)
 {
 	ResetAnsiState(fore);
 	WriteString(fore, "\033[H\033[J", 6);
@@ -2011,7 +2009,7 @@ static void DoCommandMonitor(struct action *act)
 	}
 }
 
-static void DoCommandDisplays(struct action *act)
+static void DoCommandDisplays(struct action *act UNUSED)
 {
 	display_displays();
 }
@@ -2078,12 +2076,12 @@ static void DoCommandHelp(struct action *act)
 		display_help(NULL, ktab);
 }
 
-static void DoCommandLicense(struct action *act)
+static void DoCommandLicense(struct action *act UNUSED)
 {
 	display_license();
 }
 
-static void DoCommandCopy(struct action *act)
+static void DoCommandCopy(struct action *act UNUSED)
 {
 	if (flayer->l_layfn != &WinLf) {
 		OutputMsg(0, "Must be on a window layer");
@@ -2093,7 +2091,7 @@ static void DoCommandCopy(struct action *act)
 	WindowChanged(fore, WINESC_COPY_MODE);
 }
 
-static void DoCommandHistory(struct action *act)
+static void DoCommandHistory(struct action *act UNUSED)
 {
 	static char *pasteargs[] = { ".", NULL };
 	static int pasteargl[] = { 1 };
@@ -2158,8 +2156,7 @@ static void DoCommandHistory(struct action *act)
 				l += RecodeBuf((unsigned char *)plop_tab[(int)(unsigned char)ch].buf,
 					       plop_tab[(int)(unsigned char)ch].len,
 					       plop_tab[(int)(unsigned char)ch].enc,
-					       enc,
-					       NULL);
+					       enc, NULL);
 			else
 				l += plop_tab[(int)(unsigned char)ch].len;
 		}
@@ -2285,8 +2282,7 @@ static void DoCommandPaste(struct action *act)
 				l += RecodeBuf((unsigned char *)plop_tab[(int)(unsigned char)ch].buf,
 					       plop_tab[(int)(unsigned char)ch].len,
 					       plop_tab[(int)(unsigned char)ch].enc,
-					       enc,
-					       NULL);
+					       enc, NULL);
 			else
 				l += plop_tab[(int)(unsigned char)ch].len;
 		}
@@ -2435,7 +2431,7 @@ static void DoCommandReadbuf(struct action *act)
 	}
 }
 
-static void DoCommandRemovebuf(struct action *act)
+static void DoCommandRemovebuf(struct action *act UNUSED)
 {
 	KillBuffers();
 }
@@ -2574,13 +2570,13 @@ static void DoCommandShelltitle(struct action *act)
 	(void)ParseSaveStr(act, &nwin_default.aka);
 }
 
-static void DoCommandTerminfo(struct action *act)
+static void DoCommandTerminfo(struct action *act UNUSED)
 {
 	if (!rc_name || !*rc_name)
 		OutputMsg(0, "Sorry, too late now. Place that in your .screenrc file.");
 }
 
-static void DoCommandSleep(struct action *act)
+static void DoCommandSleep(struct action *act UNUSED)
 {
 }
 
@@ -3038,7 +3034,7 @@ static void DoCommandSilencewait(struct action *act)
 		OutputMsg(0, "silencewait set to %d seconds", SilenceWait);
 }
 
-static void DoCommandBumpright(struct action *act)
+static void DoCommandBumpright(struct action *act UNUSED)
 {
 	Window *win = NextWindow();
 
@@ -3046,7 +3042,7 @@ static void DoCommandBumpright(struct action *act)
 		SwapWindows(fore->w_number, win->w_number);
 }
 
-static void DoCommandBumpleft(struct action *act)
+static void DoCommandBumpleft(struct action *act UNUSED)
 {
 	Window *win = PreviousWindow();
 
@@ -3054,7 +3050,7 @@ static void DoCommandBumpleft(struct action *act)
 		SwapWindows(fore->w_number, win->w_number);
 }
 
-static void DoCommandCollapse(struct action *act)
+static void DoCommandCollapse(struct action *act UNUSED)
 {
 	CollapseWindowlist();
 }
@@ -3107,7 +3103,7 @@ static void DoCommandZombie_timeout(struct action *act)
 		fore->w_poll_zombie_timeout = nwin_default.poll_zombie_timeout;
 }
 
-static void DoCommandSort(struct action *act)
+static void DoCommandSort(struct action *act UNUSED)
 {
 	if (first_window == last_window) {
 		Msg(0, "Less than two windows, sorting makes no sense.\n");
@@ -3462,7 +3458,7 @@ static void DoCommandBindkey(struct action *act)
 				if (args[1])
 					break;
 			} else if (*argl == (kme->fl & ~KMAP_NOTIMEOUT)
-				&& memcmp(kme->str, *args, *argl) == 0)
+				   && memcmp(kme->str, *args, *argl) == 0)
 				break;
 		if (i == kmap_extn) {
 			if (!args[1]) {
@@ -3552,12 +3548,12 @@ static void DoCommandMaptimeout(struct action *act)
 		OutputMsg(0, "maptimeout is %dms", maptimeout);
 }
 
-static void DoCommandMapnotnext(struct action *act)
+static void DoCommandMapnotnext(struct action *act UNUSED)
 {
 	D_dontmap = 1;
 }
 
-static void DoCommandMapdefault(struct action *act)
+static void DoCommandMapdefault(struct action *act UNUSED)
 {
 	D_mapdefault = 1;
 }
@@ -3935,7 +3931,6 @@ static inline bool dot_or_0_3(char c)
 static void DoCommandDefcharset(struct action *act)
 {
 	char **args = act->args;
-	size_t len;
 
 	if (*args == NULL) {
 		char buf[256] = { 0 };
@@ -3944,7 +3939,7 @@ static void DoCommandDefcharset(struct action *act)
 		OutputMsg(0, "default charset is '%s'", buf);
 		return;
 	}
-	len = strlen(*args);
+	size_t len = strlen(*args);
 	if (len == 0 || len > 6) {
 		OutputMsg(0, "%s: defcharset: string has illegal size.", rc_name);
 		return;
@@ -4140,19 +4135,19 @@ static void DoCommandSgr3mode(struct action *act)
 	}
 }
 
-static void DoCommandRemove(struct action *act)
+static void DoCommandRemove(struct action *act UNUSED)
 {
 	RemCanvas();
 	Activate(-1);
 }
 
-static void DoCommandOnly(struct action *act)
+static void DoCommandOnly(struct action *act UNUSED)
 {
 	OneCanvas();
 	Activate(-1);
 }
 
-static void DoCommandFit(struct action *act)
+static void DoCommandFit(struct action *act UNUSED)
 {
 	D_forecv->c_xoff = D_forecv->c_xs;
 	D_forecv->c_yoff = D_forecv->c_ys;
@@ -4290,7 +4285,7 @@ static void DoCommandBacktick(struct action *act)
 	WindowChanged(NULL, WINESC_BACKTICK);
 }
 
-static void DoCommandBlanker(struct action *act)
+static void DoCommandBlanker(struct action *act UNUSED)
 {
 	if (blankerprg) {
 		RunBlanker(blankerprg);
@@ -5052,7 +5047,8 @@ int Parse(char *buf, int bufl, char **args, int *argl)
 				}
 			} else if (delim != '\'' && *p == '$'
 				   && (p[1] == '{' || p[1] == ':' || (p[1] >= 'a' && p[1] <= 'z')
-				       || (p[1] >= 'A' && p[1] <= 'Z') || (p[1] >= '0' && p[1] <= '9')
+				       || (p[1] >= 'A' && p[1] <= 'Z')
+				       || (p[1] >= '0' && p[1] <= '9')
 				       || p[1] == '_')) {
 				char *ps, *pe, op, *v, xbuf[11], path[MAXPATHLEN];
 				int vl;
@@ -6992,11 +6988,11 @@ uint64_t ParseAttrColor(char *str, int msgok)
  */
 void ApplyAttrColor(uint64_t i, struct mchar *mc)
 {
-	uint8_t a = i >> 56;
+	attr_mask_t a = i >> 56;	/* TODO: NEED 3 MORE BITS!!! */
 	uint8_t h = i >> 48;
 
-	uint32_t b = i >> 24 & 0xFFFFFF | h << 20 & 0x07000000;
-	uint32_t f = i       & 0xFFFFFF | h << 24 & 0x07000000;
+	color_t b = i >> 24 & 0xFFFFFF | h << 20 & 0x07000000;
+	color_t f = i       & 0xFFFFFF | h << 24 & 0x07000000;
 
 	mc->attr = a;
 	mc->colorbg = b;

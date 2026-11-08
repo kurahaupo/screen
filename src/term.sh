@@ -38,24 +38,24 @@ struct term {
 
 union tcu {
 	bool flg;
-	int  num;
+	int num;
 	char *str;
 };
 
 extern struct term term[];
-
 EOF
 
-$AWK < "$source_file" -v source_file="$source_file" '
-/^[[:space:]]+[{] ".*KMAPDEF[(]/{ #}
+< "$source_file" \
+$AWK -v source_file="$source_file" '
+/^[[:space:]]+[{] ".*KMAPDEF[(]/{	#}
     if (min == 0) min = s
     max = s;
 }
-/^[[:space:]]+[{] ".*KMAPADEF[(]/{ #}
+/^[[:space:]]+[{] ".*KMAPADEF[(]/{	#}
     if (amin == 0) amin = s
     amax = s;
 }
-/^[[:space:]]+[{] ".*KMAPMDEF[(]/{ #}
+/^[[:space:]]+[{] ".*KMAPMDEF[(]/{	#}
     if (mmin == 0) mmin = s
     mmax = s;
 }
@@ -64,31 +64,32 @@ $AWK < "$source_file" -v source_file="$source_file" '
     b=tolower(substr($3,3,3));
     if (length(a)==2) {
         a=toupper(aa);
-        if (substr(a,0,1) == substr(aa,0,1)) a="C"a;
+        if (substr(a,0,1) == substr(aa,0,1))
+            a="C"a;
     }
     if (nolist == 0) {
-        printf "# define d_%-12s d_td.td_tcs[%d].%s\n",a,s,b
-        printf "# define D_%-12s DISPLAY(d_%s)\n",a,a
+        printf "# define d_%-12s d_td.td_tcs[%d].%s\n", a, s, b
+        printf "# define D_%-12s DISPLAY(d_%s)\n",      a, a
     }
     s++;
 }
-/[[:space:]]*\/[*/]+[[:space:]]+define/{
-    printf "#define  %-14s %d\t\t/* line %u in %s */\n",$3,s,NR,source_file
+/^[[:space:]]*\/[*/]+[[:space:]]+define/{
+    printf "#define  %-14s %d\t\t/* line %u in %s */\n", $3, s, NR, source_file
 }
-/[[:space:]]*\/[/*]+[[:space:]]*nolist/{
+/^[[:space:]]*\/[*/]+[[:space:]]*nolist/{
     nolist = 1;
 }
-/[[:space:]]*\/[/*]+[[:space:]]*list/{
+/^[[:space:]]*\/[*/]+[[:space:]]*list/{
     nolist = 0;
 }
 END {
     printf "\n"
-    printf "# define %-14s %d\n", "KMAPDEFSTART", min
-    printf "# define %-14s %d\n", "NKMAPDEF", max-min+1
+    printf "# define %-14s %d\n", "KMAPDEFSTART",  min
+    printf "# define %-14s %d\n", "NKMAPDEF",      max-min+1
     printf "# define %-14s %d\n", "KMAPADEFSTART", amin
-    printf "# define %-14s %d\n", "NKMAPADEF", amax-amin+1
+    printf "# define %-14s %d\n", "NKMAPADEF",     amax-amin+1
     printf "# define %-14s %d\n", "KMAPMDEFSTART", mmin
-    printf "# define %-14s %d\n", "NKMAPMDEF", mmax-mmin+1
+    printf "# define %-14s %d\n", "NKMAPMDEF",     mmax-mmin+1
 }
 '
 } > term.h.$$ || { ex=$? ; rm -f *.$$ ; exit $ex ; }
@@ -106,11 +107,12 @@ cat << EOF &&
 
 EOF
 
-$AWK -v"source_file=$source_file" < "$source_file" '
+< "$source_file" \
+$AWK -v source_file="$source_file" '
 /^[[:space:]]+[{][[:space:]]+".*KMAP/{  #}
     xline[s] = NR
     for (i = 4; i <= NF; i++) {
-        q = $(i)
+        q = $i
         if (substr(q, 1, 8) == "KMAPDEF(") {
             if (min == 0) min = s
             max = s
@@ -126,7 +128,7 @@ $AWK -v"source_file=$source_file" < "$source_file" '
         }
     }
 }
-/^[[:space:]]+[{][[:space:]]+"/{    #}
+/^[[:space:]]+[{][[:space:]]+"/{	#}
     s++;
 }
 END {

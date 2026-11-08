@@ -216,7 +216,8 @@ struct Window {
 		int CharsetR;
 		int Charsets[4];
 	} w_saved;
-	int w_top, w_bot;	/* scrollregion */
+	int w_top;		/* scrollregion */
+	int w_bot;
 	bool w_wrap;		/* autowrap */
 	int w_origin;		/* origin mode */
 	bool w_insert;		/* window is in insert mode */
@@ -236,7 +237,7 @@ struct Window {
 	char *w_tabs;		/* line with tabs */
 	int w_bell;		/* bell status of this window */
 	int w_flow;		/* flow flags */
-	struct Log *w_log;		/* log to file */
+	struct Log *w_log;	/* log to file */
 	int w_logsilence;	/* silence in secs */
 	int w_monitor;		/* monitor status */
 	int w_silencewait;	/* wait for silencewait secs */
@@ -350,11 +351,11 @@ int winexec(char **);
 void FreePseudowin(Window *);
 void nwin_compose(struct NewWindow *, struct NewWindow *, struct NewWindow *);
 int DoStartLog(Window *, char *, int);
-int ReleaseAutoWritelock(struct Display *, Window *);
-int ObtainAutoWritelock(struct Display *, Window *);
+int ReleaseAutoWritelock(struct Display *, struct Window *);
+int ObtainAutoWritelock(struct Display *, struct Window *);
 int OpenDevice(char **, int, int *, char **);
-void CloseDevice(Window *);
-void zmodem_abort(Window *, struct Display *);
+void CloseDevice(struct Window *);
+void zmodem_abort(struct Window *, struct Display *);
 void WindowDied(Window *, int, int);
 void ResetWindow(Window *);
 Window *GetWindowByNumber(uint16_t);

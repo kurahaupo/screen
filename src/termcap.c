@@ -943,7 +943,7 @@ static inline bool IsSGR(char *s, int code)
 
 static inline bool SubstituteMissingAttr(attr_t to, attr_t from)
 {
-	if (D_td.td_attr[to].tda_set && D_td.td_attr[from].tda_set)
+	if (D_td.td_attr[to].tda_set || ! D_td.td_attr[from].tda_set)
 		return false;
 	D_td.td_attr[to] = D_td.td_attr[from];
 	return true;
@@ -1003,7 +1003,8 @@ int InitTermcap(int width, int height)
 			break;
 		default:
 			Panic(0, "Illegal tc type in entry #%zu", i);
-			/*NOTREACHED*/}
+			/*NOTREACHED*/
+		}
 	}
 
 	/*
@@ -1096,16 +1097,12 @@ int InitTermcap(int width, int height)
 
 	if (D_SO && D_SE == NULL) {
 		Msg(0, "Warning: 'so' but no 'se' capability.");
-		if (D_ME)
-			;
-		else
+		if (D_ME == NULL)
 			D_SO = NULL;
 	}
 	if (D_US && D_UE == NULL) {
 		Msg(0, "Warning: 'us' but no 'ue' capability.");
-		if (D_ME)
-			;
-		else
+		if (D_ME == NULL)
 			D_US = NULL;
 	}
 	if ((D_MH || D_MD || D_MR || D_MB) && D_ME == NULL) {
@@ -1129,7 +1126,6 @@ int InitTermcap(int width, int height)
 	if (D_MR)   D_td.td_attr[ATTR_RV] = (TermDefAttr){ D_MR,  D_ME, A_ME };	// 7 / 27	B	mr	rev		begin	Reverse
 
 	/* Guess some stuff about ECMA-48 terminals */
-        char mbuf[MAXSTR] = "ANSI PROBES", *cmb = mbuf+11, *const emb = mbuf + sizeof mbuf;
 	int const num_verify = ATTR_RV + 1 - ATTR_BD;
 	int ansi_probe_failures = 0;
 	for (int i=ATTR_BD; i<=ATTR_RV ; ++i) {
@@ -1138,26 +1134,18 @@ int InitTermcap(int width, int height)
 		int const p = j == 1 ? 22 :	/* intensity change, but note that some terminals treat 1 as "heavy strike", not just "bright", so that \e[1;2m results in heavy-strike+dim */
 			      j == 6 ? 25 :	/* blink rate change */
 				       j+20;
-		if (a->tda_set   && !IsSGR(a->tda_set,   j)) { ansi_probe_failures = num_verify; seprintf(&cmb, emb, "; SGR#%u.set = ", j); seputsq(&cmb, emb, a->tda_set); break; }
+		if (a->tda_set   && !IsSGR(a->tda_set,   j)) { ansi_probe_failures = num_verify; break; }
 		if (a->tda_unset && !IsSGR(a->tda_unset, p)
-				 && !IsSGR(a->tda_unset, 0)) { ansi_probe_failures = num_verify; seprintf(&cmb, emb, "; SGR#%u.unset = ", j); seputsq(&cmb, emb, a->tda_unset); break; }
-		if (!a->tda_set || !a->tda_unset) { ++ansi_probe_failures; seprintf(&cmb, emb, "; SGR#%u missing", j); }
+				 && !IsSGR(a->tda_unset, 0)) { ansi_probe_failures = num_verify; break; }
+		if (!a->tda_set || !a->tda_unset) { ++ansi_probe_failures; }
 	}
 	D_td.td_ansi = ansi_probe_failures <= ANSI_PROBE_FAILURE_LIMIT;
-	seprintf(&cmb, emb, "; probes=%u failures=%u limit=%u td_ansi=%s",
-		 num_verify,
-		 ansi_probe_failures,
-		 ANSI_PROBE_FAILURE_LIMIT,
-		 D_td.td_ansi ? "true" : "false");
 	if (ansi_probe_failures <= ANSI_PROBE_FAILURE_LIMIT+1) {
 		D_td.td_attr[ATTR_HI] = (TermDefAttr){ "\033[8m", "\033[28m", 0 };
-		seprintf(&cmb, emb, " +hidden");
 		D_td.td_attr[ATTR_ST] = (TermDefAttr){ "\033[9m", "\033[29m", 0 };
-		seprintf(&cmb, emb, " +strikethrough");
 	}
 	if (ansi_probe_failures <= ANSI_PROBE_FAILURE_LIMIT+2 && IsSGR(D_td.td_attr[ATTR_BL].tda_set, 5)) {
 		D_td.td_attr[ATTR_FB] = (TermDefAttr){ "\033[6m", "\033[25m", 0 };
-		seprintf(&cmb, emb, " +fast-blink");
 	}
 
 	/* Set up missing entries (attributes are priority ordered) */
@@ -1263,17 +1251,19 @@ int InitTermcap(int width, int height)
 		D_AC = "";	/* enable default string */
 	}
 
-	for (int i = 0; i < 256; i++)
+	for (size_t i = 0; i < 256; i++)
 		D_c0_tab[i] = i;
 	if (D_AC) {
 		/* init with default string first */
-		char s[] = "l+m+k+j+u+t+v+w+q-x|n+o~s_p\"r#`+a:f'g#~o.v-^+<,>h#I#0#y<z>";
-		for (int i = (strlen(s) - 2) & ~1; i >= 0; i -= 2)
-			D_c0_tab[(int)(unsigned char)s[i]] = s[i + 1];
+		char s[] = "l+" "m+" "k+" "j+" "u+" "t+" "v+" "w+" "q-" "x|"
+			   "n+" "o~" "s_" "p\"" "r#" "`+" "a:" "f'" "g#" "~o"
+			   ".v" "-^" "+<" ",>" "h#" "I#" "0#" "y<" "z>" ;
+		for (size_t l = sizeof s - 1 & ~1, i = 0 ; i != l; i += 2)
+			D_c0_tab[(uint8_t)s[i]] = s[i + 1];
 	}
 	if (D_CC0)
-		for (int i = (strlen(D_CC0) - 2) & ~1; i >= 0; i -= 2)
-			D_c0_tab[(int)(unsigned char)D_CC0[i]] = D_CC0[i + 1];
+		for (size_t l = strlen(D_CC0) & ~1, i = 0; i != l; i += 2)
+			D_c0_tab[(uint8_t)D_CC0[i]] = D_CC0[i + 1];
 	if (D_PF == NULL)
 		D_PO = NULL;
 
@@ -1348,12 +1338,5 @@ int InitTermcap(int width, int height)
 	/* Make sure libterm uses external term properties for our tputs() calls.  */
 	e_tgetent(tbuf, D_termname);
 	CheckEscape();
-	if (cmb != mbuf) {
-		FILE *f = fopen("screentrace.txt", "w");
-		fprintf(f, "%s\n", mbuf);
-		fclose(f);
-	}
-	else
-		unlink("screentrace.txt");
 	return 0;
 }

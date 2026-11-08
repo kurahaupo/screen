@@ -2244,10 +2244,10 @@ void SetXtermOSC(int i, char *s, char *t)
 {
 	static char *oscs[][2] = {
 		{ WT_FLAG ";", "screen" },	/* set window title */
-		{ "11;", "" },	/* background RGB */
-		{ "20;", "" },	/* background */
-		{ "39;", "black" },	/* default foreground (black?) */
-		{ "49;", "white" }	/* default background (white?) */
+		{ "11;", "" },			/* background RGB */
+		{ "20;", "" },			/* background */
+		{ "39;", "black" },		/* default foreground (black?) */
+		{ "49;", "white" },		/* default background (white?) */
 	};
 
 	if (!D_CXT)

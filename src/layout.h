@@ -50,23 +50,23 @@ typedef struct Layout {
 
 void FreeLayoutCv(struct Canvas *c);
 Layout *CreateLayout(char *, int);
-void AutosaveLayout(Layout *);
-void LoadLayout(Layout *);
+void AutosaveLayout(struct Layout *);
+void LoadLayout(struct Layout *);
 void NewLayout(char *, int);
 void SaveLayout(char *, struct Canvas *);
 void ShowLayouts(int);
-Layout *FindLayout(char *);
+struct Layout *FindLayout(char *);
 void UpdateLayoutCanvas(struct Canvas *, struct Window *);
-Layout *CreateLayout(char *, int);
-void RemoveLayout(Layout *);
+struct Layout *CreateLayout(char *, int);
+void RemoveLayout(struct Layout *);
 int LayoutDumpCanvas(struct Canvas *, char *);
 
-void RenameLayout(Layout *, const char *);
-int RenumberLayout(Layout *, int);
+void RenameLayout(struct Layout *, const char *);
+int RenumberLayout(struct Layout *, int);
 
 /* global variables */
 
-extern Layout *layout_attach, *layout_last, layout_last_marker;
-extern Layout *layouts;
+extern struct Layout *layout_attach, *layout_last, layout_last_marker;
+extern struct Layout *layouts;
 
 #endif				/* SCREEN_LAYOUT_H */

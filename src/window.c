@@ -755,7 +755,7 @@ int RemakeWindow(Window *window)
 		TtyName = "telnet";
 	} else
 #endif
-	{ /* see above #ifdef */
+	{			/* see above #ifdef */
 		if ((fd = OpenDevice(window->w_cmdargs, lflag, &window->w_type, &TtyName)) < 0)
 			return -1;
 	}

@@ -37,13 +37,13 @@
 /* structure representing single cell of terminal */
 struct mchar {
 	image_t image;		/* actual letter like a, b, c ... as Unicode code point */
-	attr_mask_t attr;	/* attributes - bold, standout etc.  (should be attr_mask_t) */
+	attr_mask_t attr;	/* attributes - bold, standout etc. */
 	font_t font;		/* font :) */
 	color_t colorbg;	/* background color */
 	color_t colorfg;	/* foreground color */
 	mbcs_t mbcs;		/* used for multi byte character sets;
 				 * TODO: possible to remove? use image instead, since
-				 * it's now wide enough */
+				 *       it's now wide enough */
 };
 
 struct mline {
@@ -62,4 +62,3 @@ enum {
 };
 
 #endif				/* SCREEN_IMAGE_H */
-
