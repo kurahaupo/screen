@@ -30,29 +30,30 @@
 
 #include "config.h"
 
-#include <ctype.h>
-#include <fcntl.h>
-#include <poll.h>
-#include <pwd.h>
-#include <signal.h>
-#include <stdint.h>
-#include <stdbool.h>
-#include <string.h>
-#include <unistd.h>
 #include <sys/ioctl.h>
 #include <sys/stat.h>
 #include <sys/types.h>
 #include <sys/wait.h>
+
+#include <ctype.h>
+#include <fcntl.h>
 #include <limits.h>
+#include <poll.h>
+#include <pwd.h>
+#include <signal.h>
+#include <stdbool.h>
+#include <stdint.h>
+#include <string.h>
+#include <unistd.h>
 
 #include <locale.h>
 #if defined(HAVE_LANGINFO_H)
 #include <langinfo.h>
 #endif
 
-#include "layout.h"		// for AutosaveLayout
 #include "display.h"
 #include "fileio.h"
+#include "layout.h"		// for AutosaveLayout
 #include "list_generic.h"
 #include "logfile.h"		/* islogfile, logfflush, logfopen/logfclose */
 #include "mark.h"

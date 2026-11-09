@@ -31,14 +31,15 @@
 
 #include "config.h"
 
-#include <sys/types.h>
-#include <sys/stat.h>
-#include <signal.h>
-#include <stdint.h>
-#include <stdbool.h>
-#include <fcntl.h>
 #include <sys/ioctl.h>
+#include <sys/stat.h>
+#include <sys/types.h>
 #include <sys/wait.h>
+
+#include <fcntl.h>
+#include <signal.h>
+#include <stdbool.h>
+#include <stdint.h>
 
 #include "canvas.h"
 #include "display.h"
