@@ -1187,8 +1187,9 @@ static void SetAttr(attr_mask_t new)
 		AddCStr("\033[");
 		int not_first = 0;
 
-		/* If it's more efficient to do so, reset all attribute, and
-		 * then set any remaining.
+                /* Step 1: if it's more efficient to do so, reset all
+                 * attributes, so that all wanted attributes will
+                 * be set individually in step 3.
 		 */
 		if (count_one_bits(D_rend.attr & ~new & A__MASK)*3 >=
 		    count_one_bits(new)*2
@@ -1236,9 +1237,14 @@ static void SetAttr(attr_mask_t new)
 		) {
 			AddChar('0');
 			not_first++;
-			D_rend.colorbg = D_rend.colorfg = 0;	/* "\e[0;...m" resets color as well as attributes */
+			D_rend.colorbg = D_rend.colorfg = 0;	/* "\e[0;…m" resets colors as well as attributes */
 		}
 
+                /*
+                 * Step 2: reset any attributes we don't want. This may also
+                 * reset some that we *do* want, if they share reset codes, so
+                 * do this before setting wanted attributes.
+                 */
 		for (attr_mask_t to_be_unset; to_be_unset = lo_bit(D_rend.attr & ~new) ;) {
 			int ll = log_lo_bit(to_be_unset)+1;
 			if (ll == 1) {
@@ -1252,6 +1258,11 @@ static void SetAttr(attr_mask_t new)
 			tputs(tparm(";%d"+!not_first++, ll), 1, DoAddChar);
 			D_rend.attr &=~ to_be_unset;
 		}
+
+                /*
+                 * Step 3: set any attributes we do want, including any that
+                 * were reset during steps 1 & 2.
+                 */
 		for (attr_mask_t to_be_set; to_be_set = lo_bit(~D_rend.attr & new) ;) {
 			int ll = log_lo_bit(to_be_set)+1;
 			tputs(tparm(";%d"+!not_first++, ll), 1, DoAddChar);
