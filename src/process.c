@@ -72,7 +72,6 @@
 #include "winmsg.h"
 #include "winmsgbuf.h"
 
-
 static size_t CountArgs(char **);
 static bool CheckArgCount(struct comm *, size_t);
 static int CheckArgNum(int, char **);
@@ -4174,7 +4173,6 @@ static bool ParseSGR3Mode(struct action *act, sgr3_mode_t *m)
 		*m = SGR3_ITALIC;
 		return true;
 	}
-
 	bool msgok = display && !*rc_name;
 	if (msgok)
 		OutputMsg(0, "Invalid parameter; need 'italic' or 'standout'");
