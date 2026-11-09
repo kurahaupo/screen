@@ -36,8 +36,6 @@
 
 #include "aatypes.h"
 
-#define ANSI_PROBE_FAILURE_LIMIT 2	/* max 2 missing; 5 out of 7 standard attributes must match */
-
 /*
  *  Parser state
  */

@@ -35,6 +35,7 @@
 
 
 #include <fcntl.h>
+#include <math.h>
 #include <signal.h>
 #include <sys/ioctl.h>
 #include <sys/stat.h>
@@ -3774,6 +3775,43 @@ static void DoCommandEncoding(struct action *act)
 	}
 }
 
+static bool ParseFraction(struct action *act, double *var)
+{
+	char **args = act->args;
+	if (!args[0])
+		return true;
+	char *p;
+	double x = strtod(args[0], &p);
+	if (*p == '%') {
+		++p;
+		x /= 100.0;
+	} else if (*p == '/') {
+		++p;
+		double d = strtod(p, &p);
+		if (isnan(d) || d==0)
+			x = NAN;
+		else
+			x /= d;
+	}
+	if (*p || isnan(x) || x < 0 || x > 1) {
+		Msg(0, "%s: %s: invalid argument. Expected decimal, percentage, or fraction.", rc_name, comms[act->nr].name);
+		return false;
+	}
+	*var = x;
+	return 0;
+}
+
+static void DoCommandDefecma48threshold(struct action *act)
+{
+	if (ParseFraction(act, &ecma48_match_threshold)) {
+		bool msgok = display && !*rc_name;
+		if (msgok)
+			OutputMsg(0,
+				  "On new displays, ECMA-48 mode will be used if termcap match exceeds %f%%",
+				  ecma48_match_threshold * 100.0);
+	}
+}
+
 static void DoCommandDefencoding(struct action *act)
 {
 	char **args = act->args;
@@ -4083,6 +4121,43 @@ static void DoCommandSplit(struct action *act)
 	else
 		AddCanvas(SLICE_VERT);
 	Activate(-1);
+}
+
+static bool ParseEcma38Mode(struct action *act, bool *m) {
+	char **args = act->args;
+	if (!args[0])
+		return true;
+	if (!strcmp(args[0], "full") || !strcmp(args[0], "direct")) {
+		*m = true;
+		return true;
+	}
+	if (!strcmp(args[0], "termcap")) {
+		*m = false;
+		return true;
+	}
+	bool msgok = display && !*rc_name;
+	if (msgok)
+		OutputMsg(0, "Invalid parameter; need 'italic' or 'standout'");
+	return false;
+}
+
+static void DoCommandEcma48(struct action *act)
+{
+	bool msgok = display && !*rc_name;
+
+	if (!display) {
+		if (msgok)
+			OutputMsg(0, "No display terminal");
+		return;
+	}
+
+	if (ParseEcma38Mode(act, &D_td.td_ansi)) {
+		bool msgok = display && !*rc_name;
+		if (msgok)
+			OutputMsg(0,
+				  D_td.td_ansi ? "This terminal will use full ECMA-48 (ANSI) capabilities"
+					       : "This terminal will use termcap capabilities only");
+	}
 }
 
 static bool ParseSGR3Mode(struct action *act, sgr3_mode_t *m)
@@ -4764,6 +4839,8 @@ void DoAction(struct action *act)
 		[RC_DUMPTERMCAP]	= DoCommandDumptermcap,
 		[RC_DYNAMICTITLE]	= DoCommandDynamictitle,
 		[RC_ECHO]		= DoCommandEcho,
+		[RC_ECMA48]		= DoCommandEcma48,
+		[RC_DEFECMA48THRESHOLD]	= DoCommandDefecma48threshold,
 		[RC_ENCODING]		= DoCommandEncoding,
 		[RC_ESCAPE]		= DoCommandEscape,
 		[RC_EVAL]		= DoCommandEval,
