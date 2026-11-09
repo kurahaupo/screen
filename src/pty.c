@@ -28,11 +28,7 @@
 
 #include "config.h"
 
-#include "pty.h"
-
 #include <sys/ioctl.h>
-
-#include "screen.h"
 
 #if defined(HAVE_PTY_H)
 # include <pty.h>
@@ -43,6 +39,9 @@
 #if defined(HAVE_LIBUTIL_H)
 # include <libutil.h>
 #endif
+
+#include "pty.h"
+#include "screen.h"
 
 int pty_preopen = 0;
 

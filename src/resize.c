@@ -28,12 +28,12 @@
 
 #include "config.h"
 
+#include <sys/ioctl.h>
 #include <sys/types.h>
 
 #include <signal.h>
-#include <stdint.h>
 #include <stdbool.h>
-#include <sys/ioctl.h>
+#include <stdint.h>
 
 #include "aatypes.h"
 #include "canvas.h"

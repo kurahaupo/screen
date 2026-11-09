@@ -28,14 +28,14 @@
 
 #include "config.h"
 
-#include "sched.h"
+#include <sys/time.h>
+#include <sys/types.h>
 
 #include <poll.h>
 #include <stdint.h>
-#include <sys/types.h>
 #include <time.h>
-#include <sys/time.h>
 
+#include "sched.h"
 #include "screen.h"
 
 static Event *evs;

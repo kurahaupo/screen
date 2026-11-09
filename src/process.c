@@ -33,16 +33,16 @@
 
 #include "config.h"
 
+#include <sys/ioctl.h>
+#include <sys/stat.h>
+#include <sys/time.h>
+#include <sys/types.h>
 
 #include <fcntl.h>
 #include <math.h>
 #include <signal.h>
-#include <sys/ioctl.h>
-#include <sys/stat.h>
-#include <sys/time.h>
-#include <stdint.h>
 #include <stdbool.h>
-#include <sys/types.h>
+#include <stdint.h>
 #include <time.h>
 
 #include "bitmath.h"

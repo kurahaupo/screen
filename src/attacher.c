@@ -28,14 +28,15 @@
 
 #include "config.h"
 
-#include <fcntl.h>
-#include <pwd.h>
-#include <signal.h>
 #include <sys/ioctl.h>
 #include <sys/stat.h>
 #include <sys/types.h>
-#include <stdint.h>
+
+#include <fcntl.h>
+#include <pwd.h>
+#include <signal.h>
 #include <stdbool.h>
+#include <stdint.h>
 
 #ifdef ENABLE_PAM
 #include <security/pam_appl.h>

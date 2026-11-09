@@ -29,19 +29,18 @@
 
 #include "config.h"
 
-#include <stdio.h>
-#include <errno.h>
 #include <sys/param.h>
+#include <sys/time.h>
+
+#include <errno.h>
 #include <fcntl.h>
-
 #include <limits.h>
-
-#include <unistd.h>
+#include <stdarg.h>
+#include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <stdarg.h>
 #include <time.h>
-#include <sys/time.h>
+#include <unistd.h>
 
 #if defined(HAVE_SETRESUID) && !defined(HAVE_SETREUID)
 # define setreuid(ruid, euid) setresuid(ruid, euid, -1)

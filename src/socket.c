@@ -28,16 +28,18 @@
 
 #include "config.h"
 
-#include <pwd.h>
-#include <sys/types.h>
-#include <sys/stat.h>
-#include <fcntl.h>
 #include <sys/socket.h>
+#include <sys/stat.h>
+#include <sys/types.h>
 #ifdef _OpenBSD_
 # include <sys/uio.h>
 #endif
 #include <sys/un.h>
+
+#include <pwd.h>
+#include <fcntl.h>
 #include <utime.h>
+
 #include <stdint.h>
 #include <stdbool.h>
 #include <string.h>

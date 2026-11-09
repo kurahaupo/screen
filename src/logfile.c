@@ -28,17 +28,16 @@
 
 #include "config.h"
 
-#include "logfile.h"
-
-#include <sys/types.h>		/* dev_t, ino_t, off_t, ... */
 #include <sys/stat.h>		/* struct stat */
+#include <sys/types.h>		/* dev_t, ino_t, off_t, ... */
+
 #include <fcntl.h>		/* O_WRONLY for logfile_reopen */
-#include <stdint.h>
 #include <stdbool.h>
+#include <stdint.h>
 
-#include "screen.h"
-
+#include "logfile.h"
 #include "misc.h"
+#include "screen.h"
 
 static void changed_logfile(Log *);
 static Log *lookup_logfile(char *);
