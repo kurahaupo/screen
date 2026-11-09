@@ -52,6 +52,8 @@ static void setseqoff(unsigned char *, int, int);
 static int addmapseq(char *, int, int);
 static int remmapseq(char *, int);
 
+double ecma48_match_threshold = (7.0 - ANSI_PROBE_FAILURE_LIMIT) / 7.0 - 0.001;
+
 char Term[MAXSTR + 5] = "TERM=";
 #define limTerm		(Term + sizeof Term)
 #define Termname	(Term + 5)
@@ -1139,7 +1141,7 @@ int InitTermcap(int width, int height)
 				 && !IsSGR(a->tda_unset, 0)) { ansi_probe_failures = num_verify; break; }
 		if (!a->tda_set || !a->tda_unset) { ++ansi_probe_failures; }
 	}
-	D_td.td_ansi = ansi_probe_failures <= ANSI_PROBE_FAILURE_LIMIT;
+	D_td.td_ansi = (7.0 - ansi_probe_failures) >= ecma48_match_threshold * 7.0;
 	if (ansi_probe_failures <= ANSI_PROBE_FAILURE_LIMIT+1) {
 		D_td.td_attr[ATTR_HI] = (TermDefAttr){ "\033[8m", "\033[28m", 0 };
 		D_td.td_attr[ATTR_ST] = (TermDefAttr){ "\033[9m", "\033[29m", 0 };
