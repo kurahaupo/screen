@@ -52,6 +52,7 @@ CPP_DEPEND = $(CC) -MM @CPPFLAGS@ $(IFLAGS)
 INSTALL = @INSTALL@
 INSTALL_PROGRAM = @INSTALL_PROGRAM@
 INSTALL_DATA = @INSTALL_DATA@
+MKDIR_P = mkdir -vp
 
 AWK = @AWK@
 
@@ -151,8 +152,7 @@ install: installdirs install_bin
 	@echo "You may also want to install $(srcdir)/etc/etcscreenrc in" $(ETCSCREENRC)
 
 installdirs:
-# Path leading to ETCSCREENRC and Socketdirectory not checked.
-	$(srcdir)/etc/mkinstalldirs $(DESTDIR)$(bindir) $(DESTDIR)$(SCREENENCODINGS)
+	$(MKDIR_P) $(DESTDIR)$(bindir) $(DESTDIR)$(SCREENENCODINGS)
 	cd doc ; $(MAKE) installdirs
 
 uninstall:

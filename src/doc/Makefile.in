@@ -3,7 +3,7 @@
 srcdir = @srcdir@
 VPATH = @srcdir@
 
-DESTDIR = 
+DESTDIR =
 
 prefix = @prefix@
 datarootdir = @datarootdir@
@@ -13,6 +13,7 @@ infodir = @infodir@
 INSTALL = @INSTALL@
 INSTALL_DATA = @INSTALL_DATA@
 MAKEINFO = makeinfo
+MKDIR_P = mkdir -vp
 TEXI2DVI = texi2dvi
 TEXI2PDF = texi2pdf
 
@@ -46,7 +47,7 @@ uninstall:
 	rm -f $(DESTDIR)$(infodir)/screen.info*
 
 installdirs:
-	$(srcdir)/../etc/mkinstalldirs $(DESTDIR)$(mandir)/man1 $(DESTDIR)$(infodir)
+	$(MKDIR_P) $(DESTDIR)$(mandir)/man1 $(DESTDIR)$(infodir)
 
 mostlyclean:
 	-rm -f *.cp *.cps *.fn *.fns *.ky *.kys *.pg *.tp *.vr
