@@ -11,9 +11,11 @@ mandir = @mandir@
 infodir = @infodir@
 
 INSTALL = @INSTALL@
-INSTALL_DATA = @INSTALL_DATA@
+INSTALL_DATA = @INSTALL_DATA@ -o root -m 644
+#INSTALL_DIR = mkdir -vp
+INSTALL_DIR = $(INSTALL) -D -d
+
 MAKEINFO = makeinfo
-MKDIR_P = mkdir -vp
 TEXI2DVI = texi2dvi
 TEXI2PDF = texi2pdf
 
@@ -31,23 +33,28 @@ info screen.info: screen.texinfo
 	@rm -f screen.info*
 	$(MAKEINFO) $(srcdir)/screen.texinfo -o screen.info
 
-install: installdirs
+install:
+	$(INSTALL_DIR) $(DESTDIR)$(mandir)/man1 $(DESTDIR)$(infodir)
 	$(INSTALL_DATA) $(srcdir)/screen.1 $(DESTDIR)$(mandir)/man1/screen.1
 	-$(MAKE) screen.info
 	-if test -f screen.info; then d=.; else d=$(srcdir); fi; \
-	if test -f $$d/screen.info; then \
-	for f in $$d/screen.info*; do $(INSTALL_DATA) $$f $(DESTDIR)$(infodir);done; \
-	if $(SHELL) -c 'install-info --version' >/dev/null 2>&1; then \
-	  install-info --info-dir=$(DESTDIR)$(infodir) $$d/screen.info; \
-	else true; fi; \
-	fi
+	 if test -f $$d/screen.info; then \
+	   $(INSTALL_DIR) $(DESTDIR)$(infodir) ;\
+	   for f in $$d/screen.info*; do \
+	     $(INSTALL_DATA) $$f $(DESTDIR)$(infodir); \
+	   done; \
+	   if $(SHELL) -c 'install-info --version' >/dev/null 2>&1; \
+	   then \
+	     install-info --info-dir=$(DESTDIR)$(infodir) $$d/screen.info; \
+	   fi; \
+	 fi
 
 uninstall:
 	rm -f $(DESTDIR)$(mandir)/man1/screen.1
 	rm -f $(DESTDIR)$(infodir)/screen.info*
 
 installdirs:
-	$(MKDIR_P) $(DESTDIR)$(mandir)/man1 $(DESTDIR)$(infodir)
+	$(INSTALL_DIR) $(DESTDIR)$(mandir)/man1 $(DESTDIR)$(infodir)
 
 mostlyclean:
 	-rm -f *.cp *.cps *.fn *.fns *.ky *.kys *.pg *.tp *.vr
