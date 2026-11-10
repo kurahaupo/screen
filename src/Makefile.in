@@ -256,7 +256,7 @@ depend.in::
 	sed -e ':b; /\\$$/ { ' \
 	    -e   'N' \
 	    -e   's/\\\n//' \
-	    -e   'bb' \
+	    -e   '$ ! bb' \
 	    -e '};' | \
 	sed -e 's/   */ /g' \
 	    -e 's#\.\./src#$$(srcdir)#g' \
