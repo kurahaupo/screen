@@ -1244,11 +1244,11 @@ static void DoCommandAt(struct action *act)
 					if (!strncmp(*args, u->u_name, n))
 						break;
 				}
-				if (!u) {
-					args[0][n] = '\0';
-					OutputMsg(0, "Did not find any user matching '%s'", args[0]);
-					goto out;
-				}
+			}
+			if (!u) {
+				args[0][n] = '\0';
+				OutputMsg(0, "Did not find any user matching '%s'", args[0]);
+				goto out;
 			}
 			for (display = displays; display; display = nd) {
 				nd = display->d_next;
