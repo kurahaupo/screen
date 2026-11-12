@@ -1242,7 +1242,7 @@ static void DoCommandAt(struct action *act)
 			else {
 				for (u = users; u; u = u->u_next) {
 					if (!strncmp(*args, u->u_name, n))
-						goto out;
+						break;
 				}
 				if (!u) {
 					args[0][n] = '\0';
