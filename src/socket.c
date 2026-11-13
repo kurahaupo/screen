@@ -554,7 +554,7 @@ static void ExecCreate(Message *mp)
 		int l, num;
 
 		l = strlen(p);
-		if (IsNumColon(p, buf, ARRAY_SIZE(buf))) {
+		if (ExtractColonNum(buf, sizeof buf, p)) {
 			if (*buf)
 				nwin.aka = buf;
 			num = atoi(p);
