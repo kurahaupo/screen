@@ -38,6 +38,8 @@
 #include <sys/time.h>
 #include <sys/types.h>
 
+#include <ctype.h>
+#include <errno.h>
 #include <fcntl.h>
 #include <math.h>
 #include <signal.h>
@@ -72,11 +74,6 @@
 #include "winmsg.h"
 #include "winmsgbuf.h"
 
-static size_t CountArgs(char **);
-static bool CheckArgCount(struct comm *, size_t);
-static int CheckArgNum(int, char **);
-static void ClearAction(struct action *);
-static void SaveAction(struct action *, int, char **, int *);
 static Window *NextWindow(void);
 static Window *PreviousWindow(void);
 static Window *ParentWindow(void);
@@ -85,35 +82,20 @@ static void CollapseWindowlist(void);
 static void LogToggle(bool);
 static void ShowInfo(void);
 static void ShowDInfo(void);
-static Window *WindowByName(char *);
-static int WindowByNumber(char *);
-static int ParseSwitch(struct action *, bool *);
-static int ParseOnOff(struct action *, bool *);
-static int ParseWinNum(struct action *, int *);
-static int ParseBase(struct action *, char *, int *, int, char *);
-static int ParseSaveStr(struct action *, char **);
-static int ParseNum(struct action *, int *);
-static int ParseNum1000(struct action *, int *);
-static char **SaveArgs(char **);
-static bool IsNum(char *);
+
 static void ColonFin(char *, size_t, void *);
 static void InputSelect(void);
 static void InputSetenv(char *);
 static void InputAKA(void);
 static int InputSu(struct acluser **, char *);
-static void suFin(char *, size_t, void *);
-static void AKAFin(char *, size_t, void *);
 static void copy_reg_fn(char *, size_t, void *);
 static void ins_reg_fn(char *, size_t, void *);
 static void process_fn(char *, size_t, void *);
 static void digraph_fn(char *, size_t, void *);
 static int digraph_find(const char *buf);
 static void confirm_fn(char *, size_t, void *);
-static int IsOnDisplay(Window *);
 static void ResizeRegions(char *, int);
 static void ResizeFin(char *, size_t, void *);
-static struct action *FindKtab(char *, int);
-static void SelectFin(char *, size_t, void *);
 static void SelectLayoutFin(char *, size_t, void *);
 static void ShowWindowsX(char *);
 
@@ -148,6 +130,278 @@ struct action mmtab[KMAP_KEYS + KMAP_AKEYS];
 struct kmap_ext *kmap_exts;
 size_t kmap_extn;
 int maptimeout = 300;
+
+////////////////////////////////////////////////////////////////////////////////
+
+static inline size_t CountArgs(char **args)
+{
+	size_t argc = 0;
+	if (args)
+		for (; args[argc]; argc++) {}
+	return argc;
+}
+
+static bool CheckArgCount(struct comm *c, size_t argc)
+{
+	int allowed_counts_mask = c->flags & ARGS_MASK;
+
+	if (allowed_counts_mask == 0
+	 || allowed_counts_mask & 1U << (argc <= ARGS_ANY ?
+					 argc  : ARGS_ANY))
+		return true;
+
+	/* From here to the end of this function is just trying to be
+	 * very specific about the phrasing of the error message. */
+	char const *name = c->name;
+#ifdef FANCY_ERROR_REPORTING
+	switch (allowed_counts_mask) {
+	case ARGS(0):
+		Msg(0, "%s: %s: no arguments allowed", rc_name, name);
+		return false;
+	case ARGS(1):
+		Msg(0, "%s: %s: exactly one argument required", rc_name, name);
+		return false;
+	case ARGS(1)
+	   | ARGS(2)
+	   | ARGS(4):
+		Msg(0, "%s: %s: one, two, or four arguments required", rc_name, name);
+		return false;
+	case ARGS_ATLEAST(1):
+		Msg(0, "%s: %s: at least one argument required", rc_name, name);
+		return false;
+	}
+
+	bool or_more = allowed_counts_mask & ARGS_MORE;
+	const int first = log_lo_bit(lo_bit(allowed_counts_mask));
+
+	static char *nums[] = { "no", "one", "two", "three", "four", "five" };
+
+	if (!or_more && is_single_bit(allowed_counts_mask)) {
+		/* Exactly one allowed count, not including "or more" */
+		Msg(0, "%s: %s: exactly %s arguments required", rc_name, name, nums[first]);
+		return false;
+	}
+	if (!or_more && is_bit_pair(allowed_counts_mask)) {
+		/* Exactly two allowed counts, not including "or more" */
+		Msg(0, "%s: %s: %s or %s arguments required", rc_name, name,
+		    nums[first], nums[log_lo_bit(hi_bits(allowed_counts_mask))]);
+		return false;
+	}
+	if (is_bit_range(allowed_counts_mask)) {
+		/* Contiguous range of allowed counts.
+		 * Use bitwise carry propagation to find the top of the range.
+		 * Since we've already checked is_single_bit(allowed_counts_mask),
+		 * we know that first ≠ range_top (except for first = hi =
+		 * ARGS_ANY, but we will still correctly render that as "five
+		 * or more") */
+		const int range_top = log_lo_bit(range_end_bit(allowed_counts_mask));
+		if (first == 0)
+			Msg(0, "%s: %s: no more than %s arguments allowed", rc_name, name, nums[range_top]);
+		else if (range_top == ARGS_ANY)
+			Msg(0, "%s: %s: at least %s arguments required", rc_name, name, nums[first]);
+		else
+			Msg(0, "%s: %s: between %s and %s arguments required",
+			    rc_name, name, nums[first], nums[range_top]);
+		return false;
+	}
+#endif	/*FANCY_ERROR_REPORTING*/
+	Msg(0, "%s: %s: wrong number of arguments", rc_name, name);
+	return false;
+}
+
+static int CheckArgNum(int nr, char **args)
+{
+	int argc = CountArgs(args);
+	if (CheckArgCount(&comms[nr], argc))
+		return argc;
+	return -1;
+}
+
+////////////////////////////////////////////////////////////////////////////////
+
+static bool ParseOnOff(struct action *act, char *arg, bool *var)
+{
+	if (arg) {
+		if (strcmp(arg, "on") == 0) {
+			*var = true;
+			return true;
+		}
+		if (strcmp(arg, "off") == 0) {
+			*var = false;
+			return true;
+		}
+	}
+	Msg(0, "%s: %s: invalid argument. Give 'on' or 'off'", rc_name, comms[act->nr].name);
+	return false;
+}
+
+static bool ParseToggle(struct action *act, char *arg, bool *var)
+{
+	if (arg == NULL) {
+		*var ^= true;
+		return true;
+	}
+	return ParseOnOff(act, arg, var);
+}
+
+static bool ParseSaveStr(struct action *act, char const *arg, char **var)
+{
+	char **args = act->args;
+	if (arg == NULL) {
+		Msg(0, "%s: %s: argument required.", rc_name, comms[act->nr].name);
+		return false;
+	}
+	if (*var)
+		free(*var);
+	*var = SaveStr(*args);
+	return true;
+}
+
+static bool ParseNum(struct action *act, char const *arg, int *var)
+{
+	if (arg == NULL) {
+		Msg(0, "%s: %s: missing numeric argument.", rc_name, comms[act->nr].name);
+		return false;
+	}
+	char *e;
+	errno = 0;
+	unsigned long l = strtoul(arg, &e, 10);
+	if (e == arg || *e) {
+		Msg(0, "%s: %s: argument is not valid a (decimal) number.", rc_name, comms[act->nr].name);
+		return false;
+	}
+	int i = l;
+	if (errno || i < 0 || (unsigned long)i != l) {
+		Msg(0, "%s: %s: numeric argument is out of range.", rc_name, comms[act->nr].name);
+		return false;
+	}
+	*var = i;
+	return true;
+}
+
+static bool ParseOctalNum(struct action *act, char const *arg, int *var)
+{
+	if (arg == NULL) {
+		Msg(0, "%s: %s: missing octal argument.", rc_name, comms[act->nr].name);
+		return false;
+	}
+	char *e;
+	errno = 0;
+	unsigned long l = strtoul(arg, &e, 8);
+	if (e == arg || *e) {
+		Msg(0, "%s: %s: argument is not a valid  octal number.", rc_name, comms[act->nr].name);
+		return false;
+	}
+	int i = l;
+	if (errno || i < 0 || (unsigned long)i != l) {
+		Msg(0, "%s: %s: octal numeric argument is out of range.", rc_name, comms[act->nr].name);
+		return false;
+	}
+	*var = i;
+	return true;
+}
+
+static bool ParseMilliseconds(struct action *act, char const *arg, int *var, bool allow_negative)
+{
+	if (arg == NULL || *arg == 0) {
+		Msg(0, "%s: %s: missing decimal fraction argument.", rc_name, comms[act->nr].name);
+		return false;
+	}
+	char *e;
+	errno = 0;
+	double f = strtod(arg, &e);
+	if (e == arg || *e) {
+		Msg(0, "%s: %s: argument is not a valid decimal fraction.", rc_name, comms[act->nr].name);
+		return false;
+	}
+	f = rint(f * 1000.0);
+	int i = (int)f;
+	if (errno || (double)i != f || i < 0 && !allow_negative) {
+		Msg(0, "%s: %s: decimal fraction argument is out of range.", rc_name, comms[act->nr].name);
+		return false;
+	}
+	*var = i < 0 ? INT_MIN : i;
+	return true;
+}
+
+////////////////////////////////////////////////////////////////////////////////
+
+static int WindowByNumber(char *);
+static int WindowByNumber(char *string)
+{
+	char *s;
+        int i = strtoul(string, &s, 10);
+	return *s ? -1 : i;
+}
+
+/*
+ * Get window number from Name or Number string.
+ * Numbers are tried first, then names, a prefix match suffices.
+ * Be careful when assigning numeric strings as WindowTitles.
+ */
+int WindowByNoN(char *const string)
+{
+	Window *w = GetWindowByNameOrNumber(string);
+        return w ? w->w_number : -1;
+}
+
+static bool ParseWinNum(struct action *act, char *arg, Window **var)
+{
+	if (arg == NULL) {
+		Msg(0, "%s: %s: missing window number or name.", rc_name, comms[act->nr].name);
+		return false;
+	}
+
+	Window *w = GetWindowByNameOrNumber(arg);
+	if (!w) {
+		Msg(0, "%s: %s: argument is not a valid window number or name.", rc_name, comms[act->nr].name);
+		return false;
+	}
+	*var = w;
+	return true;
+}
+
+////////////////////////////////////////////////////////////////////////////////
+
+static void SaveAction(struct action *act, int nr, char **args, int *argl)
+{
+	int argc = CountArgs(args);
+	char **pp;
+	int *lp;
+
+	if (argc == 0) {
+		act->nr = nr;
+		act->args = noargs;
+		act->argl = NULL;
+		return;
+	}
+	if ((pp = malloc((argc + 1) * sizeof *pp)) == NULL)
+		Panic(0, "%s", strnomem);
+	if ((lp = malloc(argc * sizeof *lp)) == NULL)
+		Panic(0, "%s", strnomem);
+	act->nr = nr;
+	act->args = pp;
+	act->argl = lp;
+	while (argc--) {
+		*lp = argl ? *argl++ : (int)strlen(*args);
+		*pp++ = SaveStrn(*args++, *lp++);
+	}
+	*pp = NULL;
+}
+
+static char **SaveArgs(char **args)
+{
+	char **ap, **pp;
+
+	if ((pp = ap = malloc((CountArgs(args) + 1) * sizeof *ap)) == NULL)
+		Panic(0, "%s", strnomem);
+	while (*args)
+		*pp++ = SaveStr(*args++);
+	*pp = NULL;
+	return ap;
+}
+
+////////////////////////////////////////////////////////////////////////////////
 
 #ifndef MAX_DIGRAPH
 #define MAX_DIGRAPH 512
@@ -378,6 +632,22 @@ static int parse_input_int(const char *buf, size_t len, int *val)
 
 char *noargs[1];
 
+static void ClearAction(struct action *act)
+{
+	char **p;
+
+	if (act->nr == RC_ILLEGAL)
+		return;
+	act->nr = RC_ILLEGAL;
+	if (act->args == noargs)
+		return;
+	for (p = act->args; *p; p++)
+		free(*p);
+	free((char *)act->args);
+	act->args = noargs;
+	act->argl = NULL;
+}
+
 int enter_window_name_mode = 0;
 
 void InitKeytab(void)
@@ -541,22 +811,6 @@ static struct action *FindKtab(char *class, int create)
 		*kpp = kp;
 	}
 	return kp->ktab;
-}
-
-static void ClearAction(struct action *act)
-{
-	char **p;
-
-	if (act->nr == RC_ILLEGAL)
-		return;
-	act->nr = RC_ILLEGAL;
-	if (act->args == noargs)
-		return;
-	for (p = act->args; *p; p++)
-		free(*p);
-	free((char *)act->args);
-	act->args = noargs;
-	act->argl = NULL;
 }
 
 /*
@@ -788,90 +1042,6 @@ int FindCommnr(const char *str)
 	return RC_ILLEGAL;
 }
 
-static inline size_t CountArgs(char **args)
-{
-	size_t argc = 0;
-	if (args)
-		for (; args[argc]; argc++) {}
-	return argc;
-}
-
-static bool CheckArgCount(struct comm *c, size_t argc)
-{
-	int allowed_counts_mask = c->flags & ARGS_MASK;
-
-	if (allowed_counts_mask == 0
-	 || allowed_counts_mask & 1U << (argc <= ARGS_ANY ?
-					 argc  : ARGS_ANY))
-		return true;
-
-	/* From here to the end of this function is just trying to be
-	 * very specific about the phrasing of the error message. */
-	char const *name = c->name;
-#ifdef FANCY_ERROR_REPORTING
-	switch (allowed_counts_mask) {
-	case ARGS(0):
-		Msg(0, "%s: %s: no arguments allowed", rc_name, name);
-		return false;
-	case ARGS(1):
-		Msg(0, "%s: %s: exactly one argument required", rc_name, name);
-		return false;
-	case ARGS(1)
-	   | ARGS(2)
-	   | ARGS(4):
-		Msg(0, "%s: %s: one, two, or four arguments required", rc_name, name);
-		return false;
-	case ARGS_ATLEAST(1):
-		Msg(0, "%s: %s: at least one argument required", rc_name, name);
-		return false;
-	}
-
-	bool or_more = allowed_counts_mask & ARGS_MORE;
-	const int first = log_lo_bit(lo_bit(allowed_counts_mask));
-
-	static char *nums[] = { "no", "one", "two", "three", "four", "five" };
-
-	if (!or_more && is_single_bit(allowed_counts_mask)) {
-		/* Exactly one allowed count, not including "or more" */
-		Msg(0, "%s: %s: exactly %s arguments required", rc_name, name, nums[first]);
-		return false;
-	}
-	if (!or_more && is_bit_pair(allowed_counts_mask)) {
-		/* Exactly two allowed counts, not including "or more" */
-		Msg(0, "%s: %s: %s or %s arguments required", rc_name, name,
-		    nums[first], nums[log_lo_bit(hi_bits(allowed_counts_mask))]);
-		return false;
-	}
-	if (is_bit_range(allowed_counts_mask)) {
-		/* Contiguous range of allowed counts.
-		 * Use bitwise carry propagation to find the top of the range.
-		 * Since we've already checked is_single_bit(allowed_counts_mask),
-		 * we know that first ≠ range_top (except for first = hi =
-		 * ARGS_ANY, but we will still correctly render that as "five
-		 * or more") */
-		const int range_top = log_lo_bit(range_end_bit(allowed_counts_mask));
-		if (first == 0)
-			Msg(0, "%s: %s: no more than %s arguments allowed", rc_name, name, nums[range_top]);
-		else if (range_top == ARGS_ANY)
-			Msg(0, "%s: %s: at least %s arguments required", rc_name, name, nums[first]);
-		else
-			Msg(0, "%s: %s: between %s and %s arguments required",
-			    rc_name, name, nums[first], nums[range_top]);
-		return false;
-	}
-#endif	/*FANCY_ERROR_REPORTING*/
-	Msg(0, "%s: %s: wrong number of arguments", rc_name, name);
-	return false;
-}
-
-static int CheckArgNum(int nr, char **args)
-{
-	int argc = CountArgs(args);
-	if (CheckArgCount(&comms[nr], argc))
-		return argc;
-	return -1;
-}
-
 static void StuffFin(char *buf, size_t len, void *data UNUSED)
 {
 	if (!flayer)
@@ -902,15 +1072,14 @@ static void StuffFin(char *buf, size_t len, void *data UNUSED)
 
 static void DoCommandSelect(struct action *act)
 {
-	char **args = act->args;
-	int n;
+	char *arg = act->args[0];
 
-	if (!*args)
+	if (!arg)
 		InputSelect();
-	else if (args[0][0] == '-' && !args[0][1]) {
+	else if (!strcmp(arg, "-")) {
 		SetForeWindow(NULL);
 		Activate(0);
-	} else if (args[0][0] == '.' && !args[0][1]) {
+	} else if (!strcmp(arg, ".")) {
 		if (!fore) {
 			OutputMsg(0, "select . needs a window");
 			queryflag = -1;
@@ -918,30 +1087,30 @@ static void DoCommandSelect(struct action *act)
 			SetForeWindow(fore);
 			Activate(0);
 		}
-	} else if (ParseWinNum(act, &n) == 0)
-		SwitchWindow(GetWindowByNumber(n));
-	else if (queryflag >= 0)
-		queryflag = -1;	/* ParseWinNum already prints out an appropriate error message. */
+	} else {
+		Window *w;
+		if (ParseWinNum(act, arg, &w))
+			SwitchWindow(w);
+		else if (queryflag >= 0)
+			queryflag = -1;	/* ParseWinNum already prints out an appropriate error message. */
+	}
 }
 
 static void DoCommandMultiinput(struct action *act)
 {
-	char **args = act->args;
+	char *arg = act->args[0];
 
-	if (!*args) {
+	if (!arg) {
 		if (!fore)
 			OutputMsg(0, "multiinput needs a window");
 		else
-			fore->w_miflag = fore->w_miflag ? 0 : 1;
+			fore->w_miflag = ! fore->w_miflag;
 	} else {
-		int n;
-		if (ParseWinNum(act, &n) == 0) {
-			Window *p = GetWindowByNumber(n);
-			if (p)
-				p->w_miflag = p->w_miflag ? 0 : 1;
-			else
-				ShowWindows(act, n);
-		}
+		Window *w = NULL;
+		if (ParseWinNum(act, arg, &w) && w)
+			w->w_miflag = ! w->w_miflag;
+		else
+			ShowWindows(act, -1);
 	}
 }
 
@@ -949,7 +1118,7 @@ static void DoCommandDefautonuke(struct action *act)
 {
 	int msgok = display && !*rc_name;
 
-	if (ParseOnOff(act, &defautonuke) == 0 && msgok)
+	if (ParseOnOff(act, act->args[0], &defautonuke) && msgok)
 		OutputMsg(0, "Default autonuke turned %s", defautonuke ? "on" : "off");
 	if (display && *rc_name)
 		D_auto_nuke = defautonuke;
@@ -959,7 +1128,7 @@ static void DoCommandAutonuke(struct action *act)
 {
 	int msgok = display && !*rc_name;
 
-	if (ParseOnOff(act, &D_auto_nuke) == 0 && msgok)
+	if (ParseOnOff(act, act->args[0], &D_auto_nuke) && msgok)
 		OutputMsg(0, "Autonuke turned %s", D_auto_nuke ? "on" : "off");
 }
 
@@ -967,7 +1136,7 @@ static void DoCommandDefobuflimit(struct action *act)
 {
 	int msgok = display && !*rc_name;
 
-	if (ParseNum(act, &defobuflimit) == 0 && msgok)
+	if (ParseNum(act, act->args[0], &defobuflimit) && msgok)
 		OutputMsg(0, "Default limit set to %d", defobuflimit);
 	if (display && *rc_name) {
 		D_obufmax = defobuflimit;
@@ -978,11 +1147,11 @@ static void DoCommandDefobuflimit(struct action *act)
 static void DoCommandObuflimit(struct action *act)
 {
 	int msgok = display && !*rc_name;
-	char **args = act->args;
+	char *arg = act->args[0];
 
-	if (*args == NULL)
+	if (arg == NULL)
 		OutputMsg(0, "Limit is %d, current buffer size is %d", D_obufmax, D_obuflen);
-	else if (ParseNum(act, &D_obufmax) == 0 && msgok)
+	else if (ParseNum(act, arg, &D_obufmax) && msgok)
 		OutputMsg(0, "Limit set to %d", D_obufmax);
 	D_obuflenmax = D_obuflen - D_obufmax;
 }
@@ -998,36 +1167,36 @@ static void DoCommandHardcopy(struct action *act)
 {
 	char **args = act->args;
 	int mode = DUMP_HARDCOPY;
-	char *file = NULL;
+	char *filename = NULL;
 	struct acluser *user = display ? D_user : users;
 
-	if (args[0]) {
-		if (!strcmp(*args, "-h")) {
-			mode = DUMP_SCROLLBACK;
-			file = args[1];
-		} else if (!strcmp(*args, "--") && args[1])
-			file = args[1];
-		else
-			file = args[0];
+	if (*args && !strcmp(*args, "-h")) {
+		mode = DUMP_SCROLLBACK;
+		++args;
 	}
+	if (*args && !strcmp(*args, "--"))
+		++args;
 
-	if (args[0] && file == args[0] && args[1]) {
+	if (*args && !filename)
+		filename = *args++;
+
+	if (*args) {
 		OutputMsg(0, "%s: hardcopy: too many arguments", rc_name);
 		return;
 	}
-	WriteFile(user, file, mode);
+	WriteFile(user, filename, mode);
 }
 
 static void DoCommandDeflog(struct action *act)
 {
-	(void)ParseOnOff(act, &nwin_default.Lflag);
+	(void)ParseOnOff(act, act->args[0], &nwin_default.Lflag);
 }
 
 static void DoCommandLog(struct action *act)
 {
 	bool b = fore->w_log ? true : false;
 
-	if (ParseSwitch(act, &b) == 0)
+	if (ParseToggle(act, act->args[0], &b))
 		LogToggle(b);
 }
 
@@ -1215,16 +1384,14 @@ static void DoCommandAt(struct action *act)
 	char **args = act->args;
 	int *argl = act->argl;
 	struct acluser *user = display ? D_user : users;
-	char *s;
-	size_t n;
 
 	/* where this AT command comes from: */
 	if (!user)
 		return;
-	s = SaveStr(user->u_name);
+	char *const s = SaveStr(user->u_name);
 	/* DO NOT RETURN FROM HERE WITHOUT RESETTING THIS: */
 	EffectiveAclUser = user;
-	n = strlen(args[0]);
+	size_t n = strlen(args[0]);
 	if (n)
 		n--;
 	/*
@@ -1235,23 +1402,18 @@ static void DoCommandAt(struct action *act)
 	switch (args[0][n]) {
 	case '*':		/* user */
 		{
-			Display *nd;
-			struct acluser *u;
 
-			if (!n)
-				u = user;
-			else {
-				for (u = users; u; u = u->u_next) {
-					if (!strncmp(*args, u->u_name, n))
-						break;
-				}
-			}
+			struct acluser *u = user;
+
+			if (n)
+				for (; u && strncmp(*args, u->u_name, n); u = u->u_next)  {}
+
 			if (!u) {
 				args[0][n] = '\0';
 				OutputMsg(0, "Did not find any user matching '%s'", args[0]);
 				goto out;
 			}
-			for (display = displays; display; display = nd) {
+			for (Display *nd, *display = displays; display; display = nd) {
 				nd = display->d_next;
 				if (D_forecv == NULL)
 					continue;
@@ -1270,9 +1432,7 @@ static void DoCommandAt(struct action *act)
 		break;
 	case '%':		/* display */
 		{
-			Display *nd;
-
-			for (display = displays; display; display = nd) {
+			for (Display *nd, *display = displays; display; display = nd) {
 				nd = display->d_next;
 				if (D_forecv == NULL)
 					continue;
@@ -1296,11 +1456,10 @@ static void DoCommandAt(struct action *act)
 		FALLTHROUGH;
 	default:
 		{
-			int ch;
 			int i = 0;
 
 			n++;
-			ch = args[0][n];
+			char ch = args[0][n];
 			args[0][n] = '\0';
 			if (!*args[0] || (i = WindowByNumber(args[0])) < 0) {
 				args[0][n] = ch;	/* must restore string in case of bind */
@@ -1614,7 +1773,7 @@ static void DoCommandBreaktype(struct action *act)
 	int n;
 
 	if (*args) {
-		if (ParseNum(act, &n))
+		if (!ParseNum(act, args[0], &n))
 			for (n = 0; (size_t) n < ARRAY_SIZE(types); n++) {
 				int i;
 				for (i = 0; i < 4; i++) {
@@ -1641,7 +1800,7 @@ static void DoCommandPow_break(struct action *act)
 	char **args = act->args;
 	int n = 0;
 
-	if (*args && ParseNum(act, &n))
+	if (*args && !ParseNum(act, args[0], &n))
 		return;
 	SendBreak(fore, n, true);
 }
@@ -1651,7 +1810,7 @@ static void DoCommandBreak(struct action *act)
 	char **args = act->args;
 	int n = 0;
 
-	if (*args && ParseNum(act, &n))
+	if (*args && !ParseNum(act, args[0], &n))
 		return;
 	SendBreak(fore, n, false);
 }
@@ -1843,12 +2002,12 @@ static void DoCommandHeight(struct action *act)
 
 static void DoCommandDefdynamictitle(struct action *act)
 {
-	(void)ParseOnOff(act, &nwin_default.dynamicaka);
+	(void)ParseOnOff(act, act->args[0], &nwin_default.dynamicaka);
 }
 
 static void DoCommandDynamictitle(struct action *act)
 {
-	(void)ParseOnOff(act, &fore->w_dynamicaka);
+	(void)ParseOnOff(act, act->args[0], &fore->w_dynamicaka);
 }
 
 static void DoCommandTitle(struct action *act)
@@ -1897,7 +2056,7 @@ static void DoCommandWrap(struct action *act)
 {
 	int msgok = display && !*rc_name;
 
-	if (ParseSwitch(act, &fore->w_wrap) == 0 && msgok)
+	if (ParseToggle(act, act->args[0], &fore->w_wrap) && msgok)
 		OutputMsg(0, "%cwrap", fore->w_wrap ? '+' : '-');
 }
 
@@ -1910,7 +2069,7 @@ static void DoCommandFlow(struct action *act)
 	if (*args) {
 		if (args[0][0] == 'a') {
 			fore->w_flow = (fore->w_flow & FLOW_AUTO) ? FLOW_AUTOFLAG | FLOW_AUTO | FLOW_ON : FLOW_AUTOFLAG;
-		} else if (ParseOnOff(act, &b) == 0)
+		} else if (ParseOnOff(act, act->args[0], &b))
 			fore->w_flow = (fore->w_flow & FLOW_AUTO) | b ? FLOW_ON : FLOW_OFF;
 	} else {
 		if (fore->w_flow & FLOW_AUTOFLAG)
@@ -1934,7 +2093,7 @@ static void DoCommandDefwritelock(struct action *act)
 
 	if (args[0][0] == 'a')
 		nwin_default.wlock = WLOCK_AUTO;
-	else if (ParseOnOff(act, &b) == 0)
+	else if (ParseOnOff(act, act->args[0], &b))
 		nwin_default.wlock = b ? WLOCK_ON : WLOCK_OFF;
 }
 
@@ -1947,7 +2106,7 @@ static void DoCommandWritelock(struct action *act)
 		if (args[0][0] == 'a') {
 			fore->w_wlock = WLOCK_AUTO;
 		} else {
-			if (ParseOnOff(act, &b))
+			if (!ParseOnOff(act, act->args[0], &b))
 				return;
 			fore->w_wlock = b ? WLOCK_ON : WLOCK_OFF;
 		}
@@ -1982,8 +2141,8 @@ static void DoCommandMonitor(struct action *act)
 	int i;
 
 	if (display)
-		b = b && (ACLBYTE(fore->w_mon_notify, D_user->u_id) & ACLBIT(D_user->u_id));
-	if (ParseSwitch(act, &b))
+		b = b && ACLBYTE(fore->w_mon_notify, D_user->u_id) & ACLBIT(D_user->u_id);
+	if (ParseToggle(act, act->args[0], &b))
 		return;
 	if (b) {
 		if (display)	/* we tell only this user */
@@ -2441,7 +2600,7 @@ static void DoCommandIgnorecase(struct action *act)
 {
 	int msgok = display && !*rc_name;
 
-	(void)ParseSwitch(act, &search_ic);
+	(void)!ParseToggle(act, act->args[0], &search_ic);
 	if (msgok)
 		OutputMsg(0, "Will %signore case in searches", search_ic ? "" : "not ");
 }
@@ -2500,7 +2659,7 @@ static void DoCommandChdir(struct action *act)
 
 static void DoCommandShell(struct action *act)
 {
-	if (ParseSaveStr(act, &ShellProg) == 0)
+	if (ParseSaveStr(act, act->args[0], &ShellProg))
 		ShellArgs[0] = ShellProg;
 }
 
@@ -2510,7 +2669,7 @@ static void DoCommandHardcopydir(struct action *act)
 	int msgok = display && !*rc_name;
 
 	if (*args)
-		(void)ParseSaveStr(act, &hardcopydir);
+		(void)ParseSaveStr(act, args[0], &hardcopydir);
 	if (msgok)
 		OutputMsg(0, "hardcopydir is %s\n", hardcopydir && *hardcopydir ? hardcopydir : "<cwd>");
 }
@@ -2528,7 +2687,7 @@ static void DoCommandLogfile(struct action *act)
 				OutputMsg(0, "log flush timeout set to %ds\n", log_flush);
 			return;
 		}
-		if (ParseSaveStr(act, &screenlogfile))
+		if (!ParseSaveStr(act, args[0], &screenlogfile))
 			return;
 		if (fore && fore->w_log)
 			if (DoStartLog(fore, buf, sizeof buf))
@@ -2545,7 +2704,7 @@ static void DoCommandLogtstamp(struct action *act)
 	int msgok = display && !*rc_name;
 
 	if (!*args || !strcmp(*args, "on") || !strcmp(*args, "off")) {
-		if (ParseSwitch(act, &logtstamp_on) == 0 && msgok)
+		if (ParseToggle(act, act->args[0], &logtstamp_on) && msgok)
 			OutputMsg(0, "timestamps turned %s", logtstamp_on ? "on" : "off");
 	} else if (!strcmp(*args, "string")) {
 		if (args[1]) {
@@ -2568,7 +2727,7 @@ static void DoCommandLogtstamp(struct action *act)
 
 static void DoCommandShelltitle(struct action *act)
 {
-	(void)ParseSaveStr(act, &nwin_default.aka);
+	(void)ParseSaveStr(act, act->args[0], &nwin_default.aka);
 }
 
 static void DoCommandTerminfo(struct action *act UNUSED)
@@ -2584,9 +2743,9 @@ static void DoCommandSleep(struct action *act UNUSED)
 static void DoCommandTerm(struct action *act)
 {
 	char *s = NULL;
-
-	if (ParseSaveStr(act, &s))
+	if (!ParseSaveStr(act, act->args[0], &s))
 		return;
+
 	if (strlen(s) > MAXTERMLEN) {
 		OutputMsg(0, "%s: term: argument too long ( < %d)", rc_name, MAXTERMLEN);
 		free(s);
@@ -2641,7 +2800,7 @@ static void DoCommandBell(struct action *act)
 		OutputMsg(0, "bell_msg is '%s'", buf);
 		return;
 	}
-	(void)ParseSaveStr(act, &BellString);
+	(void)ParseSaveStr(act, args[0], &BellString);
 }
 
 static void DoCommandBufferfile(struct action *act)
@@ -2651,7 +2810,7 @@ static void DoCommandBufferfile(struct action *act)
 
 	if (*args == NULL)
 		BufferFile = SaveStr(DEFAULT_BUFFERFILE);
-	else if (ParseSaveStr(act, &BufferFile))
+	else if (!ParseSaveStr(act, args[0], &BufferFile))
 		return;
 	if (msgok)
 		OutputMsg(0, "Bufferfile is now '%s'", BufferFile);
@@ -2659,7 +2818,7 @@ static void DoCommandBufferfile(struct action *act)
 
 static void DoCommandActivity(struct action *act)
 {
-	(void)ParseSaveStr(act, &ActivityString);
+	(void)ParseSaveStr(act, act->args[0], &ActivityString);
 }
 
 static void DoCommandPow_detach_msg(struct action *act)
@@ -2672,7 +2831,7 @@ static void DoCommandPow_detach_msg(struct action *act)
 		OutputMsg(0, "pow_detach_msg is '%s'", buf);
 		return;
 	}
-	(void)ParseSaveStr(act, &PowDetachString);
+	(void)ParseSaveStr(act, args[0], &PowDetachString);
 }
 
 #if defined(ENABLE_UTMP) && defined(LOGOUTOK)
@@ -2693,7 +2852,7 @@ static void DoCommandLogin(struct action *act)
 			SlotToggle(0);
 		return;
 	}
-	if (ParseSwitch(act, &b) == 0)
+	if (ParseToggle(act, act->args[0], &b))
 		SlotToggle(b);
 }
 
@@ -2706,7 +2865,7 @@ static void DoCommandDeflogin(struct action *act)
 		nwin_default.lflag |= 2;
 	else if (!strcmp(*args, "attached"))
 		nwin_default.lflag &= ~2;
-	else if (ParseOnOff(act, &b) == 0)
+	else if (ParseOnOff(act, act->args[0], &b))
 		nwin_default.lflag = b ? 1 : 0;
 }
 #endif
@@ -2728,25 +2887,25 @@ static void DoCommandDefflow(struct action *act)
 	}
 	if (args[0] && args[0][0] == 'a')
 		nwin_default.flowflag = FLOW_AUTOFLAG;
-	else if (ParseOnOff(act, &b) == 0)
+	else if (ParseOnOff(act, act->args[0], &b))
 		nwin_default.flowflag = b ? FLOW_ON : FLOW_OFF;
 }
 
 static void DoCommandDefwrap(struct action *act)
 {
-	(void)ParseOnOff(act, &nwin_default.wrap);
+	(void)!ParseOnOff(act, act->args[0], &nwin_default.wrap);
 }
 
 static void DoCommandDefc1(struct action *act)
 {
-	(void)ParseOnOff(act, &nwin_default.c1);
+	(void)!ParseOnOff(act, act->args[0], &nwin_default.c1);
 }
 
 static void DoCommandDefbce(struct action *act)
 {
 	bool b;
 
-	if (ParseOnOff(act, &b) == 0)
+	if (ParseOnOff(act, act->args[0], &b))
 		nwin_default.bce = b ? 1 : 0;
 }
 
@@ -2754,7 +2913,7 @@ static void DoCommandDefgr(struct action *act)
 {
 	bool b;
 
-	if (ParseOnOff(act, &b) == 0)
+	if (ParseOnOff(act, act->args[0], &b))
 		nwin_default.gr = b ? 1 : 0;
 }
 
@@ -2762,7 +2921,7 @@ static void DoCommandDefmonitor(struct action *act)
 {
 	bool b;
 
-	if (ParseOnOff(act, &b) == 0)
+	if (ParseOnOff(act, act->args[0], &b))
 		nwin_default.monitor = b ? MON_ON : MON_OFF;
 }
 
@@ -2770,7 +2929,7 @@ static void DoCommandDefmousetrack(struct action *act)
 {
 	bool b;
 
-	if (ParseOnOff(act, &b) == 0)
+	if (ParseOnOff(act, act->args[0], &b))
 		defmousetrack = b ? 1000 : 0;
 }
 
@@ -2781,7 +2940,7 @@ static void DoCommandMousetrack(struct action *act)
 
 	if (!args[0]) {
 		OutputMsg(0, "Mouse tracking for this display is turned %s", D_mousetrack ? "on" : "off");
-	} else if (ParseOnOff(act, &b) == 0) {
+	} else if (ParseOnOff(act, act->args[0], &b)) {
 		D_mousetrack = b ? 1000 : 0;
 		if (D_fore)
 			MouseMode(D_fore->w_mouse);
@@ -2792,7 +2951,7 @@ static void DoCommandDefsilence(struct action *act)
 {
 	bool b;
 
-	if (ParseOnOff(act, &b) == 0)
+	if (ParseOnOff(act, act->args[0], &b))
 		nwin_default.silence = b ? SILENCE_ON : SILENCE_OFF;
 }
 
@@ -2803,7 +2962,7 @@ static void DoCommandVerbose(struct action *act)
 	if (!*args)
 		OutputMsg(0, "W%s echo command when creating windows.", VerboseCreate ? "ill" : "on't");
 	else
-		(void)ParseOnOff(act, &VerboseCreate);
+		(void)!ParseOnOff(act, act->args[0], &VerboseCreate);
 }
 
 static void DoCommandHardstatus(struct action *act)
@@ -2871,7 +3030,7 @@ static void DoCommandHardstatus(struct action *act)
 		display = olddisplay;
 		return;
 	}
-	(void)ParseSwitch(act, &use_hardstatus);
+	(void)!ParseToggle(act, act->args[0], &use_hardstatus);
 	if (msgok)
 		OutputMsg(0, "messages displayed on %s", use_hardstatus ? "hardstatus line" : "window");
 }
@@ -2947,7 +3106,7 @@ static void DoCommandConsole(struct action *act)
 {
 	bool b = (console_window != NULL);
 
-	if (ParseSwitch(act, &b))
+	if (!ParseToggle(act, act->args[0], &b))
 		return;
 	if (TtyGrabConsole(fore->w_ptyfd, b, rc_name))
 		return;
@@ -2969,7 +3128,7 @@ static void DoCommandAllpartial(struct action *act)
 {
 	int msgok = display && !*rc_name;
 
-	if (ParseOnOff(act, &all_norefresh))
+	if (!ParseOnOff(act, act->args[0], &all_norefresh))
 		return;
 	if (!all_norefresh && fore)
 		Activate(-1);
@@ -2981,7 +3140,7 @@ static void DoCommandPartial(struct action *act)
 {
 	bool b = fore->w_norefresh;
 
-	(void)ParseSwitch(act, &b);
+	(void)!ParseToggle(act, act->args[0], &b);
 	fore->w_norefresh = b;
 }
 
@@ -2989,7 +3148,7 @@ static void DoCommandVbell(struct action *act)
 {
 	int msgok = display && !*rc_name;
 
-	if (ParseSwitch(act, &visual_bell) || !msgok)
+	if (!ParseToggle(act, act->args[0], &visual_bell) || !msgok)
 		return;
 	if (visual_bell == 0)
 		OutputMsg(0, "switched to audible bell.");
@@ -3001,7 +3160,7 @@ static void DoCommandVbellwait(struct action *act)
 {
 	int msgok = display && !*rc_name;
 
-	if (ParseNum1000(act, &VBellWait) == 0 && msgok)
+	if (ParseMilliseconds(act, act->args[0], &VBellWait, true) && msgok)
 		OutputMsg(0, "vbellwait set to %.10g seconds", VBellWait / 1000.);
 }
 
@@ -3009,7 +3168,7 @@ static void DoCommandMsgwait(struct action *act)
 {
 	int msgok = display && !*rc_name;
 
-	if (ParseNum1000(act, &MsgWait) == 0 && msgok)
+	if (ParseMilliseconds(act, act->args[0], &MsgWait, true) && msgok)
 		OutputMsg(0, "msgwait set to %.10g seconds", MsgWait / 1000.);
 }
 
@@ -3017,7 +3176,7 @@ static void DoCommandMsgminwait(struct action *act)
 {
 	int msgok = display && !*rc_name;
 
-	if (ParseNum1000(act, &MsgMinWait) == 0 && msgok)
+	if (ParseMilliseconds(act, act->args[0], &MsgMinWait, true) && msgok)
 		OutputMsg(0, "msgminwait set to %.10g seconds", MsgMinWait / 1000.);
 }
 
@@ -3025,7 +3184,7 @@ static void DoCommandSilencewait(struct action *act)
 {
 	int msgok = display && !*rc_name;
 
-	if (ParseNum(act, &SilenceWait))
+	if (!ParseNum(act, act->args[0], &SilenceWait))
 		return;
 	if (SilenceWait < 1)
 		SilenceWait = 1;
@@ -3064,7 +3223,7 @@ static void DoCommandNumber(struct action *act)
 		OutputMsg(0, queryflag >= 0 ? "%d (%s)" : "This is window %d (%s).", fore->w_number, fore->w_title);
 	else {
 		int old = fore->w_number;
-		int rel = 0, parse;
+		int rel = 0;
 		int n = 0;
 		if (args[0][0] == '+')
 			rel = 1;
@@ -3072,7 +3231,7 @@ static void DoCommandNumber(struct action *act)
 			rel = -1;
 		if (rel)
 			++act->args[0];
-		parse = ParseNum(act, &n);
+		bool parse = !ParseNum(act, args[0], &n);
 		if (rel)
 			--act->args[0];
 		if (parse)
@@ -3135,10 +3294,10 @@ static void DoCommandSilence(struct action *act)
 	int i = fore->w_silencewait;
 
 	if (args[0] && (args[0][0] == '-' || (args[0][0] >= '0' && args[0][0] <= '9'))) {
-		if (ParseNum(act, &i))
+		if (!ParseNum(act, args[0], &i))
 			return;
 		b = i > 0;
-	} else if (ParseSwitch(act, &b))
+	} else if (!ParseToggle(act, act->args[0], &b))
 		return;
 	if (b) {
 		if (display)	/* we tell only this user */
@@ -3175,7 +3334,7 @@ static void DoCommandSilence(struct action *act)
 
 static void DoCommandDefscrollback(struct action *act)
 {
-	(void)ParseNum(act, &nwin_default.histheight);
+	(void)!ParseNum(act, act->args[0], &nwin_default.histheight);
 }
 
 static void DoCommandScrollback(struct action *act)
@@ -3187,7 +3346,7 @@ static void DoCommandScrollback(struct action *act)
 		OutputMsg(0, "Cannot resize scrollback buffer in copy/scrollback mode.");
 		return;
 	}
-	(void)ParseNum(act, &n);
+	(void)!ParseNum(act, act->args[0], &n);
 	ChangeWindowSize(fore, fore->w_width, fore->w_height, n);
 	if (msgok)
 		OutputMsg(0, "scrollback set to %d", fore->w_histheight);
@@ -3203,7 +3362,7 @@ static void DoCommandSessionname(struct action *act)
 		char buf[MAXPATHLEN];
 		char *s = NULL;
 
-		if (ParseSaveStr(act, &s))
+		if (!ParseSaveStr(act, args[0], &s))
 			return;
 		if (!*s || strlen(s) + (SocketName - SocketPath) > MAXPATHLEN - 13 || strchr(s, '/')) {
 			OutputMsg(0, "%s: bad session name '%s'\n", rc_name, s);
@@ -3250,7 +3409,7 @@ static void DoCommandUnsetenv(struct action *act)
 
 static void DoCommandDefslowpaste(struct action *act)
 {
-	(void)ParseNum(act, &nwin_default.slow);
+	(void)!ParseNum(act, act->args[0], &nwin_default.slow);
 }
 
 static void DoCommandSlowpaste(struct action *act)
@@ -3264,7 +3423,7 @@ static void DoCommandSlowpaste(struct action *act)
 					    : "Slowpaste in window %d is unset.",
 			  fore->w_number,
 			  fore->w_slowpaste);
-	else if (ParseNum(act, &fore->w_slowpaste) == 0 && msgok)
+	else if (ParseNum(act, args[0], &fore->w_slowpaste) && msgok)
 		OutputMsg(0,
 			  fore->w_slowpaste ? "Slowpaste in window %d set to %d milliseconds."
 					    : "Slowpaste in window %d now unset.",
@@ -3285,26 +3444,26 @@ static void DoCommandPastefont(struct action *act)
 {
 	int msgok = display && !*rc_name;
 
-	if (ParseSwitch(act, &pastefont) == 0 && msgok)
+	if (ParseToggle(act, act->args[0], &pastefont) && msgok)
 		OutputMsg(0, "Will %spaste font settings", pastefont ? "" : "not ");
 }
 
 static void DoCommandCrlf(struct action *act)
 {
-	(void)ParseSwitch(act, &join_with_cr);
+	(void)!ParseToggle(act, act->args[0], &join_with_cr);
 }
 
 static void DoCommandCompacthist(struct action *act)
 {
 	int msgok = display && !*rc_name;
 
-	if (ParseSwitch(act, &compacthist) == 0 && msgok)
+	if (ParseToggle(act, act->args[0], &compacthist) && msgok)
 		OutputMsg(0, "%scompacting history lines", compacthist ? "" : "not ");
 }
 
 static void DoCommandHardcopy_append(struct action *act)
 {
-	(void)ParseOnOff(act, &hardcopy_append);
+	(void)!ParseOnOff(act, act->args[0], &hardcopy_append);
 }
 
 static void DoCommandVbell_msg(struct action *act)
@@ -3317,7 +3476,7 @@ static void DoCommandVbell_msg(struct action *act)
 		OutputMsg(0, "vbell_msg is '%s'", buf);
 		return;
 	}
-	(void)ParseSaveStr(act, &VisualBellString);
+	(void)ParseSaveStr(act, args[0], &VisualBellString);
 }
 
 static void DoCommandDefmode(struct action *act)
@@ -3326,7 +3485,7 @@ static void DoCommandDefmode(struct action *act)
 	int msgok = display && !*rc_name;
 	int n = 0;
 
-	if (ParseBase(act, *args, &n, 8, "octal"))
+	if (!ParseOctalNum(act, *args, &n))
 		return;
 	if (n < 0 || n > 0777) {
 		OutputMsg(0, "%s: mode: Invalid tty mode %o", rc_name, n);
@@ -3339,12 +3498,12 @@ static void DoCommandDefmode(struct action *act)
 
 static void DoCommandAutodetach(struct action *act)
 {
-	(void)ParseOnOff(act, &auto_detach);
+	(void)!ParseOnOff(act, act->args[0], &auto_detach);
 }
 
 static void DoCommandStartup_message(struct action *act)
 {
-	(void)ParseOnOff(act, &default_startup);
+	(void)!ParseOnOff(act, act->args[0], &default_startup);
 }
 
 static void DoCommandBind(struct action *act)
@@ -3537,7 +3696,7 @@ static void DoCommandMaptimeout(struct action *act)
 	int n = 0;
 
 	if (*args) {
-		if (ParseNum(act, &n))
+		if (!ParseNum(act, args[0], &n))
 			return;
 		if (n < 0) {
 			OutputMsg(0, "%s: maptimeout: illegal time %d", rc_name, n);
@@ -3650,7 +3809,7 @@ static void DoCommandMultiuser(struct action *act)
 	int msgok = display && !*rc_name;
 	bool b;
 
-	if (ParseOnOff(act, &b))
+	if (!ParseOnOff(act, act->args[0], &b))
 		return;
 	multi = b ? "" : NULL;
 	chsock();
@@ -3673,9 +3832,9 @@ static void DoCommandNonblock(struct action *act)
 	int n = 0;
 
 	if (*args && ((args[0][0] >= '0' && args[0][0] <= '9') || args[0][0] == '.')) {
-		if (ParseNum1000(act, &n))
+		if (!ParseMilliseconds(act, args[0], &n, true))
 			return;
-	} else if (!ParseSwitch(act, &b))
+	} else if (ParseToggle(act, act->args[0], &b))
 		n = b == 0 ? -1 : 1000;
 	else
 		return;
@@ -3696,9 +3855,9 @@ static void DoCommandDefnonblock(struct action *act)
 	bool b;
 
 	if (*args && ((args[0][0] >= '0' && args[0][0] <= '9') || args[0][0] == '.')) {
-		if (ParseNum1000(act, &defnonblock))
+		if (!ParseMilliseconds(act, args[0], &defnonblock, true))
 			return;
-	} else if (!ParseOnOff(act, &b))
+	} else if (ParseOnOff(act, act->args[0], &b))
 		defnonblock = b == 0 ? -1 : 1000;
 	else
 		return;
@@ -3717,7 +3876,7 @@ static void DoCommandGr(struct action *act)
 	if (fore->w_gr == 2)
 		fore->w_gr = 0;
 	b = fore->w_gr;
-	if (ParseSwitch(act, &b) == 0 && msgok) {
+	if (ParseToggle(act, act->args[0], &b) && msgok) {
 		fore->w_gr = b ? 1 : 0;
 		OutputMsg(0, "Will %suse GR", fore->w_gr ? "" : "not ");
 	}
@@ -3729,7 +3888,7 @@ static void DoCommandC1(struct action *act)
 {
 	int msgok = display && !*rc_name;
 
-	if (ParseSwitch(act, &fore->w_c1) == 0 && msgok)
+	if (ParseToggle(act, act->args[0], &fore->w_c1) && msgok)
 		OutputMsg(0, "Will %suse C1", fore->w_c1 ? "" : "not ");
 }
 
@@ -3807,7 +3966,7 @@ static void DoCommandDefecma48threshold(struct action *act)
 		bool msgok = display && !*rc_name;
 		if (msgok)
 			OutputMsg(0,
-				  "On new displays, ECMA-48 mode will be used if termcap match exceeds %f%%",
+				  "On new displays, ECMA-48 (ANSI) mode will be used if termcap defines at least %.1f%% of ANSI functionality",
 				  ecma48_match_threshold * 100.0);
 	}
 }
@@ -3830,7 +3989,7 @@ static void DoCommandDefutf8(struct action *act)
 	int msgok = display && !*rc_name;
 	bool b = nwin_default.encoding == UTF8;
 
-	if (ParseSwitch(act, &b) == 0) {
+	if (ParseToggle(act, act->args[0], &b)) {
 		nwin_default.encoding = b ? UTF8 : 0;
 		if (msgok)
 			OutputMsg(0, "Will %suse UTF-8 encoding for new windows", b ? "" : "not ");
@@ -3944,7 +4103,7 @@ static void DoCommandDefhstatus(struct action *act)
 		OutputMsg(0, "default hstatus is '%s'", buf);
 		return;
 	}
-	(void)ParseSaveStr(act, &nwin_default.hstatus);
+	(void)ParseSaveStr(act, args[0], &nwin_default.hstatus);
 	if (*nwin_default.hstatus == 0) {
 		free(nwin_default.hstatus);
 		nwin_default.hstatus = NULL;
@@ -3953,7 +4112,7 @@ static void DoCommandDefhstatus(struct action *act)
 
 static void DoCommandHstatus(struct action *act)
 {
-	(void)ParseSaveStr(act, &fore->w_hstatus);
+	(void)ParseSaveStr(act, act->args[0], &fore->w_hstatus);
 	if (*fore->w_hstatus == 0) {
 		free(fore->w_hstatus);
 		fore->w_hstatus = NULL;
@@ -4300,7 +4459,7 @@ static void DoCommandResize(struct action *act)
 
 static void DoCommandSetsid(struct action *act)
 {
-	(void)ParseSwitch(act, &separate_sids);
+	(void)!ParseToggle(act, act->args[0], &separate_sids);
 }
 
 static void DoCommandEval(struct action *act)
@@ -4320,7 +4479,7 @@ static void DoCommandAltscreen(struct action *act)
 {
 	int msgok = display && !*rc_name;
 
-	(void)ParseSwitch(act, &use_altscreen);
+	(void)!ParseToggle(act, act->args[0], &use_altscreen);
 	if (msgok)
 		OutputMsg(0, "Will %sdo alternate screen switching", use_altscreen ? "" : "not ");
 }
@@ -4329,7 +4488,7 @@ static void DoCommandAuth(struct action *act)
 {
 	int msgok = display && !*rc_name;
 
-	(void)ParseSwitch(act, &do_auth);
+	(void)!ParseToggle(act, act->args[0], &do_auth);
 	if (msgok)
 		OutputMsg(0, "Authentication: %s", do_auth ? "enabled" : "disabled");
 }
@@ -4340,7 +4499,7 @@ static void DoCommandBacktick(struct action *act)
 	int argc = CheckArgNum(act->nr, args);
 	int n = 0;
 
-	if (ParseBase(act, *args, &n, 10, "decimal"))
+	if (!ParseNum(act, *args, &n))
 		return;
 	if (!args[1])
 		setbacktick(n, 0, 0, NULL);
@@ -4350,9 +4509,9 @@ static void DoCommandBacktick(struct action *act)
 			OutputMsg(0, "%s: usage: backtick num [lifespan tick cmd args...]", rc_name);
 			return;
 		}
-		if (ParseBase(act, args[1], &lifespan, 10, "decimal"))
+		if (!ParseNum(act, args[1], &lifespan))
 			return;
-		if (ParseBase(act, args[2], &tick, 10, "decimal"))
+		if (!ParseNum(act, args[2], &tick))
 			return;
 		setbacktick(n, lifespan, tick, SaveArgs(args + 3));
 	}
@@ -4470,7 +4629,7 @@ static void DoCommandGroup(struct action *act)
 	if (*args) {
 		fore->w_group = NULL;
 		if (args[0][0]) {
-			fore->w_group = WindowByName(*args);
+			fore->w_group = GetWindowByName(*args);
 			if (fore->w_group == fore || (fore->w_group && fore->w_group->w_type != W_TYPE_GROUP))
 				fore->w_group = NULL;
 		}
@@ -4689,7 +4848,7 @@ static void DoCommandCjkwidth(struct action *act)
 {
 	int msgok = display && !*rc_name;
 
-	if (ParseSwitch(act, &cjkwidth) == 0) {
+	if (ParseToggle(act, act->args[0], &cjkwidth)) {
 		if (msgok)
 			OutputMsg(0, "Treat ambiguous width characters as %s width", cjkwidth ? "full" : "half");
 	}
@@ -4697,7 +4856,7 @@ static void DoCommandCjkwidth(struct action *act)
 
 static void DoCommandTruecolor(struct action *act)
 {
-	if (ParseOnOff(act, &hastruecolor) == 0)
+	if (ParseOnOff(act, act->args[0], &hastruecolor))
 		Activate(-1);
 }
 
@@ -5009,44 +5168,6 @@ void DoCommand(char **argv, int *argl)
 	DoAction(&act);
 }
 
-static void SaveAction(struct action *act, int nr, char **args, int *argl)
-{
-	int argc = CountArgs(args);
-	char **pp;
-	int *lp;
-
-	if (argc == 0) {
-		act->nr = nr;
-		act->args = noargs;
-		act->argl = NULL;
-		return;
-	}
-	if ((pp = malloc((argc + 1) * sizeof *pp)) == NULL)
-		Panic(0, "%s", strnomem);
-	if ((lp = malloc(argc * sizeof *lp)) == NULL)
-		Panic(0, "%s", strnomem);
-	act->nr = nr;
-	act->args = pp;
-	act->argl = lp;
-	while (argc--) {
-		*lp = argl ? *argl++ : (int)strlen(*args);
-		*pp++ = SaveStrn(*args++, *lp++);
-	}
-	*pp = NULL;
-}
-
-static char **SaveArgs(char **args)
-{
-	char **ap, **pp;
-
-	if ((pp = ap = malloc((CountArgs(args) + 1) * sizeof *ap)) == NULL)
-		Panic(0, "%s", strnomem);
-	while (*args)
-		*pp++ = SaveStr(*args++);
-	*pp = NULL;
-	return ap;
-}
-
 /*
  * buf is split into argument vector args.
  * leading whitespace is removed.
@@ -5248,202 +5369,11 @@ void SetEscape(struct acluser *u, int e, int me)
 	}
 }
 
-static int ParseSwitch(struct action *act, bool *var)
+static bool IsNum(char const *s)
 {
-	if (*act->args == NULL) {
-		*var ^= true;
-		return 0;
-	}
-	return ParseOnOff(act, var);
-}
-
-static int ParseOnOff(struct action *act, bool *var)
-{
-	int num = -1;
-	char **args = act->args;
-
-	if (*args && args[1] == NULL) {
-		if (strcmp(args[0], "on") == 0)
-			num = true;
-		else if (strcmp(args[0], "off") == 0)
-			num = false;
-	}
-	if (num < 0) {
-		Msg(0, "%s: %s: invalid argument. Give 'on' or 'off'", rc_name, comms[act->nr].name);
-		return -1;
-	}
-	*var = num;
-	return 0;
-}
-
-static int ParseSaveStr(struct action *act, char **var)
-{
-	char **args = act->args;
-	if (*args == NULL || args[1]) {
-		Msg(0, "%s: %s: one argument required.", rc_name, comms[act->nr].name);
-		return -1;
-	}
-	if (*var)
-		free(*var);
-	*var = SaveStr(*args);
-	return 0;
-}
-
-static int ParseNum(struct action *act, int *var)
-{
-	int i;
-	char *p, **args = act->args;
-
-	p = *args;
-	if (p == NULL || *p == 0 || args[1]) {
-		Msg(0, "%s: %s: invalid argument. Give one argument.", rc_name, comms[act->nr].name);
-		return -1;
-	}
-	i = 0;
-	while (*p) {
-		if (*p >= '0' && *p <= '9')
-			i = 10 * i + (*p - '0');
-		else {
-			Msg(0, "%s: %s: invalid argument. Give numeric argument.", rc_name, comms[act->nr].name);
-			return -1;
-		}
-		p++;
-	}
-	*var = i;
-	return 0;
-}
-
-static int ParseNum1000(struct action *act, int *var)
-{
-	int i;
-	char *p, **args = act->args;
-	int dig = 0;
-
-	p = *args;
-	if (p == NULL || *p == 0 || args[1]) {
-		Msg(0, "%s: %s: invalid argument. Give one argument.", rc_name, comms[act->nr].name);
-		return -1;
-	}
-	i = 0;
-	while (*p) {
-		if (*p >= '0' && *p <= '9') {
-			if (dig < 4)
-				i = 10 * i + (*p - '0');
-			else if (dig == 4 && *p >= '5')
-				i++;
-			if (dig)
-				dig++;
-		} else if (*p == '.' && !dig)
-			dig++;
-		else {
-			Msg(0, "%s: %s: invalid argument. Give floating point argument.", rc_name, comms[act->nr].name);
-			return -1;
-		}
-		p++;
-	}
-	if (dig == 0)
-		i *= 1000;
-	else
-		while (dig++ < 4)
-			i *= 10;
-	if (i < 0)
-		i = INT_MIN;
-	*var = i;
-	return 0;
-}
-
-static Window *WindowByName(char *s)
-{
-	Window *window;
-
-	for (window = mru_window; window; window = window->w_prev_mru)
-		if (!strcmp(window->w_title, s))
-			return window;
-	for (window = mru_window; window; window = window->w_prev_mru)
-		if (!strncmp(window->w_title, s, strlen(s)))
-			return window;
-	return NULL;
-}
-
-static int WindowByNumber(char *string)
-{
-	int i;
-	char *s;
-
-	for (i = 0, s = string; *s; s++) {
-		if (*s < '0' || *s > '9')
-			break;
-		i = i * 10 + (*s - '0');
-	}
-	return *s ? -1 : i;
-}
-
-/*
- * Get window number from Name or Number string.
- * Numbers are tried first, then names, a prefix match suffices.
- * Be careful when assigning numeric strings as WindowTitles.
- */
-int WindowByNoN(char *string)
-{
-	int i;
-	Window *window;
-
-	if ((i = WindowByNumber(string)) < 0 || i > last_window->w_number) {
-		if ((window = WindowByName(string)))
-			return window->w_number;
-		return -1;
-	}
-	return i;
-}
-
-static int ParseWinNum(struct action *act, int *var)
-{
-	char **args = act->args;
-	int i = 0;
-
-	if (*args == NULL || args[1]) {
-		Msg(0, "%s: %s: one argument required.", rc_name, comms[act->nr].name);
-		return -1;
-	}
-
-	i = WindowByNoN(*args);
-	if (i < 0) {
-		Msg(0, "%s: %s: invalid argument. Give window number or name.", rc_name, comms[act->nr].name);
-		return -1;
-	}
-	*var = i;
-	return 0;
-}
-
-static int ParseBase(struct action *act, char *p, int *var, int base, char *bname)
-{
-	int i = 0;
-	int c;
-
-	if (!p || *p == 0) {
-		Msg(0, "%s: %s: empty argument.", rc_name, comms[act->nr].name);
-		return -1;
-	}
-	while ((c = *p++)) {
-		if (c >= 'a' && c <= 'z')
-			c -= 'a' - 'A';
-		if (c >= 'A' && c <= 'Z')
-			c -= 'A' - ('0' + 10);
-		c -= '0';
-		if (c < 0 || c >= base) {
-			Msg(0, "%s: %s: argument is not %s.", rc_name, comms[act->nr].name, bname);
-			return -1;
-		}
-		i = base * i + c;
-	}
-	*var = i;
-	return 0;
-}
-
-static bool IsNum(char *s)
-{
+	return s[strspn(s, "0123456789")] == 0;
 	for (; *s; ++s)
-		if (*s < '0' || *s > '9')
+		if (!isdigit(*s))
 			return false;
 	return true;
 }
@@ -6250,7 +6180,7 @@ void DoScreen(char *fn, char **av)
 		}
 		++av;
 	}
-	if (av && *av && IsNumColon(*av, buf, ARRAY_SIZE(buf))) {
+	if (av && *av && ExtractColonNum(buf, sizeof buf, *av)) {
 		if (*buf != '\0')
 			nwin.aka = buf;
 		num = atoi(*av);
@@ -6553,13 +6483,13 @@ int StuffKey(int i)
 	return 0;
 }
 
-static int IsOnDisplay(Window *win)
+static bool IsOnDisplay(Window *win)
 {
 	Canvas *cv;
 	for (cv = D_cvlist; cv; cv = cv->c_next)
 		if (Layer2Window(cv->c_layer) == win)
-			return 1;
-	return 0;
+			return true;
+	return false;
 }
 
 Window *FindNiceWindow(Window *win, char *presel)
