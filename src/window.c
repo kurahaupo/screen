@@ -36,6 +36,7 @@
 #include <sys/types.h>
 #include <sys/wait.h>
 
+#include <errno.h>
 #include <fcntl.h>
 #include <signal.h>
 #include <stdbool.h>
@@ -2006,22 +2007,65 @@ void ResetWindow(Window *win)
 
 Window *GetWindowByNumber(uint16_t n)
 {
-	if (first_window->w_number <= n && n <= last_window->w_number) {
-		Window *w;
-		if ((first_window->w_number + (last_window->w_number - first_window->w_number) / 2) > n) {
-			/* look from the start */
-			w = first_window;
-			while (w && w->w_number < n)
-				w = w->w_next;
-		} else {
-			/* look from the end */
-			w = last_window;
-			while (w && w->w_number > n)
-				w = w->w_prev;
-		}
+	if (n < first_window->w_number
+	 || n > last_window->w_number)
+		return NULL;
 
-		if (w && w->w_number == n)
-			return w;
+	if ((first_window->w_number + last_window->w_number) > n * 2) {
+		/* scan forwards from first */
+		for (Window *w = first_window; w && w->w_number < n; w = w->w_next)
+			if (w->w_number == n)
+				return w;
+	} else {
+		/* scan backwards from last */
+		for (Window *w = last_window; w && w->w_number > n; w = w->w_prev)
+			if (w->w_number == n)
+				return w;
 	}
 	return NULL;
+}
+
+/*
+ * Get window from Name string.
+ * Whole names are tried first, then prefices of names.
+ */
+Window *GetWindowByName(char const *s)
+{
+	for (Window *w = mru_window; w; w = w->w_prev_mru)
+		if (!strcmp(w->w_title, s))
+			return w;
+	size_t l = strlen(s);
+	for (Window *w = mru_window; w; w = w->w_prev_mru)
+		if (!memcmp(w->w_title, s, l))
+			return w;
+	return NULL;
+}
+
+/*
+ * Get window from Number string.
+ * Be careful when assigning numeric strings as WindowTitles.
+ */
+Window *GetWindowByNumberStr(char const *string)
+{
+	char *s;
+	errno = 0;
+	int i = strtoul(string, &s, 10);
+
+	if (*s || s == string || errno)
+		return NULL;
+
+	return GetWindowByNumber(i);
+}
+
+/*
+ * Get window from Name or Number string.
+ * Numbers are tried first, then names, then prefices of names.
+ * Be careful when assigning numeric strings as WindowTitles.
+ */
+Window *GetWindowByNameOrNumber(char const *string)
+{
+	Window *w = GetWindowByNumberStr(string);
+	if (w)
+		return w;
+	return GetWindowByName(string);
 }
