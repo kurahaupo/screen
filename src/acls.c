@@ -626,9 +626,6 @@ static int AclSetPermWin(struct acluser *uu, struct acluser *u, char *mode, Wind
  */
 int AclSetPerm(struct acluser *uu, struct acluser *u, char *mode, char *s)
 {
-	int i;
-	char *p, ch;
-
 	while (*s) {
 		switch (*s) {
 		case '*':	/* all windows and all commands */
@@ -645,24 +642,35 @@ int AclSetPerm(struct acluser *uu, struct acluser *u, char *mode, char *s)
 			if (uu)	/* command umask or .. */
 				AclSetPermWin(uu, u, mode, NULL);
 			else	/* .. or all commands */
-				for (i = 0; i <= RC_LAST; i++)
+				for (int i = 0; i <= RC_LAST; i++)
 					AclSetPermCmd(u, mode, &comms[i]);
 			s++;
 			break;
 		default:
-			for (p = s; *p && *p != ' ' && *p != '\t' && *p != ','; p++) ;
-			if ((ch = *p))
-				*p++ = '\0';
-			if ((i = FindCommnr(s)) != RC_ILLEGAL)
+		       {
+			char *p = s + strcspn(s, " \t,");
+			char *o = NULL;
+			if (*p) {
+				++p;
+				asprintf(&o, "%.*s", (int)(p-1-s), s);
+				s = o;
+			}
+			int i = FindCommnr(s);
+			if (i == RC_ILLEGAL) {
+				Window *w = GetWindowByNameOrNumber(s);
+				if (w == NULL) {
+					if (o)
+						free(o);
+					/* checking group name */
+					return -1;
+				}
+				AclSetPermWin(NULL, u, mode, w);
+			} else
 				AclSetPermCmd(u, mode, &comms[i]);
-			else if (((i = WindowByNoN(s)) >= 0) && GetWindowByNumber(i))
-				AclSetPermWin(NULL, u, mode, GetWindowByNumber(i));
-			else
-				/* checking group name */
-				return -1;
-			if (ch)
-				p[-1] = ch;
+			if (o)
+				free(o);
 			s = p;
+		       }
 		}
 	}
 	return 0;
