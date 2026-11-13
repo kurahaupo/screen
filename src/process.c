@@ -5447,7 +5447,7 @@ static bool IsNum(char *s)
 	return true;
 }
 
-int IsNumColon(char *s, char *p, int psize)
+bool ExtractColonNum(char *p, size_t psize, char const *s)
 {
 	char *q;
 	if ((q = strrchr(s, ':')) != NULL) {

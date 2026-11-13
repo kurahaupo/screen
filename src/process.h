@@ -25,7 +25,7 @@ void SetForeWindow(struct Window *);
 int Parse(char *, int, char **, int *);
 void SetEscape(struct acluser *, int, int);
 void DoScreen(char *, char **);
-int IsNumColon(char *, char *, int);
+bool ExtractColonNum(char *, size_t, char const*);
 void ShowWindows(struct action *, int);
 char *AddWindows(struct WinMsgBufContext *, int, int, int);
 char *AddWindowFlags(char *, int, struct Window *);
