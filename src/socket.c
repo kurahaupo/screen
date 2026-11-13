@@ -1439,16 +1439,17 @@ static void DoCommandMsg(Message *mp)
 	if (!display)
 		display = displays;	/* sigh */
 	if (*mp->m.command.preselect) {
-		int i = -1;
-		if (strcmp(mp->m.command.preselect, "-")) {
-			i = WindowByNoN(mp->m.command.preselect);
-			if (i < 0 || !GetWindowByNumber(i)) {
+		Window *w = NULL;
+		char const *wn = mp->m.command.preselect;
+		if (strcmp(wn, "-")) {
+			w = GetWindowByNameOrNumber(wn);
+			if (w == NULL) {
 				Msg(0, "Could not find pre-select window.");
 				queryflag = -1;
 				return;
 			}
 		}
-		fore = i >= 0 ? GetWindowByNumber(i) : NULL;
+		fore = w;
 	} else if (!fore) {
 		if (display && D_user == user)
 			fore = Layer2Window(display->d_forecv->c_layer);
