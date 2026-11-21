@@ -12,6 +12,14 @@ struct paster;
 struct Window;
 struct WinMsgBufContext;
 
+typedef enum add_window_flags_e {
+    AWF_NONE  = 0,
+    AWF_HIDE  = 1,
+    AWF_SHORT = 2,
+    AWF_PLUS  = 4,
+    AWF_MINUS = 8,
+} add_window_flags_t;
+
 void InitKeytab(void);
 void ProcessInput(char *, size_t);
 void ProcessInput2(char *, size_t);
@@ -26,8 +34,8 @@ int Parse(char *, int, char **, int *);
 void SetEscape(struct acluser *, int, int);
 void DoScreen(char *, char **);
 bool ExtractColonNum(char *, size_t, char const*);
-void ShowWindows(struct action *, int);
-char *AddWindows(struct WinMsgBufContext *, int, int, int);
+void ShowWindows(struct action *, struct Window *);
+char *AddWindows(struct WinMsgBufContext *, size_t, add_window_flags_t, struct Window *);
 char *AddWindowFlags(char *, int, struct Window *);
 char *AddOtherUsers(char *, int, struct Window *);
 int WindowByNoN(char *);

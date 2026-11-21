@@ -46,8 +46,8 @@ CPPFLAGS = @CPPFLAGS@ $(IFLAGS) -DSCREENENCODINGS='"$(SCREENENCODINGS)"' -DBUILD
 LDFLAGS = @LDFLAGS@
 LIBS = @LIBS@
 
-CCE_DEPEND = $(CC) -E  @CPPFLAGS@ $(IFLAGS)
-CPP_DEPEND = $(CC) -MM @CPPFLAGS@ $(IFLAGS)
+CCE_DEPEND = $(CC) -E  @CPPFLAGS@ $(IFLAGS) -DCPP_ONLY=1
+CPP_DEPEND = $(CC) -MM @CPPFLAGS@ $(IFLAGS) -DCPP_ONLY=1
 
 INSTALL = @INSTALL@
 INSTALL_PROGRAM = @INSTALL_PROGRAM@ -o root -m 4755
@@ -245,7 +245,9 @@ config.h: config.status
 config.status: $(srcdir)/configure.ac
 	$(srcdir)/configure
 
-mdepend: $(CFILES) $(GCFILES) config.h comm.h term.h
+mdepend:: DEPEND
+
+DEPEND: $(CFILES) $(GCFILES) config.h comm.h term.h
 	{ \
         for i in $(CFILES) ; do \
           echo "$(srcdir)/$$i" ; \
@@ -286,25 +288,26 @@ depend: depend.in
 depend.in::
 	mkdir -p ../build ; \
 	cd ../build ; \
-	sed -e '/^#* Dependencies/q' < ../src/Makefile.in > .tmp_make$$$$-a && \
-	{ \
-	  for i in $(CFILES) ; do \
-	    echo ../src/$$i >&2 ; \
-	    $(CPP_DEPEND) ../src/$$i || \
-	      break ; \
-	  done ; \
-	  for i in $(GCFILES) ; do \
-	    echo $$i >&2 ; \
-	    $(CPP_DEPEND) -I. -I../src $$i || \
-	      break ; \
-	  done ; \
-	} > .tmp_make$$$$-t && \
-	<.tmp_make$$$$-t \
-	sed -e ':b; /\\$$/ { ' \
+	for i in $(CFILES) ; do \
+	  echo ../src/$$i >&2 ; \
+	  $(CPP_DEPEND) ../src/$$i || \
+	    ! break ; \
+	done > .tmp_make$$$$-t1 && \
+	for i in $(GCFILES) ; do \
+	  echo $$i >&2 ; \
+	  $(CPP_DEPEND) -I. -I../src $$i || \
+	    ! break ; \
+	done > .tmp_make$$$$-t2 && \
+        cat .tmp_make$$$$-t* > .tmp_make$$$$-u1 && \
+        < .tmp_make$$$$-u1 \
+	sed -e ':b' \
+	    -e '/\\$$/ { ' \
 	    -e   'N' \
 	    -e   's/\\\n//' \
 	    -e   '$$ ! bb' \
-	    -e '};' | \
+	    -e '};' \
+        > .tmp_make$$$$-u2 && \
+        < .tmp_make$$$$-u2 \
 	sed -e 's/   */ /g' \
 	    -e 's#\.\./src#$$(srcdir)#g' \
 	    -e ':b' \
@@ -313,11 +316,16 @@ depend.in::
 	    -e   'P' \
 	    -e   'D' \
 	    -e   'bb' \
-	    -e '}' | \
+	    -e '}' \
+        > .tmp_make$$$$-u3 && \
+        < .tmp_make$$$$-u3 \
 	sort -o .tmp_make$$$$-b && \
-	cp ../src/Makefile.in ../src/Makefile.in.~$$$$~ && \
+	sed -e '/^#* Dependencies/q' < ../src/Makefile.in > .tmp_make$$$$-a && \
 	cat .tmp_make$$$$-a .tmp_make$$$$-b > ../src/Makefile.in && \
-	rm -f .tmp_make$$$$-*
+	if [ -n "$$KEEP" ] ; \
+        then echo KEEPING .tmp_make$$$$-* >&2 ; \
+        else rm -f .tmp_make$$$$-* ; \
+	fi
 
 ###############################################################################
 

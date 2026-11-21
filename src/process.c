@@ -271,7 +271,7 @@ static bool ParseNum(struct action *act, char const *arg, int *var)
 		return false;
 	}
 	int i = l;
-	if (errno || i < 0 || (unsigned long)i != l) {
+	if (errno && l == ULONG_MAX || i < 0 || (unsigned long)i != l) {
 		Msg(0, "%s: %s: numeric argument is out of range.", rc_name, comms[act->nr].name);
 		return false;
 	}
@@ -293,7 +293,7 @@ static bool ParseOctalNum(struct action *act, char const *arg, int *var)
 		return false;
 	}
 	int i = l;
-	if (errno || i < 0 || (unsigned long)i != l) {
+	if (errno && l == ULONG_MAX || i < 0 || (unsigned long)i != l) {
 		Msg(0, "%s: %s: octal numeric argument is out of range.", rc_name, comms[act->nr].name);
 		return false;
 	}
@@ -316,7 +316,7 @@ static bool ParseMilliseconds(struct action *act, char const *arg, int *var, boo
 	}
 	f = rint(f * 1000.0);
 	int i = (int)f;
-	if (errno || (double)i != f || i < 0 && !allow_negative) {
+	if (errno && f == HUGE_VAL || (double)i != f || i < 0 && !allow_negative) {
 		Msg(0, "%s: %s: decimal fraction argument is out of range.", rc_name, comms[act->nr].name);
 		return false;
 	}
@@ -354,7 +354,7 @@ static bool ParseWinNum(struct action *act, char *arg, Window **var)
 
 	Window *w = GetWindowByNameOrNumber(arg);
 	if (!w) {
-		Msg(0, "%s: %s: argument is not a valid window number or name.", rc_name, comms[act->nr].name);
+		Msg(0, "%s: %s: argument %s is not a valid window number or name.", rc_name, comms[act->nr].name, arg);
 		return false;
 	}
 	*var = w;
@@ -1110,7 +1110,7 @@ static void DoCommandMultiinput(struct action *act)
 		if (ParseWinNum(act, arg, &w) && w)
 			w->w_miflag = ! w->w_miflag;
 		else
-			ShowWindows(act, -1);
+			ShowWindows(act, NULL);
 	}
 }
 
@@ -1685,7 +1685,7 @@ static void DoCommandWindows(struct action *act)
 	if (args[0])
 		ShowWindowsX(args[0]);
 	else
-		ShowWindows(act, -1);
+		ShowWindows(act, NULL);
 }
 
 static void DoCommandVersion(struct action *act UNUSED)
@@ -3364,16 +3364,20 @@ static void DoCommandSessionname(struct action *act)
 
 		if (!ParseSaveStr(act, args[0], &s))
 			return;
-		if (!*s || strlen(s) + (SocketName - SocketPath) > MAXPATHLEN - 13 || strchr(s, '/')) {
+		size_t l = strlen(s);
+		if (l == 0 || l + (SocketName - SocketPath) > MAXPATHLEN - 13 || memchr(s, '/', l)) {
 			OutputMsg(0, "%s: bad session name '%s'\n", rc_name, s);
 			free(s);
 			return;
 		}
-		strncpy(buf, SocketPath, SocketName - SocketPath);
-		sprintf(buf + (SocketName - SocketPath), "%d.%s", (int)getpid(), s);
+		snprintf(buf, sizeof buf,
+			 "%.*s%ld.%s",
+			 (int)(SocketName - SocketPath), SocketPath,
+			 (long)getpid(),
+			 s);
 		free(s);
 		if ((access(buf, F_OK) == 0) || (errno != ENOENT)) {
-			OutputMsg(0, "%s: inappropriate path: '%s'.", rc_name, buf);
+			OutputMsg(errno, "%s: inappropriate path: '%s'.", rc_name, buf);
 			return;
 		}
 		if (rename(SocketPath, buf)) {
@@ -5393,7 +5397,7 @@ bool ExtractColonNum(char *p, size_t psize, char const *s)
 void SwitchWindow(Window *window)
 {
 	if (window == NULL) {
-		ShowWindows(NULL, -1);
+		ShowWindows(NULL, NULL);
 		return;
 	}
 	if (display == NULL) {
@@ -5606,32 +5610,30 @@ static void LogToggle(bool on)
 	WindowChanged(fore, WINESC_WFLAGS);
 }
 
-/* TODO: wmb encapsulation; flags enum; update all callers */
-/* also maybe give window pointer instead of number in 'where'? */
-char *AddWindows(WinMsgBufContext *wmbc, int len, int flags, int where)
+char *AddWindows(WinMsgBufContext *wmbc,
+		 size_t len,
+		 add_window_flags_t flags,
+		 Window *cur)
 {
 	char *s, *ss;
 	Window *win;
 	char *cmd;
 	char *buf = wmbc->p;
-	int l;
-	Window *cur;
+	size_t l;
 
 	s = ss = buf;
-	if (where < 0) {
+	if (cur == NULL) {
 		*s = 0;
 		return ss;
 	}
 
-	cur = GetWindowByNumber(where);
-
-	for (win = (flags & 4) ? cur->w_next : first_window; win; win = win->w_next) {
+	for (win = (flags & AWF_PLUS) ? cur->w_next : first_window; win; win = win->w_next) {
 		uint64_t rend = 0;
 		if (win == cur && ss == buf)
 			ss = s;
 		if (win == NULL)
 			continue;
-		if ((flags & 1) && display && win == D_fore)
+		if ((flags & AWF_HIDE) && display && win == D_fore)
 			continue;
 		if (display && D_fore && D_fore->w_group != win->w_group)
 			continue;
@@ -5642,13 +5644,13 @@ char *AddWindows(WinMsgBufContext *wmbc, int len, int flags, int where)
 			l = 20;
 		if (s - buf + l > len - 24)
 			break;
-		if (s > buf || (flags & 4)) {
+		if (s > buf || (flags & AWF_PLUS)) {
 			*s++ = ' ';
 			*s++ = ' ';
 		}
 		if (win == cur) {
 			ss = s;
-			if (flags & 8)
+			if (flags & AWF_MINUS)
 				break;
 		}
 		if (win->w_monitor == MON_DONE && renditions[REND_MONITOR] != 0)
@@ -5661,7 +5663,7 @@ char *AddWindows(WinMsgBufContext *wmbc, int len, int flags, int where)
 		if (rend != 0)
 			AddWinMsgRend(wmbc->buf, s, rend);
 		s += sprintf(s, "%d", win->w_number);
-		if (!(flags & 2)) {
+		if (!(flags & AWF_SHORT)) {
 			s = AddWindowFlags(s, len, win);
 		}
 		*s++ = ' ';
@@ -5747,7 +5749,7 @@ char *AddOtherUsers(char *buf, int len, Window *p)
 /* Display window list as a message.  WHERE denotes the active window
  * number; if -1, then the active window will be determined using the
  * current foreground window, if available. */
-void ShowWindows(struct action *act, int where)
+void ShowWindows(struct action *act, struct Window *where)
 {
 	const char *buf, *s, *ss;
 
@@ -5755,11 +5757,11 @@ void ShowWindows(struct action *act, int where)
 	WinMsgBufContext *wmbc = wmbc_create(wmb);
 	size_t max = wmbc_bytesleft(wmbc);
 
-	if (display && where == -1 && D_fore)
-		where = D_fore->w_number;
+	if (display && where == NULL && D_fore)
+		where = D_fore;
 
 	/* TODO: this is a confusing mix of old and new; modernize */
-	ss = AddWindows(wmbc, max, 0, where);
+	ss = AddWindows(wmbc, max, AWF_NONE, where);
 	wmbc_fastfw0(wmbc);
 	buf = wmbc_finish(wmbc);
 	s = buf + strlen(buf);

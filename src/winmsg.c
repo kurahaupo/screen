@@ -68,9 +68,20 @@ static const char months[] = "JanFebMarAprMayJunJulAugSepOctNovDec";
 /* escape char for backtick output */
 #define WINMSG_BT_ESC '\005'
 
-/* redundant definition abstraction for escape character handlers; note that
+/* Redundant definition abstraction for escape character handlers; note that
  * a variable varadic macro name is a gcc extension and is not portable, so
  * we instead use two separate macros */
+
+#ifndef HAVE_VA_OPT
+# if HAVE_VA_ARGS
+#  define __VA_OPT__(x,y) ,
+# else
+#  ifndef CPP_ONLY	/* unless doing "make depends" */
+#   error "Require C23 or GCC or clang to support varadic macros"
+#  endif
+# endif
+#endif
+
 #define WINMSG_ESC_PARAMS \
 	__attribute__((unused)) WinMsgEsc *esc, \
 	__attribute__((unused)) char **src, \
@@ -79,10 +90,10 @@ static const char months[] = "JanFebMarAprMayJunJulAugSepOctNovDec";
 #define winmsg_esc__name(name) __WinMsgEsc##name
 #define winmsg_esc__def(name) static void winmsg_esc__name(name)
 #define winmsg_esc(name) winmsg_esc__def(name)(WINMSG_ESC_PARAMS)
-#define winmsg_esc_ex(name, ...) winmsg_esc__def(name)(WINMSG_ESC_PARAMS, __VA_ARGS__)
+#define winmsg_esc_ex(name, ...) winmsg_esc__def(name)(WINMSG_ESC_PARAMS __VA_OPT__(,) __VA_ARGS__)
 #define WINMSG_ESC_ARGS &esc, &s, wmbc, cond
 #define WinMsgDoEsc(name) winmsg_esc__name(name)(WINMSG_ESC_ARGS)
-#define WinMsgDoEscEx(name, ...) winmsg_esc__name(name)(WINMSG_ESC_ARGS, __VA_ARGS__)
+#define WinMsgDoEscEx(name, ...) winmsg_esc__name(name)(WINMSG_ESC_ARGS __VA_OPT__(,) __VA_ARGS__)
 
 static void _MakeWinMsgEvRec(WinMsgBufContext *, WinMsgCond *, char *, Window *, int *, int);
 
@@ -387,13 +398,15 @@ winmsg_esc_ex(WinNames, const bool hide_cur, Window *win)
 	}
 
 	/* TODO: no need to enforce a limit here */
-	AddWindows(wmbc,
-		   max - 1,
-		   hide_cur
-		   | (esc->flags.lng ? 0 : 2)
-		   | (esc->flags.plus ? 4 : 0)
-		   | (esc->flags.minus ? 8 : 0),
-		   win ? win->w_number : -1);
+	if (max > 0) --max;
+
+        add_window_flags_t const awf =
+		  ( hide_cur        ? AWF_HIDE : 0 )
+		| (esc->flags.lng   ? 0 : AWF_SHORT)
+		| (esc->flags.plus  ? AWF_PLUS : 0 )
+		| (esc->flags.minus ? AWF_MINUS : 0);
+
+	AddWindows(wmbc, max, awf, win);
 
 	if (display)
 		D_fore = oldfore;

@@ -1,9 +1,72 @@
 #ifndef SCREEN_BITMATH_H
 #define SCREEN_BITMATH_H
 
-#include <stdint.h>
 #ifdef HAVE_STDBIT_H
 # include <stdbit.h>
+#endif
+#include <stdint.h>
+
+#if UINT128_WIDTH == 128
+typedef uint128_t; bit_uint128_t;
+#elif HAVE___UINT128
+typedef __uint128; bit_uint128_t;
+#elif HAVE__UINT128
+typedef _uint128; bit_uint128_t;
+#elif HAVE_UINT128
+typedef uint128; bit_uint128_t;
+#endif
+
+#if UINT256_WIDTH == 256
+typedef uint256_t; bit_uint256_t;
+#elif HAVE___UINT256
+typedef __uint256; bit_uint256_t;
+#elif HAVE__UINT256
+typedef _uint256; bit_uint256_t;
+#elif HAVE_UINT256
+typedef uint256; bit_uint256_t;
+#endif
+
+#if UINT512_WIDTH == 512
+typedef uint512_t; bit_uint512_t;
+#elif HAVE___UINT512
+typedef __uint512; bit_uint512_t;
+#elif HAVE__UINT512
+typedef _uint512; bit_uint512_t;
+#elif HAVE_UINT512
+typedef uint512; bit_uint512_t;
+#endif
+
+#define bit_eval1(...) __VA_ARGS__
+#define bit_eval2(...) bit_eval1(bit_eval1(__VA_ARGS__))
+#define bit_eval3(...) bit_eval1(bit_eval1(bit_eval1(__VA_ARGS__)))
+#define bit_eval4(...) bit_eval1(bit_eval1(bit_eval1(bit_eval1(__VA_ARGS__))))
+
+#define bit_eval16(...) bit_eval4(bit_eval4(bit_eval4(bit_eval4(__VA_ARGS__))))
+#define bit_eval64(...) bit_eval16(bit_eval16(bit_eval16(bit_eval16(__VA_ARGS__))))
+
+/* Expand 128 times by default, being half of the 256 levels specified by std C */
+#define bit_eval(...) bit_eval64(bit_eval64(__VA_ARGS__))
+
+/* The following may or may not work, depending on your compiler */
+#define bit_eval256(...) bit_eval64(bit_eval64(bit_eval64(bit_eval64(__VA_ARGS__))))
+#define bit_eval512(...) bit_eval256(bit_eval256(__VA_ARGS__))
+#define bit_eval1024(...) bit_eval256(bit_eval256(bit_eval256(bit_eval256(__VA_ARGS__))))
+
+#if HAVE_VA_OPT
+#define bit_stepbound2(V,Y,...) (Y) __VA_OPT__( < (V) ? bit_stepbound2(V, __VA_ARGS__) : (Y) )
+#define bit_stepbound(V,Y,...) ( bit_eval16(bit_stepbound2(__VA_ARGS__)) )
+
+#define bit(X) _Generic((char[bit_stepbound(X,8,16,32,64,128,256,512) >> 3]){0}, \
+			char[1]:  (uint8_t)1U << (X),
+			char[2]:  (uint16_t)1U << (X),
+			char[4]:  (uint32_t)1U << (X),
+			char[8]:  (uint64_t)1U << (X),
+			char[16]: (bit_uint128_t)1U << (X),
+			char[32]: (bit_uint256_t)1U << (X),
+			char[64]: (bit_uint512_t)1U << (X))
+
+#define bit_list(...) ( bit_eval( (uint8_t)0U __VA_OPT__( | bit_list2(__VA_ARGS__) ) ) )
+#define bit_list2(X, ...) bit(X) __VA_OPT__( | bit_list2(__VA_ARGS__))
 #endif
 
 /* lookup for base-2 logarithm of a single bit */

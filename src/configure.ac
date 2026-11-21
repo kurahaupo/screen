@@ -50,6 +50,275 @@ AC_PROG_INSTALL
 AC_USE_SYSTEM_EXTENSIONS
 
 dnl
+dnl Check for __VA_ARGS__ (standard since C99)
+dnl   and for __VA_OPT__ (standard since C23 / C++20)
+dnl
+AC_MSG_CHECKING([whether the compiler supports __VA_ARGS__ and __VA_OPT__])
+AC_COMPILE_IFELSE([AC_LANG_PROGRAM([], [
+  #define TEST_MACRO(fmt, ...) fprintf(stderr, fmt, __VA_ARGS__)
+  TEST_MACRO("test %d\n", 1);
+])],
+[
+  AC_DEFINE([HAVE_VA_ARGS], [1], [Define to 1 if the compiler supports __VA_ARGS__.])
+  AC_COMPILE_IFELSE([AC_LANG_PROGRAM([], [
+    #define TEST_OPT(fmt, ...) fprintf(stderr, fmt __VA_OPT__(,) __VA_ARGS__)
+    TEST_OPT("test\n");
+    TEST_OPT("test %d\n", 42);
+  ])],
+  [
+    AC_DEFINE([HAVE_VA_OPT], [1], [Define to 1 if the compiler supports __VA_OPT__.])
+    AC_MSG_RESULT([has __VA_ARGS__ and __VA_OPT__])
+  ],
+  [
+    AC_MSG_RESULT([has __VA_ARGS__ but not __VA_OPT__])
+  ])
+],
+[
+  AC_MSG_RESULT([lacks __VA_ARGS__ (__VA_OPT__ ignored)])
+])
+
+dnl
+dnl Check for weirdly named extended integer types
+dnl
+AC_MSG_CHECKING([whether the compiler supports uint128, _uint128, or __uint128])
+AC_COMPILE_IFELSE([AC_LANG_PROGRAM([#include <stdint.h>], [
+  uint128_t x = (uint128_t)1 << 128 - 1;
+  (void)x;
+])], [
+  AC_MSG_RESULT([ignored (has uint128_t)])
+], [
+  AC_COMPILE_IFELSE([AC_LANG_PROGRAM([#include <stdint.h>], [
+    _uint128 x = (uint128)1 << 128 - 1;
+    (void)x;
+  ])], [
+    AC_DEFINE([HAVE___UINT128], [1], [Define to 1 if the compiler supports __uint128.])
+    AC_MSG_RESULT([has __uint128])
+  ], [
+    AC_COMPILE_IFELSE([AC_LANG_PROGRAM([#include <stdint.h>], [
+      __uint128 x = (uint128)1 << 128 - 1;
+      (void)x;
+    ])], [
+      AC_DEFINE([HAVE__UINT128], [1], [Define to 1 if the compiler supports _uint128.])
+      AC_MSG_RESULT([has _uint128])
+    ], [
+      AC_COMPILE_IFELSE([AC_LANG_PROGRAM([#include <stdint.h>], [
+	uint128 x = (uint128)1 << 128 - 1;
+	(void)x;
+      ])], [
+	AC_DEFINE([HAVE_UINT128], [1], [Define to 1 if the compiler supports uint128.])
+	AC_MSG_RESULT([has uint128])
+      ], [
+        AC_MSG_RESULT([no])
+      ])
+    ])
+  ])
+])
+
+AC_MSG_CHECKING([whether the compiler supports uint256, _uint256, or __uint256])
+AC_COMPILE_IFELSE([AC_LANG_PROGRAM([#include <stdint.h>], [
+  uint256_t x = (uint256_t)1 << 256 - 1;
+  (void)x;
+])], [
+  AC_MSG_RESULT([ignored (has uint256_t)])
+], [
+  AC_COMPILE_IFELSE([AC_LANG_PROGRAM([#include <stdint.h>], [ 
+    _uint256 x = (uint256)1 << 256 - 1;
+    (void)x;
+  ])], [
+    AC_DEFINE([HAVE___UINT256], [1], [Define to 1 if the compiler supports __uint256.])
+    AC_MSG_RESULT([has __uint256])
+  ], [
+    AC_COMPILE_IFELSE([AC_LANG_PROGRAM([#include <stdint.h>], [ 
+      __uint256 x = (uint256)1 << 256 - 1;
+      (void)x;
+    ])], [
+      AC_DEFINE([HAVE__UINT256], [1], [Define to 1 if the compiler supports _uint256.])
+      AC_MSG_RESULT([has _uint256])
+    ], [
+      AC_COMPILE_IFELSE([AC_LANG_PROGRAM([#include <stdint.h>], [
+	uint256 x = (uint256)1 << 256 - 1;
+	(void)x;
+      ])], [
+	AC_DEFINE([HAVE_UINT256], [1], [Define to 1 if the compiler supports uint256.])
+	AC_MSG_RESULT([has uint256])
+      ], [
+        AC_MSG_RESULT([no])
+      ])
+    ])
+  ])
+])
+
+AC_MSG_CHECKING([whether the compiler supports uint512, _uint512, or __uint512])
+AC_COMPILE_IFELSE([AC_LANG_PROGRAM([#include <stdint.h>], [
+  uint512_t x = (uint512_t)1 << 512 - 1;
+  (void)x;
+])], [
+  AC_MSG_RESULT([ignored (has uint512_t)])
+], [
+  AC_COMPILE_IFELSE([AC_LANG_PROGRAM([#include <stdint.h>], [ 
+    _uint512 x = (uint512)1 << 512 - 1;
+    (void)x;
+  ])], [
+    AC_DEFINE([HAVE___UINT512], [1], [Define to 1 if the compiler supports __uint512.])
+    AC_MSG_RESULT([has __uint512])
+  ], [
+    AC_COMPILE_IFELSE([AC_LANG_PROGRAM([#include <stdint.h>], [ 
+      __uint512 x = (uint512)1 << 512 - 1;
+      (void)x;
+    ])], [
+      AC_DEFINE([HAVE__UINT512], [1], [Define to 1 if the compiler supports _uint512.])
+      AC_MSG_RESULT([has _uint512])
+    ], [
+      AC_COMPILE_IFELSE([AC_LANG_PROGRAM([#include <stdint.h>], [
+	uint512 x = (uint512)1 << 512 - 1;
+	(void)x;
+      ])], [
+	AC_DEFINE([HAVE_UINT512], [1], [Define to 1 if the compiler supports uint512.])
+	AC_MSG_RESULT([has uint512])
+      ], [
+        AC_MSG_RESULT([no])
+      ])
+    ])
+  ])
+])
+
+AC_MSG_CHECKING([whether the compiler supports uint1024, _uint1024, or __uint1024])
+AC_COMPILE_IFELSE([AC_LANG_PROGRAM([#include <stdint.h>], [
+  uint1024_t x = (uint1024_t)1 << 1024 - 1;
+  (void)x;
+])], [
+  AC_MSG_RESULT([ignored (has uint1024_t)])
+], [
+  AC_COMPILE_IFELSE([AC_LANG_PROGRAM([#include <stdint.h>], [ 
+    _uint1024 x = (uint1024)1 << 1024 - 1;
+    (void)x;
+  ])], [
+    AC_DEFINE([HAVE___UINT1024], [1], [Define to 1 if the compiler supports __uint1024.])
+    AC_MSG_RESULT([has __uint1024])
+  ], [
+    AC_COMPILE_IFELSE([AC_LANG_PROGRAM([#include <stdint.h>], [ 
+      __uint1024 x = (uint1024)1 << 1024 - 1;
+      (void)x;
+    ])], [
+      AC_DEFINE([HAVE__UINT1024], [1], [Define to 1 if the compiler supports _uint1024.])
+      AC_MSG_RESULT([has _uint1024])
+    ], [
+      AC_COMPILE_IFELSE([AC_LANG_PROGRAM([#include <stdint.h>], [
+	uint1024 x = (uint1024)1 << 1024 - 1;
+	(void)x;
+      ])], [
+	AC_DEFINE([HAVE_UINT1024], [1], [Define to 1 if the compiler supports uint1024.])
+	AC_MSG_RESULT([has uint1024])
+      ], [
+        AC_MSG_RESULT([no])
+      ])
+    ])
+  ])
+])
+
+AC_MSG_CHECKING([whether the compiler supports uint2048, _uint2048, or __uint2048])
+AC_COMPILE_IFELSE([AC_LANG_PROGRAM([#include <stdint.h>], [
+  uint2048_t x = (uint2048_t)1 << 2048 - 1;
+  (void)x;
+])], [
+  AC_MSG_RESULT([ignored (has uint2048_t)])
+], [
+  AC_COMPILE_IFELSE([AC_LANG_PROGRAM([#include <stdint.h>], [ 
+    _uint2048 x = (uint2048)1 << 2048 - 1;
+    (void)x;
+  ])], [
+    AC_DEFINE([HAVE___UINT2048], [1], [Define to 1 if the compiler supports __uint2048.])
+    AC_MSG_RESULT([has __uint2048])
+  ], [
+    AC_COMPILE_IFELSE([AC_LANG_PROGRAM([#include <stdint.h>], [ 
+      __uint2048 x = (uint2048)1 << 2048 - 1;
+      (void)x;
+    ])], [
+      AC_DEFINE([HAVE__UINT2048], [1], [Define to 1 if the compiler supports _uint2048.])
+      AC_MSG_RESULT([has _uint2048])
+    ], [
+      AC_COMPILE_IFELSE([AC_LANG_PROGRAM([#include <stdint.h>], [
+	uint2048 x = (uint2048)1 << 2048 - 1;
+	(void)x;
+      ])], [
+	AC_DEFINE([HAVE_UINT2048], [1], [Define to 1 if the compiler supports uint2048.])
+	AC_MSG_RESULT([has uint2048])
+      ], [
+        AC_MSG_RESULT([no])
+      ])
+    ])
+  ])
+])
+
+AC_MSG_CHECKING([whether the compiler supports uint4096, _uint4096, or __uint4096])
+AC_COMPILE_IFELSE([AC_LANG_PROGRAM([#include <stdint.h>], [
+  uint4096_t x = (uint4096_t)1 << 4096 - 1;
+  (void)x;
+])], [
+  AC_MSG_RESULT([ignored (has uint4096_t)])
+], [
+  AC_COMPILE_IFELSE([AC_LANG_PROGRAM([#include <stdint.h>], [ 
+    _uint4096 x = (uint4096)1 << 4096 - 1;
+    (void)x;
+  ])], [
+    AC_DEFINE([HAVE___UINT4096], [1], [Define to 1 if the compiler supports __uint4096.])
+    AC_MSG_RESULT([has __uint4096])
+  ], [
+    AC_COMPILE_IFELSE([AC_LANG_PROGRAM([#include <stdint.h>], [ 
+      __uint4096 x = (uint4096)1 << 4096 - 1;
+      (void)x;
+    ])], [
+      AC_DEFINE([HAVE__UINT4096], [1], [Define to 1 if the compiler supports _uint4096.])
+      AC_MSG_RESULT([has _uint4096])
+    ], [
+      AC_COMPILE_IFELSE([AC_LANG_PROGRAM([#include <stdint.h>], [
+	uint4096 x = (uint4096)1 << 4096 - 1;
+	(void)x;
+      ])], [
+	AC_DEFINE([HAVE_UINT4096], [1], [Define to 1 if the compiler supports uint4096.])
+	AC_MSG_RESULT([has uint4096])
+      ], [
+        AC_MSG_RESULT([no])
+      ])
+    ])
+  ])
+])
+
+AC_MSG_CHECKING([whether the compiler supports uint8192, _uint8192, or __uint8192])
+AC_COMPILE_IFELSE([AC_LANG_PROGRAM([#include <stdint.h>], [
+  uint8192_t x = (uint8192_t)1 << 8192 - 1;
+  (void)x;
+])], [
+  AC_MSG_RESULT([ignored (has uint8192_t)])
+], [
+  AC_COMPILE_IFELSE([AC_LANG_PROGRAM([#include <stdint.h>], [
+    _uint8192 x = (uint8192)1 << 8192 - 1;
+    (void)x;
+  ])], [
+    AC_DEFINE([HAVE___UINT8192], [1], [Define to 1 if the compiler supports __uint8192.])
+    AC_MSG_RESULT([has __uint8192])
+  ], [
+    AC_COMPILE_IFELSE([AC_LANG_PROGRAM([#include <stdint.h>], [
+      __uint8192 x = (uint8192)1 << 8192 - 1;
+      (void)x;
+    ])], [
+      AC_DEFINE([HAVE__UINT8192], [1], [Define to 1 if the compiler supports _uint8192.])
+      AC_MSG_RESULT([has _uint8192])
+    ], [
+      AC_COMPILE_IFELSE([AC_LANG_PROGRAM([#include <stdint.h>], [
+	uint8192 x = (uint8192)1 << 8192 - 1;
+	(void)x;
+      ])], [
+	AC_DEFINE([HAVE_UINT8192], [1], [Define to 1 if the compiler supports uint8192.])
+	AC_MSG_RESULT([has uint8192])
+      ], [
+        AC_MSG_RESULT([no])
+      ])
+    ])
+  ])
+])
+
+dnl
 dnl Check various system stuff
 dnl
 
