@@ -77,7 +77,7 @@
 static Window *NextWindow(void);
 static Window *PreviousWindow(void);
 static Window *ParentWindow(void);
-static int MoreWindows(void);
+static bool MoreWindows(void);
 static void CollapseWindowlist(void);
 static void LogToggle(bool);
 static void ShowInfo(void);
@@ -5504,17 +5504,17 @@ static Window *ParentWindow(void)
 	return w;
 }
 
-static int MoreWindows(void)
+static bool MoreWindows(void)
 {
 	char *m = "No other window.";
 	if (mru_window && (fore == NULL || mru_window->w_prev_mru))
-		return 1;
+		return true;
 	if (fore == NULL) {
 		Msg(0, "No window available");
-		return 0;
+		return false;
 	}
 	Msg(0, m, fore->w_number);
-	return 0;
+	return false;
 }
 
 void KillWindow(Window *window)
