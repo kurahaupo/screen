@@ -105,13 +105,13 @@ void inp_setprompt(char *p, char *s)
 
 /*
  * We dont use HS status line with Input().
- * If we would use it, then we should check e_tgetflag("es") if
- * we are allowed to use esc sequences there.
+ * If we were to use it, then we would have to check e_tgetflag("es") to see
+ * whether we are allowed to use esc sequences there.
  *
- * mode is an OR of
- * INP_NOECHO == suppress echoing of characters.
- * INP_RAW    == raw mode. call finfunc after each character typed.
- * INP_EVERY  == digraph mode.
+ * mode is bitwise-OR of
+ *  INP_NOECHO  suppress echoing of characters.
+ *  INP_RAW     raw mode; call finfunc after each character typed.
+ *  INP_EVERY   digraph mode.
  */
 void Input(char *istr, size_t len, int mode, InputCallback *finfunc, void *priv, int data)
 {
