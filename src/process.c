@@ -83,21 +83,34 @@ static void LogToggle(bool);
 static void ShowInfo(void);
 static void ShowDInfo(void);
 
-static void ColonFin(char *, size_t, void *);
 static void InputSelect(void);
+static InputCallback SelectFin;
+
 static void InputSetenv(char *);
+static InputCallback SetenvFin1;
+static InputCallback SetenvFin2;
+
 static void InputAKA(void);
+static InputCallback AKAFin;
+
 static int InputSu(struct acluser **, char *);
-static void copy_reg_fn(char *, size_t, void *);
-static void ins_reg_fn(char *, size_t, void *);
-static void process_fn(char *, size_t, void *);
-static void digraph_fn(char *, size_t, void *);
+static InputCallback suFin;
+static InputCallback copy_reg_fn;
+static InputCallback ins_reg_fn;
+static InputCallback process_fn;
+static InputCallback digraph_fn;
+
 static int digraph_find(const char *buf);
-static void confirm_fn(char *, size_t, void *);
+static InputCallback confirm_fn;
+
 static void ResizeRegions(char *, int);
-static void ResizeFin(char *, size_t, void *);
-static void SelectLayoutFin(char *, size_t, void *);
+static InputCallback ResizeFin;
+static InputCallback SelectLayoutFin;
+
 static void ShowWindowsX(char *);
+
+static InputCallback ColonFin;
+static InputCallback StuffFin;
 
 struct plop plop_tab[MAX_PLOP_DEFS];
 
@@ -209,10 +222,15 @@ static bool CheckArgCount(struct comm *c, size_t argc)
 	return false;
 }
 
-static int CheckArgNum(int nr, char **args)
+static inline bool CheckArgCountNR(int nr, size_t argc)
+{
+	return CheckArgCount(&comms[nr], argc);
+}
+
+static inline int CheckArgNum(int nr, char **args)
 {
 	int argc = CountArgs(args);
-	if (CheckArgCount(&comms[nr], argc))
+	if (CheckArgCountNR(nr, argc))
 		return argc;
 	return -1;
 }
@@ -325,25 +343,6 @@ static bool ParseMilliseconds(struct action *act, char const *arg, int *var, boo
 }
 
 ////////////////////////////////////////////////////////////////////////////////
-
-static int WindowByNumber(char *);
-static int WindowByNumber(char *string)
-{
-	char *s;
-        int i = strtoul(string, &s, 10);
-	return *s ? -1 : i;
-}
-
-/*
- * Get window number from Name or Number string.
- * Numbers are tried first, then names, a prefix match suffices.
- * Be careful when assigning numeric strings as WindowTitles.
- */
-int WindowByNoN(char *const string)
-{
-	Window *w = GetWindowByNameOrNumber(string);
-        return w ? w->w_number : -1;
-}
 
 static bool ParseWinNum(struct action *act, char *arg, Window **var)
 {
@@ -1379,6 +1378,20 @@ static void DoCommandWall(struct action *act)
 	OutputMsg(0, "%s: %s", s, *args);
 }
 
+static bool MemToNum(int *r, char *mem, size_t len)
+{
+	if (!len)
+		return false;
+	char *s;
+	errno = 0;
+	unsigned long l = strtoul(mem, &s, 10);
+	int i = l;
+	if (s != mem+len || l == ULONG_MAX && errno || i < 0 || (unsigned) i != l)
+		return false;
+	*r = i;
+	return true;
+}
+
 static void DoCommandAt(struct action *act)
 {
 	char **args = act->args;
@@ -1411,7 +1424,7 @@ static void DoCommandAt(struct action *act)
 			if (!u) {
 				args[0][n] = '\0';
 				OutputMsg(0, "Did not find any user matching '%s'", args[0]);
-				goto out;
+				break;
 			}
 			for (Display *nd, *display = displays; display; display = nd) {
 				nd = display->d_next;
@@ -1451,18 +1464,27 @@ static void DoCommandAt(struct action *act)
 			}
 		}
 		break;
-	case '#':		/* window */
-		n--;
-		FALLTHROUGH;
 	default:
 		{
-			int i = 0;
-
 			n++;
-			char ch = args[0][n];
-			args[0][n] = '\0';
-			if (!*args[0] || (i = WindowByNumber(args[0])) < 0) {
-				args[0][n] = ch;	/* must restore string in case of bind */
+	case '#':		/* optional suffix for window */
+			(void) 0;
+			int i = -1;
+			if (MemToNum(&i, args[0], n)) {
+				if ((fore = GetWindowByNumber(i))) {
+					if (fore->w_layer.l_cvlist)
+						display = fore->w_layer.l_cvlist->c_display;
+					flayer = fore->w_savelayer ? fore->w_savelayer : &fore->w_layer;
+					DoCommand(args + 1, argl + 1);
+					if (fore && fore->w_layer.l_cvlist) {
+						display = fore->w_layer.l_cvlist->c_display;
+						OutputMsg(0, "command from %s: %s %s", s, args[1], args[2] ? args[2] : "");
+					}
+					display = NULL;
+					fore = NULL;
+				} else
+					OutputMsg(0, "%s: at [identifier][%%|*|#] command [args]", rc_name);
+			} else {
 				/* try looping over titles */
 				for (fore = mru_window; fore; fore = fore->w_prev_mru) {
 					if (strncmp(args[0], fore->w_title, n))
@@ -1471,8 +1493,8 @@ static void DoCommandAt(struct action *act)
 					 * consider this a bug or a feature:
 					 * while looping through windows, we have fore AND
 					 * display context. This will confuse users who try to
-					 * set up loops inside of loops, but often allows to do
-					 * what you mean, even when you address your context wrong.
+					 * set up loops inside loops, but often does
+					 * what you mean, even when you address your context wrongly.
 					 */
 					i = 0;
 					/* XXX: other displays? */
@@ -1490,24 +1512,11 @@ static void DoCommandAt(struct action *act)
 				fore = NULL;
 				if (i < 0)
 					OutputMsg(0, "%s: at '%s': no such window.\n", rc_name, args[0]);
-				goto out;
-			} else if ((fore = GetWindowByNumber(i))) {
-				args[0][n] = ch;	/* must restore string in case of bind */
-				if (fore->w_layer.l_cvlist)
-					display = fore->w_layer.l_cvlist->c_display;
-				flayer = fore->w_savelayer ? fore->w_savelayer : &fore->w_layer;
-				DoCommand(args + 1, argl + 1);
-				if (fore && fore->w_layer.l_cvlist) {
-					display = fore->w_layer.l_cvlist->c_display;
-					OutputMsg(0, "command from %s: %s %s", s, args[1], args[2] ? args[2] : "");
-				}
-				display = NULL;
-				fore = NULL;
-			} else
-				OutputMsg(0, "%s: at [identifier][%%|*|#] command [args]", rc_name);
+				break;
+			}
 		}
 	}
- out:
+
 	free(s);
 	EffectiveAclUser = NULL;
 }
@@ -1517,7 +1526,7 @@ static void DoCommandReadreg(struct action *act)
 	char **args = act->args;
 	int *argl = act->argl;
 	int i = fore ? fore->w_encoding : display ? display->d_encoding : 0;
-	char ch;
+	unsigned char ch;
 	char *s;
 	int n;
 
@@ -1528,6 +1537,7 @@ static void DoCommandReadreg(struct action *act)
 			return;
 		}
 		args += 2;
+		argl += 2;
 	}
 	/*
 	 * Without arguments we prompt for a destination register.
@@ -1553,7 +1563,7 @@ static void DoCommandReadreg(struct action *act)
 			return;
 		}
 		if ((s = ReadFile(args[1], &n))) {
-			struct plop *pp = plop_tab + (int)(unsigned char)ch;
+			struct plop *pp = plop_tab + (unsigned char)ch;
 
 			if (pp->buf)
 				free(pp->buf);
@@ -1578,7 +1588,6 @@ static void DoCommandRegister(struct action *act)
 	int i = fore ? fore->w_encoding : display ? display->d_encoding : 0;
 	struct acluser *user = display ? D_user : users;
 	int argc = CheckArgNum(act->nr, args);
-	char ch;
 
 	if (args[0] && args[1] && !strcmp(args[0], "-e")) {
 		i = FindEncoding(args[1]);
@@ -1587,6 +1596,7 @@ static void DoCommandRegister(struct action *act)
 			return;
 		}
 		args += 2;
+		argl += 2;
 		argc -= 2;
 	}
 	if (argc != 2) {
@@ -1597,7 +1607,7 @@ static void DoCommandRegister(struct action *act)
 		OutputMsg(0, "%s: register: character, ^x, or (octal) \\032 expected.", rc_name);
 		return;
 	}
-	ch = args[0][0];
+	unsigned char ch = args[0][0];
 	if (ch == '.') {
 		if (user->u_plop.buf != NULL)
 			UserFreeCopyBuffer(user);
@@ -1607,7 +1617,7 @@ static void DoCommandRegister(struct action *act)
 			user->u_plop.enc = i;
 		}
 	} else {
-		struct plop *plp = plop_tab + (int)(unsigned char)ch;
+		struct plop *plp = plop_tab + (unsigned char)ch;
 
 		if (plp->buf)
 			free(plp->buf);
@@ -1621,7 +1631,7 @@ static void DoCommandProcess(struct action *act)
 {
 	char **args = act->args;
 	int *argl = act->argl;
-	char ch;
+	unsigned char ch;
 
 	if (*args == NULL) {
 		Input("Process register:", 1, INP_RAW, process_fn, NULL, 0);
@@ -1739,7 +1749,7 @@ static void DoCommandOther(struct action *act UNUSED)
 static void DoCommandMeta(struct action *act UNUSED)
 {
 	struct acluser *user = display ? D_user : users;
-	char ch = user->u_Esc;
+	int ch = user->u_Esc;
 	char *s = &ch;
 	size_t len = 1;
 
@@ -2261,7 +2271,7 @@ static void DoCommandHistory(struct action *act UNUSED)
 	int enc = -1;
 	size_t l = 0;
 	char *s, *ss, *dbuf;
-	char ch, dch;
+	unsigned char ch, dch;
 
 	if (flayer->l_layfn != &WinLf) {
 		OutputMsg(0, "Must be on a window layer");
@@ -2311,14 +2321,14 @@ static void DoCommandHistory(struct action *act UNUSED)
 				l += user->u_plop.len;
 		} else {
 			if (enc == -1)
-				enc = plop_tab[(int)(unsigned char)ch].enc;
-			if (enc != plop_tab[(int)(unsigned char)ch].enc)
-				l += RecodeBuf((unsigned char *)plop_tab[(int)(unsigned char)ch].buf,
-					       plop_tab[(int)(unsigned char)ch].len,
-					       plop_tab[(int)(unsigned char)ch].enc,
+				enc = plop_tab[ch].enc;
+			if (enc != plop_tab[ch].enc)
+				l += RecodeBuf((unsigned char *)plop_tab[(unsigned char)ch].buf,
+					       plop_tab[(unsigned char)ch].len,
+					       plop_tab[(unsigned char)ch].enc,
 					       enc, NULL);
 			else
-				l += plop_tab[(int)(unsigned char)ch].len;
+				l += plop_tab[ch].len;
 		}
 	}
 	if (l == 0) {
@@ -2351,7 +2361,7 @@ static void DoCommandHistory(struct action *act UNUSED)
 	 * special and is skipped if no display exists.
 	 */
 	for (ss = s; (ch = *ss); ss++) {
-		struct plop *pp = (ch == '.' ? &user->u_plop : &plop_tab[(int)(unsigned char)ch]);
+		struct plop *pp = (ch == '.' ? &user->u_plop : &plop_tab[ch]);
 		if (pp->enc != enc) {
 			l += RecodeBuf((unsigned char *)pp->buf,
 				       pp->len,
@@ -2399,7 +2409,7 @@ static void DoCommandPaste(struct action *act)
 	int enc = -1;
 	size_t l = 0;
 	char *s, *ss, *dbuf;
-	char ch, dch;
+	unsigned char ch, dch;
 
 	/*
 	 * without args we prompt for one(!) register to be pasted in the window
@@ -2437,7 +2447,7 @@ static void DoCommandPaste(struct action *act)
 				l += user->u_plop.len;
 		} else {
 			if (enc == -1)
-				enc = plop_tab[(int)(unsigned char)ch].enc;
+				enc = plop_tab[(int)ch].enc;
 			if (enc != plop_tab[(int)(unsigned char)ch].enc)
 				l += RecodeBuf((unsigned char *)plop_tab[(int)(unsigned char)ch].buf,
 					       plop_tab[(int)(unsigned char)ch].len,
@@ -3517,7 +3527,7 @@ static void DoCommandBind(struct action *act)
 	int *argl = act->argl;
 	int n = 0;
 	struct action *ktabp = ktab;
-	int kflag = 0;
+	bool kflag = false;
 
 	for (;;) {
 		if (argc > 2 && !strcmp(*args, "-c")) {
@@ -3528,13 +3538,14 @@ static void DoCommandBind(struct action *act)
 			argl += 2;
 			argc -= 2;
 		} else if (argc > 1 && !strcmp(*args, "-k")) {
-			kflag = 1;
+			kflag = true;
 			args++;
 			argl++;
 			argc--;
 		} else
 			break;
 	}
+
 	if (kflag) {
 		for (n = 0; n < KMAP_KEYS; n++)
 			if (strcmp(term[n + T_CAPS].tcname, *args) == 0)
@@ -3544,11 +3555,13 @@ static void DoCommandBind(struct action *act)
 			return;
 		}
 		n += 256;
-	} else if (*argl != 1) {
-		OutputMsg(0, "%s: bind: character, ^x, or (octal) \\032 expected.", rc_name);
-		return;
-	} else
+	} else {
+		if (*argl != 1) {
+			OutputMsg(0, "%s: bind: character, ^x, or (octal) \\032 expected.", rc_name);
+			return;
+		}
 		n = (unsigned char)args[0][0];
+	}
 
 	if (args[1]) {
 		int i;
@@ -3568,24 +3581,20 @@ static void DoCommandBindkey(struct action *act)
 {
 	char **args = act->args;
 	int *argl = act->argl;
-	struct action *newact;
-	int newnr, fl = 0, kf = 0, af = 0, df = 0, mf = 0;
-	Display *olddisplay = display;
-	int used = 0;
-	struct kmap_ext *kme = NULL;
-	size_t i;
+	int fl = 0;
+	bool kf = false, af = false, df = false, mf = false;
 
 	for (; *args && **args == '-'; args++, argl++) {
 		if (strcmp(*args, "-t") == 0)
 			fl = KMAP_NOTIMEOUT;
 		else if (strcmp(*args, "-k") == 0)
-			kf = 1;
+			kf = true;
 		else if (strcmp(*args, "-a") == 0)
-			af = 1;
+			af = true;
 		else if (strcmp(*args, "-d") == 0)
-			df = 1;
+			df = true;
 		else if (strcmp(*args, "-m") == 0)
-			mf = 1;
+			mf = true;
 		else if (strcmp(*args, "--") == 0) {
 			args++;
 			argl++;
@@ -3608,7 +3617,13 @@ static void DoCommandBindkey(struct action *act)
 			display_bindkey("User", umtab);
 		return;
 	}
-	if (kf == 0) {
+
+	int used = 0;
+	struct kmap_ext *kme = NULL;
+	size_t i;
+	struct action *newact;
+
+	if (!kf) {
 		if (af) {
 			OutputMsg(0, "%s: bindkey: -a only works with -k", rc_name);
 			return;
@@ -3642,9 +3657,9 @@ static void DoCommandBindkey(struct action *act)
 			i -= 8;
 			kme -= 8;
 		}
-		if (df == 0 && kme->dm.nr != RC_ILLEGAL)
+		if (!df && kme->dm.nr != RC_ILLEGAL)
 			used = 1;
-		if (mf == 0 && kme->mm.nr != RC_ILLEGAL)
+		if (!mf && kme->mm.nr != RC_ILLEGAL)
 			used = 1;
 		if ((df || mf) && kme->um.nr != RC_ILLEGAL)
 			used = 1;
@@ -3664,7 +3679,9 @@ static void DoCommandBindkey(struct action *act)
 			i -= T_CAPS;
 		newact = df ? &dmtab[i] : mf ? &mmtab[i] : &umtab[i];
 	}
+
 	if (args[1]) {
+		int newnr;
 		if ((newnr = FindCommnr(args[1])) == RC_ILLEGAL) {
 			OutputMsg(0, "%s: bindkey: unknown command '%s'", rc_name, args[1]);
 			return;
@@ -3673,7 +3690,7 @@ static void DoCommandBindkey(struct action *act)
 			return;
 		ClearAction(newact);
 		SaveAction(newact, newnr, args + 2, argl + 2);
-		if (kf == 0 && args[1]) {
+		if (!kf && args[1]) {
 			if (kme->str)
 				free(kme->str);
 			kme->str = SaveStrn(*args, *argl);
@@ -3681,16 +3698,17 @@ static void DoCommandBindkey(struct action *act)
 		}
 	} else
 		ClearAction(newact);
+
+	Display *olddisplay = display;
 	for (display = displays; display; display = display->d_next)
 		remap(i, args[1] ? 1 : 0);
-	if (kf == 0 && !args[1]) {
-		if (!used && kme->str) {
-			free(kme->str);
-			kme->str = NULL;
-			kme->fl = 0;
-		}
-	}
 	display = olddisplay;
+
+	if (!kf && !args[1] && !used && kme->str) {
+		free(kme->str);
+		kme->str = NULL;
+		kme->fl = 0;
+	}
 }
 
 static void DoCommandMaptimeout(struct action *act)
@@ -6015,8 +6033,6 @@ static void ColonFin(char *buf, size_t len, void *data UNUSED)
 
 static void SelectFin(char *buf, size_t len, void *data UNUSED)
 {
-	int n;
-
 	if (!len || !display)
 		return;
 	if (len == 1 && *buf == '-') {
@@ -6024,9 +6040,11 @@ static void SelectFin(char *buf, size_t len, void *data UNUSED)
 		Activate(0);
 		return;
 	}
-	if ((n = WindowByNoN(buf)) < 0)
-		return;
-	SwitchWindow(GetWindowByNumber(n));
+	Window *w = GetWindowByNameOrNumber(buf);
+	if (w)
+		SwitchWindow(w);
+	else
+		Msg(0, "Invalid window number or name \"%s\".\n", buf);
 }
 
 static void SelectLayoutFin(char *buf, size_t len, void *data UNUSED)
@@ -6289,7 +6307,7 @@ static void ins_reg_fn(char *buf, size_t len, void *data UNUSED)
 
 static void process_fn(char *buf, size_t len, void *data UNUSED)
 {
-	struct plop *pp = plop_tab + (int)(unsigned char)*buf;
+	struct plop *pp = plop_tab + (unsigned char)*buf;
 
 	if (len) {
 		memset(buf, 0, len);
@@ -6304,17 +6322,17 @@ static void process_fn(char *buf, size_t len, void *data UNUSED)
 
 static void confirm_fn(char *buf, size_t len, void *data)
 {
-	struct action act;
-
 	if (len || (*buf != 'y' && *buf != 'Y')) {
 		memset(buf, 0, len);
 		return;
 	}
-	act.nr = *(int *)data;
-	act.args = noargs;
-	act.argl = NULL;
-	act.quiet = 0;
-	DoAction(&act);
+	int *flagp = data;
+	DoAction(&(struct action){
+		.nr    = *flagp,
+		.args  = noargs,
+		.argl  = NULL,
+		.quiet = 0,
+	});
 }
 
 struct inputsu {
@@ -6326,7 +6344,7 @@ struct inputsu {
 
 static void suFin(char *buf, size_t len, void *data)
 {
-	struct inputsu *i = (struct inputsu *)data;
+	struct inputsu *i = data;
 	char *p;
 	size_t l;
 
@@ -6496,13 +6514,9 @@ static bool IsOnDisplay(Window *win)
 
 Window *FindNiceWindow(Window *win, char *presel)
 {
-	int i;
 
-	if (presel) {
-		i = WindowByNoN(presel);
-		if (i >= 0)
-			win = GetWindowByNumber(i);
-	}
+	if (presel)
+		win = GetWindowByNameOrNumber(presel);
 	if (!display)
 		return win;
 	if (win && AclCheckPermWin(D_user, ACL_READ, win))
@@ -6740,7 +6754,8 @@ static void ResizeRegions(char *arg, int flags)
 static void ResizeFin(char *buf, size_t len, void *data)
 {
 	int ch;
-	int flags = *(int *)data;
+	int *flagp = data;
+	int flags = *flagp;
 	int prompt = 0;
 	ch = ((unsigned char *)buf)[len];
 	if (ch == 0) {
@@ -6764,7 +6779,7 @@ static void ResizeFin(char *buf, size_t len, void *data)
 	if ((prompt & (RESIZE_FLAG_H | RESIZE_FLAG_V)) == 0 && D_forecv->c_slorient == SLICE_VERT)
 		prompt |= RESIZE_FLAG_H;
 	inp_setprompt(resizeprompts[prompt], NULL);
-	*(int *)data = flags;
+	*flagp = flags;
 	buf[len] = '\034';
 }
 

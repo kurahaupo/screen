@@ -38,7 +38,6 @@ void ShowWindows(struct action *, struct Window *);
 char *AddWindows(struct WinMsgBufContext *, size_t, add_window_flags_t, struct Window *);
 char *AddWindowFlags(char *, int, struct Window *);
 char *AddOtherUsers(char *, int, struct Window *);
-int WindowByNoN(char *);
 struct Window *FindNiceWindow(struct Window *, char *);
 int CompileKeys(char *, int, unsigned char *);
 void RefreshXtermOSC(void);

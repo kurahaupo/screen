@@ -2015,7 +2015,6 @@ Window *GetWindowByNumber(uint16_t n)
 	if (n < first_window->w_number
 	 || n > last_window->w_number)
 		return NULL;
-
 	if (first_window->w_number + last_window->w_number > n * 2) {
 		/* scan forwards from first */
 		for (Window *w = first_window; w && w->w_number <= n; w = w->w_next)
@@ -2054,9 +2053,10 @@ Window *GetWindowByNumberStr(char const *string)
 {
 	char *s;
 	errno = 0;
-	int i = strtoul(string, &s, 10);
+	unsigned long l = strtoul(string, &s, 10);
+	uint16_t i = l;
 
-	if (*s || s == string || errno)
+	if (*s || s == string || l == ULONG_MAX && errno || i != l)
 		return NULL;
 
 	return GetWindowByNumber(i);
