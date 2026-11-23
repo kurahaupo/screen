@@ -56,7 +56,7 @@ extern struct comm comms[];
 #define NEED_LAYER		0x4000U		/* command needs a layer */
 #define CAN_QUERY		0x8000U		/* command can be queried using ‘-Q’ to print a result to stdout */
 
-#define ARGS_RANGE(lo,hi)	(ARGS(hi+1) - ARGS(lo))
+#define ARGS_RANGE(lo,hi)	(ARGS((hi)+1) - ARGS(lo))
 #define ARGS_ATLEAST(lo)	ARGS_RANGE(lo, ARGS_ANY)
 #define ARGS_MASK		ARGS_ATLEAST(0)
 #define ARGS_MORE		ARGS(ARGS_ANY)
