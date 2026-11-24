@@ -987,7 +987,7 @@ static void DoCommandObuflimit(struct action *act)
 	D_obuflenmax = D_obuflen - D_obufmax;
 }
 
-static void DoCommandDumptermcap(struct action *act)
+static void DoCommandDumptermcap(struct action *act UNUSED)
 {
 	struct acluser *user = display ? D_user : users;
 
@@ -1031,24 +1031,24 @@ static void DoCommandLog(struct action *act)
 		LogToggle(b);
 }
 
-static void DoCommandSuspend(struct action *act)
+static void DoCommandSuspend(struct action *act UNUSED)
 {
 	Detach(D_STOP);
 }
 
-static void DoCommandNext(struct action *act)
+static void DoCommandNext(struct action *act UNUSED)
 {
 	if (MoreWindows())
 		SwitchWindow(NextWindow());
 }
 
-static void DoCommandPrev(struct action *act)
+static void DoCommandPrev(struct action *act UNUSED)
 {
 	if (MoreWindows())
 		SwitchWindow(PreviousWindow());
 }
 
-static void DoCommandParent(struct action *act)
+static void DoCommandParent(struct action *act UNUSED)
 {
 	if (MoreWindows()) {
 		Window *w = ParentWindow();
@@ -1168,7 +1168,7 @@ static void DoCommandZmodem(struct action *act)
 		OutputMsg(0, "zmodem mode is %s", zmodes[zmodem_mode]);
 }
 
-static void DoCommandUnbindall(struct action *act)
+static void DoCommandUnbindall(struct action *act UNUSED)
 {
 	for (size_t i = 0; i < ARRAY_SIZE(ktab); i++)
 		ClearAction(&ktab[i]);
@@ -1514,7 +1514,7 @@ static void DoCommandStuff(struct action *act)
 		LayProcess(&s, &len);
 }
 
-static void DoCommandRedisplay(struct action *act)
+static void DoCommandRedisplay(struct action *act UNUSED)
 {
 	Activate(-1);
 }
@@ -1529,17 +1529,17 @@ static void DoCommandWindows(struct action *act)
 		ShowWindows(act, -1);
 }
 
-static void DoCommandVersion(struct action *act)
+static void DoCommandVersion(struct action *act UNUSED)
 {
 	OutputMsg(0, "screen %s", version);
 }
 
-static void DoCommandInfo(struct action *act)
+static void DoCommandInfo(struct action *act UNUSED)
 {
 	ShowInfo();
 }
 
-static void DoCommandDinfo(struct action *act)
+static void DoCommandDinfo(struct action *act UNUSED)
 {
 	ShowDInfo();
 }
@@ -1571,13 +1571,13 @@ static void DoCommandCommand(struct action *act)
 		SwitchWindow(display && D_other ? D_other : NextWindow());
 }
 
-static void DoCommandOther(struct action *act)
+static void DoCommandOther(struct action *act UNUSED)
 {
 	if (MoreWindows())
 		SwitchWindow(display && D_other ? D_other : NextWindow());
 }
 
-static void DoCommandMeta(struct action *act)
+static void DoCommandMeta(struct action *act UNUSED)
 {
 	struct acluser *user = display ? D_user : users;
 	char ch = user->u_Esc;
@@ -1588,7 +1588,7 @@ static void DoCommandMeta(struct action *act)
 		LayProcess(&s, &len);
 }
 
-static void DoCommandXon(struct action *act)
+static void DoCommandXon(struct action *act UNUSED)
 {
 	char ch = Ctrl('q');
 	char *s = &ch;
@@ -1597,7 +1597,7 @@ static void DoCommandXon(struct action *act)
 	LayProcess(&s, &len);
 }
 
-static void DoCommandXoff(struct action *act)
+static void DoCommandXoff(struct action *act UNUSED)
 {
 	char ch = Ctrl('s');
 	char *s = &ch;
@@ -1656,7 +1656,7 @@ static void DoCommandBreak(struct action *act)
 	SendBreak(fore, n, false);
 }
 
-static void DoCommandLockscreen(struct action *act)
+static void DoCommandLockscreen(struct action *act UNUSED)
 {
 	Detach(D_LOCK);
 }
@@ -1882,7 +1882,7 @@ static void DoCommandColon(struct action *act)
 	}
 }
 
-static void DoCommandLastmsg(struct action *act)
+static void DoCommandLastmsg(struct action *act UNUSED)
 {
 	if (D_status_lastmsg)
 		OutputMsg(0, "%s", D_status_lastmsg);
@@ -1964,13 +1964,13 @@ static void DoCommandWritelock(struct action *act)
 		  (fore->w_wlock == WLOCK_AUTO) ? "auto" : ((fore->w_wlock == WLOCK_OFF) ? "off" : "on"));
 }
 
-static void DoCommandClear(struct action *act)
+static void DoCommandClear(struct action *act UNUSED)
 {
 	ResetAnsiState(fore);
 	WriteString(fore, "\033[H\033[J", 6);
 }
 
-static void DoCommandReset(struct action *act)
+static void DoCommandReset(struct action *act UNUSED)
 {
 	ResetAnsiState(fore);
 	if (fore->w_zdisplay)
@@ -2012,7 +2012,7 @@ static void DoCommandMonitor(struct action *act)
 	}
 }
 
-static void DoCommandDisplays(struct action *act)
+static void DoCommandDisplays(struct action *act UNUSED)
 {
 	display_displays();
 }
@@ -2079,12 +2079,12 @@ static void DoCommandHelp(struct action *act)
 		display_help(NULL, ktab);
 }
 
-static void DoCommandLicense(struct action *act)
+static void DoCommandLicense(struct action *act UNUSED)
 {
 	display_license();
 }
 
-static void DoCommandCopy(struct action *act)
+static void DoCommandCopy(struct action *act UNUSED)
 {
 	if (flayer->l_layfn != &WinLf) {
 		OutputMsg(0, "Must be on a window layer");
@@ -2094,7 +2094,7 @@ static void DoCommandCopy(struct action *act)
 	WindowChanged(fore, WINESC_COPY_MODE);
 }
 
-static void DoCommandHistory(struct action *act)
+static void DoCommandHistory(struct action *act UNUSED)
 {
 	static char *pasteargs[] = { ".", NULL };
 	static int pasteargl[] = { 1 };
