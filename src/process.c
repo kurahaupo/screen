@@ -794,13 +794,24 @@ static inline size_t CountArgs(char **args)
 }
 
 #ifdef FANCY_ERROR_REPORTING
+
 static char *nums[] = { "no", "one", "two", "three", "four", "five" };
 
+static inline bool is_bit_pair(int i)
+{
+	return is_single_bit(hi_bits(i));
+}
+
+static inline bool is_bit_range(int i)
+{
+	return is_single_bit(range_end_bit(i));
+}
 #endif	/*FANCY_ERROR_REPORTING*/
 
 static bool CheckArgCount(struct comm *c, size_t argc)
 {
 	int allowed_counts_mask = c->flags & ARGS_MASK;
+
 	if (allowed_counts_mask == 0
 	 || allowed_counts_mask & 1U << (argc <= ARGS_ANY ?
 					 argc  : ARGS_ANY))
@@ -828,26 +839,27 @@ static bool CheckArgCount(struct comm *c, size_t argc)
 	}
 
 	bool or_more = allowed_counts_mask & ARGS_MORE;
-	const int first = log_lo_bit(lo_bit(allowed_counts_mask) & ARGS_MASK);
-	if (is_single_bit(allowed_counts_mask) && !or_more) {
+	allowed_counts_mask &= ARGS_MASK;
+	const int first = log_lo_bit(lo_bit(allowed_counts_mask));
+	if (!or_more && is_single_bit(allowed_counts_mask)) {
 		/* Exactly one allowed count, not including "or more" */
 		Msg(0, "%s: %s: exactly %s arguments required", rc_name, name, nums[first]);
 		return false;
 	}
-	if (is_single_bit(hi_bits(allowed_counts_mask)) && !or_more) {
+	if (!or_more && is_bit_pair(allowed_counts_mask)) {
 		/* Exactly two allowed counts, not including "or more" */
 		Msg(0, "%s: %s: %s or %s arguments required", rc_name, name,
-		    nums[first], nums[log_lo_bit(hi_bits(allowed_counts_mask) & ARGS_MASK)]);
+		    nums[first], nums[log_lo_bit(hi_bits(allowed_counts_mask))]);
 		return false;
 	}
-	if (is_single_bit(range_end_bit(allowed_counts_mask))) {
+	if (is_bit_range(allowed_counts_mask)) {
 		/* Contiguous range of allowed counts.
 		 * Use bitwise carry propagation to find the top of the range.
 		 * Since we've already checked is_single_bit(allowed_counts_mask),
-		 * we know that first ≠ range_top (except for first = hi = ARGS_MORE,
-		 * but we will still correctly render that as "five or more")
-		 */
-		const int range_top = log_lo_bit(range_end_bit(allowed_counts_mask) & ARGS_MASK);
+		 * we know that first ≠ range_top (except for first = hi =
+		 * ARGS_ANY, but we will still correctly render that as "five
+		 * or more") */
+		const int range_top = log_lo_bit(range_end_bit(allowed_counts_mask));
 		if (first == 0)
 			Msg(0, "%s: %s: no more than %s arguments allowed", rc_name, name, nums[range_top]);
 		else if (range_top == ARGS_ANY)
