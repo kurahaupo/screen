@@ -62,4 +62,3 @@ enum {
 };
 
 #endif				/* SCREEN_IMAGE_H */
-
