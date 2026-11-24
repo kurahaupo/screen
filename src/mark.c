@@ -524,7 +524,7 @@ static void MarkProcess(char **inbufp, size_t *inlenp)
 			}
 		}
 
-	      processchar:
+ processchar:
 		switch (od) {
 		case 'f':	/* fall through */
 		case 'F':	/* fall through */
@@ -688,8 +688,8 @@ static void MarkProcess(char **inbufp, size_t *inlenp)
 			if (rep_cnt > 100)
 				rep_cnt = 100;
 			revto_line(markdata->left_mar,
-				   fore->w_histheight - fore->w_scrollback_height +
-				   (int)(rep_cnt * (fore->w_scrollback_height + fore->w_height) / 100.0),
+				   fore->w_histheight - fore->w_scrollback_height
+				   + (int)(rep_cnt * (fore->w_scrollback_height + fore->w_height) / 100.0),
 				   (fore->w_height - 1) / 2);
 			break;
 		case 0201:
