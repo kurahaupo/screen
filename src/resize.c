@@ -60,11 +60,11 @@ static void SwapAltScreen(Window *);
 struct winsize glwz;
 
 static struct mline mline_zero = {
-	.image = NULL,
-	.attr = NULL,
-	.font = NULL,
-	.colorbg = NULL,
-	.colorfg = NULL
+	.image		= NULL,
+	.attr		= NULL,
+	.font		= NULL,
+	.colorbg	= NULL,
+	.colorfg	= NULL
 };
 
 /*
@@ -389,9 +389,8 @@ static void CheckMaxSize(int wi)
 	mline_old.font = xrealloc(mline_old.font, maxwidth * 4);
 	mline_old.colorbg = xrealloc(mline_old.colorbg, maxwidth * 4);
 	mline_old.colorfg = xrealloc(mline_old.colorfg, maxwidth * 4);
-	if (!
-	    (blank && null && mline_old.image && mline_old.attr && mline_old.font && mline_old.colorbg
-	     && mline_old.colorfg))
+	if (!(blank && null && mline_old.image && mline_old.attr && mline_old.font
+	      && mline_old.colorbg && mline_old.colorfg))
 		Panic(0, "%s", strnomem);
 
 	MakeBlankLine(blank, maxwidth);
@@ -458,8 +457,8 @@ static void MakeBlankLine(uint32_t *p, int n)
 }
 
 #define OLDWIN(y) ((y < p->w_histheight) \
-	? &p->w_hlines[(p->w_histidx + y) % p->w_histheight] \
-	: &p->w_mlines[y - p->w_histheight])
+		   ? &p->w_hlines[(p->w_histidx + y) % p->w_histheight] \
+		   : &p->w_mlines[y - p->w_histheight])
 
 #define NEWWIN(y) ((y < hi) ? &nhlines[y] : &nmlines[y - hi])
 
@@ -742,7 +741,7 @@ int ChangeWindowSize(Window *p, int wi, int he, int hi)
 
 	return 0;
 
-      nomem:
+ nomem:
 	if (nmlines) {
 		for (ty = he + hi - 1; ty >= 0; ty--) {
 			mlt = NEWWIN(ty);
