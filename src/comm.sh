@@ -28,7 +28,7 @@ trap 'rm -rf tmp$$' 0
 # Do not re-order the compilation relative to the other steps, lest you
 # encounter a dangling #ifdef in the partially build tmp$$/comm.h.
 
-$CC -E $IQ./tmp$$ $IQ. "$IQ$srcdir" "$source_file" > tmp$$/comm.cpp || exit $?
+$CC -E "$IQ./tmp$$" "$IQ." "$IQ$srcdir" "$source_file" > tmp$$/comm.cpp || exit $?
 
 cat << EOF
 /*
