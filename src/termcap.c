@@ -1251,7 +1251,7 @@ int InitTermcap(int width, int height)
 		D_AC = "";	/* enable default string */
 	}
 
-	for (int i = 0; i < 256; i++)
+	for (size_t i = 0; i < 256; i++)
 		D_c0_tab[i] = i;
 	if (D_AC) {
 		/* init with default string first */
