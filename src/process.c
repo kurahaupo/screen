@@ -380,17 +380,17 @@ int enter_window_name_mode = 0;
 void InitKeytab(void)
 {
 	for (size_t i = 0; i < ARRAY_SIZE(ktab); i++)
-		ktab[i] = (struct action) {
-			.nr = RC_ILLEGAL,
-			.args = noargs,
-			.argl = NULL,
-		};
+		ktab[i] = (struct action){
+				.nr = RC_ILLEGAL,
+				.args = noargs,
+				.argl = NULL,
+			};
 	for (size_t i = 0; i < KMAP_KEYS + KMAP_AKEYS; i++)
-		umtab[i] = dmtab[i] = mmtab[i] = (struct action) {
-			.nr = RC_ILLEGAL,
-			.args = noargs,
-			.argl = NULL,
-		};
+		umtab[i] = dmtab[i] = mmtab[i] = (struct action){
+				.nr = RC_ILLEGAL,
+				.args = noargs,
+				.argl = NULL,
+			};
 	for (size_t i = 0; i < NKMAPDEF; i++) {
 		if (i + KMAPDEFSTART < T_CAPS)
 			continue;
@@ -398,7 +398,7 @@ void InitKeytab(void)
 			continue;
 		if (kmapdef[i] == NULL)
 			continue;
-		SaveAction(dmtab + i + (KMAPDEFSTART - T_CAPS), RC_STUFF, (char *[2]) { kmapdef[i] }, NULL);
+		SaveAction(dmtab + i + (KMAPDEFSTART - T_CAPS), RC_STUFF, (char *[2]){ kmapdef[i] }, NULL);
 	}
 	for (size_t i = 0; i < NKMAPADEF; i++) {
 		if (i + KMAPADEFSTART < T_CURSOR)
@@ -409,7 +409,7 @@ void InitKeytab(void)
 			continue;
 
 		SaveAction(dmtab + i + (KMAPADEFSTART - T_CURSOR + KMAP_KEYS), RC_STUFF,
-			   (char *[2]) { kmapadef[i] }, NULL);
+			   (char *[2]){ kmapadef[i] }, NULL);
 	}
 	for (size_t i = 0; i < NKMAPMDEF; i++) {
 		if (i + KMAPMDEFSTART < T_CAPS)
@@ -418,7 +418,7 @@ void InitKeytab(void)
 			continue;
 		if (kmapmdef[i] == NULL)
 			continue;
-		SaveAction(mmtab + i + (KMAPMDEFSTART - T_CAPS), RC_STUFF, (char *[2]) { kmapmdef[i] }, NULL);
+		SaveAction(mmtab + i + (KMAPMDEFSTART - T_CAPS), RC_STUFF, (char *[2]){ kmapmdef[i] }, NULL);
 	}
 
 	ktab['h'].nr = RC_HARDCOPY;
@@ -457,14 +457,14 @@ void InitKeytab(void)
 	ktab['M'].nr = RC_MONITOR;
 	ktab['?'].nr = RC_HELP;
 	ktab['*'].nr = RC_DISPLAYS;
-	SaveAction(ktab + '-', RC_SELECT, (char *[2]) { "-" }, NULL);
+	SaveAction(ktab + '-', RC_SELECT, (char *[2]){ "-" }, NULL);
 	for (int i = 0; i < 10; i++) {
 		char arg1[10];
 		snprintf(arg1, sizeof arg1, "%d", i);
-		SaveAction(ktab + '0' + i, RC_SELECT, (char *[2]) { arg1 }, NULL);
+		SaveAction(ktab + '0' + i, RC_SELECT, (char *[2]){ arg1 }, NULL);
 	}
 	ktab['\''].nr = RC_SELECT;	/* calling a window by name */
-	SaveAction(ktab + '"', RC_WINDOWLIST, (char *[2]) { "-b" }, NULL);
+	SaveAction(ktab + '"', RC_WINDOWLIST, (char *[2]){ "-b" }, NULL);
 	ktab[Ctrl('G')].nr = RC_VBELL;
 	ktab[':'].nr = RC_COLON;
 	ktab['['].nr = ktab[Ctrl('[')].nr = RC_COPY;
@@ -487,8 +487,8 @@ void InitKeytab(void)
 	ktab['X'].nr = RC_REMOVE;
 	ktab['F'].nr = RC_FIT;
 	ktab['\t'].nr = RC_FOCUS;
-	SaveAction(ktab + T_BACKTAB - T_CAPS + 256, RC_FOCUS, (char *[2]) { "prev" }, NULL);
-	SaveAction(ktab + '|', RC_SPLIT, (char *[2]) { "-v" }, NULL);
+	SaveAction(ktab + T_BACKTAB - T_CAPS + 256, RC_FOCUS, (char *[2]){ "prev" }, NULL);
+	SaveAction(ktab + '|', RC_SPLIT, (char *[2]){ "-v" }, NULL);
 	/* These come last; they may want overwrite others: */
 	if (DefaultEsc >= 0) {
 		ClearAction(&ktab[DefaultEsc]);
