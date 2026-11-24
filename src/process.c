@@ -3932,7 +3932,6 @@ static inline bool dot_or_0_3(char c)
 static void DoCommandDefcharset(struct action *act)
 {
 	char **args = act->args;
-	size_t len;
 
 	if (*args == NULL) {
 		char buf[256] = { 0 };
@@ -3941,7 +3940,7 @@ static void DoCommandDefcharset(struct action *act)
 		OutputMsg(0, "default charset is '%s'", buf);
 		return;
 	}
-	len = strlen(*args);
+	size_t len = strlen(*args);
 	if (len == 0 || len > 6) {
 		OutputMsg(0, "%s: defcharset: string has illegal size.", rc_name);
 		return;
