@@ -49,7 +49,7 @@ struct Log {
  * otherwise.
  * example: l = logfopen(name, islogfile(name) : NULL ? fopen(name, "a"));
  */
-Log *logfopen(char *name, FILE * fp);
+Log *logfopen(char *name, FILE *fp);
 
 /*
  * lookup a logfile by name. This is useful, so that we can provide
