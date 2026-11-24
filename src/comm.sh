@@ -77,7 +77,7 @@ EOF
 
 < $source_file >&2 \
 $AWK -v source_file="$source_file" '
-/^[[:space:]]+[{][[:space:]]*"/ {   #}
+/^[[:space:]]+[{][[:space:]]*"/ {	#}
     if (split($0, f, "\"") < 3) {
         printf "*** ERROR: invalid line %u in %s!!!\n\n", NR, source_file;
         exit 1;
@@ -92,7 +92,7 @@ $AWK -v source_file="$source_file" '
 
 < tmp$$/comm.cpp \
 $AWK -v source_file="$source_file" '
-/^[[:space:]]*[{][[:space:]]*"/ {    #}
+/^[[:space:]]*[{][[:space:]]*"/ {	#}
     split($0, f, "\"")
     printf "#define %-15s %u\t/* line %u in %s */\n", "RC_" toupper(f[2]), i++, NR, source_file;
 }
