@@ -1097,16 +1097,12 @@ int InitTermcap(int width, int height)
 
 	if (D_SO && D_SE == NULL) {
 		Msg(0, "Warning: 'so' but no 'se' capability.");
-		if (D_ME)
-			;
-		else
+		if (D_ME == NULL)
 			D_SO = NULL;
 	}
 	if (D_US && D_UE == NULL) {
 		Msg(0, "Warning: 'us' but no 'ue' capability.");
-		if (D_ME)
-			;
-		else
+		if (D_ME == NULL)
 			D_US = NULL;
 	}
 	if ((D_MH || D_MD || D_MR || D_MB) && D_ME == NULL) {
