@@ -1003,7 +1003,8 @@ int InitTermcap(int width, int height)
 			break;
 		default:
 			Panic(0, "Illegal tc type in entry #%zu", i);
-			/*NOTREACHED*/}
+			/*NOTREACHED*/
+		}
 	}
 
 	/*
