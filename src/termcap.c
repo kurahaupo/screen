@@ -1126,7 +1126,7 @@ int InitTermcap(int width, int height)
 	if (D_MR)   D_td.td_attr[ATTR_RV] = (TermDefAttr){ D_MR,  D_ME, A_ME };	// 7 / 27	B	mr	rev		begin	Reverse
 
 	/* Guess some stuff about ECMA-48 terminals */
-        char mbuf[MAXSTR] = "ANSI PROBES", *cmb = mbuf+11, *const emb = mbuf + sizeof mbuf;
+	char mbuf[MAXSTR] = "ANSI PROBES", *cmb = mbuf+11, *const emb = mbuf + sizeof mbuf;
 	int const num_verify = ATTR_RV + 1 - ATTR_BD;
 	int ansi_probe_failures = 0;
 	for (int i=ATTR_BD; i<=ATTR_RV ; ++i) {
