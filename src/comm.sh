@@ -51,10 +51,10 @@ extern struct comm comms[];
 #define ARGS_ANY		5	/* interpreted as "more than 4" */
 
 #define ARGS(n)			(1U << (n))
-#define NEED_FORE		0x1000U	/* command needs a fore window */
-#define NEED_DISPLAY		0x2000U	/* command needs a display */
-#define NEED_LAYER		0x4000U	/* command needs a layer */
-#define CAN_QUERY		0x8000U	/* command can be queried using ‘-Q’ to print a result to stdout */
+#define NEED_FORE		0x1000U		/* command needs a fore window */
+#define NEED_DISPLAY		0x2000U		/* command needs a display */
+#define NEED_LAYER		0x4000U		/* command needs a layer */
+#define CAN_QUERY		0x8000U		/* command can be queried using ‘-Q’ to print a result to stdout */
 
 #define ARGS_RANGE(lo,hi)	(ARGS(hi+1) - ARGS(lo))
 #define ARGS_ATLEAST(lo)	ARGS_RANGE(lo, ARGS_ANY)
