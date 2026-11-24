@@ -5048,7 +5048,8 @@ int Parse(char *buf, int bufl, char **args, int *argl)
 				}
 			} else if (delim != '\'' && *p == '$'
 				   && (p[1] == '{' || p[1] == ':' || (p[1] >= 'a' && p[1] <= 'z')
-				       || (p[1] >= 'A' && p[1] <= 'Z') || (p[1] >= '0' && p[1] <= '9')
+				       || (p[1] >= 'A' && p[1] <= 'Z')
+				       || (p[1] >= '0' && p[1] <= '9')
 				       || p[1] == '_')) {
 				char *ps, *pe, op, *v, xbuf[11], path[MAXPATHLEN];
 				int vl;
