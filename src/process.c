@@ -7012,11 +7012,11 @@ uint64_t ParseAttrColor(char *str, int msgok)
  */
 void ApplyAttrColor(uint64_t i, struct mchar *mc)
 {
-	enum attr_mask_e a = i >> 56 & 0x7F;	/* TODO: need more than 7 bits */
+	attr_mask_t a = i >> 56 & 0x7F;	/* TODO: NEED MORE BITS!!! (≥10) */
 	uint16_t h = i >> 48;
 
-	uint32_t b = i >> 24 & 0xFFFFFF | h << 20 & 0x07000000;
-	uint32_t f = i       & 0xFFFFFF | h << 24 & 0x07000000;
+	color_t b = i >> 24 & 0xFFFFFF | h << 20 & 0x07000000;
+	color_t f = i       & 0xFFFFFF | h << 24 & 0x07000000;
 
 	switch (i & REND_XOR) {
 	case REND_ADD:
