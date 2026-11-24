@@ -1864,6 +1864,7 @@ static void SelectRendition(Window *win)
 
 				cs_param_t r = cs->params[i + 2], g = cs->params[i + 3], b = cs->params[i + 4];
 
+				/* Are any out of range 0~255? */
 				if ((r | g | b) & ~255U)
 					continue;
 				*target_color = 0x04000000 | r << 16 | g << 8 | b;
@@ -1897,11 +1898,9 @@ static void SelectRendition(Window *win)
 			continue;
 
 		attr_mask_t l = rendlist[m][j];
-		if (!l)
-			continue;
 
 		if (l & A__UNSET)
-			attr &= ~l;
+			attr &= l;
 		else
 			attr |= l;
 	}
