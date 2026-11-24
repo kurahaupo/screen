@@ -389,7 +389,8 @@ void WriteFile(struct acluser *user, char *fn, int dump)
 			if (exists) {
 				if ((fd = open(fn, O_WRONLY, 0666)) >= 0) {
 					if (fstat(fd, &stb2) == 0
-					    && stb.st_dev == stb2.st_dev && stb.st_ino == stb2.st_ino) {
+					    && stb.st_dev == stb2.st_dev
+					    && stb.st_ino == stb2.st_ino) {
 						if (ftruncate(fd, 0) != 0) {
 							close(fd);
 							fd = -1;
@@ -420,7 +421,8 @@ void WriteFile(struct acluser *user, char *fn, int dump)
 					fputs("<\n", f);
 				}
 				if (dump == DUMP_SCROLLBACK) {
-					for (i = fore->w_histheight - fore->w_scrollback_height; i < fore->w_histheight;
+					for (i = fore->w_histheight - fore->w_scrollback_height;
+					     i < fore->w_histheight;
 					     i++) {
 						p = (WIN(i)->image);
 						pf = WIN(i)->font;

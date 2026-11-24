@@ -133,7 +133,7 @@ void Input(char *istr, size_t len, int mode, InputCallback *finfunc, void *priv,
 	flayer->l_mode = 1;
 	inpdata = flayer->l_data;
 
-	*inpdata = (struct inpdata) {
+	*inpdata = (struct inpdata){
 		.inp = {
 			.len = 0,
 			.pos = 0,

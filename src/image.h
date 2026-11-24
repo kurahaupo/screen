@@ -59,5 +59,5 @@ enum {
 	NUM_RENDS
 };
 
-#endif /* SCREEN_IMAGE_H */
+#endif				/* SCREEN_IMAGE_H */
 
