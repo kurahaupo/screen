@@ -229,13 +229,12 @@ const char *wmbc_strcpy(WinMsgBufContext *wmbc, const char *s)
 int wmbc_printf(WinMsgBufContext *wmbc, const char *fmt, ...)
 {
 	va_list ap;
-	size_t n, max;
 
 	/* to prevent buffer overflows, cap the number of bytes to the remaining
 	 * buffer size */
 	va_start(ap, fmt);
-	max = wmbc_bytesleft(wmbc);
-	n = vsnprintf(wmbc->p, max, fmt, ap);
+	size_t max = wmbc_bytesleft(wmbc);
+	size_t n = vsnprintf(wmbc->p, max, fmt, ap);
 	va_end(ap);
 
 	/* more space is needed if vsnprintf returns a larger number than our max,
