@@ -43,15 +43,15 @@
  */
 /* keep state_t and state_t_string in sync! */
 typedef enum state_e {
-	LIT,			/* Literal input */
-	ESC,			/* Start of escape sequence */
-	ASTR,			/* Start of control string */
-	STRESC,			/* ESC seen in control string */
-	CTL_SEQ,		/* Reading arguments in "CSI Pn ;... */
+	LIT,			/* LITeral input */
+	ESC,			/* start of ESCape sequence */
+	ASTR,			/* start of control STRing */
+	STRESC,			/* ESC seen in control STRing */
+	CTL_SEQ,		/* Reading arguments in Control Sequence (CSI Pn ; … KEY) */
 	PRIN,			/* Printer mode */
-	PRINESC,		/* ESC seen in printer mode */
-	PRINCSI,		/* CSI seen in printer mode */
-	PRIN4			/* CSI 4 seen in printer mode */
+	PRINESC,		/* ESC seen in PRINter mode, looking for '[4i' */
+	PRINCSI,		/* CSI seen in PRINter mode, looking for '4i' */
+	PRIN4			/* CSI 4 seen in PRINter mode, looking for 'i' */
 } state_t;
 
 #define MAX_CS_PARAMS	64	/* ISO-6429 specifies 16, and recommends
