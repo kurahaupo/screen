@@ -1597,7 +1597,7 @@ static void DoCommandXon(struct action *act UNUSED)
 	LayProcess(&s, &len);
 }
 
-static void DoCommandXoff(struct action *act UNUSED)
+static void DoCommandXoff(struct action *act)
 {
 	char ch = Ctrl('s');
 	char *s = &ch;
@@ -1837,9 +1837,7 @@ static void DoCommandHeight(struct action *act)
 		else if (w == D_width)
 			OutputMsg(0, "Your termcap does not specify how to change the terminal's height to %d.", h);
 		else
-			OutputMsg(0,
-				  "Your termcap does not specify how to change the terminal's resolution to %dx%d.",
-				  w, h);
+			OutputMsg(0, "Your termcap does not specify how to change the terminal's resolution to %d×%d.", w, h);
 	}
 }
 
@@ -1970,7 +1968,7 @@ static void DoCommandClear(struct action *act UNUSED)
 	WriteString(fore, "\033[H\033[J", 6);
 }
 
-static void DoCommandReset(struct action *act UNUSED)
+static void DoCommandReset(struct action *act)
 {
 	ResetAnsiState(fore);
 	if (fore->w_zdisplay)
@@ -2159,8 +2157,7 @@ static void DoCommandHistory(struct action *act UNUSED)
 				l += RecodeBuf((unsigned char *)plop_tab[(int)(unsigned char)ch].buf,
 					       plop_tab[(int)(unsigned char)ch].len,
 					       plop_tab[(int)(unsigned char)ch].enc,
-					       enc,
-					       NULL);
+					       enc, NULL);
 			else
 				l += plop_tab[(int)(unsigned char)ch].len;
 		}
@@ -2286,8 +2283,7 @@ static void DoCommandPaste(struct action *act)
 				l += RecodeBuf((unsigned char *)plop_tab[(int)(unsigned char)ch].buf,
 					       plop_tab[(int)(unsigned char)ch].len,
 					       plop_tab[(int)(unsigned char)ch].enc,
-					       enc,
-					       NULL);
+					       enc, NULL);
 			else
 				l += plop_tab[(int)(unsigned char)ch].len;
 		}
@@ -2436,7 +2432,7 @@ static void DoCommandReadbuf(struct action *act)
 	}
 }
 
-static void DoCommandRemovebuf(struct action *act)
+static void DoCommandRemovebuf(struct action *act UNUSED)
 {
 	KillBuffers();
 }
@@ -2575,13 +2571,13 @@ static void DoCommandShelltitle(struct action *act)
 	(void)ParseSaveStr(act, &nwin_default.aka);
 }
 
-static void DoCommandTerminfo(struct action *act)
+static void DoCommandTerminfo(struct action *act UNUSED)
 {
 	if (!rc_name || !*rc_name)
 		OutputMsg(0, "Sorry, too late now. Place that in your .screenrc file.");
 }
 
-static void DoCommandSleep(struct action *act)
+static void DoCommandSleep(struct action *act UNUSED)
 {
 }
 
@@ -3039,7 +3035,7 @@ static void DoCommandSilencewait(struct action *act)
 		OutputMsg(0, "silencewait set to %d seconds", SilenceWait);
 }
 
-static void DoCommandBumpright(struct action *act)
+static void DoCommandBumpright(struct action *act UNUSED)
 {
 	Window *win = NextWindow();
 
@@ -3047,7 +3043,7 @@ static void DoCommandBumpright(struct action *act)
 		SwapWindows(fore->w_number, win->w_number);
 }
 
-static void DoCommandBumpleft(struct action *act)
+static void DoCommandBumpleft(struct action *act UNUSED)
 {
 	Window *win = PreviousWindow();
 
@@ -3055,7 +3051,7 @@ static void DoCommandBumpleft(struct action *act)
 		SwapWindows(fore->w_number, win->w_number);
 }
 
-static void DoCommandCollapse(struct action *act)
+static void DoCommandCollapse(struct action *act UNUSED)
 {
 	CollapseWindowlist();
 }
@@ -3108,7 +3104,7 @@ static void DoCommandZombie_timeout(struct action *act)
 		fore->w_poll_zombie_timeout = nwin_default.poll_zombie_timeout;
 }
 
-static void DoCommandSort(struct action *act)
+static void DoCommandSort(struct action *act UNUSED)
 {
 	if (first_window == last_window) {
 		Msg(0, "Less than two windows, sorting makes no sense.\n");
@@ -3553,12 +3549,12 @@ static void DoCommandMaptimeout(struct action *act)
 		OutputMsg(0, "maptimeout is %dms", maptimeout);
 }
 
-static void DoCommandMapnotnext(struct action *act)
+static void DoCommandMapnotnext(struct action *act UNUSED)
 {
 	D_dontmap = 1;
 }
 
-static void DoCommandMapdefault(struct action *act)
+static void DoCommandMapdefault(struct action *act UNUSED)
 {
 	D_mapdefault = 1;
 }
@@ -4141,19 +4137,19 @@ static void DoCommandSgr3mode(struct action *act)
 	}
 }
 
-static void DoCommandRemove(struct action *act)
+static void DoCommandRemove(struct action *act UNUSED)
 {
 	RemCanvas();
 	Activate(-1);
 }
 
-static void DoCommandOnly(struct action *act)
+static void DoCommandOnly(struct action *act UNUSED)
 {
 	OneCanvas();
 	Activate(-1);
 }
 
-static void DoCommandFit(struct action *act)
+static void DoCommandFit(struct action *act UNUSED)
 {
 	D_forecv->c_xoff = D_forecv->c_xs;
 	D_forecv->c_yoff = D_forecv->c_ys;
@@ -4291,7 +4287,7 @@ static void DoCommandBacktick(struct action *act)
 	WindowChanged(NULL, WINESC_BACKTICK);
 }
 
-static void DoCommandBlanker(struct action *act)
+static void DoCommandBlanker(struct action *act UNUSED)
 {
 	if (blankerprg) {
 		RunBlanker(blankerprg);
