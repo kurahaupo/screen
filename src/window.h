@@ -216,7 +216,8 @@ struct Window {
 		int CharsetR;
 		int Charsets[4];
 	} w_saved;
-	int w_top, w_bot;	/* scrollregion */
+	int w_top;		/* scrollregion */
+	int w_bot;
 	bool w_wrap;		/* autowrap */
 	int w_origin;		/* origin mode */
 	bool w_insert;		/* window is in insert mode */
