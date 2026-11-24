@@ -51,7 +51,6 @@ extern struct comm comms[];
 #define ARGS_ANY		5	/* interpreted as "more than 4" */
 
 #define ARGS(n)			(1U << (n))
-#define XXARG(n)		(1U << ARGS_ANY+(n))
 #define NEED_FORE		0x1000U	/* command needs a fore window */
 #define NEED_DISPLAY		0x2000U	/* command needs a display */
 #define NEED_LAYER		0x4000U	/* command needs a layer */
