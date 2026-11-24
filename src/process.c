@@ -3459,7 +3459,7 @@ static void DoCommandBindkey(struct action *act)
 				if (args[1])
 					break;
 			} else if (*argl == (kme->fl & ~KMAP_NOTIMEOUT)
-				&& memcmp(kme->str, *args, *argl) == 0)
+				   && memcmp(kme->str, *args, *argl) == 0)
 				break;
 		if (i == kmap_extn) {
 			if (!args[1]) {
