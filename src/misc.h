@@ -4,7 +4,7 @@
 #include <stddef.h>	// for size_t
 
 struct mchar;
-typedef void (*signal_handler_t)(int);
+typedef void signal_handler_t(int);
 
 char *SaveStr(const char *);
 char *SaveStrn(const char *, size_t);
@@ -19,7 +19,7 @@ void closeallfiles(int);
 int UserContext(void);
 void UserReturn(int);
 int UserStatus(void);
-signal_handler_t xsignal(int, signal_handler_t);
+signal_handler_t *xsignal(int, signal_handler_t *);
 #if defined(HAVE_SETEUID) || defined(HAVE_SETREUID)
 void xseteuid(int);
 void xsetegid(int);
