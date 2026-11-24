@@ -2247,7 +2247,7 @@ void SetXtermOSC(int i, char *s, char *t)
 		{ "11;", "" },			/* background RGB */
 		{ "20;", "" },			/* background */
 		{ "39;", "black" },		/* default foreground (black?) */
-		{ "49;", "white" }		/* default background (white?) */
+		{ "49;", "white" },		/* default background (white?) */
 	};
 
 	if (!D_CXT)
