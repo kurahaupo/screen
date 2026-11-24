@@ -1299,7 +1299,7 @@ int EncodeChar(char *bp, int c, int encoding, int *fontp)
 			c = (c >> 8) & 0xff;
 			t += (c & 1) ? ((t <= 0x5f) ? 0x1f : 0x20) : 0x7e;
 			c = (c - 0x21 >> 1)
-			    + (c < 0x5f ? 0x81 : 0xc1);
+			  + (c < 0x5f ? 0x81 : 0xc1);
 			*bp++ = c;
 			*bp++ = t;
 			return 2;
@@ -1415,9 +1415,11 @@ int PrepareEncodedChar(int c)
 		if (f == FONT_KANA)
 			return c | 0x80;
 		else if (f == FONT_KANJI) {
-			t += (c & 1) == 0 ? 0x7e : t <= 0x5f ? 0x1f : 0x20;
+			t += (c & 1) == 0 ? 0x7e :
+			     t <= 0x5f    ? 0x1f :
+					    0x20;
 			c = (c - 0x21 >> 1)
-			    + (c < 0x5f ? 0x81 : 0xc1);
+			  + (c < 0x5f ? 0x81 : 0xc1);
 			D_mbcs = t;
 		}
 		return c;
