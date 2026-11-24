@@ -73,34 +73,34 @@ struct mchar mchar_so = { ' ', A_RV, 0, 0, 0, 0 };
 /* Default bell/monitor/silence renditions in ParseAttrColor() encoding. */
 uint64_t renditions[NUM_RENDS] = {
 	((uint64_t)(A_US | A_BD) << 56) | REND_KEEP_FG | REND_KEEP_BG,	/* bell: =ub */
-	((uint64_t)A_BD << 56) | REND_KEEP_FG | REND_KEEP_BG,	/* monitor: =b */
-	((uint64_t)A_US << 56) | REND_KEEP_FG | REND_KEEP_BG	/* silence: =u */
+	((uint64_t)A_BD << 56) | REND_KEEP_FG | REND_KEEP_BG,		/* monitor: =b */
+	((uint64_t)A_US << 56) | REND_KEEP_FG | REND_KEEP_BG		/* silence: =u */
 };
 
 /* keep string_t and string_t_string in sync! */
 static char *string_t_string[] = {
-	[NONE] = "NONE",
-	[DCS] = "DCS",		/* Device Control String */
-	[OSC] = "OSC",		/* Operating System Command */
-	[APC] = "APC",		/* Application Program Command
-				 *  - used for status change */
-	[PM] = "PM",		/* Privacy Message */
-	[AKA] = "AKA",		/* Title for current screen */
-	[GM] = "GM",		/* Global Message (to every display) */
-	[STATUS] = "STATUS"	/* User hardstatus line */
+	[NONE]		= "NONE",
+	[DCS]		= "DCS",	/* Device Control String */
+	[OSC]		= "OSC",	/* Operating System Command */
+	[APC]		= "APC",	/* Application Program Command
+					 *  - used for status change */
+	[PM]		= "PM",		/* Privacy Message */
+	[AKA]		= "AKA",	/* Title for current screen */
+	[GM]		= "GM",		/* Global Message (to every display) */
+	[STATUS]	= "STATUS"	/* User hardstatus line */
 };
 
 /* keep state_t and state_t_string in sync! */
 static char *state_t_string[] = {
-	[LIT] = "LIT",		/* Literal input */
-	[ESC] = "ESC",		/* Start of escape sequence */
-	[ASTR] = "ASTR",	/* Start of control string */
-	[STRESC] = "STRESC",	/* ESC seen in control string */
-	[CTL_SEQ] = "CS",	/* Reading arguments in "CSI Pn ;... */
-	[PRIN] = "PRIN",	/* Printer mode */
-	[PRINESC] = "PRINESC",	/* ESC seen in printer mode */
-	[PRINCSI] = "PRINCSI",	/* CSI seen in printer mode */
-	[PRIN4] = "PRIN4"	/* CSI 4 seen in printer mode */
+	[LIT]		= "LIT",	/* Literal input */
+	[ESC]		= "ESC",	/* Start of escape sequence */
+	[ASTR]		= "ASTR",	/* Start of control string */
+	[STRESC]	= "STRESC",	/* ESC seen in control string */
+	[CTL_SEQ]	= "CS",		/* Reading arguments in "CSI Pn ;... */
+	[PRIN]		= "PRIN",	/* Printer mode */
+	[PRINESC]	= "PRINESC",	/* ESC seen in printer mode */
+	[PRINCSI]	= "PRINCSI",	/* CSI seen in printer mode */
+	[PRIN4]		= "PRIN4"	/* CSI 4 seen in printer mode */
 };
 
 static void DoESC(Window *, int, int);
@@ -1063,73 +1063,75 @@ static void DoControlSequence(Window *win, int c, int intermediate)
 				break;
 			bool i = c == 'h';
 			switch (a1) {
-			case 1:	/* CKM:  cursor key mode */
+			case 1:		/* CKM:  cursor key mode */
 				LCursorkeysMode(&win->w_layer, win->w_cursorkeys = i);
 #ifndef TIOCPKT
 				WNewAutoFlow(win, !i);
 #endif				/* !TIOCPKT */
 				break;
-			case 2:	/* ANM:  ansi/vt52 mode */
+			case 2:		/* ANM:  ansi/vt52 mode */
 				if (i) {
 					if (win->w_encoding)
 						break;
 					win->w_charsets[0] =
-					    win->w_charsets[1] =
-					    win->w_charsets[2] =
-					    win->w_charsets[3] = win->w_FontL = win->w_FontR = ASCII;
+					win->w_charsets[1] =
+					win->w_charsets[2] =
+					win->w_charsets[3] =
+					win->w_FontL =
+					win->w_FontR = ASCII;
 					win->w_Charset = 0;
 					win->w_CharsetR = 2;
 					win->w_ss = 0;
 				}
 				break;
-			case 3:	/* COLM: column mode */
+			case 3:		/* COLM: column mode */
 				ClearScreen(win);
 				win->w_x = 0;
 				win->w_y = 0;
 				WChangeSize(win, i ? Z0width : Z1width, win->w_height);
 				break;
-		     /*	case 4:        SCLM: scrolling mode */
-			case 5:	/* SCNM: screen mode */
+		     /*	case 4:         SCLM: scrolling mode */
+			case 5:		/* SCNM: screen mode */
 				if (i != win->w_revvid)
 					WReverseVideo(win, i);
 				win->w_revvid = i;
 				break;
-			case 6:	/* OM:   origin mode */
+			case 6:		/* OM:   origin mode */
 				win->w_origin = i;
 				win->w_x = 0;
 				win->w_y = i ? win->w_top : 0;
 				LGotoPos(&win->w_layer, win->w_x, win->w_y);
 				break;
-			case 7:	/* AWM:  auto wrap mode */
+			case 7:		/* AWM:  auto wrap mode */
 				win->w_wrap = i;
 				break;
-		     /*	case 8:        ARM:  auto repeat mode */
-		     /*	case 9:        INLM: interlace mode */
-			case 9:	/* X10 mouse tracking */
+		     /*	case 8:		ARM:  auto repeat mode */
+		     /*	case 9:		INLM: interlace mode */
+			case 9:		/* X10 mouse tracking */
 				win->w_mouse = i ? 9 : 0;
 				LMouseMode(&win->w_layer, win->w_mouse);
 				break;
-		     /*	case 10:       EDM:  edit mode */
-		     /*	case 11:       LTM:  line transmit mode */
-		     /*	case 13:       SCFDM: space compression / field delimiting */
-		     /*	case 14:       TEM:  transmit execution mode */
-		     /*	case 16:       EKEM: edit key execution mode */
-		     /*	case 18:       PFF:  Printer term form feed */
-		     /*	case 19:       PEX:  Printer extend screen / scroll. reg */
+		     /*	case 10:	EDM:  edit mode */
+		     /*	case 11:	LTM:  line transmit mode */
+		     /*	case 13:	SCFDM: space compression / field delimiting */
+		     /*	case 14:	TEM:  transmit execution mode */
+		     /*	case 16:	EKEM: edit key execution mode */
+		     /*	case 18:	PFF:  Printer term form feed */
+		     /*	case 19:	PEX:  Printer extend screen / scroll. reg */
 			case 25:	/* TCEM: text cursor enable mode */
 				win->w_curinv = !i;
 				LCursorVisibility(&win->w_layer, i ? win->w_curvvis : -1);
 				break;
-		     /*	case 34:       RLM:  Right to left mode */
-		     /*	case 35:       HEBM: hebrew keyboard map */
-		     /*	case 36:       HEM:  hebrew encoding */
-		     /*	case 38:             TeK Mode */
-		     /*	case 40:             132 col enable */
-		     /*	case 42:       NRCM: 7bit NRC character mode */
-		     /*	case 44:             margin bell enable */
+		     /*	case 34:	RLM:  Right to left mode */
+		     /*	case 35:	HEBM: hebrew keyboard map */
+		     /*	case 36:	HEM:  hebrew encoding */
+		     /*	case 38:	      TeK Mode */
+		     /*	case 40:	      132 col enable */
+		     /*	case 42:	NRCM: 7bit NRC character mode */
+		     /*	case 44:	      margin bell enable */
 			case 47:	/*       xterm-like alternate screen */
-		     /*	case 66:       NKM:  Numeric keypad appl mode */
-		     /*	case 68:       KBUM: Keyboard usage mode (data process) */
+		     /*	case 66:	NKM:  Numeric keypad appl mode */
+		     /*	case 68:	KBUM: Keyboard usage mode (data process) */
 			case 1000:	/* VT200 mouse tracking */
 			case 1001:	/* VT200 highlight mouse */
 			case 1002:	/* button event mouse */
@@ -1137,12 +1139,12 @@ static void DoControlSequence(Window *win, int c, int intermediate)
 				win->w_mouse = i ? a1 : 0;
 				LMouseMode(&win->w_layer, win->w_mouse);
 				break;
-		     /*	case 1005:     UTF-8 mouse mode rejected */
+		     /*	case 1005:	UTF-8 mouse mode rejected */
 			case 1006:	/* SGR mouse mode */
 				win->w_extmouse = i ? a1 : 0;
 				LExtMouseMode(&win->w_layer, win->w_extmouse);
 				break;
-		     /*	case 1015:     UXRVT mouse mode rejected */
+		     /*	case 1015:	UXRVT mouse mode rejected */
 			case 1047:	/*       xterm-like alternate screen */
 			case 1049:	/*       xterm-like alternate screen */
 				if (use_altscreen) {
@@ -1709,44 +1711,44 @@ static void ASetMode(Window *win, bool on)
 
 static enum attr_mask_e rendlist[][30] = {
 	[SGR3_ITALIC] = {	/* strict mode */
-			 [0] = ~A__MASK,
-			 [1] = A_BD,
-			 [2] = A_DI,
-			 [3] = A_IT,
-			 [4] = A_US,
-			 [5] = A_BL,
-			 [6] = A_FB,
-			 [7] = A_RV,
-			 [8] = A_HI,
-			 [9] = A_ST,
-			 [22] = ~(A_BD | A_DI),
-			 [23] = ~A_IT,
-			 [24] = ~A_US,
-			 [25] = ~(A_BL | A_FB),
-			 [26] = ~(A_BL | A_FB),
-			 [27] = ~A_RV,
-			 [28] = ~A_HI,
-			 [29] = ~A_ST,
-			  },
+		[0]  = ~A__MASK,
+		[1]  = A_BD,
+		[2]  = A_DI,
+		[3]  = A_IT,
+		[4]  = A_US,
+		[5]  = A_BL,
+		[6]  = A_FB,
+		[7]  = A_RV,
+		[8]  = A_HI,
+		[9]  = A_ST,
+		[22] = ~(A_BD | A_DI),
+		[23] = ~A_IT,
+		[24] = ~A_US,
+		[25] = ~(A_BL | A_FB),
+		[26] = ~(A_BL | A_FB),
+		[27] = ~A_RV,
+		[28] = ~A_HI,
+		[29] = ~A_ST,
+	},
 	[SGR3_STANDOUT] = {	/* legacy mode */
-			 [0]  = ~A__MASK,
-			 [1]  = A_BD,
-			 [2]  = A_DI,
-			 [3]  = A_SO,
-			 [4]  = A_US,
-			 [5]  = A_BL,
-			 [6]  = A_FB,
-			 [7]  = A_RV,
-			 [8]  = A_HI,
-			 [9]  = A_ST,
-			 [22] = ~(A_BD | A_DI),
-			 [23] = ~A_SO,
-			 [24] = ~A_US,
-			 [25] = ~(A_BL | A_FB),
-			 [26] = ~(A_BL | A_FB),
-			 [27] = ~A_RV,
-			 [28] = ~A_HI,
-			 [29] = ~A_ST,
+		[0]  = ~A__MASK,
+		[1]  = A_BD,
+		[2]  = A_DI,
+		[3]  = A_SO,
+		[4]  = A_US,
+		[5]  = A_BL,
+		[6]  = A_FB,
+		[7]  = A_RV,
+		[8]  = A_HI,
+		[9]  = A_ST,
+		[22] = ~(A_BD | A_DI),
+		[23] = ~A_SO,
+		[24] = ~A_US,
+		[25] = ~(A_BL | A_FB),
+		[26] = ~(A_BL | A_FB),
+		[27] = ~A_RV,
+		[28] = ~A_HI,
+		[29] = ~A_ST,
 	},
 };
 
@@ -1843,9 +1845,9 @@ static void SelectRendition(Window *win)
 			}
 
 			/* Truecolor (24bit) colour space; example control sequences:
-			 *  \e[48:2:0:12:13:14m                Standard
-			 *  \e[48;2;12;13;14m          Customary
-			 *  \e[48:2:12:13:14m          Fix for botched clients
+			 *  \e[48:2:0:12:13:14m         Standard
+			 *  \e[48;2;12;13;14m           Customary
+			 *  \e[48:2:12:13:14m           Fix for botched clients
 			 * which sets red=12, green=13, blue=14, color-space=0/empty (application)
 			 * giving very dark gun-metal gray
 			 */
@@ -1883,6 +1885,7 @@ static void SelectRendition(Window *win)
 
 		if (j >= ARRAY_SIZE(rendlist[0]))
 			continue;
+
 		sgr3_mode_t m = win->w_sgr3_mode;
 
 		/* Special SGR3 handling... */
