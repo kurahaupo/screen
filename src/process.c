@@ -70,6 +70,8 @@
 #include "winmsg.h"
 #include "winmsgbuf.h"
 
+
+static size_t CountArgs(char **);
 static bool CheckArgCount(struct comm *, size_t);
 static int CheckArgNum(int, char **);
 static void ClearAction(struct action *);
