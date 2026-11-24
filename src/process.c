@@ -882,9 +882,8 @@ static int CheckArgNum(int nr, char **args)
 	return -1;
 }
 
-static void StuffFin(char *buf, size_t len, void *data)
+static void StuffFin(char *buf, size_t len, void *data UNUSED)
 {
-	(void)data; /* unused */
 	if (!flayer)
 		return;
 	while (len)
