@@ -59,18 +59,18 @@ struct kmap_ext {
 };
 
 typedef enum {
-	STATUS_OFF = 0,
-	STATUS_ON_WIN = 1,
-	STATUS_ON_HS = 2
+	STATUS_OFF	= 0,
+	STATUS_ON_WIN	= 1,
+	STATUS_ON_HS	= 2
 } DisplayStatus;
 
 typedef enum {
-	HSTATUS_IGNORE = 0,
-	HSTATUS_LASTLINE = 1,
-	HSTATUS_MESSAGE = 2,
-	HSTATUS_HS = 3,
-	HSTATUS_FIRSTLINE = 4,
-	HSTATUS_ALWAYS = (1 << 3)
+	HSTATUS_IGNORE		= 0,
+	HSTATUS_LASTLINE	= 1,
+	HSTATUS_MESSAGE		= 2,
+	HSTATUS_HS		= 3,
+	HSTATUS_FIRSTLINE	= 4,
+	HSTATUS_ALWAYS		= (1 << 3)
 } HardStatus;
 
 struct statusposstr {
@@ -129,7 +129,7 @@ struct Display {
 	Window *d_fore;		/* pointer to fore window */
 	Window *d_other;	/* pointer to other window */
 	int d_nonblock;		/* -1 don't block if obufmax reached */
-	/* >0: block after nonblock secs */
+				/* >0: block after nonblock secs */
 	char d_termname[MAXTERMLEN + 1];	/* $TERM */
 	char *d_tentry;		/* buffer for tgetstr */
 	bool d_tcinited;	/* termcap initialised yet? */
