@@ -236,7 +236,7 @@ struct Window {
 	char *w_tabs;		/* line with tabs */
 	int w_bell;		/* bell status of this window */
 	int w_flow;		/* flow flags */
-	struct Log *w_log;		/* log to file */
+	struct Log *w_log;	/* log to file */
 	int w_logsilence;	/* silence in secs */
 	int w_monitor;		/* monitor status */
 	int w_silencewait;	/* wait for silencewait secs */
