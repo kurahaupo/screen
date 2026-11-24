@@ -54,13 +54,13 @@ struct gl_Window_Data {
 #define FOR_EACH_WINDOW(_wdata, _w, fn) do {					\
 	if ((_wdata)->order == WLIST_MRU) {					\
 		Window *_ww;							\
-		for (_ww = mru_window; _ww; _ww = _ww->w_prev_mru) {			\
+		for (_ww = mru_window; _ww; _ww = _ww->w_prev_mru) {		\
 			_w = _ww;						\
 			fn							\
 		}								\
 	} else {								\
 		Window *_ww;							\
-		for (_ww = first_window; _ww; _ww = _ww->w_next) {			\
+		for (_ww = first_window; _ww; _ww = _ww->w_next) {		\
 			_w = _ww;						\
 			fn							\
 		}								\
@@ -460,7 +460,8 @@ void display_windows(int onblank, int order, Window *group)
 
 	if (group) {
 		onblank = 0;	/* When drawing a group window, ignore 'onblank' */
-		order = (group->w_list_nested ? WLIST_NESTED : 0) + (group->w_list_order ? WLIST_MRU : WLIST_NUM);	/* restore windowlist order flags */
+		order = (group->w_list_nested ? WLIST_NESTED : 0)
+		      + (group->w_list_order ? WLIST_MRU : WLIST_NUM);	/* restore windowlist order flags */
 	}
 
 	if (onblank) {
