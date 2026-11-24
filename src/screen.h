@@ -85,20 +85,20 @@
 #define MSG_REVISION	(('m'<<24) | ('s'<<16) | ('g'<<8) | MSG_VERSION)
 typedef struct Message Message;
 struct Message {
-	int protocol_revision;	/* reduce harm done by incompatible messages */
+	int protocol_revision;				/* reduce harm done by incompatible messages */
 	int type;
-	char m_tty[MAXPATHLEN];	/* ttyname */
+	char m_tty[MAXPATHLEN];				/* ttyname */
 	union {
 		struct {
 			int lflag;
 			int Lflag;
 			bool aflag;
 			int flowflag;
-			int hheight;	/* size of scrollback buffer */
+			int hheight;			/* size of scrollback buffer */
 			int nargs;
 			char line[MAXPATHLEN];
 			char dir[MAXPATHLEN];
-			char screenterm[MAXTERMLEN + 1];	/* is screen really "screen" ? */
+			char screenterm[MAXTERMLEN+1];	/* is screen really "screen" ? */
 		} create;
 		struct {
 			char auser[MAXLOGINLEN + 1];	/* username */
@@ -115,13 +115,13 @@ struct Message {
 		} attach;
 		struct {
 			char duser[MAXLOGINLEN + 1];	/* username */
-			pid_t dpid;	/* pid of frontend */
+			pid_t dpid;			/* pid of frontend */
 		} detach;
 		struct {
 			char auser[MAXLOGINLEN + 1];	/* username */
 			int nargs;
 			char cmd[MAXPATHLEN + 1];	/* command */
-			pid_t apid;	/* pid of frontend */
+			pid_t apid;			/* pid of frontend */
 			char preselect[20];
 			char writeback[MAXPATHLEN];	/* The socket to write the result.
 							 * Only used for MSG_QUERY */
