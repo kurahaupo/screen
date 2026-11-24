@@ -1255,13 +1255,15 @@ int InitTermcap(int width, int height)
 		D_c0_tab[i] = i;
 	if (D_AC) {
 		/* init with default string first */
-		char s[] = "l+m+k+j+u+t+v+w+q-x|n+o~s_p\"r#`+a:f'g#~o.v-^+<,>h#I#0#y<z>";
-		for (int i = (strlen(s) - 2) & ~1; i >= 0; i -= 2)
-			D_c0_tab[(int)(unsigned char)s[i]] = s[i + 1];
+		char s[] = "l+" "m+" "k+" "j+" "u+" "t+" "v+" "w+" "q-" "x|"
+			   "n+" "o~" "s_" "p\"" "r#" "`+" "a:" "f'" "g#" "~o"
+			   ".v" "-^" "+<" ",>" "h#" "I#" "0#" "y<" "z>" ;
+		for (size_t l = sizeof s - 1 & ~1, i = 0 ; i != l; i += 2)
+			D_c0_tab[(uint8_t)s[i]] = s[i + 1];
 	}
 	if (D_CC0)
-		for (int i = (strlen(D_CC0) - 2) & ~1; i >= 0; i -= 2)
-			D_c0_tab[(int)(unsigned char)D_CC0[i]] = D_CC0[i + 1];
+		for (size_t l = strlen(D_CC0) & ~1, i = 0; i != l; i += 2)
+			D_c0_tab[(uint8_t)D_CC0[i]] = D_CC0[i + 1];
 	if (D_PF == NULL)
 		D_PO = NULL;
 
