@@ -943,7 +943,7 @@ static inline bool IsSGR(char *s, int code)
 
 static inline bool SubstituteMissingAttr(attr_t to, attr_t from)
 {
-	if (D_td.td_attr[to].tda_set && D_td.td_attr[from].tda_set)
+	if (D_td.td_attr[to].tda_set || ! D_td.td_attr[from].tda_set)
 		return false;
 	D_td.td_attr[to] = D_td.td_attr[from];
 	return true;
