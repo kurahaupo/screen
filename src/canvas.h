@@ -40,6 +40,8 @@
 #define SLICE_THIS	(1 << 2)	/* used in equal test */
 #define SLICE_GLOBAL	(1 << 3)
 
+struct Canvas;
+struct Layer;
 struct Viewport;
 struct Window;
 
@@ -55,9 +57,9 @@ typedef struct Canvas {
 	int c_slweight;			/* size ratio */
 
 	struct Viewport *c_vplist;
-	Layer *c_layer;			/* layer on this canvas */
+	struct Layer *c_layer;		/* layer on this canvas */
 	struct Canvas *c_lnext;		/* next canvas that displays layer */
-	Layer c_blank;			/* bottom layer, always blank */
+	struct Layer c_blank;		/* bottom layer, always blank */
 	int c_xoff;			/* canvas x offset on display */
 	int c_yoff;			/* canvas y offset on display */
 	int c_xs;
