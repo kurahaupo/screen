@@ -92,7 +92,7 @@ $AWK -v source_file="$source_file" '
 
 < tmp$$/comm.cpp \
 $AWK -v source_file="$source_file" '
-/^[[:space:]]*[{][[:space:]]*"/ {    #}
+/^[[:space:]]*[{][[:space:]]*"/ {	#}
     split($0, f, "\"")
     printf "#define %-15s %u\t/* line %u in %s */\n", "RC_" toupper(f[2]), i++, NR, source_file;
 }
