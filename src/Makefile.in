@@ -123,6 +123,8 @@ uninstall:
 kmapdef.c term.h: $(srcdir)/term.c $(srcdir)/term.sh
 	AWK=$(AWK) srcdir=$(srcdir) sh $(srcdir)/term.sh
 
+kmapdef.c: term.h
+
 comm.h: $(srcdir)/comm.c $(srcdir)/comm.sh config.h term.h
 	AWK=$(AWK) CC="$(CC) $(CFLAGS)" srcdir=$(srcdir) sh $(srcdir)/comm.sh
 
@@ -196,7 +198,7 @@ depend.in::
 	    -e   'D' \
 	    -e   'bb' \
 	    -e '}' | \
-	sort -u -o .tmp_make$$$$-b && \
+	sort -o .tmp_make$$$$-b && \
 	cat .tmp_make$$$$-a .tmp_make$$$$-b > ../src/Makefile.in && \
 	rm -f .tmp_make$$$$-*
 
@@ -205,6 +207,7 @@ depend.in::
 ### Dependencies:
 acls.o: $(srcdir)/aalimits.h
 acls.o: $(srcdir)/acls.c
+acls.o: $(srcdir)/acls.h
 acls.o: $(srcdir)/acls.h
 acls.o: $(srcdir)/ansi.h
 acls.o: $(srcdir)/canvas.h
@@ -223,6 +226,7 @@ acls.o: comm.h
 acls.o: config.h
 acls.o: term.h
 ansi.o: $(srcdir)/aalimits.h
+ansi.o: $(srcdir)/acls.h
 ansi.o: $(srcdir)/acls.h
 ansi.o: $(srcdir)/ansi.c
 ansi.o: $(srcdir)/ansi.h
@@ -280,6 +284,7 @@ backtick.o: $(srcdir)/winmsg.h
 backtick.o: config.h
 canvas.o: $(srcdir)/aalimits.h
 canvas.o: $(srcdir)/acls.h
+canvas.o: $(srcdir)/acls.h
 canvas.o: $(srcdir)/ansi.h
 canvas.o: $(srcdir)/canvas.c
 canvas.o: $(srcdir)/canvas.h
@@ -305,6 +310,7 @@ comm.o: $(srcdir)/os.h
 comm.o: comm.h
 comm.o: config.h
 display.o: $(srcdir)/aalimits.h
+display.o: $(srcdir)/acls.h
 display.o: $(srcdir)/acls.h
 display.o: $(srcdir)/ansi.h
 display.o: $(srcdir)/bitmath.h
@@ -333,6 +339,7 @@ display.o: config.h
 display.o: term.h
 encoding.o: $(srcdir)/aalimits.h
 encoding.o: $(srcdir)/acls.h
+encoding.o: $(srcdir)/acls.h
 encoding.o: $(srcdir)/ansi.h
 encoding.o: $(srcdir)/canvas.h
 encoding.o: $(srcdir)/display.h
@@ -352,6 +359,7 @@ encoding.o: comm.h
 encoding.o: config.h
 encoding.o: term.h
 fileio.o: $(srcdir)/aalimits.h
+fileio.o: $(srcdir)/acls.h
 fileio.o: $(srcdir)/acls.h
 fileio.o: $(srcdir)/ansi.h
 fileio.o: $(srcdir)/canvas.h
@@ -412,6 +420,7 @@ kmapdef.o: $(srcdir)/kmapdef.h
 kmapdef.o: kmapdef.c
 layer.o: $(srcdir)/aalimits.h
 layer.o: $(srcdir)/acls.h
+layer.o: $(srcdir)/acls.h
 layer.o: $(srcdir)/ansi.h
 layer.o: $(srcdir)/canvas.h
 layer.o: $(srcdir)/display.h
@@ -434,6 +443,7 @@ layer.o: config.h
 layer.o: term.h
 layout.o: $(srcdir)/aalimits.h
 layout.o: $(srcdir)/acls.h
+layout.o: $(srcdir)/acls.h
 layout.o: $(srcdir)/ansi.h
 layout.o: $(srcdir)/canvas.h
 layout.o: $(srcdir)/display.h
@@ -455,6 +465,7 @@ layout.o: comm.h
 layout.o: config.h
 layout.o: term.h
 list_display.o: $(srcdir)/aalimits.h
+list_display.o: $(srcdir)/acls.h
 list_display.o: $(srcdir)/acls.h
 list_display.o: $(srcdir)/ansi.h
 list_display.o: $(srcdir)/canvas.h
@@ -508,6 +519,7 @@ list_license.o: config.h
 list_license.o: term.h
 list_window.o: $(srcdir)/aalimits.h
 list_window.o: $(srcdir)/acls.h
+list_window.o: $(srcdir)/acls.h
 list_window.o: $(srcdir)/ansi.h
 list_window.o: $(srcdir)/canvas.h
 list_window.o: $(srcdir)/display.h
@@ -534,6 +546,7 @@ logfile.o: $(srcdir)/os.h
 logfile.o: $(srcdir)/screen.h
 logfile.o: config.h
 mark.o: $(srcdir)/aalimits.h
+mark.o: $(srcdir)/acls.h
 mark.o: $(srcdir)/acls.h
 mark.o: $(srcdir)/ansi.h
 mark.o: $(srcdir)/canvas.h
@@ -566,6 +579,7 @@ misc.o: $(srcdir)/os.h
 misc.o: $(srcdir)/screen.h
 misc.o: config.h
 process.o: $(srcdir)/aalimits.h
+process.o: $(srcdir)/acls.h
 process.o: $(srcdir)/acls.h
 process.o: $(srcdir)/ansi.h
 process.o: $(srcdir)/bitmath.h
@@ -605,9 +619,11 @@ process.o: term.h
 pty.o: $(srcdir)/os.h
 pty.o: $(srcdir)/pty.c
 pty.o: $(srcdir)/pty.h
+pty.o: $(srcdir)/pty.h
 pty.o: $(srcdir)/screen.h
 pty.o: config.h
 resize.o: $(srcdir)/aalimits.h
+resize.o: $(srcdir)/acls.h
 resize.o: $(srcdir)/acls.h
 resize.o: $(srcdir)/ansi.h
 resize.o: $(srcdir)/canvas.h
@@ -633,6 +649,7 @@ sched.o: $(srcdir)/sched.h
 sched.o: $(srcdir)/screen.h
 sched.o: config.h
 screen.o: $(srcdir)/aalimits.h
+screen.o: $(srcdir)/acls.h
 screen.o: $(srcdir)/acls.h
 screen.o: $(srcdir)/ansi.h
 screen.o: $(srcdir)/attacher.h
@@ -681,6 +698,7 @@ search.o: $(srcdir)/window.h
 search.o: config.h
 socket.o: $(srcdir)/aalimits.h
 socket.o: $(srcdir)/acls.h
+socket.o: $(srcdir)/acls.h
 socket.o: $(srcdir)/ansi.h
 socket.o: $(srcdir)/canvas.h
 socket.o: $(srcdir)/display.h
@@ -716,6 +734,7 @@ term.o: config.h
 term.o: term.h
 termcap.o: $(srcdir)/aalimits.h
 termcap.o: $(srcdir)/acls.h
+termcap.o: $(srcdir)/acls.h
 termcap.o: $(srcdir)/ansi.h
 termcap.o: $(srcdir)/canvas.h
 termcap.o: $(srcdir)/display.h
@@ -738,6 +757,7 @@ termcap.o: comm.h
 termcap.o: config.h
 termcap.o: term.h
 tty.o: $(srcdir)/aalimits.h
+tty.o: $(srcdir)/acls.h
 tty.o: $(srcdir)/acls.h
 tty.o: $(srcdir)/ansi.h
 tty.o: $(srcdir)/canvas.h
@@ -782,6 +802,7 @@ viewport.o: config.h
 viewport.o: term.h
 window.o: $(srcdir)/aalimits.h
 window.o: $(srcdir)/acls.h
+window.o: $(srcdir)/acls.h
 window.o: $(srcdir)/ansi.h
 window.o: $(srcdir)/canvas.h
 window.o: $(srcdir)/display.h
@@ -810,6 +831,7 @@ window.o: comm.h
 window.o: config.h
 window.o: term.h
 winmsg.o: $(srcdir)/aalimits.h
+winmsg.o: $(srcdir)/acls.h
 winmsg.o: $(srcdir)/acls.h
 winmsg.o: $(srcdir)/ansi.h
 winmsg.o: $(srcdir)/backtick.h
