@@ -386,7 +386,9 @@ void InitKeytab(void)
 				.argl = NULL,
 			};
 	for (size_t i = 0; i < KMAP_KEYS + KMAP_AKEYS; i++)
-		umtab[i] = dmtab[i] = mmtab[i] = (struct action){
+		umtab[i] =
+		dmtab[i] =
+		mmtab[i] = (struct action){
 				.nr = RC_ILLEGAL,
 				.args = noargs,
 				.argl = NULL,
@@ -1345,7 +1347,7 @@ static void DoCommandAt(struct action *act)
 				OutputMsg(0, "%s: at [identifier][%%|*|#] command [args]", rc_name);
 		}
 	}
-out:
+ out:
 	free(s);
 	EffectiveAclUser = NULL;
 }
@@ -4690,7 +4692,7 @@ void DoAction(struct action *act)
 		}
 	}
 
-	static void (*despatch_action[RC_LAST + 1])(struct action *act)		= {
+	static void (*despatch_action[RC_LAST + 1])(struct action *act) = {
 
 		[RC_ACLADD]		= DoCommandAclchg,
 		[RC_ACLCHG]		= DoCommandAclchg,
@@ -4744,9 +4746,9 @@ void DoAction(struct action *act)
 		[RC_DEFHSTATUS]		= DoCommandDefhstatus,
 		[RC_DEFKANJI]		= DoCommandDefencoding,
 		[RC_DEFLOG]		= DoCommandDeflog,
-#if defined(ENABLE_UTMP) && defined(LOGOUTOK)
+# if defined(ENABLE_UTMP) && defined(LOGOUTOK)
 		[RC_DEFLOGIN]		= DoCommandDeflogin,
-#endif
+# endif
 		[RC_DEFMODE]		= DoCommandDefmode,
 		[RC_DEFMONITOR]		= DoCommandDefmonitor,
 		[RC_DEFMOUSETRACK]	= DoCommandDefmousetrack,
@@ -4795,9 +4797,9 @@ void DoAction(struct action *act)
 		[RC_LICENSE]		= DoCommandLicense,
 		[RC_LOCKSCREEN]		= DoCommandLockscreen,
 		[RC_LOGFILE]		= DoCommandLogfile,
-#if defined(ENABLE_UTMP) && defined(LOGOUTOK)
+# if defined(ENABLE_UTMP) && defined(LOGOUTOK)
 		[RC_LOGIN]		= DoCommandLogin,
-#endif
+# endif
 		[RC_LOGTSTAMP]		= DoCommandLogtstamp,
 		[RC_LOG]		= DoCommandLog,
 		[RC_MAPDEFAULT]		= DoCommandMapdefault,
