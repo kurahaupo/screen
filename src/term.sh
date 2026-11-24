@@ -38,7 +38,7 @@ struct term {
 
 union tcu {
 	bool flg;
-	int  num;
+	int num;
 	char *str;
 };
 
