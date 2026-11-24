@@ -1192,9 +1192,9 @@ int InitTermcap(int width, int height)
 		}
 
 	/*
-	 * Identify any functions that share "unset" strings. (This handles
-	 * ‘me’ (sgr0) being the reset code for ‘bd’, ‘di’, ‘bl’ & ‘rv’, but
-	 * will correctly reset other attributes when me="\E[0m".)
+         * Identify any functions that share "unset" strings. (This handles
+         * ‘me’ (sgr0) being the reset code for ‘bd’, ‘di’, ‘bl’ & ‘rv’, but
+         * will correctly reset other attributes when me="\E[0m".)
 	 */
 	for (size_t i = 0; i<NATTR; ++i)
 		if (D_td.td_attr[i].tda_set)
