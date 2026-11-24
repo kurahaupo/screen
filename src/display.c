@@ -171,7 +171,7 @@ static int BlankResize(int wi, int he)
  *  The new display is placed in the displays list.
  */
 
-Display *MakeDisplay(char *uname, char *utty, char *term, bool colorterm, int fd, pid_t pid, struct mode *Mode)
+Display *MakeDisplay(char *uname, char *utty, char *term, bool truecolor, int fd, pid_t pid, struct mode *Mode)
 {
 	struct acluser **u;
 
@@ -230,7 +230,7 @@ Display *MakeDisplay(char *uname, char *utty, char *term, bool colorterm, int fd
 	D_userpid = pid;
 	snprintf(D_usertty, sizeof D_usertty, "%s", utty);
 	snprintf(D_termname, sizeof D_termname, "%s", term);
-	D_hastruecolor = colorterm;
+	D_hastruecolor = truecolor;
 	D_user = *u;
 	D_processinput = ProcessInput;
 	D_mousetrack = defmousetrack;
