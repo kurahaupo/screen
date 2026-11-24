@@ -387,8 +387,12 @@ winmsg_esc_ex(WinNames, const bool hide_cur, Window *win)
 	}
 
 	/* TODO: no need to enforce a limit here */
-	AddWindows(wmbc, max - 1,
-		   hide_cur | (esc->flags.lng ? 0 : 2) | (esc->flags.plus ? 4 : 0) | (esc->flags.minus ? 8 : 0),
+	AddWindows(wmbc,
+		   max - 1,
+		   hide_cur
+		   | (esc->flags.lng ? 0 : 2)
+		   | (esc->flags.plus ? 4 : 0)
+		   | (esc->flags.minus ? 8 : 0),
 		   win ? win->w_number : -1);
 
 	if (display)
