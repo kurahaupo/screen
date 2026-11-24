@@ -1864,7 +1864,9 @@ static void SelectRendition(Window *win)
 					/* not enough params left */
 					break;
 
-				cs_param_t r = cs->params[i + 2], g = cs->params[i + 3], b = cs->params[i + 4];
+				cs_param_t r = cs->params[i + 2];
+				cs_param_t g = cs->params[i + 3];
+				cs_param_t b = cs->params[i + 4];
 
 				/* Are any out of range 0~255? */
 				if ((r | g | b) & ~255U)
