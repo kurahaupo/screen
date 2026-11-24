@@ -479,14 +479,14 @@ static void RAW_PUTCHAR(uint32_t c)
 	}
 	if (D_encoding)
 		c = PrepareEncodedChar(c);
-kanjiloop:
-	if (D_xtable && D_xtable[(int)(unsigned char)D_rend.font]
-	    && D_xtable[(int)(unsigned char)D_rend.font][(int)(unsigned char)c])
-		AddStr(D_xtable[(int)(unsigned char)D_rend.font][(int)(unsigned char)c]);
+ kanjiloop:
+	if (D_xtable && D_xtable[(uint8_t)D_rend.font]
+	    && D_xtable[(uint8_t)D_rend.font][(uint8_t)c])
+		AddStr(D_xtable[(uint8_t)D_rend.font][(uint8_t)c]);
 	else
-		AddChar(D_rend.font != '0' ? c : (uint32_t) D_c0_tab[(int)(unsigned char)c]);
+		AddChar(D_rend.font != '0' ? c : (uint32_t)D_c0_tab[(uint8_t)c]);
 
-addedutf8:
+ addedutf8:
 	if (++D_x >= D_width) {
 		if (D_AM == 0)
 			D_x = D_width - 1;
@@ -1099,7 +1099,7 @@ void ScrollV(int xs, int ys, int xe, int ye, int n, int bce)
 		if (oldbot == D_bot) {	/* have scrolled */
 			if (--n == 0) {
 /* XXX
-	      ChangeScrollRegion(oldtop, oldbot);
+				ChangeScrollRegion(oldtop, oldbot);
 */
 				if (bce && !D_BE)
 					ClearLine(NULL, ye, xs, xe, bce);
@@ -1321,19 +1321,12 @@ static inline int color4to16(int color)
 	/* Convert 2-bit gray-scale to: dark-black, light-black, dark-white,
 	 * light-white
 	 *	00	01	10	11
-	 *	0	1	2	3
-	 *
-	 *	0	5	10	15
-	 *	1	6	11	16
-	 *	0	7	10	17
-	 *
-	 *	0	8	7	15
-	 *	0000	1000	0111	1111
+	 *      0       1       2	3
+	 *      0       8       7       15
+	 *      0000    1000    0111    1111
 	 */
 	static const uint8_t r[] = { 0, 8, 7, 15 };
 	return r[color];
-	return (color & 1 ? 8 : 0) | (color & 2 ? 7 : 0);
-	return color << 3 & 8 | (color & 2 ? 7 : 0);
 }
 
 int color256to16(int color)
@@ -1441,7 +1434,7 @@ void SetColor(uint32_t foreground, uint32_t background)
 			f = D_CCO == 88 && D_CAF ? color256to88(f) : color256to16(f);
 		}
 		if (D_CAF) {
-			// AddCStr2(D_CAF, f); // FIXME
+		     // AddCStr2(D_CAF, f);	// FIXME
 			tputs(tparm("\033[38:5:%dm", f), 1, DoAddChar);
 		}
 	}
@@ -1475,7 +1468,7 @@ void SetColor(uint32_t foreground, uint32_t background)
 			b = D_CCO == 88 && D_CAB ? color256to88(b) : color256to16(b);
 		}
 		if (D_CAB) {
-			// AddCStr2(D_CAB, b); // FIXME
+		     // AddCStr2(D_CAB, b);	// FIXME
 			tputs(tparm("\033[48:5:%dm", b), 1, DoAddChar);
 		}
 	}
@@ -1821,7 +1814,9 @@ void RefreshHStatus(void)
 void RefreshAll(int isblank)
 {
 	for (Canvas *cv = D_cvlist; cv; cv = cv->c_next) {
-		CV_CALL(cv, LayRedisplayLine(-1, -1, -1, isblank));
+		CV_CALL(cv,
+			LayRedisplayLine(-1, -1, -1, isblank)
+		);
 		display = cv->c_display;	/* just in case! */
 	}
 	RefreshArea(0, 0, D_width - 1, D_height - 1, isblank);
