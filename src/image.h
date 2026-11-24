@@ -43,7 +43,7 @@ struct mchar {
 	color_t colorfg;	/* foreground color */
 	mbcs_t mbcs;		/* used for multi byte character sets;
 				 * TODO: possible to remove? use image instead, since
-				 * it's now wide enough */
+				 *       it's now wide enough */
 };
 
 struct mline {
