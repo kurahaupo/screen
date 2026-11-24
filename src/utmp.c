@@ -215,7 +215,7 @@ void RemoveLoginSlot(void)
 		    && stb.st_uid == real_uid
 		    && !CheckTtyname(tty)
 		    && ((int)stb.st_mode & 0777) != 0666) {
-			D_loginttymode = (int)stb.st_mode & 0777;
+			D_loginttymode = stb.st_mode & 0777;
 			chmod(D_usertty, stb.st_mode & 0600);
 		}
 	}
