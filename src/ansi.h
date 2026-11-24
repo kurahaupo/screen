@@ -37,22 +37,21 @@
 #define ANSI_PROBE_FAILURE_LIMIT 2	/* max 2 missing; 5 out of 7 standard attributes must match */
 
 typedef enum attr_e {
-		 // attribute           terminfo code   termcap code    ECMA-48 SGR     custom SGR
-		 //                     (on   / off)    (on / off)      (on / off)      (on / off)
-		 //
-
-	ATTR_BD, // bold mode           bold  / *        md / *           1 / 21
-	ATTR_DI, // dim mode            dim   / *        mh / *           2 / 22
-	ATTR_IT, // italicized          sitm  / ritm     ZH / ZR          3 / 23        3:0 / 23:0
-	ATTR_US, // underscore mode     smul  / rmul     us / ue          4 / 24
-	ATTR_BL, // slow blink          blink / *        mb / *           5 / 25                        (> 0.4s; < 2.5Hz; < 150/min)
-	ATTR_FB, // fast blink          -                -                6 / 26                        (≤ 0.4s; ≥ 2.5Hz; ≥ 150/min; SGR only)
-	ATTR_RV, // reverse video       rev   / *        mr / *           7 / 27
-	ATTR_HI, // hidden              invis / *        mk / *           8 / 28
-	ATTR_ST, // strikeThru          smxx  / rmxx     -                9 / 29                        (terminfo only)
-	ATTR_SO, // standout mode       smso  / rmso     so / se          - / -         3:1 / 23:1
-	NATTR    //
-		 //      * reset all    -     / sgr0     -  / me          - / 0
+			// attribute           terminfo code   termcap code    ECMA-48 SGR     custom SGR
+			//                     (on   / off)    (on / off)      (on / off)      (on / off)
+			//
+	ATTR_BD,	// bold mode           bold  / *        md / *           1 / 21
+	ATTR_DI,	// dim mode            dim   / *        mh / *           2 / 22
+	ATTR_IT,	// italicized          sitm  / ritm     ZH / ZR          3 / 23        3:0 / 23:0
+	ATTR_US,	// underscore mode     smul  / rmul     us / ue          4 / 24
+	ATTR_BL,	// slow blink          blink / *        mb / *           5 / 25                        (> 0.4s; < 2.5Hz; < 150/min)
+	ATTR_FB,	// fast blink          -                -                6 / 26                        (≤ 0.4s; ≥ 2.5Hz; ≥ 150/min; SGR only)
+	ATTR_RV,	// reverse video       rev   / *        mr / *           7 / 27
+	ATTR_HI,	// hidden              invis / *        mk / *           8 / 28
+	ATTR_ST,	// strikeThru          smxx  / rmxx     -                9 / 29                        (terminfo only)
+	ATTR_SO,	// standout mode       smso  / rmso     so / se          - / -         3:1 / 23:1
+	NATTR		//
+			//      * reset all    -     / sgr0     -  / me          - / 0
 } attr_t;
 
 typedef enum attr_mask_e {
@@ -112,15 +111,15 @@ typedef enum atyp_mask_e {
  */
 /* keep state_t and state_t_string in sync! */
 typedef enum state_e {
-	LIT,				/* Literal input */
-	ESC,				/* Start of escape sequence */
-	ASTR,				/* Start of control string */
-	STRESC,				/* ESC seen in control string */
-	CTL_SEQ,			/* Reading arguments in "CSI Pn ;... */
-	PRIN,				/* Printer mode */
-	PRINESC,			/* ESC seen in printer mode */
-	PRINCSI,			/* CSI seen in printer mode */
-	PRIN4				/* CSI 4 seen in printer mode */
+	LIT,			/* Literal input */
+	ESC,			/* Start of escape sequence */
+	ASTR,			/* Start of control string */
+	STRESC,			/* ESC seen in control string */
+	CTL_SEQ,		/* Reading arguments in "CSI Pn ;... */
+	PRIN,			/* Printer mode */
+	PRINESC,		/* ESC seen in printer mode */
+	PRINCSI,		/* CSI seen in printer mode */
+	PRIN4			/* CSI 4 seen in printer mode */
 } state_t;
 
 #define MAX_CS_PARAMS	64	/* ISO-6429 specifies 16, and recommends
@@ -133,14 +132,14 @@ typedef enum state_e {
 /* keep string_t and string_t_string in sync! */
 typedef enum string_e {
 	NONE,
-	DCS,				/* Device Control String */
-	OSC,				/* Operating System Command */
-	APC,				/* Application Program Command
-					 *  - used for status change */
-	PM,				/* Privacy Message */
-	AKA,				/* Title for current screen */
-	GM,				/* Global Message (to every display) */
-	STATUS				/* User hardstatus line */
+	DCS,			/* Device Control String */
+	OSC,			/* Operating System Command */
+	APC,			/* Application Program Command
+				 *  - used for status change */
+	PM,			/* Privacy Message */
+	AKA,			/* Title for current screen */
+	GM,			/* Global Message (to every display) */
+	STATUS			/* User hardstatus line */
 } string_t;
 
 /*
