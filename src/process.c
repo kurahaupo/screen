@@ -1749,12 +1749,14 @@ static void DoCommandOther(struct action *act UNUSED)
 static void DoCommandMeta(struct action *act UNUSED)
 {
 	struct acluser *user = display ? D_user : users;
-	int ch = user->u_Esc;
-	char *s = &ch;
-	size_t len = 1;
+	int ci = user->u_Esc;
+	if (ci != -1) {
+		char s1[1] = { ci };
+		char *s = s1;
+		size_t len = 1;
 
-	if (ch != -1)
 		LayProcess(&s, &len);
+	}
 }
 
 static void DoCommandXon(struct action *act UNUSED)
