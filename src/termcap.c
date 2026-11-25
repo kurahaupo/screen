@@ -350,10 +350,12 @@ static inline bool AddCapSprintf(const char *fmt, ...)
 {
 	if (endTermcap >= limTermcap - 1)
 		return false;
+
 	va_list v;
 	va_start(v, fmt);
 	int n = vsnprintf(endTermcap, limTermcap - endTermcap, fmt, v);
 	va_end(v);
+
 	if (n < 0 || n >= limTermcap - endTermcap) {
 		limTermcap[-1] = 0;
 		return false;
@@ -373,6 +375,7 @@ static inline bool AddCap(const char *s)
 	if (endTermcap >= limTermcap - 1)
 		return false;
 	int n = strlen(s);
+
 	if (n < 0 || n >= limTermcap - endTermcap) {
 		limTermcap[-1] = 0;
 		return false;
@@ -428,7 +431,7 @@ char *MakeTermcap(bool aflag)
 		if (!aflag && tname
 		 && sizeof Term > (size_t) snprintf(Term, sizeof Term, "TERM=%s.%s", screenterm, tname)
 		 && e_tgetent(buf, Termname) == 1)
-				break;
+			break;
 
 		if (nwin_default.bce
 		 && sizeof Term > (size_t) snprintf(Term, sizeof Term, "TERM=%s-bce", screenterm)
@@ -443,7 +446,6 @@ char *MakeTermcap(bool aflag)
 		 && sizeof Term > (size_t) snprintf(Term, sizeof Term, "TERM=%s", tname)
 		 && e_tgetent(buf, Termname) == 1)
 			break;
-
 		strcpy(Termname, "vt100");
 	} while (0);		/* Goto-free programming... */
 
