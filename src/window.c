@@ -497,6 +497,7 @@ int MakeWindow(struct NewWindow *newwin)
 	Window *win = first_window;
 
 	nwin_compose(&nwin_default, newwin, &nwin);
+	nwin.hastruecolor = D_hastruecolor;
 
 	startat = nwin.StartAt;
 	/* skip windows with lower number */
