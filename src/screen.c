@@ -927,8 +927,8 @@ int main(int argc, char **argv)
 		if (strlen(attach_term) > MAXTERMLEN)
 			Panic(0, "$TERM too long - sorry.");
 		char *ts = getenv("COLORTERM");
-		attach_colorterm = ts && (! strcmp(ts, "truecolor")
-				       || ! strcmp(ts, "24bit"));
+		attach_colorterm = ts && (!strcmp(ts, "truecolor")
+				       || !strcmp(ts, "24bit"));
 		GetTTY(0, &attach_Mode);
 	}
 
@@ -1065,8 +1065,9 @@ int main(int argc, char **argv)
 		D_encoding = nwin_options.encoding > 0 ? nwin_options.encoding : 0;
 	}
 
-	if (!freopen("/dev/null", "r", stdin) ||
-	    !freopen("/dev/null", "w", stdout) || !freopen("/dev/null", "w", stderr))
+	if (!freopen("/dev/null", "r", stdin)
+	 || !freopen("/dev/null", "w", stdout)
+	 || !freopen("/dev/null", "w", stderr))
 		Panic(0, "Cannot reassociate std streams");
 
 	InitSocketName(MasterPid);
@@ -1517,8 +1518,7 @@ void MakeNewEnv(void)
 		    && !IsSymbol(*op, "STY") && !IsSymbol(*op, "WINDOW")
 		    && !IsSymbol(*op, "SCREENCAP") && !IsSymbol(*op, "SHELL")
 		    && !IsSymbol(*op, "LINES") && !IsSymbol(*op, "COLUMNS")
-		    && !IsSymbol(*op, "COLORTERM")
-		    )
+		    && !IsSymbol(*op, "COLORTERM"))
 			*np++ = *op;
 	}
 	*np = NULL;
