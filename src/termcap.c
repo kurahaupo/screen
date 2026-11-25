@@ -463,9 +463,7 @@ char *MakeTermcap(bool aflag)
 	}
 	AddCap(TermcapConst);
 	AddCapSprintf("li#%d:"
-		      "co#%d:",
-		      height,
-		      width);
+		      "co#%d:", height, width);
 	AddCap("am:");
 	if (aflag || (force_vt && !D_COP) || D_CLP || !D_AM)
 		AddCap("xn:"
