@@ -47,19 +47,19 @@ extern struct term term[];
 EOF
 
 $AWK < "$source_file" -v source_file="$source_file" '
-/^[[:space:]]+[{] ".*KMAPDEF[(]/{ #}
+/^[[:space:]]+[{] ".*KMAPDEF[(]/{	#}
     if (min == 0) min = s
     max = s;
 }
-/^[[:space:]]+[{] ".*KMAPADEF[(]/{ #}
+/^[[:space:]]+[{] ".*KMAPADEF[(]/{	#}
     if (amin == 0) amin = s
     amax = s;
 }
-/^[[:space:]]+[{] ".*KMAPMDEF[(]/{ #}
+/^[[:space:]]+[{] ".*KMAPMDEF[(]/{	#}
     if (mmin == 0) mmin = s
     mmax = s;
 }
-/^[[:space:]]+[{][[:space:]]*"/{ #}
+/^[[:space:]]+[{][[:space:]]*"/{	#}
     a=aa=substr($2,2,length($2)-3);
     b=tolower(substr($3,3,3));
     if (length(a)==2) {
@@ -107,7 +107,7 @@ cat << EOF &&
 EOF
 
 $AWK -v"source_file=$source_file" < "$source_file" '
-/^[[:space:]]+[{][[:space:]]+".*KMAP/{  #}
+/^[[:space:]]+[{][[:space:]]+".*KMAP/{	#}
     xline[s] = NR
     for (i = 4; i <= NF; i++) {
         q = $(i)
@@ -126,7 +126,7 @@ $AWK -v"source_file=$source_file" < "$source_file" '
         }
     }
 }
-/^[[:space:]]+[{][[:space:]]+"/{    #}
+/^[[:space:]]+[{][[:space:]]+"/{	#}
     s++;
 }
 END {
