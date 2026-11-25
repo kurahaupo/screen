@@ -50,32 +50,32 @@
 #include "ansi.h"	// for sgr3_mode_t
 
 struct NewWindow {
-	int	StartAt;	/* where to start the search for the slot */
-	char	*aka;		/* aka string */
-	char	**args;		/* argv vector */
-	char	*dir;		/* directory for chdir */
-	char	*term;		/* TERM to be set instead of "screen" */
-	bool	hastruecolor;	/* export COLORTERM=truecolor? */
-	bool	aflag;
-	bool	dynamicaka;
-	int	flowflag;
-	bool	list_order;	/* list order for window groups */
-	bool	list_nested;	/* show nested children in window groups */
-	int	lflag;
-	int	histheight;
-	int	monitor;
-	int	wlock;		/* default writelock setting */
-	int	silence;
-	bool	wrap;
-	bool	Lflag;		/* logging */
-	int	slow;		/* inter character milliseconds */
-	int	gr;
-	bool	c1;
-	int	bce;
-	int	encoding;
-	char	*hstatus;
-	char	*charset;
-	int	poll_zombie_timeout;
+	int StartAt;		/* where to start the search for the slot */
+	char *aka;		/* aka string */
+	char **args;		/* argv vector */
+	char *dir;		/* directory for chdir */
+	char *term;		/* TERM to be set instead of "screen" */
+	bool hastruecolor;	/* export COLORTERM=truecolor? */
+	bool aflag;
+	bool dynamicaka;
+	int flowflag;
+	bool list_order;	/* list order for window groups */
+	bool list_nested;	/* show nested children in window groups */
+	int lflag;
+	int histheight;
+	int monitor;
+	int wlock;		/* default writelock setting */
+	int silence;
+	bool wrap;
+	bool Lflag;		/* logging */
+	int slow;		/* inter character milliseconds */
+	int gr;
+	bool c1;
+	int bce;
+	int encoding;
+	char *hstatus;
+	char *charset;
+	int poll_zombie_timeout;
 	sgr3_mode_t sgr3_mode;
 };
 
