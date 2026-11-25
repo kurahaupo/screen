@@ -649,14 +649,15 @@ static int CreateTempDisplay(Message *m, int recvfd, Window *win)
 			ssize_t ret = readlink(myttyname, ttyname_in_ns,
 					       ARRAY_SIZE(ttyname_in_ns));
 			if (ret < 0 || (size_t)ret >= ARRAY_SIZE(ttyname_in_ns)) {
-				Msg(errno, "Could not perform necessary sanity " "checks on pts device.");
+				Msg(errno, "Could not perform necessary sanity checks on pts device.");
 				close(i);
 				KillUnpriv(pid, SIG_BYE);
 				return -1;
 			}
 			if (strcmp(ttyname_in_ns, m->m_tty)) {
-				Msg(errno, "Attach: passed fd does not match "
-				    "tty: %s - %s!", ttyname_in_ns, m->m_tty[0] != '\0' ? m->m_tty : "(null)");
+				Msg(errno, "Attach: passed fd does not match tty: %s - %s!",
+				    ttyname_in_ns,
+				    m->m_tty[0] != '\0' ? m->m_tty : "(null)");
 				close(i);
 				KillUnpriv(pid, SIG_BYE);
 				return -1;
@@ -672,8 +673,8 @@ static int CreateTempDisplay(Message *m, int recvfd, Window *win)
 			strncpy(m->m_tty, myttyname, sizeof m->m_tty);
 			m->m_tty[sizeof m->m_tty - 1] = 0;
 		} else if (myttyname == NULL || strcmp(myttyname, m->m_tty)) {
-			Msg(errno,
-			    "Attach: passed fd does not match tty: %s - %s!", m->m_tty, myttyname ? myttyname : "NULL");
+			Msg(errno, "Attach: passed fd does not match tty: %s - %s!",
+			    m->m_tty, myttyname ? myttyname : "NULL");
 			close(i);
 			KillUnpriv(pid, SIG_BYE);
 			return -1;
