@@ -6997,8 +6997,8 @@ uint64_t ParseAttrColor(char *str, int msgok)
 
 	r |= (uint64_t)(attr & 0xFF) << 56;
 
-	r |= (uint64_t)(bg & 0x0FFFFFF) << 24;
-	r |= fg & 0x0FFFFFF;
+	r |= (uint64_t)(bg & 0xFFFFFF) << 24;
+	r |= fg & 0xFFFFFF;
 	r |= (uint64_t)fm << 48;
 	r |= (uint64_t)bm << 52;
 
