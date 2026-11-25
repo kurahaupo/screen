@@ -124,7 +124,8 @@ struct NewWindow nwin_default = {
 	.args			= ShellArgs,
 	.dir			= NULL,
 	.term			= screenterm,
-	.hastruecolor		= false, /**/.aflag = false,
+	.hastruecolor		= false, /**/
+	.aflag			= false,
 	.dynamicaka		= true,
 	.flowflag		= FLOW_ON,
 	.list_order		= false,
