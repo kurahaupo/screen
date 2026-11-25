@@ -94,7 +94,7 @@ struct Message {
 			int Lflag;
 			bool aflag;
 			int flowflag;
-			int hheight;	/* size of scrollback buffer */
+			int hheight;			/* size of scrollback buffer */
 			int nargs;
 			char line[MAXPATHLEN];
 			char dir[MAXPATHLEN];
@@ -102,12 +102,12 @@ struct Message {
 		} create;
 		struct {
 			char auser[MAXLOGINLEN + 1];	/* username */
-			pid_t apid;	/* pid of frontend */
-			int adaptflag;	/* adapt window size? */
-			int lines, columns;	/* display size */
+			pid_t apid;			/* pid of frontend */
+			int adaptflag;			/* adapt window size? */
+			int lines, columns;		/* display size */
 			char preselect[20];
-			int esc;	/* his new escape character unless -1 */
-			int meta_esc;	/* his new meta esc character unless -1 */
+			int esc;			/* his new escape character unless -1 */
+			int meta_esc;			/* his new meta esc character unless -1 */
 			char envterm[MAXTERMLEN + 1];	/* terminal type */
 			bool env_colorterm :1;		/* with COLORTERM=truecolor in env */
 			int encoding;			/* encoding of display */
@@ -115,13 +115,13 @@ struct Message {
 		} attach;
 		struct {
 			char duser[MAXLOGINLEN + 1];	/* username */
-			pid_t dpid;	/* pid of frontend */
+			pid_t dpid;			/* pid of frontend */
 		} detach;
 		struct {
 			char auser[MAXLOGINLEN + 1];	/* username */
 			int nargs;
 			char cmd[MAXPATHLEN + 1];	/* command */
-			pid_t apid;	/* pid of frontend */
+			pid_t apid;			/* pid of frontend */
 			char preselect[20];
 			char writeback[MAXPATHLEN];	/* The socket to write the result.
 							 * Only used for MSG_QUERY */
@@ -155,12 +155,12 @@ struct Message {
 #define DUMP_TERMCAP	0	/* WriteFile() options */
 #define DUMP_HARDCOPY	1
 #define DUMP_EXCHANGE	2
-#define DUMP_SCROLLBACK 3
+#define DUMP_SCROLLBACK	3
 
 #define SILENCE_OFF	0	/* Not checking for silence */
 #define SILENCE_ON	1	/* Window being monitored for silence */
-#define SILENCE_FOUND   2	/* Window is silent */
-#define SILENCE_DONE    3	/* Window is silent and user is notified */
+#define SILENCE_FOUND	2	/* Window is silent */
+#define SILENCE_DONE	3	/* Window is silent and user is notified */
 
 /*
  * line modes used by Input()
