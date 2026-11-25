@@ -405,7 +405,7 @@ static int e_tgetent(char *bp, char *name)
 char *MakeTermcap(bool aflag)
 {
 	char buf[TERMCAP_BUFSIZE];
-	char *s, *tname;
+	char *s, *tname = NULL;
 	int width, height;
 
 	if (display) {
@@ -422,28 +422,29 @@ char *MakeTermcap(bool aflag)
 		strcpy(Termname, "screen");
 		return Termcap;
 	}
+	endTermcap = Termcap;
 	if (*screenterm == '\0' || strlen(screenterm) > MAXSTR - 3) {
-		strncpy(screenterm, "screen", MAXTERMLEN);
-		screenterm[MAXTERMLEN] = '\0';
+		strncpy(screenterm, "screen", sizeof screenterm);
+		screenterm[sizeof screenterm - 1] = '\0';
 	}
 
 	do {
 		if (!aflag && tname
-		 && sizeof Term > (size_t) snprintf(Term, sizeof Term, "TERM=%s.%s", screenterm, tname)
+		 && limTerm - Termname > snprintf(Termname, limTerm - Termname, "%s.%s", screenterm, tname)
 		 && e_tgetent(buf, Termname) == 1)
 			break;
 
 		if (nwin_default.bce
-		 && sizeof Term > (size_t) snprintf(Term, sizeof Term, "TERM=%s-bce", screenterm)
+		 && limTerm - Termname > snprintf(Termname, limTerm - Termname, "%s-bce", screenterm)
 		 && e_tgetent(buf, Termname) == 1)
 			break;
 
-		if (sizeof Term > (size_t) snprintf(Term, sizeof Term, "TERM=%s", screenterm)
+		if (limTerm - Termname > snprintf(Termname, limTerm - Termname, "%s", screenterm)
 		 && e_tgetent(buf, Termname) == 1)
 			break;
 
 		if (tname
-		 && sizeof Term > (size_t) snprintf(Term, sizeof Term, "TERM=%s", tname)
+		 && limTerm - Termname > snprintf(Termname, limTerm - Termname, "%s", tname)
 		 && e_tgetent(buf, Termname) == 1)
 			break;
 		strcpy(Termname, "vt100");
