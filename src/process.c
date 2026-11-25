@@ -5990,7 +5990,7 @@ static void ColonFin(char *buf, size_t len, void *data UNUSED)
 				for (m = ++l;
 				     m <= r
 				     && strncmp(buf, comms[m].name, len) == 0
-				     && (uintptr_t)(s - mbuf) < ARRAY_SIZE(mbuf);
+				     && s < mbuf + sizeof mbuf;
 				     m++)
 					s += snprintf(s, ARRAY_SIZE(mbuf) - (s - mbuf), " %s", comms[m].name);
 				if (l < m - 1) {
