@@ -93,14 +93,14 @@ static void SetTtyname(bool fatal, struct stat *st);
 int nversion;			/* numerical version, used for secondary DA */
 
 /* the attacher */
-bool		do_auth = false;
-struct passwd  *ppp;
-char           *attach_tty;
-int		attach_fd = -1;
-char           *attach_term;
-bool		attach_colorterm;
-char           *LoginName;
-struct mode	attach_Mode;
+bool do_auth = false;
+struct passwd *ppp;
+char *attach_tty;
+int attach_fd = -1;
+char *attach_term;
+bool attach_colorterm;
+char *LoginName;
+struct mode attach_Mode;
 
 /* Indicator whether the current tty exists in another namespace. */
 bool attach_tty_is_in_new_ns = false;
