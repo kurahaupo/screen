@@ -151,7 +151,7 @@ void sched(void)
 				pfd[i].fd = ev->fd;
 				pfd[i].events = POLLOUT;
 			}
-		      skip:
+ skip:
 			if (ev->type == EV_READ || ev->type == EV_WRITE)
 				i++;
 		}
