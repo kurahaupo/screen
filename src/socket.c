@@ -34,7 +34,7 @@
 #include <fcntl.h>
 #include <sys/socket.h>
 #ifdef _OpenBSD_
-#include <sys/uio.h>
+# include <sys/uio.h>
 #endif
 #include <sys/un.h>
 #include <utime.h>
@@ -45,20 +45,20 @@
 #include <signal.h>
 
 #if ENABLE_PAM
-#include <security/pam_appl.h>
+# include <security/pam_appl.h>
 #else
-#ifdef _PWD_H_
-#include <pwd.h>
-#else
-#include <shadow.h>
-#endif				/* PWD_H */
+# ifdef _PWD_H_
+#  include <pwd.h>
+# else
+#  include <shadow.h>
+# endif				/* PWD_H */
 #endif
 
 #ifdef HAVE_DIRENT_H
-#include <dirent.h>
+# include <dirent.h>
 #else
-#include <sys/dir.h>
-#define dirent direct
+# include <sys/dir.h>
+# define dirent direct
 #endif
 
 #include "aalimits.h"
@@ -78,10 +78,10 @@
 #include "window.h"
 
 #ifndef CMSG_LEN
-#define CMSG_LEN(length) ((_CMSG_DATA_ALIGN(sizeof(struct cmsghdr))) + (length))
+# define CMSG_LEN(length) ((_CMSG_DATA_ALIGN(sizeof(struct cmsghdr))) + (length))
 #endif
 #ifndef CMSG_SPACE
-#define CMSG_SPACE(length) ((_CMSG_DATA_ALIGN(sizeof(struct cmsghdr))) + (_CMSG_DATA_ALIGN(length)))
+# define CMSG_SPACE(length) ((_CMSG_DATA_ALIGN(sizeof(struct cmsghdr))) + (_CMSG_DATA_ALIGN(length)))
 #endif
 
 static int CheckPid(pid_t);
@@ -512,7 +512,7 @@ void SendCreateMsg(char *sty, struct NewWindow *nwin)
 	m.protocol_revision = MSG_REVISION;
 	if (write(s, &m, sizeof m) != sizeof m)
 		Msg(errno, "write");
-      end:
+ end:
 	close(s);
 }
 
@@ -1192,11 +1192,11 @@ static void AskPassword(Message *m)
 }
 
 #if ENABLE_PAM
-#if defined(_sun) || defined(__sun_)	/* Solaris */
-# define PAM_MSG_CONST
-#else				/* Linux, BSD, etc. */
-# define PAM_MSG_CONST const
-#endif
+# if defined(_sun) || defined(__sun_)	/* Solaris */
+#  define PAM_MSG_CONST
+# else				/* Linux, BSD, etc. */
+#  define PAM_MSG_CONST const
+# endif
 static int screen_conv(int num_msg, PAM_MSG_CONST struct pam_message **msg, struct pam_response **resp, void *data)
 {
 	(void)num_msg;		/* unused */
@@ -1262,11 +1262,11 @@ static bool CheckPassword(const char *password)
 	bool ret = false;
 	char *passwd = 0;
 
-#ifndef _PWD_H
+# ifndef _PWD_H
 	struct passwd *p;
-#else
+# else
 	struct spwd *p;
-#endif
+# endif
 
 	gid_t gid = getegid();
 	uid_t uid = geteuid();
@@ -1274,11 +1274,11 @@ static bool CheckPassword(const char *password)
 	if (seteuid(0) || setegid(0))
 		Panic(0, "\r\ncan't get root uid/gid\r\n");
 
-#ifndef _PWD_H
+# ifndef _PWD_H
 	p = getpwnam_shadow(ppp->pw_name);
-#else
+# else
 	p = getspnam(ppp->pw_name);
-#endif
+# endif
 	if (p == NULL)
 		return false;
 
@@ -1289,13 +1289,13 @@ static bool CheckPassword(const char *password)
 		AddStr("\r\ncan't open passwd file\r\n");
 		return false;
 	}
-#ifndef _PWD_H
+# ifndef _PWD_H
 	passwd = crypt(password, p->pw_passwd);
 	ret = (strcmp(passwd, p->pw_passwd) == 0);
-#else
+# else
 	passwd = crypt(password, p->sp_pwdp);
 	ret = (strcmp(passwd, p->sp_pwdp) == 0);
-#endif
+# endif
 	return ret;
 }
 #endif				/* ENABLE_PAM */
