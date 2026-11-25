@@ -755,7 +755,7 @@ int RemakeWindow(Window *window)
 		TtyName = "telnet";
 	} else
 #endif
-	{			/* see above #ifdef */
+	{ /* see above #ifdef */
 		if ((fd = OpenDevice(window->w_cmdargs, lflag, &window->w_type, &TtyName)) < 0)
 			return -1;
 	}
@@ -870,8 +870,9 @@ void FreeWindow(Window *window)
 		free(window->w_term);
 	for (Display *display = displays; display; display = display->d_next) {
 		if (display->d_other == window)
-			display->d_other = display->d_fore
-			    && display->d_fore->w_prev_mru != window ? display->d_fore->w_prev_mru : window->w_prev_mru;
+			display->d_other = display->d_fore && display->d_fore->w_prev_mru != window
+						? display->d_fore->w_prev_mru
+						: window->w_prev_mru;
 		if (display->d_fore == window)
 			display->d_fore = NULL;
 		for (Canvas *canvas = display->d_cvlist; canvas; canvas = canvas->c_next) {

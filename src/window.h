@@ -107,14 +107,14 @@ struct pseudowin {
 
 /* ... wants to write to window: user writes to window
  * or stdout/stderr of pseudo are duplicated to window */
-#define W_WW(w) (!((w)->w_pwin) || \
-(((w)->w_pwin->p_fdpat & F_PMASK) == F_PBACK) || \
-((((w)->w_pwin->p_fdpat >> F_PSHIFT) & F_PMASK) == F_PBOTH) || \
-((((w)->w_pwin->p_fdpat >> (F_PSHIFT * 2)) & F_PMASK) == F_PBOTH))
+#define W_WW(w) (!((w)->w_pwin) \
+	      || (((w)->w_pwin->p_fdpat & F_PMASK) == F_PBACK) \
+	      || ((((w)->w_pwin->p_fdpat >> F_PSHIFT) & F_PMASK) == F_PBOTH) \
+	      || ((((w)->w_pwin->p_fdpat >> (F_PSHIFT * 2)) & F_PMASK) == F_PBOTH))
 
 /* ... wants to read from pseudowin */
-#define W_RP(w) ((w)->w_pwin && ((w)->w_pwin->p_fdpat & \
-((F_PFRONT << (F_PSHIFT * 2)) | (F_PFRONT << F_PSHIFT)) ))
+#define W_RP(w) ((w)->w_pwin \
+		 && ((w)->w_pwin->p_fdpat & ((F_PFRONT << (F_PSHIFT * 2)) | (F_PFRONT << F_PSHIFT)) ))
 
 /* ... wants to read from window */
 #define W_RW(w) (!((w)->w_pwin) || ((w)->w_pwin->p_fdpat & F_PFRONT))
@@ -123,9 +123,8 @@ struct pseudowin {
 #define W_UWP(w) ((w)->w_pwin && ((w)->w_pwin->p_fdpat & F_UWP))
 
 /* pseudo output has to be stuffed in window */
-#define W_PTOW(w) (\
-((w)->w_pwin->p_fdpat & F_PMASK << F_PSHIFT) == F_PBOTH << F_PSHIFT || \
-((w)->w_pwin->p_fdpat & F_PMASK << F_PSHIFT * 2) == F_PBOTH << F_PSHIFT * 2 )
+#define W_PTOW(w) (((w)->w_pwin->p_fdpat & F_PMASK << F_PSHIFT) == F_PBOTH << F_PSHIFT \
+		|| ((w)->w_pwin->p_fdpat & F_PMASK << F_PSHIFT * 2) == F_PBOTH << F_PSHIFT * 2 )
 
 /* window output has to be stuffed in pseudo */
 #define W_WTOP(w) (((w)->w_pwin->p_fdpat & F_PMASK) == F_PBOTH)
