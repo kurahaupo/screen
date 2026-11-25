@@ -379,7 +379,6 @@ static inline bool AddCap(const char *s)
 	}
 	memcpy(endTermcap, s, n + 1);
 	endTermcap += n;
-//	endTermcap = stpcpy(endTermcap, s);
 	return true;
 #endif
 }
